@@ -160,6 +160,7 @@ psl=}
 
 entity Course {=psl
   id          String   @id @default(uuid())
+  duplicateId String?
   name        String
   image       String
   description String

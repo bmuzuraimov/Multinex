@@ -32,8 +32,14 @@ export const duplicateCourse: DuplicateCourse<{ id: string }, Course> = async ({
     where: { id },
     include: {
       topics: {
+        orderBy: {
+          createdAt: 'asc'
+        },
         include: {
           exercises: {
+            orderBy: {
+              createdAt: 'asc'  
+            },
             include: {
               questions: {
                 include: {
@@ -59,6 +65,7 @@ export const duplicateCourse: DuplicateCourse<{ id: string }, Course> = async ({
       image: originalCourse.image,
       isPublic: false,
       userId: context.user.id,
+      duplicateId: originalCourse.id,
     }
   });
 
