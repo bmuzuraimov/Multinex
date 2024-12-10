@@ -13,7 +13,6 @@ import { FREE_TOKENS, ADMIN_EMAIL } from '../../shared/constants';
 import { routes } from 'wasp/client/router';
 
 export const navigation = [
-  { name: 'Features', href: '#features' },
   { name: 'Courses', href: routes.PublicCoursesRoute.build() },
   { name: 'About', href: routes.AboutPageRoute.build() },
 ];

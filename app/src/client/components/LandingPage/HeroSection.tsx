@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 
 const HeroSection: React.FC = () => {
   const [typedText, setTypedText] = useState('');
-  const fullText = 'Typing Exercises';
+  const fullText = '2024 Final Exam Study Tool';
   
   useEffect(() => {
     let currentIndex = 0;
@@ -53,24 +53,24 @@ const HeroSection: React.FC = () => {
           <div className='mx-auto max-w-3xl text-center'>
             <h1 className='text-3xl font-semibold tracking-tight text-gray-900 sm:text-6xl dark:text-gray-100'>
               <span className='text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-purple-600'>
-                Boring Lecture Notes into {typedText}
+                {typedText}
                 <span className='animate-pulse'>|</span>
               </span>
             </h1>
             <h3 className='mt-6 text-xl leading-8 text-teal-700 dark:text-teal-300 italic font-serif'>
-              Still staring at endless pages of notes, hoping they'll magically stick in your brain?
+              Transform your lecture notes into an interactive learning experience
             </h3>
             <p className='mt-6 mx-auto max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-300'>
-              What if studying could actually be... fun?
+              Drop your PDF notes and choose your study mode: Quick review with playback, active recall through typing exercises, or test your knowledge with final exam-style quizzes. Your path to exam success starts here.
             </p>
-            <div className='mt-10'>
+            {/* <div className='mt-10'>
               <div className='flex items-center justify-center w-full'>
                 <div className='flex flex-col items-center p-2 justify-center w-full h-64 border-2 border-dashed rounded-lg bg-gray-50'>
                   <p className='text-xl text-gray-500 text-center'>Demonstration video coming soon! 🎬</p>
                   <p className='text-sm text-gray-500 mt-2'>Check back later to see our product in action</p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             <div className='mt-10 flex items-center justify-center gap-x-6'>
               <Link
