@@ -50,11 +50,13 @@ export const createExercise: CreateExercise<
     return { success: false, message: 'Failed to generate exercise after multiple attempts.' };
   }
 
+  const lectureText = exerciseJson.lectureText.replace(/\*\*[\w\s]+\*\*/g, (match: string) => match.slice(2, -2)).replace('—', '-');
+
   let summaryJson = null;
   let summaryJsonUsage = 0;
   if (includeSummary) {
     try {
-      const summaryResponse = await OpenAIService.generateSummary(exerciseJson.lectureText, model, MAX_TOKENS);
+      const summaryResponse = await OpenAIService.generateSummary(lectureText, model, MAX_TOKENS);
       if (summaryResponse.success && summaryResponse.data) {
         summaryJson = summaryResponse.data;
         summaryJsonUsage = summaryResponse.usage || 0;
@@ -73,7 +75,7 @@ export const createExercise: CreateExercise<
   let questionsSuccess = false;
   if (includeMCQuiz) {
     try {
-      const questionsResponse = await OpenAIService.generateQuestions(filtered_content, model, MAX_TOKENS);
+      const questionsResponse = await OpenAIService.generateQuestions(lectureText, model, MAX_TOKENS);
       if (questionsResponse.success && questionsResponse.data) {
         questions = questionsResponse.data.questions;
         questionsUsage = questionsResponse.usage || 0;
@@ -93,7 +95,6 @@ export const createExercise: CreateExercise<
 
   // Create the exercise
   let newExercise;
-  const lectureText = exerciseJson.lectureText.replace(/\*\*[\w\s]+\*\*/g, (match: string) => match.slice(2, -2)).replace('—', '-');
   try {
     newExercise = await context.entities.Exercise.create({
       data: {

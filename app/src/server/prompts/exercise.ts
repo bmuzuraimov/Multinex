@@ -15,22 +15,29 @@ export const GENERATE_EXERCISE_PROMPT = ({
   return [
     {
       role: 'system',
-      content: `You are an AI tasked with converting PDF documents into structured, educational JSON-formatted text for typing exercises. Ensure the output is in English, tailored to the content's complexity level specified by the user. Your tasks include:
-
-          1. preExerciseText: Generate an engaging outline or series of thought-provoking questions (separated by <br/>) that highlight the main themes and prepare the user for the content, especially focusing on any important formulas. The lectureText should not be formatted (raw text).
-          
-          2. lectureText: Accurately transcribe and clearly present the core content from the PDF, including all significant formulas and technical details. All formulas must be converted to a programming-friendly format using plain text without special characters, suitable for implementation in a programming language. For example, instead of "a² + b² = c²", write "a^2 + b^2 = c^2". Strive for a balance between detailed explanation and concise summarization, using appropriate technical vocabulary and style to match the original document. Use '\\n\\n' for paragraph breaks and include necessary clarifications to make technical content accessible at different complexity levels ('beginner', 'intermediate', 'advanced').
-
-          The output JSON structure should include:
-          {
-            "name": "Title of PDF Material",
-            "preExerciseText": "Useful outline or engaging questions.",
-            "lectureText": "Accurate and comprehensive representation of the core content, including formulas written in a programming-friendly format, with adjusted complexity."
-          }`,
+      content: `You are an AI designed to convert PDF documents into structured, exam-focused JSON-formatted text summaries. Your objective is to help users prepare effectively for final exams by distilling key concepts, technical details, and practical applications into a clear, concise format. Follow these instructions:
+  
+        1. **preExerciseText**: Generate a brief, engaging introduction that outlines the key themes of the material. Include thought-provoking questions or a checklist of concepts to focus on during review. Use <br/> for separating points. The goal is to set the stage for an in-depth understanding of the material.
+  
+        2. **lectureText**: Provide an accurate, comprehensive, and structured summary of the PDF's core content. Include all significant formulas, concepts, and examples in a concise manner suitable for exam preparation. Ensure:
+           - Formulas are presented in a programming-friendly format without special characters, e.g., "a^2 + b^2 = c^2".
+           - Paragraphs are separated by '\\n\\n'.
+           - Content is grouped logically under headings and subheadings.
+           - Examples or clarifications are added as needed for enhanced understanding.
+           - The text reflects the technical vocabulary and style appropriate to the material's level ${level}.
+  
+        The output should be tailored for students preparing for final exams, emphasizing clarity, structure, and actionable insights.
+        
+        The output JSON structure should include:
+        {
+          "name": "Title of PDF Material",
+          "preExerciseText": "Brief outline or engaging questions/checklist to prepare the user for review.",
+          "lectureText": "Structured and concise summary with all significant content, including programming-friendly formulas and logical formatting."
+        }`,
     },
     {
       role: 'user',
-      content: `Extract essential information from the provided PDF material, ensuring the 'lectureText' thoroughly includes and explains all significant formulas in a programming-friendly format without special characters, suitable for a(n) ${level} user, and meets a minimum of ${length} words. Maintain the technical style of the original document and use '\\n\\n' for paragraph breaks. The 'preExerciseText' should prompt in-depth reflection on the content, formatted with <br/>. Ensure the output is in valid JSON format. PDF content: ${content}`,
+      content: `Extract and structure the key information from the provided PDF material, ensuring the 'lectureText' emphasizes the essential points for final exam preparation and is formatted for a(n) ${level} user. Include all significant formulas in a programming-friendly format and ensure the text meets a minimum of ${length} words. The 'preExerciseText' should prompt review with key themes and questions formatted with <br/>. Provide the output in valid JSON format. PDF content: ${content}`,
     },
   ];
 };
@@ -58,38 +65,55 @@ export const GENERATE_SUMMARY_PROMPT = ({ content }: { content: string }): Promp
 
 export const GENERATE_EXAM_PROMPT = ({ content }: { content: string }): Prompt[] => {
   // Define the system prompt for generating MC questions
-  const systemPrompt = `You are an AI assistant specialized in creating high-quality educational content. Your task is to generate a comprehensive set of multiple-choice questions based on the provided lecture text, which should mirror the complexity and coverage expected in a final exam.
+  const systemPrompt = `You are an AI assistant specialized in creating final exam-quality multiple-choice questions (MCQs). Your task is to design comprehensive and challenging MCQs based on the provided lecture text, emphasizing critical concepts, formulas, and key details. These questions should help students test their understanding and recall of essential material.
 
-    Please adhere to these guidelines:
-    
-    1. Generate a diverse set of multiple-choice questions that comprehensively cover all key topics and important points from the lecture text.
-    2. Each question should have four options, labeled A, B, C, and D.
-    3. Only one option per question should be marked as correct.
-    4. Questions must be clear, specific, and directly related to significant concepts within the lecture content.
-    5. Format the output as a valid JSON object:
-    
-    {
-      "questions": [
-        {
-          "text": "Question 1 text...",
-          "options": [
-            { "text": "Option A text...", "isCorrect": false },
-            { "text": "Option B text...", "isCorrect": true },
-            { "text": "Option C text...", "isCorrect": false },
-            { "text": "Option D text...", "isCorrect": false }
-          ]
-        },
-        // additional questions
-      ]
-    }
-    
-    **Important:** Avoid including any extraneous text. Ensure that the JSON is well-structured and error-free.
-    
-    ---
-    
-    Lecture Text:
-    ${content}
-    `;
+  Please follow these guidelines:
+  
+  1. **Question Design**:
+     - Questions should cover all major topics and subtopics in the lecture text.
+     - Include a mix of conceptual, applied, and formula-based questions.
+     - Ensure questions test comprehension, application, and recall of important ideas and details.
+  
+  2. **Options**:
+     - Provide four options (A, B, C, and D) for each question.
+     - Ensure only **one correct answer** per question, with plausible distractors for incorrect options.
+  
+  3. **Formatting**:
+     - Structure the output as a valid JSON object in the following format:
+       {
+         "questions": [
+           {
+             "text": "Question text here...",
+             "options": [
+               { "text": "Option A text here...", "isCorrect": false },
+               { "text": "Option B text here...", "isCorrect": true },
+               { "text": "Option C text here...", "isCorrect": false },
+               { "text": "Option D text here...", "isCorrect": false }
+             ]
+           },
+           // additional questions
+         ]
+       }
+  
+  4. **Question Variety**:
+     - Include questions that require analysis, such as "Which statement best explains...?"
+     - Add computational questions when relevant, e.g., "What is the value of...?"
+     - Use "EXCEPT" questions to test nuanced understanding, e.g., "All of the following are true EXCEPT..."
+     - Ensure some questions focus on definitions, key concepts, and interpretations.
+  
+  5. **Avoid Extraneous Information**:
+     - Do not include any explanatory text outside the JSON structure.
+     - Avoid trivial or overly simple questions.
+  
+  **Important Notes**:
+  - Questions should challenge the user as if they were part of a final exam.
+  - Ensure all content is accurate and error-free.
+  
+  ---
+  Lecture Text:
+  ${content}
+  `;
+
   return [
     {
       role: 'system',
@@ -97,7 +121,8 @@ export const GENERATE_EXAM_PROMPT = ({ content }: { content: string }): Prompt[]
     },
     {
       role: 'user',
-      content: 'Please generate multiple-choice questions based on the lecture text provided.',
+      content:
+        'Please generate a set of final exam-style multiple-choice questions based on the provided lecture text.',
     },
   ];
 };
