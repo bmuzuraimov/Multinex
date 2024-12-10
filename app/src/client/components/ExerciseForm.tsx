@@ -16,6 +16,7 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
   const [selectedModel, setSelectedModel] = useState(AVAILABLE_MODELS[0]);
   const [includeSummary, setIncludeSummary] = useState(false);
   const [includeMCQuiz, setIncludeMCQuiz] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState('');
 
   // Main function to handle file upload and content extraction
   const handleExerciseFileUpload = async (file: File) => {
@@ -25,6 +26,7 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
 
     try {
       setIsUploading(true);
+      setLoadingStatus('Scanning document and extracting content...');
 
       const formData = new FormData();
       formData.append('files', file);
@@ -53,6 +55,7 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
         return;
       }
 
+      setLoadingStatus('Calculating required tokens...');
       // Count tokens required for the file content
       const { tokens, sufficient } = await countTokens({
         content: fileContent,
@@ -71,6 +74,7 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
         return;
       }
 
+      setLoadingStatus('Generating exercise content...');
       // Proceed to create the exercise
       const jsonResponse = await createExercise({
         length: exerciseLength,
@@ -82,6 +86,14 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
         includeMCQuiz: includeMCQuiz,
       });
 
+      if (includeSummary) {
+        setLoadingStatus('Generating summary...');
+      }
+
+      if (includeMCQuiz) {
+        setLoadingStatus('Generating multiple choice quiz...');
+      }
+
       if (!jsonResponse.success) {
         alert(jsonResponse.message);
       }
@@ -90,6 +102,7 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
       alert('There was an error while processing the file. Please try again.');
     } finally {
       setIsUploading(false);
+      setLoadingStatus('');
     }
   };
 
@@ -180,7 +193,7 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
               <>
                 <BsFiletypeAi className='w-8 h-8 mb-4 text-teal-500 animate-bounce' />
                 <p className='mb-2 text-sm text-gray-500 dark:text-gray-400 text-center'>
-                  <span className='font-semibold'>Generating Exercise</span> please wait...
+                  <span className='font-semibold'>{loadingStatus}</span>
                 </p>
               </>
             ) : (

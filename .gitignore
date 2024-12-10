@@ -9,4 +9,6 @@
 *.log
 *.sh
 */migrations/*
-
+*.pyc
+*.pyo
+*.pyd
