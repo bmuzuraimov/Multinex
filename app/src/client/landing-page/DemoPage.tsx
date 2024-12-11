@@ -9,7 +9,10 @@ import { ENGLISH_LAYOUT } from '../../shared/constants';
 import ExerciseSidebar from '../components/ExerciseSidebar';
 import ExerciseTest from '../components/ExerciseTest';
 import useExercise from '../hooks/useExercise';
-import { useEffect } from 'react';
+import useKeyboard from '../hooks/useKeyboard';
+import usePlayback from '../hooks/usePlayback';
+import TypingInterface from '../components/TypingInterface';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export default function DemoPage() {
   // Prevent default tab, space and enter behavior
@@ -26,9 +29,12 @@ export default function DemoPage() {
       document.removeEventListener('keydown', preventDefaultKeys);
     };
   }, []);
-  const exerciseId = 'props.match.params.exerciseId';
+
+  const [speed, setSpeed] = useState(400);
+  const exerciseId = 'demo';
   const { data: exercise, isLoading: isExerciseLoading, refetch } = useQuery(getDemoExercise);
-  const raw_essay = exercise?.lessonText || 'Essay not found!';
+  const raw_essay = useMemo(() => exercise?.lessonText || 'Essay not found!', [exercise]);
+  
   const {
     essay,
     progress,
@@ -43,12 +49,53 @@ export default function DemoPage() {
     keyboardRef,
     essayCharsRef,
   } = useExercise(raw_essay);
-  const paragraphIndex = useParagraphIndex(essay, currentCharacterIndex);
-  const essay_length = essay.split(' ').length;
 
-  // Start of paragraph summary
-  const summary = exercise?.paragraphSummary.split('|') ?? [];
-  // End of paragraph summary
+  const paragraphIndex = useParagraphIndex(essay, currentCharacterIndex);
+  const essay_length = useMemo(() => essay.split(' ').length, [essay]);
+  const [keyboardVisible, , toggleKeyboard] = useKeyboard();
+  const summary = useMemo(() => (exercise?.paragraphSummary ? exercise.paragraphSummary.split('|') : []), [exercise]);
+
+  const onSubmitExercise = useCallback(async () => {
+    const score = 100 - Math.round((errorIndices.length / essay.length) * 100);
+    setMode('submitted');
+  }, [errorIndices, essay, setMode]);
+
+  const { isPlaying, togglePlayback } = usePlayback({
+    essay: raw_essay,
+    essayCharsRef: essayCharsRef,
+    setCurrentCharacterIndex: setCurrentCharacterIndex,
+    onSubmitExercise: onSubmitExercise,
+    speed,
+  });
+
+  const hasQuiz = useMemo(() => Boolean(exercise?.questions?.length), [exercise]);
+
+  const skipParagraph = useCallback(() => {
+    let nextIndex = currentCharacterIndex;
+    while (nextIndex < essay.length && essay[nextIndex] !== '\n') {
+      nextIndex++;
+    }
+    nextIndex++;
+
+    for (let i = currentCharacterIndex; i < nextIndex; i++) {
+      const charElement = essayCharsRef.current[i];
+      if (charElement) {
+        charElement.classList.remove(
+          'bg-lime-200',
+          'dark:bg-lime-800',
+          'bg-red-200',
+          'dark:bg-red-800',
+          'border-b-4',
+          'border-sky-400',
+          'dark:border-white'
+        );
+      }
+    }
+
+    setCurrentCharacterIndex(nextIndex);
+    const nextCharElement = essayCharsRef.current[nextIndex];
+    nextCharElement?.classList.add('border-b-4', 'border-sky-400', 'dark:border-white');
+  }, [currentCharacterIndex, essay, essayCharsRef, setCurrentCharacterIndex]);
 
   const onKeyPress = async (button: string) => {
     const currentCharacterElement = essayCharsRef.current[currentCharacterIndex];
@@ -175,12 +222,14 @@ export default function DemoPage() {
             dangerouslySetInnerHTML={{ __html: exercise?.prompt ?? '' }}
           />
           <div className='w-1/3'>
-            <button
-              onClick={() => setMode('test')}
-              className='m-2 bg-teal-500 hover:bg-teal-600 text-white py-1 px-6 rounded-full shadow'
-            >
-              Take Test
-            </button>
+            {hasQuiz && (
+              <button
+                onClick={() => setMode('test')}
+                className='m-2 bg-teal-500 hover:bg-teal-600 text-white py-1 px-6 rounded-full shadow'
+              >
+                Take Test
+              </button>
+            )}
             <button
               onClick={() => setMode('typing')}
               className='m-2 float-right bg-green-500 hover:bg-green-600 text-white py-1 px-6 rounded-full shadow'
@@ -193,62 +242,29 @@ export default function DemoPage() {
       {mode === 'typing' && (
         <div className='relative flex flex-row h-full'>
           <ExerciseSidebar
+            hasQuiz={hasQuiz}
             paragraphIndex={paragraphIndex}
-            hasQuiz={false}
             summary={summary}
             essay_length={essay_length}
             setMode={setMode}
           />
-          <div className='w-full h-[calc(100vh-64px)] flex flex-col'>
-            <div className='relative flex-1 w-5/6 h-2/3 pt-8 pb-4 mx-auto leading-10'>
-              <p className='h-full overflow-y-auto'>
-                <Essay
-                  essay={essay}
-                  essayCharsRef={essayCharsRef}
-                  setCurrentCharacterIndex={setCurrentCharacterIndex}
-                  setKeyboardState={setKeyboardState}
-                />
-              </p>
-              <div
-                className='absolute -bottom-0 left-0 right-0 bg-blue-600 h-1 rounded-full'
-                style={{ width: progress + '%' }}
-              ></div>
-            </div>
-            <div className='flex-1 h-1/3 bg-white dark:bg-gray-800'>
-              <div className='w-5/6 h-full mx-auto'>
-                <style>
-                  {`
-                    .dark .simple-keyboard {
-                      background-color: rgb(31, 41, 55);
-                      border-radius: 0.5rem;
-                    }
-                    .dark .simple-keyboard .hg-button {
-                      background-color: rgb(55, 65, 81);
-                      color: rgb(229, 231, 235);
-                      border: none;
-                      box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
-                    }
-                    .dark .simple-keyboard .hg-button:hover {
-                      background-color: rgb(75, 85, 99);
-                    }
-                    .dark .simple-keyboard .hg-button.hg-activeButton {
-                      background-color: rgb(55, 65, 81);
-                    }
-                  `}
-                </style>
-                <Keyboard
-                  keyboardRef={(r) => (keyboardRef.current = r)}
-                  onKeyPress={onKeyPress}
-                  theme='hg-theme-default hg-layout-default'
-                  layoutName={keyboardState}
-                  layout={ENGLISH_LAYOUT}
-                  physicalKeyboardHighlight={true}
-                  physicalKeyboardHighlightPress={true}
-                  physicalKeyboardHighlightTextColor={'yellow'}
-                />
-              </div>
-            </div>
-          </div>
+          <TypingInterface
+            essay={essay}
+            essayCharsRef={essayCharsRef}
+            progress={progress}
+            keyboardVisible={keyboardVisible}
+            keyboardRef={keyboardRef}
+            onKeyPress={onKeyPress}
+            keyboardState={keyboardState}
+            isPlaying={isPlaying}
+            togglePlayback={togglePlayback}
+            skipParagraph={skipParagraph}
+            setKeyboardState={setKeyboardState}
+            setCurrentCharacterIndex={setCurrentCharacterIndex}
+            setSpeed={setSpeed}
+            speed={speed}
+            currentCharacterIndex={currentCharacterIndex}
+          />
         </div>
       )}
       {mode === 'submitted' && (
