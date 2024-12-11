@@ -24,6 +24,12 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
       return;
     }
 
+    // Check if file is PPT
+    if (file.name.toLowerCase().endsWith('.ppt')) {
+      alert('PPT files are not supported. Please convert to PPTX format.');
+      return;
+    }
+
     try {
       setIsUploading(true);
       setLoadingStatus('Scanning document and extracting content...');
@@ -63,14 +69,6 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
 
       if (!sufficient) {
         alert(`You don't have enough tokens to generate this exercise. It requires at least ${tokens} tokens.`);
-        return;
-      }
-
-      // Confirm the user wants to proceed with the required tokens
-      const userConfirmed = window.confirm(
-        `Generating this exercise requires at least ${tokens} tokens. Do you want to proceed?`
-      );
-      if (!userConfirmed) {
         return;
       }
 
