@@ -1,8 +1,8 @@
 import { RouteComponentProps } from 'react-router-dom';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import 'react-simple-keyboard/build/css/index.css';
 import ExerciseResult from '../components/ExerciseResult';
-import { useQuery, getExerciseById, updateCurrentUser, updateExercise } from 'wasp/client/operations';
+import { useQuery, getExerciseById, updateExercise } from 'wasp/client/operations';
 import { useAuth } from 'wasp/client/auth';
 import useExercise from '../hooks/useExercise';
 import useParagraphIndex from '../hooks/useParagraphIndex';
@@ -28,6 +28,7 @@ const ExercisePage: React.FC<RouteComponentProps<{ exerciseId: string }>> = Reac
     };
   }, []);
   const exerciseId = match.params.exerciseId;
+  const [speed, setSpeed] = useState(400);
   const { data: currentUser } = useAuth();
   const { data: exercise, isLoading: isExerciseLoading, refetch } = useQuery(getExerciseById, { exerciseId });
   const raw_essay = useMemo(() => exercise?.lessonText || 'Essay not found!', [exercise]);
@@ -62,6 +63,7 @@ const ExercisePage: React.FC<RouteComponentProps<{ exerciseId: string }>> = Reac
     essayCharsRef: essayCharsRef,
     setCurrentCharacterIndex: setCurrentCharacterIndex,
     onSubmitExercise: onSubmitExercise,
+    speed,
   });
   const hasQuiz = useMemo(() => Boolean(exercise?.questions?.length), [exercise]);
 
@@ -190,6 +192,12 @@ const ExercisePage: React.FC<RouteComponentProps<{ exerciseId: string }>> = Reac
         // Update character index
         setCurrentCharacterIndex(wordEnd);
 
+        // Add border bottom to next character
+        const nextCharElement = essayCharsRef.current[wordEnd];
+        if (nextCharElement) {
+          nextCharElement.classList.add('border-b-4', 'border-sky-400', 'dark:border-white');
+        }
+
         // Update keyboard themes for the next character
         if (wordEnd < essay.length) {
           const nextChar = essay[wordEnd];
@@ -294,6 +302,17 @@ const ExercisePage: React.FC<RouteComponentProps<{ exerciseId: string }>> = Reac
     <div className='relative'>
       {mode === 'prompt' && (
         <div className='relative flex flex-col h-[calc(100vh-64px)] justify-center items-center mx-auto p-6 bg-gray dark:bg-gray-800 shadow-lg rounded-lg'>
+          <div className='absolute top-8 left-8'>
+            <button
+              onClick={() => window.history.back()}
+              className='flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg transition-all shadow-sm border border-gray-200 dark:border-gray-600'
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+              </svg>
+              Back
+            </button>
+          </div>
           <h1 className='text-3xl text-gray-900 dark:text-white'>{exercise?.name}</h1>
           <div
             className='w-1/2 p-4 my-4 bg-white dark:bg-gray-700 text-2xl text-gray-500 dark:text-gray-200 rounded'
@@ -339,6 +358,8 @@ const ExercisePage: React.FC<RouteComponentProps<{ exerciseId: string }>> = Reac
             skipParagraph={skipParagraph}
             setKeyboardState={setKeyboardState}
             setCurrentCharacterIndex={setCurrentCharacterIndex}
+            setSpeed={setSpeed}
+            speed={speed}
           />
         </div>
       )}
