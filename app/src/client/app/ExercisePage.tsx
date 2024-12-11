@@ -360,6 +360,7 @@ const ExercisePage: React.FC<RouteComponentProps<{ exerciseId: string }>> = Reac
             setCurrentCharacterIndex={setCurrentCharacterIndex}
             setSpeed={setSpeed}
             speed={speed}
+            currentCharacterIndex={currentCharacterIndex}
           />
         </div>
       )}

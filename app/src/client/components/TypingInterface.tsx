@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Keyboard from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
 import Essay from './Essay';
-import { BsPlayFill, BsStopFill, BsSkipEndFill, BsTextareaT, BsSpeedometer } from 'react-icons/bs';
+import { BsPlayFill, BsStopFill, BsSkipEndFill, BsTextareaT, BsSpeedometer, BsKeyboard, BsArrowRight } from 'react-icons/bs';
 import { ENGLISH_LAYOUT } from '../../shared/constants';
 
 interface TypingInterfaceProps {
@@ -20,6 +20,7 @@ interface TypingInterfaceProps {
   setKeyboardState: (state: string) => void;
   setSpeed: (speed: number) => void;
   speed: number;
+  currentCharacterIndex: number;
 }
 
 const TEXT_SIZES = ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl'];
@@ -41,6 +42,7 @@ const TypingInterface: React.FC<TypingInterfaceProps> = ({
   setKeyboardState,
   setSpeed,
   speed,
+  currentCharacterIndex,
 }) => {
   const [showTextSizeMenu, setShowTextSizeMenu] = useState(false);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
@@ -61,6 +63,13 @@ const TypingInterface: React.FC<TypingInterfaceProps> = ({
           keyboardVisible ? 'h-2/3 pt-8 pb-4' : 'h-full pt-8'
         }`}
       >
+        {currentCharacterIndex === 0 && (
+          <div className='absolute top-6 left-0 flex flex-row items-center space-x-2 z-999 transform -translate-x-[105%] bg-white dark:bg-gray-800 p-1 rounded-lg animate-pulse'>
+              <BsKeyboard className='w-5 h-5' />
+              <span>Start typing</span>
+              <BsArrowRight className='w-5 h-5' />
+          </div>
+        )}
         <p className='h-full overflow-y-auto'>
           <Essay 
             essay={essay} 
