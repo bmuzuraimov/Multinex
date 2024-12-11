@@ -1,39 +1,6 @@
 import { Link } from 'wasp/client/router';
-import { useState, useEffect } from 'react';
 
 const HeroSection: React.FC = () => {
-  const [typedText, setTypedText] = useState('');
-  const fullText = '2024 Final Exam Study Tool';
-  
-  useEffect(() => {
-    let currentIndex = 0;
-    let isDeleting = false;
-    let typingSpeed = 150;
-    let pauseEnd = 5000;
-
-    const interval = setInterval(() => {
-      if (!isDeleting && currentIndex <= fullText.length) {
-        setTypedText(fullText.slice(0, currentIndex));
-        currentIndex++;
-        typingSpeed = 150;
-      } else if (!isDeleting && currentIndex > fullText.length) {
-        isDeleting = true;
-        setTimeout(() => {
-          typingSpeed = 75;
-        }, pauseEnd);
-      } else if (isDeleting && currentIndex > 0) {
-        currentIndex--;
-        setTypedText(fullText.slice(0, currentIndex));
-        typingSpeed = 75;
-      } else if (isDeleting && currentIndex === 0) {
-        isDeleting = false;
-        typingSpeed = 150;
-      }
-    }, typingSpeed);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <div className='relative pt-14 w-full min-h-screen flex items-center pointer-events-none'>
       {/* Cool background stuff */}
@@ -53,7 +20,7 @@ const HeroSection: React.FC = () => {
           <div className='mx-auto max-w-3xl text-center'>
             <h1 className='text-3xl font-semibold tracking-tight text-gray-900 sm:text-6xl dark:text-gray-100'>
               <span className='text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-purple-600'>
-                {typedText}
+                Ultimate Final Exam Prep Tool
                 <span className='animate-pulse'>|</span>
               </span>
             </h1>

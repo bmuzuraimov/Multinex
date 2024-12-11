@@ -57,10 +57,6 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
     >
       <div className={`relative h-48 w-full ${course.image} bg-cover bg-center`}>
         <div className='absolute inset-0 bg-gradient-to-t from-black/50 to-transparent'></div>
-        <div className='absolute bottom-4 left-4 flex items-center space-x-2 text-white'>
-          <FaRegStar className="w-5 h-5" />
-          <span className='text-sm font-medium'>Featured</span>
-        </div>
       </div>
       <div className='p-6 relative'>
         <div className='flex justify-between items-start mb-3'>
