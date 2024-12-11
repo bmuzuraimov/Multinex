@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { createFeedback, hasCompletedExercises, useQuery, getFeedbackByUserId } from 'wasp/client/operations';
+import React, { useState } from 'react';
+import { createFeedback } from 'wasp/client/operations';
 import { FiCheckCircle, FiSend } from 'react-icons/fi';
-import { useHistory } from 'react-router-dom';
 
 const FeedbackPage: React.FC = () => {
-    const history = useHistory();
-    const { data: feedbackData, refetch } = useQuery(getFeedbackByUserId);
     const [formData, setFormData] = useState({
         message: '',
         rating: 0,
@@ -18,24 +15,6 @@ const FeedbackPage: React.FC = () => {
         browserInfo: ''
     });
     const [submitted, setSubmitted] = useState(false);
-    const { data: hasCompletedData } = useQuery(hasCompletedExercises);
-
-    useEffect(() => {
-        if (feedbackData) {
-            setFormData({
-                message: feedbackData.message || '',
-                rating: feedbackData.rating || 0,
-                usability: feedbackData.usability || '',
-                features: feedbackData.features || '',
-                improvements: feedbackData.improvements || '',
-                wouldRecommend: feedbackData.wouldRecommend || false,
-                experienceLevel: feedbackData.experienceLevel || '',
-                category: feedbackData.category || 'GENERAL',
-                browserInfo: feedbackData.browserInfo || ''
-            });
-            setSubmitted(true);
-        }
-    }, [feedbackData]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -61,41 +40,6 @@ const FeedbackPage: React.FC = () => {
             setSubmitted(true);
         }
     };
-
-    if (hasCompletedData === false) {
-        return (
-            <div className='min-h-screen flex items-center justify-center px-4'>
-                <div className='w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 md:p-12 text-center'>
-                    <h2 className='text-3xl font-serif font-semibold text-gray-800 dark:text-white mb-8 tracking-wide'>
-                        Access Required 🔒
-                    </h2>
-                    
-                    <p className='text-gray-600 dark:text-gray-300 mb-10 font-light leading-relaxed text-lg'>
-                        To access the feedback page, you need to complete at least one typing exercise first.
-                    </p>
-
-                    <p className='text-gray-600 dark:text-gray-300 mb-10 font-light leading-relaxed text-lg'>
-                        This helps us ensure that you've had a chance to experience our platform before providing feedback.
-                    </p>
-
-                    <p className='text-gray-600 dark:text-gray-300 mb-10 font-light leading-relaxed text-lg'>
-                        Don't worry - it only takes a few minutes to complete an exercise!
-                    </p>
-
-                    <p className='text-gray-600 dark:text-gray-300 mb-12 font-light leading-relaxed text-lg'>
-                        Head to the portal to try your first exercise. We look forward to hearing your thoughts afterwards!
-                    </p>
-
-                    <button
-                        onClick={() => history.push('/portal')}
-                        className='px-8 py-4 bg-teal-600 text-white rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 font-medium tracking-wide text-lg'
-                    >
-                        Go to Portal
-                    </button>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className='min-h-screen flex items-center justify-center px-4'>
