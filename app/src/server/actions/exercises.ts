@@ -18,9 +18,10 @@ export const createExercise: CreateExercise<
     model: string;
     includeSummary: boolean;
     includeMCQuiz: boolean;
+    priorKnowledge: string;
   },
   { success: boolean; message: string }
-> = async ({ length, level, content, topicId, model, includeSummary, includeMCQuiz }, context: any) => {
+> = async ({ length, level, content, topicId, model, includeSummary, includeMCQuiz, priorKnowledge }, context: any) => {
   // Check for user authentication
   if (!context.user) {
     throw new HttpError(401, 'Unauthorized');
@@ -42,7 +43,7 @@ export const createExercise: CreateExercise<
   let exerciseJson: any;
   let exerciseJsonUsage = 0;
   try {
-    const exerciseResponse = await OpenAIService.generateExercise(filtered_content, length, level, model, MAX_TOKENS);
+    const exerciseResponse = await OpenAIService.generateExercise(filtered_content, priorKnowledge, length, level, model, MAX_TOKENS);
     if (!exerciseResponse.success || !exerciseResponse.data) {
       return { success: false, message: 'Error generating exercise content.' };
     }

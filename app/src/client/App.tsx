@@ -53,6 +53,7 @@ export default function App({ children }: { children: ReactNode }) {
           </>
         )}
       </div>
+      <div id="modal-root"></div>
     </>
   );
 }

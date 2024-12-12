@@ -4,10 +4,12 @@ interface Prompt {
 }
 
 export const GENERATE_EXERCISE_PROMPT = ({
+  priorKnowledge,
   level,
   length,
   content,
 }: {
+  priorKnowledge: string;
   level: string;
   length: string;
   content: string;
@@ -19,12 +21,13 @@ export const GENERATE_EXERCISE_PROMPT = ({
   
         1. **preExerciseText**: Generate a brief, engaging introduction that outlines the key themes of the material. Include thought-provoking questions or a checklist of concepts to focus on during review. Use <br/> for separating points. The goal is to set the stage for an in-depth understanding of the material.
   
-        2. **lectureText**: Provide an accurate, comprehensive, and structured summary of the PDF's core content. Include all significant formulas, concepts, and examples in a concise manner suitable for exam preparation. Ensure:
+        2. **lectureText**: Provide an accurate, comprehensive, and structured summary of the PDF's core content, excluding any concepts that the user indicates they are already familiar with in their prior knowledge. Include all significant formulas, concepts, and examples in a concise manner suitable for exam preparation. Ensure:
            - Formulas are presented in a programming-friendly format without special characters, e.g., "a^2 + b^2 = c^2".
            - Paragraphs are separated by '\\n\\n'.
            - Content is grouped logically under headings and subheadings.
            - Examples or clarifications are added as needed for enhanced understanding.
            - The text reflects the technical vocabulary and style appropriate to the material's level ${level}.
+           - Content mentioned in priorKnowledge is excluded to avoid redundancy.
   
         The output should be tailored for students preparing for final exams, emphasizing clarity, structure, and actionable insights.
         
@@ -37,7 +40,7 @@ export const GENERATE_EXERCISE_PROMPT = ({
     },
     {
       role: 'user',
-      content: `Extract and structure the key information from the provided PDF material, ensuring the 'lectureText' emphasizes the essential points for final exam preparation and is formatted for a(n) ${level} user. Include all significant formulas in a programming-friendly format and ensure the text meets a minimum of ${length} words. The 'preExerciseText' should prompt review with key themes and questions formatted with <br/>. Provide the output in valid JSON format. PDF content: ${content}`,
+      content: `Extract and structure the key information from the provided PDF material, ensuring the 'lectureText' emphasizes the essential points for final exam preparation and is formatted for a(n) ${level} user. Exclude any content that overlaps with the following prior knowledge: ${priorKnowledge}. Include all significant formulas in a programming-friendly format and ensure the text meets a minimum of ${length} words. The 'preExerciseText' should prompt review with key themes and questions formatted with <br/>. Provide the output in valid JSON format. PDF content: ${content}`,
     },
   ];
 };

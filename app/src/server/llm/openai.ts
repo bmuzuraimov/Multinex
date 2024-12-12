@@ -24,12 +24,12 @@ interface OpenAIResponse {
 
 
 export class OpenAIService {
-  static async generateExercise(content: string, length: string, level: string, model: string, maxTokens: number): Promise<OpenAIResponse> {
+  static async generateExercise(content: string, priorKnowledge: string, length: string, level: string, model: string, maxTokens: number): Promise<OpenAIResponse> {
     return retry(async () => {
       try {
         const response = await openai.chat.completions.create({
           model,
-          messages: GENERATE_EXERCISE_PROMPT({ content, length, level }),
+          messages: GENERATE_EXERCISE_PROMPT({ content, priorKnowledge, length, level }),
           temperature: TEMPERATURE,
           max_tokens: maxTokens,
           top_p: 1,
