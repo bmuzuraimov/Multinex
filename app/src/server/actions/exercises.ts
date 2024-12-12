@@ -3,9 +3,11 @@ import { HttpError } from 'wasp/server';
 import { Exercise } from 'wasp/entities';
 import { OpenAIService } from '../llm/openai';
 import { TokenService } from '../llm/tokenService';
-import { truncateText, reportToAdmin } from './utils';
-import { MAX_TOKENS, OPENAI_MODEL, TEMPERATURE } from '../../shared/constants';
+import { truncateText, reportToAdmin, cleanMarkdown } from './utils';
+import { MAX_TOKENS, OPENAI_MODEL } from '../../shared/constants';
 import { TiktokenModel } from 'tiktoken';
+
+
 
 export const createExercise: CreateExercise<
   {
@@ -27,7 +29,7 @@ export const createExercise: CreateExercise<
   const { text: filtered_content, truncated } = truncateText(content);
 
   // Calculate required tokens
-  const required_tokens = TokenService.calculateRequiredTokens(filtered_content, model as TiktokenModel);
+  const required_tokens = TokenService.calculateRequiredTokens(filtered_content, OPENAI_MODEL as TiktokenModel);
 
   // Check if the user has enough tokens
   if (context.user.tokens < required_tokens) {
@@ -50,7 +52,7 @@ export const createExercise: CreateExercise<
     return { success: false, message: 'Failed to generate exercise after multiple attempts.' };
   }
 
-  const lectureText = exerciseJson.lectureText.replace(/\*\*[\w\s]+\*\*/g, (match: string) => match.slice(2, -2)).replace('—', '-');
+  const lectureText = cleanMarkdown(exerciseJson.lectureText);
 
   let summaryJson = null;
   let summaryJsonUsage = 0;
@@ -105,7 +107,7 @@ export const createExercise: CreateExercise<
         level,
         truncated,
         tokens: totalTokensUsed,
-        model: OPENAI_MODEL,
+        model,
         no_words: lectureText.split(' ').length || parseInt(length, 10),
         user: { connect: { id: context.user.id } },
         ...(topicId && { topic: { connect: { id: topicId } } }),

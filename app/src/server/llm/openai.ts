@@ -7,12 +7,12 @@ import { reportToAdmin } from '../actions/utils';
 import { TEMPERATURE } from '../../shared/constants';
 
 function setupOpenAI() {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new HttpError(500, 'OpenAI API key is not set');
-    }
-    return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  if (!process.env.OPENAI_API_KEY) {
+    throw new HttpError(500, 'OpenAI API key is not set');
   }
-  
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
+
 const openai = setupOpenAI();
 
 interface OpenAIResponse {
@@ -21,6 +21,7 @@ interface OpenAIResponse {
   usage?: number;
   message?: string;
 }
+
 
 export class OpenAIService {
   static async generateExercise(content: string, length: string, level: string, model: string, maxTokens: number): Promise<OpenAIResponse> {
@@ -35,7 +36,34 @@ export class OpenAIService {
           frequency_penalty: 0,
           presence_penalty: 0,
           response_format: {
-            type: 'json_object',
+            "type": "json_schema",
+            "json_schema": {
+              "name": "exam_summary",
+              "strict": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Title of PDF Material"
+                  },
+                  "preExerciseText": {
+                    "type": "string",
+                    "description": "Brief outline or engaging questions/checklist to prepare the user for review."
+                  },
+                  "lectureText": {
+                    "type": "string",
+                    "description": "Structured and concise summary with all significant content, including programming-friendly formulas and logical formatting."
+                  }
+                },
+                "required": [
+                  "name",
+                  "preExerciseText",
+                  "lectureText"
+                ],
+                "additionalProperties": false
+              }
+            }
           },
         });
 
@@ -68,7 +96,24 @@ export class OpenAIService {
           frequency_penalty: 0,
           presence_penalty: 0,
           response_format: {
-            type: 'json_object',
+            "type": "json_schema",
+            "json_schema": {
+              "name": "lecture_summary",
+              "strict": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paragraphSummary": {
+                    "type": "string",
+                    "description": "Concise names for the paragraphs separated by '|'"
+                  }
+                },
+                "required": [
+                  "paragraphSummary"
+                ],
+                "additionalProperties": false
+              }
+            }
           },
         });
 
@@ -95,14 +140,67 @@ export class OpenAIService {
         const response = await openai.chat.completions.create({
           model,
           messages: GENERATE_EXAM_PROMPT({ content: lectureText }),
+          response_format: {
+            "type": "json_schema",
+            "json_schema": {
+              "name": "mcq_schema",
+              "strict": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "questions": {
+                    "type": "array",
+                    "description": "A list of multiple-choice questions designed based on lecture text.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "text": {
+                          "type": "string",
+                          "description": "The textual content of the question."
+                        },
+                        "options": {
+                          "type": "array",
+                          "description": "A set of options for the multiple-choice question.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "text": {
+                                "type": "string",
+                                "description": "The text of the option."
+                              },
+                              "isCorrect": {
+                                "type": "boolean",
+                                "description": "Indicates whether this option is the correct answer."
+                              }
+                            },
+                            "required": [
+                              "text",
+                              "isCorrect"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "text",
+                        "options"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "questions"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
           temperature: TEMPERATURE,
           max_tokens: maxTokens,
           top_p: 1,
           frequency_penalty: 0.1,
           presence_penalty: 0,
-          response_format: {
-            type: 'json_object',
-          },
         });
 
         const responseContent = response.choices[0]?.message?.content || '';

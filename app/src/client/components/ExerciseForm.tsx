@@ -171,9 +171,9 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
         value={exerciseLevel} 
         onChange={(e) => setExerciseLevel(e.target.value)}
       >
-        {EXERCISE_LEVELS.map((level) => (
-          <option key={level} value={level} className="py-2">
-            {level}
+        {Object.entries(EXERCISE_LEVELS).map(([key, value]) => (
+          <option key={key} value={key} className="py-2">
+            {value}
           </option>
         ))}
       </select>
@@ -181,8 +181,8 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
       <div className='flex items-center justify-center w-full'>
         <div
           {...getRootProps()}
-          className={`flex flex-col items-center p-2 justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 ${
-            isUploading ? 'opacity-50 cursor-not-allowed' : ''
+          className={`flex flex-col items-center p-2 justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 ${
+            isUploading ? 'opacity-50 cursor-not-allowed bg-gradient-to-r from-blue-50 via-teal-50 to-blue-50 dark:from-blue-900/30 dark:via-teal-900/30 dark:to-blue-900/30 animate-gradient' : ''
           } ${isDragActive || dropzoneIsDragActive ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/50' : ''}`}
         >
           <input {...getInputProps()} />

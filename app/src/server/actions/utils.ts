@@ -60,3 +60,17 @@ export const reportToAdmin = async (message: string) => {
     html: message,
   });
 };
+
+export const cleanMarkdown = (text: string): string => {
+  return text
+    // Remove bold markdown
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    // Remove code blocks
+    .replace(/```[\s\S]*?```/g, '')
+    // Replace em dashes
+    .replace(/—/g, '-')
+    // Replace en dashes
+    .replace(/–/g, '-')
+    // Remove headers
+    .replace(/#{1,6}\s/g, '')
+}

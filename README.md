@@ -8,6 +8,7 @@ A platform to fill gaps in the education by revising materials efficiently and t
 - **Node.js**: v18 or higher
 - **PostgreSQL**: v12 or higher
 - **Python**: v3.9 or higher
+- **React**: v18.2.0 (both react and react-dom packages)
 
 ## Installation
 

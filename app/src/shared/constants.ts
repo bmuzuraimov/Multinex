@@ -6,7 +6,7 @@ export enum TierIds {
   PREMIUM = 'PREMIUM',
 }
 export const OPENAI_MODEL = 'gpt-4o-mini';
-export const MAX_TOKENS = 8200;
+export const MAX_TOKENS = 16383;
 export const TEMPERATURE = 0.7;
 export const RETRIES = 3;
 export const DELAY_MS = 500;
@@ -48,8 +48,18 @@ export const ENGLISH_LAYOUT = {
   ],
 };
 
-export const EXERCISE_LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Expert', 'Master'];
-export const AVAILABLE_MODELS = ['gpt-4o-mini'];
+export const EXERCISE_LEVELS = {
+  'Beginner Level': 'Beginner Level',
+  'Intermediate Level': 'Intermediate Level',
+  'Advanced Level': 'Advanced Level',
+  'Expert Level': 'Expert Level',
+  'Master Level': 'Master Level'
+};
+
+export const AVAILABLE_MODELS = [
+  'gpt-4o-mini',
+  'gpt-4o',
+];
 export const EXERCISE_LENGTHS = {
   '200 words (important)': 'Short (~200 words)',
   '400 words (important)': 'Medium (~400 words)',
