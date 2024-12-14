@@ -1,11 +1,6 @@
-import Essay from '../components/Essay';
-import Keyboard from 'react-simple-keyboard';
-import 'react-simple-keyboard/build/css/index.css';
 import ExerciseResult from '../components/ExerciseResult';
 import { getDemoExercise, useQuery } from 'wasp/client/operations';
 import useParagraphIndex from '../hooks/useParagraphIndex';
-import { updateExercise } from 'wasp/client/operations';
-import { ENGLISH_LAYOUT } from '../../shared/constants';
 import ExerciseSidebar from '../components/ExerciseSidebar';
 import ExerciseTest from '../components/ExerciseTest';
 import useExercise from '../hooks/useExercise';
@@ -46,7 +41,6 @@ export default function DemoPage() {
     setKeyboardState,
     mode,
     setMode,
-    keyboardRef,
     essayCharsRef,
   } = useExercise(raw_essay);
 
@@ -69,148 +63,6 @@ export default function DemoPage() {
   });
 
   const hasQuiz = useMemo(() => Boolean(exercise?.questions?.length), [exercise]);
-
-  const skipParagraph = useCallback(() => {
-    let nextIndex = currentCharacterIndex;
-    while (nextIndex < essay.length && essay[nextIndex] !== '\n') {
-      nextIndex++;
-    }
-    nextIndex++;
-
-    for (let i = currentCharacterIndex; i < nextIndex; i++) {
-      const charElement = essayCharsRef.current[i];
-      if (charElement) {
-        charElement.classList.remove(
-          'bg-lime-200',
-          'dark:bg-lime-800',
-          'bg-red-200',
-          'dark:bg-red-800',
-          'border-b-4',
-          'border-sky-400',
-          'dark:border-white'
-        );
-      }
-    }
-
-    setCurrentCharacterIndex(nextIndex);
-    const nextCharElement = essayCharsRef.current[nextIndex];
-    nextCharElement?.classList.add('border-b-4', 'border-sky-400', 'dark:border-white');
-  }, [currentCharacterIndex, essay, essayCharsRef, setCurrentCharacterIndex]);
-
-  const onKeyPress = async (button: string) => {
-    const currentCharacterElement = essayCharsRef.current[currentCharacterIndex];
-    const nextCharacterElement = essayCharsRef.current[currentCharacterIndex + 1];
-    (currentCharacterElement as HTMLElement)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    if (currentCharacterIndex + 1 === essay.length) {
-      const score = 100 - Math.round((errorIndices.length / essay.split('').length) * 100);
-      updateExercise({ id: exerciseId, updated_data: { completed: true, score, completedAt: new Date() } });
-      setMode('submitted');
-    }
-
-    // Remove styling from all previously styled elements if backspace was pressed
-    if (button === '{backspace}') {
-      if (currentCharacterIndex === 0) return;
-      const prevCharacterElement = essayCharsRef.current[currentCharacterIndex - 1];
-      (prevCharacterElement as HTMLElement)?.classList.remove(
-        'bg-lime-200',
-        'dark:bg-lime-800',
-        'bg-red-200',
-        'dark:bg-red-800',
-        'bg-yellow-200',
-        'dark:bg-yellow-800',
-        'border-b-4',
-        'border-sky-400',
-        'dark:border-white'
-      );
-      (currentCharacterElement as HTMLElement)?.classList.remove('border-b-4', 'border-sky-400', 'dark:border-white');
-      (prevCharacterElement as HTMLElement)?.classList.add('border-b-4', 'border-sky-400', 'dark:border-white');
-      setCurrentCharacterIndex(currentCharacterIndex - 1);
-      const nextChar = essay[currentCharacterIndex - 1];
-      if (/[A-Z~!#$%^&*()_+{}|:"<>?]/.test(nextChar)) {
-        if (keyboardState === 'default') {
-          setKeyboardState('shift');
-        }
-      } else {
-        if (keyboardState === 'shift') {
-          setKeyboardState('default');
-        }
-      }
-      let highlightAdd = nextChar;
-      let highlightRemove = essay[currentCharacterIndex];
-      if (highlightAdd == ' ') highlightAdd = '{space}';
-
-      if (highlightRemove == ' ') highlightRemove = '{space}';
-      keyboardRef.current?.removeButtonTheme(
-        highlightRemove,
-        document.documentElement.classList.contains('dark') ? 'bg-blue-800' : 'bg-blue-200'
-      );
-      keyboardRef.current?.addButtonTheme(
-        highlightAdd,
-        document.documentElement.classList.contains('dark') ? 'bg-blue-800' : 'bg-blue-200'
-      );
-      return;
-    }
-    const isCorrect =
-      button === essay[currentCharacterIndex] ||
-      (button === '{space}' && essay[currentCharacterIndex] === ' ') ||
-      (button === '{enter}' && essay[currentCharacterIndex] === '\n');
-    // Apply correct or incorrect styling based on comparison
-    if (isCorrect) {
-      if (errorIndices.includes(currentCharacterIndex)) {
-        (currentCharacterElement as HTMLElement)?.classList.add('bg-yellow-200', 'dark:bg-yellow-800');
-      } else {
-        (currentCharacterElement as HTMLElement)?.classList.add('bg-lime-200', 'dark:bg-lime-800');
-      }
-      (currentCharacterElement as HTMLElement)?.classList.remove(
-        'bg-red-200',
-        'dark:bg-red-800',
-        'border-b-4',
-        'border-sky-400',
-        'dark:border-white'
-      );
-    } else {
-      setErrorIndices((prevIndices) => [...prevIndices, currentCharacterIndex]);
-      (currentCharacterElement as HTMLElement)?.classList.add('bg-red-200', 'dark:bg-red-800');
-      (currentCharacterElement as HTMLElement)?.classList.remove(
-        'bg-lime-200',
-        'dark:bg-lime-800',
-        'border-b-4',
-        'border-sky-400',
-        'dark:border-white'
-      );
-    }
-    (nextCharacterElement as HTMLElement)?.classList.add('border-b-4', 'border-sky-400', 'dark:border-white');
-    setCurrentCharacterIndex((prevIndex) => prevIndex + 1);
-    if (currentCharacterIndex + 1 < essay.length) {
-      const nextChar = essay[currentCharacterIndex + 1];
-      if (/[A-Z~!#$%^&*()_+{}|:"<>?]/.test(nextChar)) {
-        // Check if nextChar is an alphabet character (A-Z)
-        if (keyboardState === 'default') {
-          setKeyboardState('shift');
-        }
-      } else {
-        if (keyboardState === 'shift') {
-          setKeyboardState('default');
-        }
-      }
-      let highlightAdd = nextChar;
-      let highlightRemove = essay[currentCharacterIndex];
-
-      if (highlightAdd == ' ') highlightAdd = '{space}';
-
-      if (highlightRemove == ' ') highlightRemove = '{space}';
-
-      keyboardRef.current?.removeButtonTheme(
-        highlightRemove,
-        document.documentElement.classList.contains('dark') ? 'bg-blue-800' : 'bg-blue-200'
-      );
-      keyboardRef.current?.addButtonTheme(
-        highlightAdd,
-        document.documentElement.classList.contains('dark') ? 'bg-blue-800' : 'bg-blue-200'
-      );
-    }
-  };
 
   return (
     <div className='relative'>
@@ -252,18 +104,14 @@ export default function DemoPage() {
             essay={essay}
             essayCharsRef={essayCharsRef}
             progress={progress}
-            keyboardVisible={keyboardVisible}
-            keyboardRef={keyboardRef}
-            onKeyPress={onKeyPress}
-            keyboardState={keyboardState}
             isPlaying={isPlaying}
             togglePlayback={togglePlayback}
-            skipParagraph={skipParagraph}
-            setKeyboardState={setKeyboardState}
             setCurrentCharacterIndex={setCurrentCharacterIndex}
             setSpeed={setSpeed}
             speed={speed}
             currentCharacterIndex={currentCharacterIndex}
+            onSubmitExercise={onSubmitExercise}
+            setErrorIndices={setErrorIndices}
           />
         </div>
       )}

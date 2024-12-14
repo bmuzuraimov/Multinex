@@ -31,22 +31,6 @@ export enum TierTokens {
   PRO_TOKENS = 350000,
   PREMIUM_TOKENS = 700000,
 }
-export const ENGLISH_LAYOUT = {
-  default: [
-    '` 1 2 3 4 5 6 7 8 9 0 - = {backspace}',
-    '{tab} q w e r t y u i o p [ ] \\',
-    "{lock} a s d f g h j k l ; ' {enter}",
-    '{shift} z x c v b n m , . / {shift}',
-    '.com @ {space}',
-  ],
-  shift: [
-    '~ ! @ # $ % ^ & * ( ) _ + {backspace}',
-    '{tab} Q W E R T Y U I O P { } |',
-    '{lock} A S D F G H J K L : " {enter}',
-    '{shift} Z X C V B N M < > ? {shift}',
-    '.com @ {space}',
-  ],
-};
 
 export const EXERCISE_LEVELS = {
   'Beginner Level': 'Beginner Level',
@@ -66,4 +50,14 @@ export const EXERCISE_LENGTHS = {
   '600 words (important)': 'Detailed (~600 words)', 
   '800 words (important)': 'Long (~800 words)',
   '1000 words (important)': 'Very Long (~1000 words)',
+};
+
+export const TEXT_SIZES = ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl'];
+
+export const PLAYBACK_SPEEDS = {
+  200: '300 WPM',
+  400: '150 WPM',
+  600: '100 WPM',
+  800: '75 WPM',
+  1000: '60 WPM'
 };

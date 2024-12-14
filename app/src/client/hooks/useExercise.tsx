@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { KeyboardReactInterface } from 'react-simple-keyboard';
 
 interface Exercise {
   id: string;
@@ -15,7 +14,6 @@ const useExercise = (raw_essay: string) => {
     essay[0] === essay[0].toUpperCase() || !isNaN(Number(essay[0])) ? 'shift' : 'default'
   );
   const [mode, setMode] = useState('prompt');
-  const keyboardRef = useRef<KeyboardReactInterface | null>(null);
   const essayCharsRef = useRef<HTMLSpanElement[]>([]);
   useEffect(() => {
     setProgress((currentCharacterIndex * 100) / essay.length);
@@ -32,7 +30,6 @@ const useExercise = (raw_essay: string) => {
     setKeyboardState,
     mode,
     setMode,
-    keyboardRef,
     essayCharsRef,
   };
 };

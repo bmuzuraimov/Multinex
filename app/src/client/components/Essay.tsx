@@ -4,7 +4,6 @@ interface EssayProps {
   essay: string;
   essayCharsRef: React.MutableRefObject<(HTMLSpanElement | null)[]>;
   setCurrentCharacterIndex: (index: number) => void;
-  setKeyboardState: (state: string) => void;
   textSize: string;
 }
 
@@ -24,7 +23,7 @@ interface TextSizes {
   '9xl': string;
 }
 
-const Essay: React.FC<EssayProps> = ({ essay, essayCharsRef, setCurrentCharacterIndex, setKeyboardState, textSize }) => {
+const Essay: React.FC<EssayProps> = ({ essay, essayCharsRef, setCurrentCharacterIndex, textSize }) => {
   // Split the essay outside of the JSX
   const characters = essay.split('');
 
@@ -97,7 +96,6 @@ const Essay: React.FC<EssayProps> = ({ essay, essayCharsRef, setCurrentCharacter
             key={index}
             onClick={(e) => {
               setCurrentCharacterIndex(index);
-              setKeyboardState(/[A-Z~!#$%^&*()_+{}|:"<>?]/.test(char) ? 'shift' : 'default');
               e.currentTarget.classList.add(borderMap[textSize], 'border-sky-400', 'dark:border-white');
             }}
             className={`text-${textSize} cursor-pointer ${trackingMap[textSize]} text-gray-500 dark:text-gray-300 mix-blend-normal dark:mix-blend-lighten ${

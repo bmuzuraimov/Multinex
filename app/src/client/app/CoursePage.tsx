@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   useQuery,
@@ -18,8 +18,8 @@ import ExerciseForm from '../components/ExerciseForm';
 
 export default function CoursePage() {
   const { id: courseId } = useParams<{ id: string }>();
-  const { data: topics } = useQuery(getTopicsByCourse, { courseId });
-  const { data: course } = useQuery(getCourseById, { courseId });
+  const { data: topics, refetch: refetchTopics } = useQuery(getTopicsByCourse, { courseId });
+  const { data: course, refetch: refetchCourse } = useQuery(getCourseById, { courseId });
   const [courseName, setCourseName] = useState('');
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export default function CoursePage() {
     }
   }, [course]);
 
-  const handleUpdateCourse = () => {
+  const handleUpdateCourse = useCallback(() => {
     if (courseId && courseName !== course?.name) {
       updateCourse({
         id: courseId,
@@ -36,10 +36,11 @@ export default function CoursePage() {
           name: courseName,
         },
       });
+      refetchCourse();
     }
-  };
+  }, [courseId, courseName, course?.name]);
 
-  const handlePublishCourse = () => {
+  const handlePublishCourse = useCallback(() => {
     if (courseId) {
       updateCourse({
         id: courseId,
@@ -47,8 +48,9 @@ export default function CoursePage() {
           isPublic: !course?.isPublic,
         },
       });
+      refetchCourse();
     }
-  };
+  }, [courseId, course?.isPublic]);
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative'>
@@ -92,18 +94,20 @@ export default function CoursePage() {
           </button>
         </div>
 
-        <div className='space-y-12'>{topics?.map((topic) => <TaskSection key={topic.id} topic={topic} />)}</div>
+        <div className='space-y-12'>{topics?.map((topic) => (
+          <TaskSection key={topic.id} topic={topic} />
+        ))}</div>
       </div>
     </div>
   );
 }
 
-const TaskSection: React.FC<ExerciseSectionProps> = ({ topic }) => {
+const TaskSection: React.FC<ExerciseSectionProps> = React.memo(({ topic }) => {
   const [topicName, setTopicName] = useState(topic.name);
   const [topicLength, setTopicLength] = useState(topic.length);
   const [topicLevel, setTopicLevel] = useState(topic.level);
 
-  const handleUpdateTopic = () => {
+  const handleUpdateTopic = useCallback(() => {
     updateTopic({
       id: topic.id,
       data: {
@@ -112,7 +116,7 @@ const TaskSection: React.FC<ExerciseSectionProps> = ({ topic }) => {
         level: topicLevel,
       },
     });
-  };
+  }, [topic.id, topicName, topicLength, topicLevel]);
 
   useEffect(() => {
     setTopicName(topic.name);
@@ -145,8 +149,10 @@ const TaskSection: React.FC<ExerciseSectionProps> = ({ topic }) => {
 
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 relative'>
         <ExerciseForm topicId={topic.id} />
-        {topic.exercises?.map((exercise, idx) => <ExerciseCard key={exercise.id} index={idx} exercise={exercise} />)}
+        {topic.exercises?.map((exercise, idx) => (
+          <ExerciseCard key={exercise.id} index={idx} exercise={exercise} />
+        ))}
       </div>
     </div>
   );
-};
+});
