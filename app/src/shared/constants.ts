@@ -61,3 +61,35 @@ export const PLAYBACK_SPEEDS = {
   800: '75 WPM',
   1000: '60 WPM'
 };
+
+export const TRACKING_MAP: Record<typeof TEXT_SIZES[number], string> = {
+  'xs': 'tracking-tight',
+  'sm': 'tracking-tight',
+  'base': 'tracking-normal',
+  'lg': 'tracking-normal',
+  'xl': 'tracking-normal',
+  '2xl': 'tracking-normal',
+  '3xl': 'tracking-wide',
+  '4xl': 'tracking-wider',
+  '5xl': 'tracking-[0.1em]',
+  '6xl': 'tracking-[0.15em]',
+  '7xl': 'tracking-[0.2em]',
+  '8xl': 'tracking-[0.25em]',
+  '9xl': 'tracking-[0.3em]'
+};
+
+export const BORDER_MAP: Record<typeof TEXT_SIZES[number], string> = {
+  'xs': 'border-b-[1px]',
+  'sm': 'border-b-2',
+  'base': 'border-b-2',
+  'lg': 'border-b-3',
+  'xl': 'border-b-3',
+  '2xl': 'border-b-4',
+  '3xl': 'border-b-[5px]',
+  '4xl': 'border-b-[6px]',
+  '5xl': 'border-b-[7px]',
+  '6xl': 'border-b-[8px]',
+  '7xl': 'border-b-[9px]',
+  '8xl': 'border-b-[10px]',
+  '9xl': 'border-b-[11px]'
+};

@@ -36,6 +36,103 @@ const TypingInterface: React.FC<TypingInterfaceProps> = ({
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [textSize, setTextSize] = useState('2xl');
 
+  const handleBackspace = useCallback((currentCharacterIndex: number, currentCharacterElement: HTMLElement | null, essayCharsRef: React.MutableRefObject<(HTMLSpanElement | null)[]>, setCurrentCharacterIndex: (index: number) => void) => {
+    if (currentCharacterIndex === 0) return;
+    
+    const prevCharacterElement = essayCharsRef.current[currentCharacterIndex - 1];
+    const classesToRemove = [
+      'bg-lime-200',
+      'dark:bg-lime-800', 
+      'bg-red-200',
+      'dark:bg-red-800',
+      'border-b-4',
+      'border-sky-400', 
+      'dark:border-white',
+    ] as const;
+    const currentClassesToRemove = ['border-b-4', 'border-sky-400', 'dark:border-white'];
+    
+    prevCharacterElement?.classList.remove(...classesToRemove);
+    currentCharacterElement?.classList.remove(...currentClassesToRemove);
+    prevCharacterElement?.classList.add('border-b-4', 'border-sky-400', 'dark:border-white');
+    setCurrentCharacterIndex(currentCharacterIndex - 1);
+  }, []);
+
+  const handleTab = useCallback((currentCharacterIndex: number, essay: string, essayCharsRef: React.MutableRefObject<(HTMLSpanElement | null)[]>, setCurrentCharacterIndex: (index: number) => void) => {
+    let wordStart = currentCharacterIndex;
+    while (wordStart > 0 && essay[wordStart - 1] !== ' ' && essay[wordStart - 1] !== '\n') {
+      wordStart--;
+    }
+    let wordEnd = currentCharacterIndex;
+    while (wordEnd < essay.length && essay[wordEnd] !== ' ' && essay[wordEnd] !== '\n') {
+      wordEnd++;
+    }
+
+    const currentCharElement = essayCharsRef.current[currentCharacterIndex];
+    if (currentCharElement) {
+      currentCharElement.classList.remove('border-b-4', 'border-sky-400', 'dark:border-white');
+    }
+
+    for (let i = wordStart; i < wordEnd; i++) {
+      const charElement = essayCharsRef.current[i];
+      if (charElement) {
+        charElement.classList.add('bg-lime-200', 'dark:bg-lime-800');
+        charElement.classList.remove(
+          'bg-red-200',
+          'dark:bg-red-800',
+          'border-b-4',
+          'border-sky-400',
+          'dark:border-white'
+        );
+      }
+    }
+
+    setCurrentCharacterIndex(wordEnd);
+
+    const nextCharElement = essayCharsRef.current[wordEnd];
+    if (nextCharElement) {
+      nextCharElement.classList.add('border-b-4', 'border-sky-400', 'dark:border-white');
+    }
+  }, []);
+
+  const handleCharacterInput = useCallback((
+    button: string, 
+    currentCharacterIndex: number,
+    essay: string,
+    currentCharacterElement: HTMLElement | null,
+    nextCharacterElement: HTMLElement | null,
+    setErrorIndices: React.Dispatch<React.SetStateAction<number[]>>,
+    setCurrentCharacterIndex: (index: number) => void
+  ) => {
+    const isCorrect =
+      button === essay[currentCharacterIndex] ||
+      (button === '{space}' && essay[currentCharacterIndex] === ' ') ||
+      (button === '{enter}' && essay[currentCharacterIndex] === '\n');
+
+    if (isCorrect) {
+      currentCharacterElement?.classList.add('bg-lime-200', 'dark:bg-lime-800');
+      currentCharacterElement?.classList.remove(
+        'bg-red-200',
+        'dark:bg-red-800',
+        'border-b-4',
+        'border-sky-400',
+        'dark:border-white'
+      );
+    } else {
+      setErrorIndices((prevIndices) => [...prevIndices, currentCharacterIndex]);
+      currentCharacterElement?.classList.add('bg-red-200', 'dark:bg-red-800');
+      currentCharacterElement?.classList.remove(
+        'bg-lime-200',
+        'dark:bg-lime-800',
+        'border-b-4',
+        'border-sky-400',
+        'dark:border-white'
+      );
+    }
+
+    nextCharacterElement?.classList.add('border-b-4', 'border-sky-400', 'dark:border-white');
+    setCurrentCharacterIndex(currentCharacterIndex + 1);
+  }, []);
+
   const onKeyPress = useCallback(
     async (button: string) => {
       const currentCharacterElement = essayCharsRef.current[currentCharacterIndex];
@@ -47,103 +144,24 @@ const TypingInterface: React.FC<TypingInterfaceProps> = ({
       }
 
       if (button === '{backspace}') {
-        if (currentCharacterIndex === 0) return;
-        const prevCharacterElement = essayCharsRef.current[currentCharacterIndex - 1];
-        const classesToRemove = [
-          'bg-lime-200',
-          'dark:bg-lime-800',
-          'bg-red-200',
-          'dark:bg-red-800',
-          'border-b-4',
-          'border-sky-400',
-          'dark:border-white',
-        ] as const;
-        const currentClassesToRemove = ['border-b-4', 'border-sky-400', 'dark:border-white'];
-        prevCharacterElement?.classList.remove(...classesToRemove);
-        currentCharacterElement?.classList.remove(...currentClassesToRemove);
-        prevCharacterElement?.classList.add('border-b-4', 'border-sky-400', 'dark:border-white');
-        setCurrentCharacterIndex(currentCharacterIndex - 1);
-
+        handleBackspace(currentCharacterIndex, currentCharacterElement as HTMLElement, essayCharsRef, setCurrentCharacterIndex);
         return;
       }
 
       if (button === '{tab}') {
-        // Find the start of the current word
-        let wordStart = currentCharacterIndex;
-        while (wordStart > 0 && essay[wordStart - 1] !== ' ' && essay[wordStart - 1] !== '\n') {
-          wordStart--;
-        }
-        // Find the end of the current word
-        let wordEnd = currentCharacterIndex;
-        while (wordEnd < essay.length && essay[wordEnd] !== ' ' && essay[wordEnd] !== '\n') {
-          wordEnd++;
-        }
-
-        // Remove old highlight from current character
-        const currentCharElement = essayCharsRef.current[currentCharacterIndex];
-        if (currentCharElement) {
-          currentCharElement.classList.remove('border-b-4', 'border-sky-400', 'dark:border-white');
-        }
-
-        // Highlight the entire word
-        for (let i = wordStart; i < wordEnd; i++) {
-          const charElement = essayCharsRef.current[i];
-          if (charElement) {
-            charElement.classList.add('bg-lime-200', 'dark:bg-lime-800');
-            charElement.classList.remove(
-              'bg-red-200',
-              'dark:bg-red-800',
-              'border-b-4',
-              'border-sky-400',
-              'dark:border-white'
-            );
-          }
-        }
-
-        // Update progress
-        const newProgress = (wordEnd / essay.length) * 100;
-
-        // Update character index
-        setCurrentCharacterIndex(wordEnd);
-
-        // Add border bottom to next character
-        const nextCharElement = essayCharsRef.current[wordEnd];
-        if (nextCharElement) {
-          nextCharElement.classList.add('border-b-4', 'border-sky-400', 'dark:border-white');
-        }
-
+        handleTab(currentCharacterIndex, essay, essayCharsRef, setCurrentCharacterIndex);
         return;
       }
 
-      const isCorrect =
-        button === essay[currentCharacterIndex] ||
-        (button === '{space}' && essay[currentCharacterIndex] === ' ') ||
-        (button === '{enter}' && essay[currentCharacterIndex] === '\n');
-
-      if (isCorrect) {
-        currentCharacterElement?.classList.add('bg-lime-200', 'dark:bg-lime-800');
-        currentCharacterElement?.classList.remove(
-          'bg-red-200',
-          'dark:bg-red-800',
-          'border-b-4',
-          'border-sky-400',
-          'dark:border-white'
-        );
-      } else {
-        setErrorIndices((prevIndices) => [...prevIndices, currentCharacterIndex]);
-        currentCharacterElement?.classList.add('bg-red-200', 'dark:bg-red-800');
-        currentCharacterElement?.classList.remove(
-          'bg-lime-200',
-          'dark:bg-lime-800',
-          'border-b-4',
-          'border-sky-400',
-          'dark:border-white'
-        );
-      }
-
-      nextCharacterElement?.classList.add('border-b-4', 'border-sky-400', 'dark:border-white');
-      setCurrentCharacterIndex(currentCharacterIndex + 1);
-
+      handleCharacterInput(
+        button,
+        currentCharacterIndex,
+        essay,
+        currentCharacterElement as HTMLElement,
+        nextCharacterElement as HTMLElement,
+        setErrorIndices,
+        setCurrentCharacterIndex
+      );
     },
     [
       essay,
@@ -152,6 +170,9 @@ const TypingInterface: React.FC<TypingInterfaceProps> = ({
       setCurrentCharacterIndex,
       setErrorIndices,
       onSubmitExercise,
+      handleBackspace,
+      handleTab,
+      handleCharacterInput
     ]
   );
 
@@ -186,7 +207,7 @@ const TypingInterface: React.FC<TypingInterfaceProps> = ({
   return (
     <div className='w-full h-[calc(100vh-64px)] flex flex-col'>
       <div
-        className='absolute top-0 left-0 right-0 bg-blue-600 h-1 rounded-full'
+        className='absolute top-0 left-0 right-0 bg-teal-500 h-1 rounded-full'
         style={{ width: `${progress}%` }}
       ></div>
       <div className='relative flex-1 w-5/6 mx-auto leading-10 h-full pt-8'>
@@ -209,7 +230,8 @@ const TypingInterface: React.FC<TypingInterfaceProps> = ({
         {/* Text Size Controls */}
         <div className='absolute bottom-4 right-36 z-50'>
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               setShowTextSizeMenu(!showTextSizeMenu);
               setShowSpeedMenu(false);
             }}
@@ -219,7 +241,10 @@ const TypingInterface: React.FC<TypingInterfaceProps> = ({
           </button>
           
           {showTextSizeMenu && (
-            <div className='absolute bottom-14 right-0 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg w-48'>
+            <div 
+              className='absolute bottom-14 right-0 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg w-48'
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className='flex flex-col space-y-2'>
                 <label className='text-sm text-gray-600 dark:text-gray-300'>Text Size</label>
                 <input
@@ -241,7 +266,8 @@ const TypingInterface: React.FC<TypingInterfaceProps> = ({
         {/* Speed Controls */}
         <div className='absolute bottom-4 right-20 z-50'>
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               setShowSpeedMenu(!showSpeedMenu);
               setShowTextSizeMenu(false);
             }}
@@ -251,7 +277,10 @@ const TypingInterface: React.FC<TypingInterfaceProps> = ({
           </button>
           
           {showSpeedMenu && (
-            <div className='absolute bottom-14 right-0 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg w-48'>
+            <div 
+              className='absolute bottom-14 right-0 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg w-48'
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className='flex flex-col space-y-2'>
                 <label className='text-sm text-gray-600 dark:text-gray-300'>Playback Speed</label>
                 <input

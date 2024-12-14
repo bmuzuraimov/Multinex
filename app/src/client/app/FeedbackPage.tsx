@@ -11,7 +11,7 @@ const FeedbackPage: React.FC = () => {
         improvements: '',
         wouldRecommend: false,
         experienceLevel: '',
-        category: 'GENERAL',
+        category: 'URGENT', // Changed default to URGENT
         browserInfo: ''
     });
     const [submitted, setSubmitted] = useState(false);
@@ -46,7 +46,7 @@ const FeedbackPage: React.FC = () => {
             <div className='w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 md:p-12'>
                 <h2 className='text-3xl font-serif font-semibold text-gray-800 dark:text-white text-center tracking-wide'>We Value Your Feedback</h2>
                 <p className='mt-4 text-gray-600 dark:text-gray-300 text-center font-light leading-relaxed'>
-                    Your insights help us improve. Please share your thoughts below.
+                    Your insights help us improve. We read and implement feedback quickly, so don't hesitate to share!
                 </p>
 
                 {submitted ? (
@@ -54,13 +54,13 @@ const FeedbackPage: React.FC = () => {
                         <FiCheckCircle className='text-green-500 w-12 h-12' />
                         <h3 className='mt-4 text-xl font-serif font-medium text-green-700 dark:text-green-300 tracking-wide'>Thank You!</h3>
                         <p className='mt-2 text-center text-green-600 dark:text-green-400 font-light leading-relaxed'>
-                            We appreciate your feedback and will use it to enhance our services.
+                            We'll review your feedback right away and implement necessary changes as soon as possible.
                         </p>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className='mt-8 space-y-6'>
                         <div>
-                            <label htmlFor='category' className='block text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide'>Category</label>
+                            <label htmlFor='category' className='block text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide'>Priority Level</label>
                             <select
                                 id='category'
                                 name='category'
@@ -68,9 +68,10 @@ const FeedbackPage: React.FC = () => {
                                 onChange={handleChange}
                                 className='mt-1 w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:text-white font-light'
                             >
-                                <option value='GENERAL'>General</option>
-                                <option value='BUG'>Bug Report</option>
+                                <option value='URGENT'>Urgent - Needs Immediate Attention</option>
+                                <option value='BUG'>Critical Bug Report</option>
                                 <option value='FEATURE'>Feature Request</option>
+                                <option value='GENERAL'>General Feedback</option>
                             </select>
                         </div>
 
@@ -115,13 +116,13 @@ const FeedbackPage: React.FC = () => {
                         </div>
 
                         <div>
-                            <label htmlFor='message' className='block text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide'>General Feedback</label>
+                            <label htmlFor='message' className='block text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide'>Your Feedback</label>
                             <textarea
                                 id='message'
                                 name='message'
                                 value={formData.message}
                                 onChange={handleChange}
-                                placeholder='Share your overall experience and thoughts...'
+                                placeholder='Share your thoughts - we read and act on feedback quickly!'
                                 rows={4}
                                 className='mt-1 w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:text-white resize-none font-light'
                                 required
@@ -135,7 +136,7 @@ const FeedbackPage: React.FC = () => {
                                 name='usability'
                                 value={formData.usability}
                                 onChange={handleChange}
-                                placeholder='How easy was it to use our app? Any difficulties encountered?'
+                                placeholder='How easy was it to use our app? Any difficulties encountered? We address issues promptly.'
                                 rows={3}
                                 className='mt-1 w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:text-white resize-none font-light'
                             />
