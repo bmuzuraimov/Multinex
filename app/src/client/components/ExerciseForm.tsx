@@ -1,237 +1,139 @@
 import React, { useState, useCallback } from 'react';
-import ReactDOM from 'react-dom';
 import { useDropzone } from 'react-dropzone';
-import { HiOutlineInformationCircle } from 'react-icons/hi';
 import { BsFiletypeAi } from 'react-icons/bs';
-import { BsChevronDown } from 'react-icons/bs';
-import { Tooltip } from 'react-tooltip';
-import { EXERCISE_LEVELS, EXERCISE_LENGTHS, AVAILABLE_MODELS } from '../../shared/constants';
+import { AVAILABLE_MODELS } from '../../shared/constants';
 import { createExercise, countTokens } from 'wasp/client/operations';
+import ExerciseFormModal from './ExerciseFormModal';
+import { ExerciseFormContentSettings, ExerciseFormGenerationSettings } from '../../shared/types';
 
-const FileModal: React.FC<{
-  selectedFile: File;
-  onGenerate: () => void;
-  onDiscard: () => void;
-  loadingStatus: string;
-  isUploading: boolean;
-  exerciseLength: string;
-  setExerciseLength: (value: string) => void;
-  exerciseLevel: string;
-  setExerciseLevel: (value: string) => void;
-  priorKnowledge: string;
-  setPriorKnowledge: (value: string) => void;
-  showAdvanced: boolean;
-  setShowAdvanced: (value: boolean) => void;
-  selectedModel: string;
-  setSelectedModel: (value: string) => void;
-  includeSummary: boolean;
-  setIncludeSummary: (value: boolean) => void;
-  includeMCQuiz: boolean;
-  setIncludeMCQuiz: (value: boolean) => void;
-  topicId: string | null;
-}> = ({
-  selectedFile,
-  onGenerate,
-  onDiscard,
-  loadingStatus,
-  isUploading,
-  exerciseLength,
-  setExerciseLength,
-  exerciseLevel,
-  setExerciseLevel,
-  priorKnowledge,
-  setPriorKnowledge,
-  showAdvanced,
-  setShowAdvanced,
-  selectedModel,
-  setSelectedModel,
-  includeSummary,
-  setIncludeSummary,
-  includeMCQuiz,
-  setIncludeMCQuiz,
-  topicId,
-}) => {
-  const modalRoot = document.getElementById('modal-root');
-  if (!modalRoot) return null;
-
-  return ReactDOM.createPortal(
-    <div className='fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50'>
-      <div className='bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full'>
-        <div className='flex flex-col items-center space-y-6'>
-          <div className='relative p-4 bg-teal-50 dark:bg-teal-900/20 rounded-full'>
-            <BsFiletypeAi className='w-12 h-12 text-teal-500' />
-          </div>
-          <p className='text-lg font-medium text-gray-700 dark:text-gray-300'>{selectedFile.name}</p>
-          <div className='flex space-x-4'>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onGenerate();
-              }}
-              className='px-6 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg hover:from-teal-600 hover:to-teal-700 transition-all duration-300 shadow-lg hover:shadow-xl font-medium'
-              disabled={isUploading}
-            >
-              {isUploading ? loadingStatus : 'Generate Exercise'}
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDiscard();
-              }}
-              className='px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl font-medium'
-            >
-              Discard
-            </button>
-          </div>
-          <div className='w-full max-w-3xl mx-auto space-y-8 overflow-y-auto max-h-[calc(100vh-200px)]'>
-            <div className='relative'>
-              <HiOutlineInformationCircle
-                className='absolute -top-1 right-0 w-6 h-6 text-gray-600 dark:text-gray-400'
-                data-multiline
-                data-tooltip-id={`my-tooltip-${topicId || 'all'}`}
-              />
-              <Tooltip
-                id={`my-tooltip-${topicId || 'all'}`}
-                place='top'
-                className='z-99'
-                content='Exercise length varies by level; higher levels require more words.'
-              />
-
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                <div className='space-y-2'>
-                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
-                    Length of the Exercise
-                  </label>
-                  <select
-                    className='w-full p-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:border-teal-400 dark:hover:border-teal-500'
-                    value={exerciseLength}
-                    onChange={(e) => setExerciseLength(e.target.value)}
-                  >
-                    {Object.entries(EXERCISE_LENGTHS).map(([key, value]) => (
-                      <option key={key} value={key} className='py-2'>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className='space-y-2'>
-                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>Exercise Level</label>
-                  <select
-                    className='w-full p-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:border-teal-400 dark:hover:border-teal-500'
-                    value={exerciseLevel}
-                    onChange={(e) => setExerciseLevel(e.target.value)}
-                  >
-                    {Object.entries(EXERCISE_LEVELS).map(([key, value]) => (
-                      <option key={key} value={key} className='py-2'>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className='w-full space-y-2'>
-              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
-                Prior Knowledge (Optional)
-              </label>
-              <textarea
-                className='w-full p-4 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:border-teal-400 dark:hover:border-teal-500'
-                placeholder="List concepts you're already familiar with to exclude them from the exercise..."
-                rows={3}
-                value={priorKnowledge}
-                onChange={(e) => setPriorKnowledge(e.target.value)}
-              />
-            </div>
-
-            <div className='flex flex-col md:flex-row md:items-center md:justify-around space-y-4 md:space-y-0'>
-              <button
-                onClick={() => setIncludeSummary(!includeSummary)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  includeSummary 
-                    ? 'bg-teal-500 text-white hover:bg-teal-600' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
-                Include Summary
-              </button>
-
-              <button 
-                onClick={() => setIncludeMCQuiz(!includeMCQuiz)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  includeMCQuiz
-                    ? 'bg-teal-500 text-white hover:bg-teal-600'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
-                Include MC Quiz
-              </button>
-            </div>
-
-            <div className='w-full'>
-              <button
-                onClick={() => setShowAdvanced(!showAdvanced)}
-                className='w-full flex items-center justify-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 py-2'
-              >
-                <span className='border-b border-gray-200 dark:border-gray-700 w-16 mx-3'></span>
-                <span className='font-medium'>Advanced Options</span>
-                <span className='border-b border-gray-200 dark:border-gray-700 w-16 mx-3'></span>
-                <BsChevronDown
-                  className={`w-4 h-4 transform transition-transform duration-150 ${showAdvanced ? 'rotate-180' : ''}`}
-                />
-              </button>
-
-              {showAdvanced && (
-                <div className='mt-4 p-4 space-y-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg'>
-                  <div className='space-y-2'>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
-                      Model Selection
-                    </label>
-                    <select
-                      className='w-full p-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                      value={selectedModel}
-                      onChange={(e) => setSelectedModel(e.target.value)}
-                    >
-                      {AVAILABLE_MODELS.map((model) => (
-                        <option key={model} value={model}>
-                          {model}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>,
-    modalRoot
-  );
-};
 
 const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
-  const [exerciseLength, setExerciseLength] = useState('Long');
-  const [exerciseLevel, setExerciseLevel] = useState('Advanced');
+  // Grouped state for exercise settings
+  const [exerciseSettings, setExerciseSettings] = useState<ExerciseFormContentSettings>({
+    exerciseLength: '400 words (important)',
+    setExerciseLength: (value: string) => {
+      setExerciseSettings((prev) => ({ ...prev, exerciseLength: value }));
+    },
+    exerciseLevel: 'Advanced Level',
+    setExerciseLevel: (value: string) => {
+      setExerciseSettings((prev) => ({ ...prev, exerciseLevel: value }));
+    },
+    priorKnowledge: [],
+    setPriorKnowledge: (value: string[]) => {
+      setExerciseSettings((prev) => ({ ...prev, priorKnowledge: value }));
+    },
+    topics: [],
+    setTopics: (value: string[]) => {
+      setExerciseSettings((prev) => ({ ...prev, topics: value }));
+    }
+  });
+
+  // Grouped state for advanced settings
+  const [advancedSettings, setAdvancedSettings] = useState<ExerciseFormGenerationSettings>({
+    scanImages: false,
+    setScanImages: (value: boolean) => {
+      setAdvancedSettings((prev) => ({ ...prev, scanImages: value }));
+    },
+    showAdvanced: false,
+    setShowAdvanced: (value: boolean) => {
+      setAdvancedSettings((prev) => ({ ...prev, showAdvanced: value }));
+    },
+    selectedModel: AVAILABLE_MODELS[0],
+    setSelectedModel: (value: string) => {
+      setAdvancedSettings((prev) => ({ ...prev, selectedModel: value }));
+    },
+    includeSummary: false,
+    setIncludeSummary: (value: boolean) => {
+      setAdvancedSettings((prev) => ({ ...prev, includeSummary: value }));
+    },
+    includeMCQuiz: false,
+    setIncludeMCQuiz: (value: boolean) => {
+      setAdvancedSettings((prev) => ({ ...prev, includeMCQuiz: value }));
+    },
+  });
+
+  // General states
   const [isUploading, setIsUploading] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [selectedModel, setSelectedModel] = useState(AVAILABLE_MODELS[0]);
-  const [includeSummary, setIncludeSummary] = useState(false);
-  const [includeMCQuiz, setIncludeMCQuiz] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [priorKnowledge, setPriorKnowledge] = useState('');
+  const [fileContent, setFileContent] = useState<string | null>(null);
 
   // Main function to handle file upload and content extraction
   const handleExerciseFileUpload = async () => {
-    if (isUploading || !selectedFile) {
+    if (isUploading || !selectedFile || !fileContent) {
       return;
     }
 
+    try {
+      setIsUploading(true);
+      setLoadingStatus('Calculating required tokens...');
+      
+      const { tokens, sufficient } = await countTokens({
+        content: fileContent,
+      });
+
+      if (!sufficient) {
+        alert(
+          `You don't have enough tokens to generate this exercise. It requires at least ${tokens} tokens.`
+        );
+        return;
+      }
+
+      setLoadingStatus('Generating exercise content...');
+      // Proceed to create the exercise
+      const jsonResponse = await createExercise({
+        length: exerciseSettings.exerciseLength,
+        level: exerciseSettings.exerciseLevel,
+        content: fileContent,
+        topicId: topicId ?? '',
+        model: advancedSettings.selectedModel,
+        includeSummary: advancedSettings.includeSummary,
+        includeMCQuiz: advancedSettings.includeMCQuiz,
+        priorKnowledge: exerciseSettings.priorKnowledge.join(','),
+      });
+
+      if (advancedSettings.includeSummary) {
+        setLoadingStatus('Generating summary...');
+      }
+
+      if (advancedSettings.includeMCQuiz) {
+        setLoadingStatus('Generating multiple choice quiz...');
+      }
+
+      if (!jsonResponse.success) {
+        alert(jsonResponse.message);
+      }
+    } catch (error) {
+      console.error('Error during exercise generation:', error);
+      alert('There was an error while generating the exercise. Please try again.');
+    } finally {
+      setIsUploading(false);
+      setLoadingStatus('');
+      setSelectedFile(null);
+      setFileContent(null);
+      setAdvancedSettings((prev) => ({
+        ...prev,
+        showAdvanced: false,
+        includeSummary: false,
+        includeMCQuiz: false,
+      }));
+      setExerciseSettings((prev) => ({
+        ...prev,
+        priorKnowledge: [],
+        topics: []
+      }));
+    }
+  };
+
+  // Handle files dropped into the dropzone
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    if (acceptedFiles.length === 0) return;
+    
+    const file = acceptedFiles[0];
+    
     // Check if file is PPT
-    if (selectedFile.name.toLowerCase().endsWith('.ppt')) {
+    if (file.name.toLowerCase().endsWith('.ppt')) {
       alert('PPT files are not supported. Please convert to PPTX format.');
       return;
     }
@@ -239,14 +141,21 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
     try {
       setIsUploading(true);
       setLoadingStatus('Scanning document and extracting content...');
+      setSelectedFile(file);
 
       const formData = new FormData();
-      formData.append('files', selectedFile);
+      formData.append('file', file);
+      formData.append(
+        'scan_images',
+        advancedSettings.scanImages ? 'true' : 'false'
+      );
+
       if (!import.meta.env.REACT_APP_DOCUMENT_PARSER_URL) {
-        console.error('DOCUMENT_PARSER_URL is not set');
-        return;
+        throw new Error('DOCUMENT_PARSER_URL is not set');
       }
-      const documentParserUrl = import.meta.env.REACT_APP_DOCUMENT_PARSER_URL + '/extract-text';
+
+      const documentParserUrl = 
+        import.meta.env.REACT_APP_DOCUMENT_PARSER_URL + '/extract-text';
       const response = await fetch(documentParserUrl, {
         method: 'POST',
         headers: {
@@ -259,72 +168,28 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
         throw new Error('Failed to extract text from file');
       }
 
-      setSelectedFile(null);
-
       const responseData = await response.json();
-      const fileContent = responseData.text;
+      const extractedContent = responseData.text;
+      exerciseSettings.setTopics(responseData.topics);
 
-      if (!fileContent || fileContent.trim().length < 10) {
-        alert('No text found in the file. Please provide a valid file.');
-        return;
+      if (!extractedContent || extractedContent.trim().length < 10) {
+        throw new Error('No text found in the file');
       }
 
-      setLoadingStatus('Calculating required tokens...');
-      // Count tokens required for the file content
-      const { tokens, sufficient } = await countTokens({
-        content: fileContent,
-      });
-
-      if (!sufficient) {
-        alert(`You don't have enough tokens to generate this exercise. It requires at least ${tokens} tokens.`);
-        return;
-      }
-
-      setLoadingStatus('Generating exercise content...');
-      // Proceed to create the exercise
-      const jsonResponse = await createExercise({
-        length: exerciseLength,
-        level: exerciseLevel,
-        content: fileContent,
-        topicId: topicId ?? '',
-        model: selectedModel,
-        includeSummary: includeSummary,
-        includeMCQuiz: includeMCQuiz,
-        priorKnowledge: priorKnowledge,
-      });
-
-      if (includeSummary) {
-        setLoadingStatus('Generating summary...');
-      }
-
-      if (includeMCQuiz) {
-        setLoadingStatus('Generating multiple choice quiz...');
-      }
-
-      if (!jsonResponse.success) {
-        alert(jsonResponse.message);
-      }
-    } catch (error) {
-      console.error('Error during file upload or processing:', error);
-      alert('There was an error while processing the file. Please try again.');
-    } finally {
+      setFileContent(extractedContent);
       setIsUploading(false);
       setLoadingStatus('');
+    } catch (error) {
+      console.error('Error during file processing:', error);
+      alert(error instanceof Error ? error.message : 'Error processing file. Please try again.');
       setSelectedFile(null);
-      setShowAdvanced(false);
-      setIncludeSummary(false);
-      setIncludeMCQuiz(false);
-      setPriorKnowledge('');
+      setFileContent(null);
+      setIsUploading(false);
+      setLoadingStatus('');
     }
-  };
-
-  // Handle files dropped into the dropzone
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      setSelectedFile(acceptedFiles[0]);
-    }
+    
     setIsDragActive(false);
-  }, []);
+  }, [advancedSettings.scanImages]);
 
   // Configure the dropzone to accept multiple file types
   const {
@@ -335,8 +200,12 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
     onDrop,
     accept: {
       'application/pdf': ['.pdf'],
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': [
+        '.pptx',
+      ],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
+        '.xlsx',
+      ],
       'text/plain': ['.txt'],
     },
     multiple: false,
@@ -396,9 +265,14 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
                 </div>
                 <div className='text-center'>
                   <p className='text-lg font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                    <span className='font-semibold hover:text-teal-600 dark:hover:text-teal-400 transition-colors'>Click to upload</span> or drag and drop
+                    <span className='font-semibold hover:text-teal-600 dark:hover:text-teal-400 transition-colors'>
+                      Click to upload
+                    </span>{' '}
+                    or drag and drop
                   </p>
-                  <p className='text-sm text-gray-500 dark:text-gray-400'>PDF, PPTX, XLSX, TXT</p>
+                  <p className='text-sm text-gray-500 dark:text-gray-400'>
+                    PDF, PPTX, XLSX, TXT
+                  </p>
                 </div>
               </div>
             )}
@@ -406,28 +280,20 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
         </div>
       </div>
 
-      {selectedFile && (
-        <FileModal
+      {selectedFile && fileContent && !isUploading && (
+        <ExerciseFormModal
           selectedFile={selectedFile}
           onGenerate={handleExerciseFileUpload}
-          onDiscard={() => setSelectedFile(null)}
+          onDiscard={() => {
+            setSelectedFile(null);
+            setFileContent(null);
+          }}
           loadingStatus={loadingStatus}
           isUploading={isUploading}
-          exerciseLength={exerciseLength}
-          setExerciseLength={setExerciseLength}
-          exerciseLevel={exerciseLevel}
-          setExerciseLevel={setExerciseLevel}
-          priorKnowledge={priorKnowledge}
-          setPriorKnowledge={setPriorKnowledge}
-          showAdvanced={showAdvanced}
-          setShowAdvanced={setShowAdvanced}
-          selectedModel={selectedModel}
-          setSelectedModel={setSelectedModel}
-          includeSummary={includeSummary}
-          setIncludeSummary={setIncludeSummary}
-          includeMCQuiz={includeMCQuiz}
-          setIncludeMCQuiz={setIncludeMCQuiz}
+          exerciseSettings={exerciseSettings}
+          advancedSettings={advancedSettings}
           topicId={topicId}
+          topics={exerciseSettings.topics}
         />
       )}
     </div>

@@ -45,10 +45,6 @@ COPY . .
 # Ensure Tesseract is in PATH (usually it is, but just in case)
 ENV PATH="/usr/bin:${PATH}"
 
-# (Optional) If your application needs to specify the Tesseract command, you can set it via environment variable
-# For example:
-# ENV TESSERACT_CMD="/usr/bin/tesseract"
-
 # Expose port 8000
 EXPOSE 8000
 

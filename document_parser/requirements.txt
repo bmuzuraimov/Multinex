@@ -6,3 +6,5 @@ python-pptx
 openpyxl
 pytesseract
 Pillow
+openai
+python-dotenv
