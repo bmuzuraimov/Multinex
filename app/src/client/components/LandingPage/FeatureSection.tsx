@@ -3,12 +3,6 @@ import { features } from '../../landing-page/contentSections';
 const FeaturesSection: React.FC = () => {
   return (
     <div id='features' className='relative mx-auto mt-32 max-w-7xl px-6 lg:px-8'>
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -left-4 top-1/4 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute right-0 bottom-1/3 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-      </div>
-
       <div className='relative mx-auto max-w-2xl text-center'>
         <span className='inline-block px-4 py-1 mb-4 text-sm font-medium text-teal-500 bg-teal-50 dark:bg-teal-900/30 rounded-full'>
           Powerful Features

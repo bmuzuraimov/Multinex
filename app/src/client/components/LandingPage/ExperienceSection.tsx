@@ -58,7 +58,7 @@ const ExperienceSection = () => {
   );
 
   return (
-    <section className='relative overflow-hidden px-6 py-32 min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900'>
+    <section className='relative overflow-hidden px-6 py-32 min-h-screen dark:from-gray-800 dark:to-gray-900'>
       {/* Animated background elements */}
       <div className="absolute inset-0">
         <div className="absolute left-1/4 top-1/3 w-96 h-96 bg-teal-300/20 rounded-full blur-3xl animate-pulse"></div>

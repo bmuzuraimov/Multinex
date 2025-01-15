@@ -55,7 +55,7 @@ const HeroSection: React.FC = () => {
             </div>
           </div>
           <span className='text-gray-600 dark:text-gray-300 text-sm mt-8 block text-center italic'>
-            Powered by gpt-4o-mini llm ✨
+            Powered by OpenAI models ✨
           </span>
         </div>
       </div>

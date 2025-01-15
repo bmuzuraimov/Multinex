@@ -1,5 +1,6 @@
 import { useAuth } from 'wasp/client/auth';
 import { updateCurrentUser } from 'wasp/client/operations';
+import { Outlet } from 'react-router-dom'
 import './Main.css';
 import AppNavBar from './components/AppNavBar';
 import { useMemo, useEffect, ReactNode } from 'react';
@@ -14,11 +15,7 @@ export default function App({ children }: { children: ReactNode }) {
   const { data: user } = useAuth();
 
   const shouldDisplayAppNavBar = useMemo(() => {
-    return location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/signup' && location.pathname !== '/about';
-  }, [location]);
-
-  const isAdminDashboard = useMemo(() => {
-    return location.pathname.startsWith('/admin');
+    return location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/signup' && location.pathname !== '/about' && location.pathname !== '/public-courses';
   }, [location]);
 
   useEffect(() => {
@@ -44,14 +41,8 @@ export default function App({ children }: { children: ReactNode }) {
   return (
     <>
       <div className='min-h-screen dark:text-white dark:bg-gray-900'>
-        {isAdminDashboard ? (
-          <>{children}</>
-        ) : (
-          <>
-            {shouldDisplayAppNavBar && <AppNavBar />}
-            <div className='font-manrope'>{children}</div>
-          </>
-        )}
+        {shouldDisplayAppNavBar && <AppNavBar />}
+        <div className='font-manrope'><Outlet /></div>
       </div>
       <div id="modal-root"></div>
     </>

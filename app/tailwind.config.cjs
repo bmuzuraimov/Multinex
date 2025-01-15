@@ -14,6 +14,7 @@ module.exports = {
       },
       fontFamily: {
         manrope: ['Manrope', 'sans-serif'],
+        dancing: ['Dancing Script', 'sans-serif'],
         satoshi: ['Satoshi', 'sans-serif'],
       },
       colors: {

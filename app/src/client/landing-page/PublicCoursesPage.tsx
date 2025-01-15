@@ -2,7 +2,6 @@ import { getPublicCourses, duplicateCourse, useQuery } from 'wasp/client/operati
 import { useCallback, memo, useState } from 'react';
 import { VscCopy } from 'react-icons/vsc';
 import { HiOutlineBookOpen, HiOutlineAcademicCap } from 'react-icons/hi';
-import { FaRegStar } from 'react-icons/fa';
 import { useAuth } from 'wasp/client/auth';
 
 interface Course {
