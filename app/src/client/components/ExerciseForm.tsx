@@ -1,13 +1,21 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { BsFiletypeAi } from 'react-icons/bs';
 import { AVAILABLE_MODELS } from '../../shared/constants';
-import { createExercise, countTokens } from 'wasp/client/operations';
+import { createExercise, countTokens, getLandingPageTry, createLandingPageTry, useQuery } from 'wasp/client/operations';
 import ExerciseFormModal from './ExerciseFormModal';
 import { ExerciseFormContentSettings, ExerciseFormGenerationSettings } from '../../shared/types';
+import { Link } from 'react-router-dom';
 
+const ExerciseForm: React.FC<{ topicId: string | null, demo: boolean }> = ({ topicId, demo = false }) => {
+  // Browser details
+  const userAgent = window.navigator.userAgent;
+  const browserLanguage = window.navigator.language;
+  const screenResolution = `${window.screen.width}x${window.screen.height}`;
+  const colorDepth = window.screen.colorDepth;
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const {data: landingPageTry} = useQuery(getLandingPageTry, {userAgent, browserLanguage, colorDepth, screenResolution, timezone})
 
-const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
   // Grouped state for exercise settings
   const [exerciseSettings, setExerciseSettings] = useState<ExerciseFormContentSettings>({
     exerciseLength: '400 words (important)',
@@ -67,31 +75,50 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
 
     try {
       setIsUploading(true);
-      setLoadingStatus('Calculating required tokens...');
       
-      const { tokens, sufficient } = await countTokens({
-        content: fileContent,
-      });
+      if (!demo) {
+        setLoadingStatus('Calculating required tokens...');
+        const { tokens, sufficient } = await countTokens({
+          content: fileContent,
+        });
 
-      if (!sufficient) {
-        alert(
-          `You don't have enough tokens to generate this exercise. It requires at least ${tokens} tokens.`
-        );
-        return;
+        if (!sufficient) {
+          alert(
+            `You don't have enough tokens to generate this exercise. It requires at least ${tokens} tokens.`
+          );
+          return;
+        }
       }
 
       setLoadingStatus('Generating exercise content...');
       // Proceed to create the exercise
-      const jsonResponse = await createExercise({
-        length: exerciseSettings.exerciseLength,
-        level: exerciseSettings.exerciseLevel,
-        content: fileContent,
-        topicId: topicId ?? '',
-        model: advancedSettings.selectedModel,
-        includeSummary: advancedSettings.includeSummary,
-        includeMCQuiz: advancedSettings.includeMCQuiz,
-        priorKnowledge: exerciseSettings.priorKnowledge.join(','),
-      });
+      let jsonResponse;
+      if(!demo) {
+        jsonResponse = await createExercise({
+          length: exerciseSettings.exerciseLength,
+          level: exerciseSettings.exerciseLevel,
+          content: fileContent,
+          topicId: topicId ?? '',
+          model: advancedSettings.selectedModel,
+          includeSummary: advancedSettings.includeSummary,
+          includeMCQuiz: advancedSettings.includeMCQuiz,
+          priorKnowledge: exerciseSettings.priorKnowledge.join(','),
+        });
+      } else {
+        jsonResponse = await createLandingPageTry({
+          userAgent: window.navigator.userAgent,
+          browserLanguage: window.navigator.language,
+          screenResolution: `${window.screen.width}x${window.screen.height}`,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          length: exerciseSettings.exerciseLength,
+          level: exerciseSettings.exerciseLevel,
+          content: fileContent,
+          model: advancedSettings.selectedModel,
+          includeSummary: advancedSettings.includeSummary,
+          includeMCQuiz: advancedSettings.includeMCQuiz,
+          priorKnowledge: exerciseSettings.priorKnowledge.join(','),
+        });
+      }
 
       if (advancedSettings.includeSummary) {
         setLoadingStatus('Generating summary...');
@@ -214,8 +241,32 @@ const ExerciseForm: React.FC<{ topicId: string | null }> = ({ topicId }) => {
     onDragLeave: () => setIsDragActive(false),
   });
 
+  if(demo && landingPageTry?.successful) {
+    return (
+      <Link 
+        to={`/demo`}
+        className="w-full h-full scale-95 opacity-95 flex flex-col items-center bg-white dark:bg-gray-800 transition-all duration-300 ease-in-out pointer-events-auto"
+      >
+        <div className='flex h-full items-center justify-center w-full max-w-4xl mx-auto'>
+          <div className='flex flex-col items-center p-6 justify-center w-full rounded-xl cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-all duration-300'>
+            <div className='flex flex-col items-center space-y-4'>
+              <div className='p-6 bg-teal-50 dark:bg-teal-900/20 rounded-full'>
+                <BsFiletypeAi className='w-12 h-12 text-teal-500' />
+              </div>
+              <div className='text-center'>
+                <p className='text-lg font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  Ready to start your exercise: "{landingPageTry.name}"
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
   return (
-    <div className='w-full h-full scale-95 opacity-95 flex flex-col items-center bg-white dark:bg-gray-800 transition-all duration-300 ease-in-out'>
+    <div className='w-full h-full scale-95 opacity-95 flex flex-col items-center bg-white dark:bg-gray-800 transition-all duration-300 ease-in-out pointer-events-auto'>
       {/* File Upload Area */}
       <div className='flex h-full items-center justify-center w-full max-w-4xl mx-auto'>
         <div

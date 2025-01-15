@@ -248,7 +248,11 @@ export default function PortalPage() {
 
   useEffect(() => {
     if (courses) {
-      setLocalCourses(courses.courses.map(c => ({ ...c, isPublic: false })));
+      setLocalCourses(courses.courses.map(c => ({ 
+        ...c, 
+        description: c.description || '', 
+        isPublic: false 
+      })));
     }
   }, [courses]);
 
@@ -276,7 +280,7 @@ export default function PortalPage() {
           <h2 className='mt-2 text-title-xxl font-manrope tracking-tight text-black dark:text-white'>Unassigned Exercises</h2>
         </div>
         <div className='grid grid-cols-1 mb-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 shadow-card rounded-lg p-8 bg-white dark:bg-gray-800 dark:shadow-none dark:bg-gray-700'>
-          <ExerciseForm topicId={null}/>
+          <ExerciseForm topicId={null} demo={false} />
           {exercises?.map((exercise: Exercise, index: number) => (
             <ExerciseCard 
               key={exercise.id} 

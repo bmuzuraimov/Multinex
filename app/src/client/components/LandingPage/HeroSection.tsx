@@ -1,4 +1,5 @@
 import { Link } from 'wasp/client/router';
+import ExerciseForm from '../ExerciseForm';
 
 const HeroSection: React.FC = () => {
   return (
@@ -20,37 +21,25 @@ const HeroSection: React.FC = () => {
           <div className='mx-auto max-w-3xl text-center'>
             <h1 className='text-3xl font-semibold tracking-tight text-gray-900 sm:text-6xl dark:text-gray-100'>
               <span className='text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-purple-600'>
-                Ultimate Final Exam Prep Tool
+                Typit: Tri-Channeled Learning for Long-Term Mastery
                 <span className='animate-pulse'>|</span>
               </span>
             </h1>
             <h3 className='mt-6 text-xl leading-8 text-teal-700 dark:text-teal-300 italic font-serif'>
-              Transform your lecture notes into an interactive learning experience
+              Learn by seeing, typing, and taking notes—not just by reading. Typit turns your PDF lecture notes into
+              interactive typing exercises, helping you focus, retain, and master your material faster.
             </h3>
             <p className='mt-6 mx-auto max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-300'>
-              Drop your PDF notes and choose your study mode: Quick review with playback, active recall through typing exercises, or test your knowledge with final exam-style quizzes. Your path to exam success starts here.
+              Designed to fight the pitfalls of passive learning, Typit makes studying smarter, not harder.
             </p>
-            {/* <div className='mt-10'>
-              <div className='flex items-center justify-center w-full'>
-                <div className='flex flex-col items-center p-2 justify-center w-full h-64 border-2 border-dashed rounded-lg bg-gray-50'>
-                  <p className='text-xl text-gray-500 text-center'>Demonstration video coming soon! 🎬</p>
-                  <p className='text-sm text-gray-500 mt-2'>Check back later to see our product in action</p>
-                </div>
-              </div>
-            </div> */}
+            <ExerciseForm topicId={null} demo={true} />
 
             <div className='mt-10 flex items-center justify-center gap-x-6'>
-              <Link
-                to='/demo'
-                className='rounded-md px-5 py-3 border border-black animate-pulse text-sm font-medium hover:bg-gray-50 transition-colors duration-100 pointer-events-auto'
-              >
-                Not sure yet? Try our demo!
-              </Link>
               <Link
                 to='/login'
                 className='rounded-md bg-teal-500 px-5 py-3 text-sm font-medium text-white hover:bg-teal-600 transition-colors duration-200 pointer-events-auto'
               >
-                Let's get started! <span aria-hidden='true'>→</span>
+                Sign up for more free credits <span aria-hidden='true'>→</span>
               </Link>
             </div>
           </div>

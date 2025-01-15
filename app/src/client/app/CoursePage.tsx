@@ -18,6 +18,8 @@ import ExerciseForm from '../components/ExerciseForm';
 
 export default function CoursePage() {
   const { id: courseId } = useParams<{ id: string }>();
+  if (!courseId) return null;
+
   const { data: topics, refetch: refetchTopics } = useQuery(getTopicsByCourse, { courseId });
   const { data: course, refetch: refetchCourse } = useQuery(getCourseById, { courseId });
   const [courseName, setCourseName] = useState('');
@@ -148,7 +150,7 @@ const TaskSection: React.FC<ExerciseSectionProps> = React.memo(({ topic }) => {
       </div>
 
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 relative'>
-        <ExerciseForm topicId={topic.id} />
+        <ExerciseForm topicId={topic.id} demo={false}/>
         {topic.exercises?.map((exercise, idx) => (
           <ExerciseCard key={exercise.id} index={idx} exercise={exercise} />
         ))}

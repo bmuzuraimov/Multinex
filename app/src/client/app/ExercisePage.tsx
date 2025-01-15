@@ -38,7 +38,7 @@ const ExercisePage: React.FC = React.memo(() => {
     mode,
     setMode,
     essayCharsRef,
-  } = useExercise(raw_essay);
+  } = useExercise(raw_essay, 'prompt');
   const paragraphIndex = useParagraphIndex(essay, currentCharacterIndex);
   const essay_length = useMemo(() => essay.split(' ').length, [essay]);
   const summary = useMemo(() => (exercise?.paragraphSummary ? exercise.paragraphSummary.split('|') : []), [exercise]);

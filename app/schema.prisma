@@ -36,18 +36,27 @@ model LandingPageTry {
   id                  String      @id @default(uuid())
   createdAt           DateTime    @default(now())
   
-  // Client information
-  ipAddress           String
+  // Visitor identification
   userAgent           String      // Browser and OS info
   browserLanguage     String?
   screenResolution    String?
   timezone           String?
   
   // Request details
-  promptUsed          String      // What they tried to generate
-  lessonText          String
+  name                String      // From Exercise
+  prompt              String      // From Exercise
+  promptImg           String      @default("/task1_prompt.png") // From Exercise
+  lessonText          String      // Generated lesson content
+  paragraphSummary    String      @default("")
+  level               String      @default("")
+  no_words            Int         @default(0)
+  truncated           Boolean     @default(false)
+  completedAt         DateTime?   // From Exercise
+  score               Int         @default(0) // From Exercise
   tokensUsed          Int         @default(0)
   successful          Boolean     @default(false)
+  model               String      @default("gpt-4o-mini")
+  userEvaluation      Int?        @default(0) // From Exercise
   
   // If they later sign up, we can link it
   convertedUserId     String?     @unique
