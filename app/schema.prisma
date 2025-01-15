@@ -1,0 +1,173 @@
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+
+  email                     String?         @unique
+  username                  String?         @unique
+  lastActiveTimestamp       DateTime        @default(now())
+  isAdmin                   Boolean         @default(false)
+
+  stripeId                  String?
+  checkoutSessionId         String?
+  sendEmail                 Boolean         @default(false)
+  datePaid                  DateTime?
+  lang                      String          @default("en")
+  tokens                    Int             @default(30000)
+
+  // Relations
+  courses                   Course[]
+  topics                    Topic[]
+  exercises                 Exercise[]
+  feedbacks                 Feedback[]
+  landingPageTry            LandingPageTry?
+}
+
+model LandingPageTry {
+  id                  String      @id @default(uuid())
+  createdAt           DateTime    @default(now())
+  
+  // Client information
+  ipAddress           String
+  userAgent           String      // Browser and OS info
+  browserLanguage     String?
+  screenResolution    String?
+  timezone           String?
+  
+  // Request details
+  promptUsed          String      // What they tried to generate
+  lessonText          String
+  tokensUsed          Int         @default(0)
+  successful          Boolean     @default(false)
+  
+  // If they later sign up, we can link it
+  convertedUserId     String?     @unique
+  convertedUser       User?       @relation(fields: [convertedUserId], references: [id])
+}
+
+model Feature {
+  id                String    @id @default(uuid())
+  name              String
+  bounty            Int
+  date              DateTime
+  approved          Boolean   @default(false)
+  completed         Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  description       String?
+  priority          Int       @default(1)
+  assignedTo        String?
+  estimatedHours    Float?
+  actualHours       Float?
+  status            String    @default("pending")
+  tags              String[]
+  githubIssueUrl    String?
+  completedAt       DateTime?
+}
+
+
+model Course {
+  id          String   @id @default(uuid())
+  duplicateId String?
+  name        String
+  image       String
+  description String
+  isPublic    Boolean   @default(false)
+  userId      String 
+  user        User     @relation(fields: [userId], references: [id])
+  topics      Topic[]
+  createdAt   DateTime @default(now())
+}
+
+model Topic {
+  id          String    @id @default(uuid())
+  name        String
+  courseId    String
+  userId      String  
+  length      Int       @default(500)
+  level       String    @default("Like I am a university student")
+  course      Course    @relation(fields: [courseId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+  exercises   Exercise[]
+  createdAt   DateTime  @default(now())
+}
+
+model Exercise {
+  id                  String      @id @default(uuid())
+  name                String
+  prompt              String
+  promptImg           String      @default("/task1_prompt.png")
+  lessonText          String
+  paragraphSummary    String      @default("")
+  level               String      @default("")
+  no_words            Int         @default(0)
+  completed           Boolean     @default(false)
+  truncated           Boolean     @default(false)
+  completedAt         DateTime?
+  score               Int         @default(0)
+  tokens              Int         @default(0)
+  model               String      @default("gpt-4o-mini")
+  userEvaluation      Int?        @default(0)
+  questions           Question[]  @relation("ExerciseQuestions")
+  userId              String
+  topicId             String?
+  topic               Topic?      @relation(fields: [topicId], references: [id])
+  user                User        @relation(fields: [userId], references: [id])
+  createdAt           DateTime    @default(now())
+}
+
+model Question {
+  id          String      @id @default(uuid())
+  text        String
+  exerciseId  String
+  exercise    Exercise    @relation("ExerciseQuestions", fields: [exerciseId], references: [id])
+  options     Option[]    @relation("QuestionOptions")
+  createdAt   DateTime    @default(now())
+}
+
+model Option {
+  id          String      @id @default(uuid())
+  text        String
+  isCorrect   Boolean     @default(false)
+  questionId  String
+  question    Question    @relation("QuestionOptions", fields: [questionId], references: [id])
+  createdAt   DateTime    @default(now())
+}
+
+
+model Feedback {
+  id                       Int             @id @default(autoincrement())
+  createdAt                DateTime        @default(now())
+
+  message                  String
+  email                    String
+  userId                   String
+  user                     User            @relation(fields: [userId], references: [id])
+  
+  // Additional feedback fields
+  rating                   Int             @default(0)  // Overall rating out of 5
+  usability               String?         // Feedback about app usability
+  features                String?         // Feedback about specific features
+  improvements            String?         // Suggestions for improvements
+  wouldRecommend          Boolean         @default(false)
+  experienceLevel         String?         // User's typing/learning experience level
+  browserInfo             String?         // Technical context
+  category                String          @default("GENERAL") // Category of feedback (BUG, FEATURE, GENERAL etc)
+}
+
+
+model Logs {
+  id                       Int             @id @default(autoincrement())
+  createdAt                DateTime        @default(now())
+
+  message                  String
+  level                    String
+}

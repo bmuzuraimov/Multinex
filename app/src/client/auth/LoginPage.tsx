@@ -1,20 +1,20 @@
 import { useAuth, LoginForm } from 'wasp/client/auth';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthWrapper } from './authWrapper';
 import { authAppearance } from './appearance';
 
 export default function Login() {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const { data: user } = useAuth();
 
   useEffect(() => {
     if (user) {
-      history.push('/portal');
+      navigate('/portal');
     }
-  }, [user, history]);
+  }, [user, navigate]);
 
   return (
     <AuthWrapper>

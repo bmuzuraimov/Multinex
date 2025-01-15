@@ -3,7 +3,7 @@ import { stripePayment } from 'wasp/client/operations';
 import { TierIds } from '../../shared/constants';
 import { AiFillCheckCircle } from 'react-icons/ai';
 import { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '../../shared/utils';
 import { z } from 'zod';
 
@@ -37,11 +37,11 @@ const PricingPage = () => {
 
   const { data: user, isLoading: isUserLoading } = useAuth();
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   async function handleBuyNowClick(tierId: string) {
     if (!user) {
-      history.push('/login');
+      navigate('/login');
       return;
     }
     try {
@@ -60,7 +60,7 @@ const PricingPage = () => {
 
   const handleCustomerPortalClick = () => {
     if (!user) {
-      history.push('/login');
+      navigate('/login');
       return;
     }
     try {

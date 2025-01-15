@@ -1,6 +1,6 @@
-import { RouteComponentProps } from 'react-router-dom';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ExerciseResult from '../components/ExerciseResult';
+import { useParams } from 'react-router-dom'
 import { useQuery, getExerciseById, updateExercise } from 'wasp/client/operations';
 import useExercise from '../hooks/useExercise';
 import useParagraphIndex from '../hooks/useParagraphIndex';
@@ -9,7 +9,7 @@ import ExerciseTest from '../components/ExerciseTest';
 import usePlayback from '../hooks/usePlayback';
 import TypingInterface from '../components/TypingInterface';
 
-const ExercisePage: React.FC<RouteComponentProps<{ exerciseId: string }>> = React.memo(({ match }) => {
+const ExercisePage: React.FC = React.memo(() => {
   // Prevent default tab, space and enter behavior
   useEffect(() => {
     const preventDefaultKeys = (e: KeyboardEvent) => {
@@ -24,9 +24,9 @@ const ExercisePage: React.FC<RouteComponentProps<{ exerciseId: string }>> = Reac
       document.removeEventListener('keydown', preventDefaultKeys);
     };
   }, []);
-  const exerciseId = match.params.exerciseId;
+  const { exerciseId } = useParams();
   const [speed, setSpeed] = useState(400);
-  const { data: exercise, isLoading: isExerciseLoading, refetch } = useQuery(getExerciseById, { exerciseId });
+  const { data: exercise, isLoading: isExerciseLoading, refetch } = useQuery(getExerciseById, { exerciseId: exerciseId! });
   const raw_essay = useMemo(() => exercise?.lessonText || 'Essay not found!', [exercise]);
   const {
     essay,
@@ -46,7 +46,7 @@ const ExercisePage: React.FC<RouteComponentProps<{ exerciseId: string }>> = Reac
   // Handle submit exercise
   const onSubmitExercise = useCallback(async () => {
     const score = 100 - Math.round((errorIndices.length / essay.length) * 100);
-    await updateExercise({ id: exerciseId, updated_data: { completed: true, score, completedAt: new Date() } });
+    await updateExercise({ id: exerciseId!, updated_data: { completed: true, score, completedAt: new Date() } });
     setMode('submitted');
   }, [errorIndices, essay, exerciseId, updateExercise, setMode]);
 
@@ -122,7 +122,7 @@ const ExercisePage: React.FC<RouteComponentProps<{ exerciseId: string }>> = Reac
         </div>
       )}
       {mode === 'submitted' && (
-        <ExerciseResult exerciseId={exerciseId} essay={essay} errorIndices={errorIndices} setMode={setMode} />
+        <ExerciseResult exerciseId={exerciseId!} essay={essay} errorIndices={errorIndices} setMode={setMode} />
       )}
       {mode === 'test' && (
         <ExerciseTest title={exercise?.name ?? ''} questions={exercise?.questions ?? []} setMode={setMode} />
