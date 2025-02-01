@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 interface Prompt {
   role: 'system' | 'user';
   content: string;
@@ -14,7 +16,7 @@ export const GENERATE_EXERCISE_PROMPT = ({
   length: string;
   content: string;
 }): Prompt[] => {
-  return [
+  const prompt: Prompt[] = [
     {
       role: 'system',
       content: `You are an AI designed to convert PDF documents into structured, knowledge-focused equivalents for student learning. Focus ONLY on generating the 'lectureText' field. Follow these rules:
@@ -62,6 +64,9 @@ export const GENERATE_EXERCISE_PROMPT = ({
       PDF content: ${content}`,
     },
   ];
+  // save prompt to file
+  fs.writeFileSync('./prompt.json', JSON.stringify(prompt, null, 2));
+  return prompt;
 };
 
 export const GENERATE_SUMMARY_PROMPT = ({ content }: { content: string }): Prompt[] => {

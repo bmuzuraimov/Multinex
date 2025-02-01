@@ -43,6 +43,7 @@ export const EXERCISE_LEVELS = {
 
 export const AVAILABLE_MODELS = [
   'gpt-4o-mini',
+  'o1-mini',
   'gpt-4o',
 ];
 export const EXERCISE_LENGTHS = {

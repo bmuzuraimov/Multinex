@@ -20,16 +20,16 @@ const HeroSection: React.FC = () => {
         <div className='mx-auto max-w-8xl px-6 lg:px-8'>
           <div className='mx-auto max-w-3xl text-center'>
             <h1 className='text-3xl font-semibold tracking-tight text-gray-900 sm:text-6xl dark:text-gray-100'>
-              <span className='text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-purple-600'>
-                Typit: Tri-Channeled Learning for Long-Term Mastery
+              <span className='text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-gray-900'>
+                Outsmart AI Laziness – Learn Faster by Doing, Not Just Reading
                 <span className='animate-pulse'>|</span>
               </span>
             </h1>
             <h3 className='mt-6 text-xl leading-8 text-teal-700 dark:text-teal-300 italic font-serif'>
-              Transform your lecture notes into interactive typing exercises.
+              Your brain wasn’t built for ChatGPT copy-paste.
             </h3>
             <p className='mt-6 mx-auto max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-300'>
-              Learn actively through seeing, typing, and note-taking.
+              <span className="font-semibold text-teal-600 dark:text-teal-400">Type key concepts</span> → <span className="font-semibold text-red-600 dark:text-red-400">Handwrite connections</span> → <span className="font-semibold text-blue-600 dark:text-blue-400">Hear explanations</span> → <span className="font-semibold text-purple-600 dark:text-purple-400">Retain 3x longer</span>.
             </p>
             <ExerciseForm topicId={null} demo={true} />
 

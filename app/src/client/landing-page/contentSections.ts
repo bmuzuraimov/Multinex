@@ -14,6 +14,7 @@ import { routes } from 'wasp/client/router';
 
 export const navigation = [
   { name: 'Courses', href: routes.PublicCoursesRoute.build() },
+  { name: 'Pricing', href: routes.PricingPageRoute.build() },
   { name: 'About', href: routes.AboutPageRoute.build() },
 ];
 

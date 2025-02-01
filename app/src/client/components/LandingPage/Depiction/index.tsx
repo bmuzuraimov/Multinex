@@ -119,11 +119,11 @@ const Depiction: React.FC = () => {
   }, [activeIndex]);
 
   return (
-    <div className="relative w-full h-full flex items-center">
-      <div className="w-1/2 h-full">
+    <div className="relative w-full h-full flex flex-col md:flex-row items-center">
+      <div className="w-full md:w-1/2 lg:w-1/2 xl:w-1/2 2xl:w-1/2 h-full min-h-[300px] md:min-h-full">
         <TextContent activeIndex={activeIndex} />
       </div>
-      <div className="w-1/2 h-full">
+      <div className="w-full md:w-1/2 lg:w-1/2 xl:w-1/2 2xl:w-1/2 h-full min-h-[300px] md:min-h-full">
         <div ref={mountRef} className="w-full h-full" />
       </div>
     </div>

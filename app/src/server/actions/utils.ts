@@ -76,4 +76,6 @@ export const cleanMarkdown = (text: string): string => {
     .replace(/–/g, '-')
     // Remove headers
     .replace(/#{1,6}\s/g, '')
+    // Remove spaces after new line before alphanumeric characters
+    .replace(/\n\s*([a-zA-Z0-9])/g, '$1');
 }
