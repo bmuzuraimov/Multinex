@@ -1,52 +1,147 @@
 import { Link } from 'wasp/client/router';
 import { type User } from 'wasp/entities';
 import { logout } from 'wasp/client/auth';
-
+import { FiArrowRight, FiLogOut, FiLock, FiUser, FiMail, FiShoppingBag, FiBell, FiShield } from 'react-icons/fi';
+import { Switch } from '@headlessui/react';
+import { useState } from 'react';
 
 export default function AccountPage({ user }: { user: User }) {
   return (
-    <div className='mt-10 px-6'>
-      <div className='overflow-hidden border border-gray-900/10 shadow-lg sm:rounded-lg lg:m-8 dark:border-gray-100/10'>
-        <div className='px-4 py-5 sm:px-6 lg:px-8'>
-          <h3 className='text-base font-semibold leading-6 text-gray-900 dark:text-white'>Account Information</h3>
+    <div className='mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8'>
+      <div className='space-y-8'>
+        {/* Account Header */}
+        <div className='flex items-center justify-between pb-8 border-b border-gray-200 dark:border-gray-700'>
+          <div>
+            <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>Account Settings</h1>
+            <p className='mt-2 text-sm text-gray-500 dark:text-gray-400'>
+              Manage your Typit account and security preferences
+            </p>
+          </div>
+          <button
+            onClick={logout}
+            className='flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors'
+          >
+            <FiLogOut className='w-5 h-5' />
+            Sign Out
+          </button>
         </div>
-        <div className='border-t border-gray-900/10 dark:border-gray-100/10 px-4 py-5 sm:p-0'>
-          <dl className='sm:divide-y sm:divide-gray-900/10 sm:dark:divide-gray-100/10'>
-            {!!user.email && (
-              <div className='py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6'>
-                <dt className='text-sm font-medium text-gray-500 dark:text-white'>Email address</dt>
-                <dd className='mt-1 text-sm text-gray-900 dark:text-gray-400 sm:col-span-2 sm:mt-0'>{user.email}</dd>
+
+        {/* Main Content Grid */}
+        <div className='grid gap-8 lg:grid-cols-3'>
+          {/* Account Details Card */}
+          <div className='lg:col-span-2 space-y-6'>
+            <section className='bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700'>
+              <div className='flex items-center gap-3 mb-6'>
+                <FiUser className='w-6 h-6 text-teal-600 dark:text-teal-400' />
+                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>Profile Information</h2>
               </div>
-            )}
-            {!!user.username && (
-              <div className='py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6'>
-                <dt className='text-sm font-medium text-gray-500 dark:text-white'>Username</dt>
-                <dd className='mt-1 text-sm text-gray-900 dark:text-gray-400 sm:col-span-2 sm:mt-0'>{user.username}</dd>
+              
+              <dl className='space-y-4 divide-y divide-gray-100 dark:divide-gray-700'>
+                <InfoRow label='Email' value={user.email} icon={<FiMail />} />
+                <InfoRow label='Username' value={user.username} icon={<FiUser />} />
+                <TokenBalance tokens={user.tokens} />
+              </dl>
+            </section>
+
+            {/* Security Card */}
+            <section className='bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700'>
+              <div className='flex items-center gap-3 mb-6'>
+                <FiLock className='w-6 h-6 text-teal-600 dark:text-teal-400' />
+                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>Security</h2>
               </div>
-            )}
-            <div className='py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6'>
-              <dt className='text-sm font-medium text-gray-500 dark:text-white'>Remaining</dt>
-              <dd className='mt-1 text-sm text-gray-900 dark:text-gray-400 sm:col-span-1 sm:mt-0'>
-                {user.tokens} tokens
-              </dd>
-              <CustomerPortalButton />
-            </div>
-            <div className='py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6'>
-              <dt className='text-sm font-medium text-gray-500 dark:text-white'>Newsletters</dt>
-              <dd className='mt-1 text-sm text-gray-900 dark:text-gray-400 sm:col-span-2 sm:mt-0'>
-                <input type='checkbox' checked={user.sendEmail} disabled />
-              </dd>
-            </div>
-          </dl>
+
+              <div className='space-y-4'>
+                <SecurityItem
+                  title='Two-Factor Authentication'
+                  description='Add an extra layer of security to your account'
+                  action={<SwitchButton />}
+                />
+                <SecurityItem
+                  title='Active Sessions'
+                  description='3 devices currently signed in'
+                  action={
+                    <button className='text-sm font-medium text-teal-600 dark:text-teal-400 hover:underline'>
+                      Manage Sessions
+                    </button>
+                  }
+                />
+              </div>
+            </section>
+          </div>
+
+          {/* Preferences Sidebar */}
+          <div className='lg:col-span-1'>
+            <section className='bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700'>
+              <div className='flex items-center gap-3 mb-6'>
+                <FiBell className='w-6 h-6 text-teal-600 dark:text-teal-400' />
+                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>Preferences</h2>
+              </div>
+
+              <div className='space-y-4'>
+                <div className='flex items-center justify-between'>
+                  <div>
+                    <h3 className='text-sm font-medium text-gray-900 dark:text-white'>Email Notifications</h3>
+                    <p className='text-sm text-gray-500 dark:text-gray-400'>Product updates and newsletters</p>
+                  </div>
+                  <Switch
+                    checked={user.sendEmail}
+                    onChange={() => {}}
+                    className={`${
+                      user.sendEmail ? 'bg-teal-600' : 'bg-gray-200 dark:bg-gray-600'
+                    } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+                  >
+                    <span
+                      className={`${
+                        user.sendEmail ? 'translate-x-6' : 'translate-x-1'
+                      } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                    />
+                  </Switch>
+                </div>
+              </div>
+            </section>
+          </div>
         </div>
       </div>
-      <div className='inline-flex w-full justify-end'>
-        <button
-          onClick={logout}
-          className='inline-flex justify-center mx-8 py-2 px-4 border border-transparent shadow-md text-sm font-medium rounded-md text-white bg-teal-500 hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-        >
-          logout
-        </button>
+    </div>
+  );
+}
+
+function InfoRow({ label, value, icon }: { label: string; value?: string | null; icon: React.ReactNode }) {
+  if (!value) return null;
+  
+  return (
+    <div className='pt-4 first:pt-0'>
+      <div className='flex items-center gap-3'>
+        <span className='text-gray-400 dark:text-gray-500'>{icon}</span>
+        <div className='flex-1'>
+          <dt className='text-sm font-medium text-gray-500 dark:text-gray-300'>{label}</dt>
+          <dd className='mt-1 text-sm text-gray-900 dark:text-white'>{value}</dd>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TokenBalance({ tokens }: { tokens: number }) {
+  return (
+    <div className='pt-4'>
+      <div className='flex items-center gap-3'>
+        <FiShoppingBag className='w-5 h-5 text-gray-400 dark:text-gray-500' />
+        <div className='flex-1'>
+          <div className='flex items-center justify-between'>
+            <div>
+              <dt className='text-sm font-medium text-gray-500 dark:text-gray-300'>Token Balance</dt>
+              <dd className='mt-1 text-sm text-gray-900 dark:text-white'>{tokens} tokens remaining</dd>
+            </div>
+            <CustomerPortalButton />
+          </div>
+          <div className='mt-3 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden'>
+            <div 
+              className='h-full bg-teal-600 dark:bg-teal-500' 
+              style={{ width: `${Math.min((tokens / 1000) * 100, 100)}%` }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -54,10 +149,48 @@ export default function AccountPage({ user }: { user: User }) {
 
 function CustomerPortalButton() {
   return (
-    <div className='ml-4 flex-shrink-0 sm:col-span-1 sm:mt-0'>
-      <Link to='/pricing' className='font-medium text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-500'>
-        Buy more tokens
-      </Link>
+    <Link
+      to='/pricing'
+      className='inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors shadow-sm'
+    >
+      <FiShoppingBag className='w-4 h-4' />
+      Add Tokens
+    </Link>
+  );
+}
+
+function SecurityItem({ title, description, action }: { 
+  title: string;
+  description: string;
+  action: React.ReactNode;
+}) {
+  return (
+    <div className='flex items-center justify-between pt-4 first:pt-0'>
+      <div>
+        <h3 className='text-sm font-medium text-gray-900 dark:text-white'>{title}</h3>
+        <p className='text-sm text-gray-500 dark:text-gray-400'>{description}</p>
+      </div>
+      {action}
     </div>
+  );
+}
+
+function SwitchButton() {
+  const [enabled, setEnabled] = useState(false);
+
+  return (
+    <Switch
+      checked={enabled}
+      onChange={setEnabled}
+      className={`${
+        enabled ? 'bg-teal-600' : 'bg-gray-200 dark:bg-gray-600'
+      } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+    >
+      <span
+        className={`${
+          enabled ? 'translate-x-6' : 'translate-x-1'
+        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+      />
+    </Switch>
   );
 }

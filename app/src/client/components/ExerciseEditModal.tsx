@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { updateExercise } from 'wasp/client/operations';
-import { RiAiGenerate } from "react-icons/ri";
 
 interface ExerciseEditModalProps {
   id: string;
@@ -15,6 +14,8 @@ const ExerciseEditModal: React.FC<ExerciseEditModalProps> = ({ id, name, lessonT
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [audioLoading, setAudioLoading] = useState(false);
+  const [audioError, setAudioError] = useState('');
 
   useEffect(() => {
     setExerciseName(name);
@@ -36,9 +37,40 @@ const ExerciseEditModal: React.FC<ExerciseEditModalProps> = ({ id, name, lessonT
     }
   };
 
+  const handleGenerateAudio = async () => {
+    setAudioLoading(true);
+    setAudioError('');
+    try {
+      const formData = new FormData();
+      formData.append('exerciseId', id);
+      formData.append('generate_text', exerciseText);
+      
+      const documentParserUrl = import.meta.env.REACT_APP_DOCUMENT_PARSER_URL + '/generate-audio';
+      const response = await fetch(documentParserUrl, {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+        },
+        body: formData,
+      });
+      console.log(response)
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to generate audio');
+      }
+
+      const data = await response.json();
+      setSuccess('Audio generated successfully');
+    } catch (err) {
+      setAudioError(err instanceof Error ? err.message : 'Failed to generate audio');
+    } finally {
+      setAudioLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300">
-      <div className="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all duration-300 ease-in-out">
+      <div className="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all duration-300 ease-in-out">
         <div className="absolute top-0 right-0 pt-4 pr-4">
           <button
             onClick={onClose}
@@ -67,15 +99,20 @@ const ExerciseEditModal: React.FC<ExerciseEditModalProps> = ({ id, name, lessonT
               />
             </div>
             <div>
-              <label htmlFor="lessonText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Lesson Text
-              </label>
+              <div className="flex justify-between items-center">
+                <label htmlFor="lessonText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Lesson Text
+                </label>
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  {exerciseText.split(' ').length} words
+                </span>
+              </div>
               <textarea
                 id="lessonText"
                 value={exerciseText}
                 onChange={(e) => setExerciseText(e.target.value)}
                 rows={4}
-                className="mt-1 block w-full h-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="mt-1 block w-full h-96 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
             {error && (
@@ -100,6 +137,25 @@ const ExerciseEditModal: React.FC<ExerciseEditModalProps> = ({ id, name, lessonT
                 ) : null}
                 {loading ? 'Updating...' : 'Update Exercise'}
               </button>
+              <button
+                type="button"
+                onClick={() => handleGenerateAudio()}
+                disabled={audioLoading}
+                className={`mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 ${
+                  audioLoading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {audioLoading ? (
+                  <svg className="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : null}
+                {audioLoading ? 'Generating Audio...' : 'Generate Audio'}
+              </button>
+              {audioError && (
+                <div className="mt-2 text-sm text-red-600 dark:text-red-400">{audioError}</div>
+              )}
             </div>
           </form>
         </div>

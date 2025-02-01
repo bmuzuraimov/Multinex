@@ -6,23 +6,35 @@ import { createExercise, countTokens, getLandingPageTry, createLandingPageTry, u
 import ExerciseFormModal from './ExerciseFormModal';
 import { ExerciseFormContentSettings, ExerciseFormGenerationSettings } from '../../shared/types';
 import { Link } from 'react-router-dom';
+import { LandingPageTry } from 'wasp/entities';
 
-const ExerciseForm: React.FC<{ topicId: string | null, demo: boolean }> = ({ topicId, demo = false }) => {
-  // Browser details
-  const userAgent = window.navigator.userAgent;
-  const browserLanguage = window.navigator.language;
-  const screenResolution = `${window.screen.width}x${window.screen.height}`;
-  const colorDepth = window.screen.colorDepth;
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const {data: landingPageTry} = useQuery(getLandingPageTry, {userAgent, browserLanguage, colorDepth, screenResolution, timezone})
+const ExerciseForm: React.FC<{ topicId: string | null; demo: boolean }> = ({ topicId, demo = false }) => {
+  const [landingPageTry, setLandingPageTry] = useState<LandingPageTry | null>(null);
+
+  const { data: landingPageTryData } = useQuery(getLandingPageTry, {
+    userAgent: window.navigator.userAgent,
+    browserLanguage: window.navigator.language,
+    screenResolution: `${window.screen.width}x${window.screen.height}`,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  });
+
+  useEffect(() => {
+    if (demo && landingPageTryData) {
+      setLandingPageTry(landingPageTryData);
+    }
+  }, [demo, landingPageTryData]);
 
   // Grouped state for exercise settings
   const [exerciseSettings, setExerciseSettings] = useState<ExerciseFormContentSettings>({
-    exerciseLength: '400 words (important)',
+    exerciseName: '',
+    setExerciseName: (value: string) => {
+      setExerciseSettings((prev) => ({ ...prev, exerciseName: value }));
+    },
+    exerciseLength: 'Auto',
     setExerciseLength: (value: string) => {
       setExerciseSettings((prev) => ({ ...prev, exerciseLength: value }));
     },
-    exerciseLevel: 'Advanced Level',
+    exerciseLevel: 'Auto',
     setExerciseLevel: (value: string) => {
       setExerciseSettings((prev) => ({ ...prev, exerciseLevel: value }));
     },
@@ -33,7 +45,7 @@ const ExerciseForm: React.FC<{ topicId: string | null, demo: boolean }> = ({ top
     topics: [],
     setTopics: (value: string[]) => {
       setExerciseSettings((prev) => ({ ...prev, topics: value }));
-    }
+    },
   });
 
   // Grouped state for advanced settings
@@ -75,7 +87,7 @@ const ExerciseForm: React.FC<{ topicId: string | null, demo: boolean }> = ({ top
 
     try {
       setIsUploading(true);
-      
+
       if (!demo) {
         setLoadingStatus('Calculating required tokens...');
         const { tokens, sufficient } = await countTokens({
@@ -83,9 +95,7 @@ const ExerciseForm: React.FC<{ topicId: string | null, demo: boolean }> = ({ top
         });
 
         if (!sufficient) {
-          alert(
-            `You don't have enough tokens to generate this exercise. It requires at least ${tokens} tokens.`
-          );
+          alert(`You don't have enough tokens to generate this exercise. It requires at least ${tokens} tokens.`);
           return;
         }
       }
@@ -93,8 +103,9 @@ const ExerciseForm: React.FC<{ topicId: string | null, demo: boolean }> = ({ top
       setLoadingStatus('Generating exercise content...');
       // Proceed to create the exercise
       let jsonResponse;
-      if(!demo) {
+      if (!demo) {
         jsonResponse = await createExercise({
+          name: selectedFile.name,
           length: exerciseSettings.exerciseLength,
           level: exerciseSettings.exerciseLevel,
           content: fileContent,
@@ -106,6 +117,7 @@ const ExerciseForm: React.FC<{ topicId: string | null, demo: boolean }> = ({ top
         });
       } else {
         jsonResponse = await createLandingPageTry({
+          name: selectedFile.name,
           userAgent: window.navigator.userAgent,
           browserLanguage: window.navigator.language,
           screenResolution: `${window.screen.width}x${window.screen.height}`,
@@ -148,75 +160,76 @@ const ExerciseForm: React.FC<{ topicId: string | null, demo: boolean }> = ({ top
       setExerciseSettings((prev) => ({
         ...prev,
         priorKnowledge: [],
-        topics: []
+        topics: [],
+        exerciseName: '',
       }));
     }
   };
 
   // Handle files dropped into the dropzone
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    if (acceptedFiles.length === 0) return;
-    
-    const file = acceptedFiles[0];
-    
-    // Check if file is PPT
-    if (file.name.toLowerCase().endsWith('.ppt')) {
-      alert('PPT files are not supported. Please convert to PPTX format.');
-      return;
-    }
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      if (acceptedFiles.length === 0) return;
 
-    try {
-      setIsUploading(true);
-      setLoadingStatus('Scanning document and extracting content...');
-      setSelectedFile(file);
+      const file = acceptedFiles[0];
 
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append(
-        'scan_images',
-        advancedSettings.scanImages ? 'true' : 'false'
-      );
-
-      if (!import.meta.env.REACT_APP_DOCUMENT_PARSER_URL) {
-        throw new Error('DOCUMENT_PARSER_URL is not set');
+      // Check if file is PPT
+      if (file.name.toLowerCase().endsWith('.ppt')) {
+        alert('PPT files are not supported. Please convert to PPTX format.');
+        return;
       }
 
-      const documentParserUrl = 
-        import.meta.env.REACT_APP_DOCUMENT_PARSER_URL + '/extract-text';
-      const response = await fetch(documentParserUrl, {
-        method: 'POST',
-        headers: {
-          accept: 'application/json',
-        },
-        body: formData,
-      });
+      try {
+        setIsUploading(true);
+        setLoadingStatus('Scanning document and extracting content...');
+        setSelectedFile(file);
+        exerciseSettings.setExerciseName(file.name);
 
-      if (!response.ok) {
-        throw new Error('Failed to extract text from file');
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('scan_images', advancedSettings.scanImages ? 'true' : 'false');
+
+        if (!import.meta.env.REACT_APP_DOCUMENT_PARSER_URL) {
+          throw new Error('DOCUMENT_PARSER_URL is not set');
+        }
+
+        const documentParserUrl = import.meta.env.REACT_APP_DOCUMENT_PARSER_URL + '/extract-text';
+        const response = await fetch(documentParserUrl, {
+          method: 'POST',
+          headers: {
+            accept: 'application/json',
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+
+        const responseData = await response.json();
+        const extractedContent = responseData.text;
+        exerciseSettings.setTopics(responseData.topics);
+
+        if (!extractedContent || extractedContent.trim().length < 10) {
+          throw new Error('No text found in the file');
+        }
+
+        setFileContent(extractedContent);
+        setIsUploading(false);
+        setLoadingStatus('');
+      } catch (error) {
+        console.error('Error during file processing:', error);
+        alert(error instanceof Error ? error.message : 'Error processing file. Please try again.');
+        setSelectedFile(null);
+        setFileContent(null);
+        setIsUploading(false);
+        setLoadingStatus('');
       }
 
-      const responseData = await response.json();
-      const extractedContent = responseData.text;
-      exerciseSettings.setTopics(responseData.topics);
-
-      if (!extractedContent || extractedContent.trim().length < 10) {
-        throw new Error('No text found in the file');
-      }
-
-      setFileContent(extractedContent);
-      setIsUploading(false);
-      setLoadingStatus('');
-    } catch (error) {
-      console.error('Error during file processing:', error);
-      alert(error instanceof Error ? error.message : 'Error processing file. Please try again.');
-      setSelectedFile(null);
-      setFileContent(null);
-      setIsUploading(false);
-      setLoadingStatus('');
-    }
-    
-    setIsDragActive(false);
-  }, [advancedSettings.scanImages]);
+      setIsDragActive(false);
+    },
+    [advancedSettings.scanImages]
+  );
 
   // Configure the dropzone to accept multiple file types
   const {
@@ -227,12 +240,8 @@ const ExerciseForm: React.FC<{ topicId: string | null, demo: boolean }> = ({ top
     onDrop,
     accept: {
       'application/pdf': ['.pdf'],
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation': [
-        '.pptx',
-      ],
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
-        '.xlsx',
-      ],
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
       'text/plain': ['.txt'],
     },
     multiple: false,
@@ -241,11 +250,11 @@ const ExerciseForm: React.FC<{ topicId: string | null, demo: boolean }> = ({ top
     onDragLeave: () => setIsDragActive(false),
   });
 
-  if(demo && landingPageTry?.successful) {
+  if (demo && landingPageTry?.successful) {
     return (
-      <Link 
+      <Link
         to={`/demo`}
-        className="w-full h-full scale-95 opacity-95 flex flex-col items-center bg-white dark:bg-gray-800 transition-all duration-300 ease-in-out pointer-events-auto"
+        className='w-full h-full scale-95 opacity-95 flex flex-col items-center bg-white dark:bg-gray-800 transition-all duration-300 ease-in-out pointer-events-auto'
       >
         <div className='flex h-full items-center justify-center w-full max-w-4xl mx-auto'>
           <div className='flex flex-col items-center p-6 justify-center w-full rounded-xl cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-all duration-300'>
@@ -321,9 +330,7 @@ const ExerciseForm: React.FC<{ topicId: string | null, demo: boolean }> = ({ top
                     </span>{' '}
                     or drag and drop
                   </p>
-                  <p className='text-sm text-gray-500 dark:text-gray-400'>
-                    PDF, PPTX, XLSX, TXT
-                  </p>
+                  <p className='text-sm text-gray-500 dark:text-gray-400'>PDF, PPTX, XLSX, TXT</p>
                 </div>
               </div>
             )}

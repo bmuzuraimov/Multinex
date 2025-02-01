@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { type Option } from 'wasp/entities';
+import { useExerciseContext } from '../contexts/ExerciseContext';
 
-interface ExerciseTestProps {
+const ExerciseTest: React.FC<{
   title: string;
   questions: any[];
-  setMode: (mode: 'prompt' | 'typing' | 'submitted' | 'test') => void;
-}
-
-const ExerciseTest: React.FC<ExerciseTestProps> = ({ title, questions, setMode }) => {
+}> = ({ title, questions }) => {
+  const { setMode } = useExerciseContext();
   const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>({});
   const [showResults, setShowResults] = useState<boolean>(false);
 
@@ -117,7 +116,7 @@ const ExerciseTest: React.FC<ExerciseTestProps> = ({ title, questions, setMode }
               {showResults && (
                 <div className="mt-6 pl-8">
                   {selectedOptions[question.id] ? (
-                    question.options.find((opt) => opt.text === selectedOptions[question.id])?.isCorrect ? (
+                    question.options.find((opt: Option) => opt.text === selectedOptions[question.id])?.isCorrect ? (
                       <div className="flex items-center text-green-600 dark:text-green-400">
                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />

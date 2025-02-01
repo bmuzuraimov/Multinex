@@ -8,6 +8,7 @@ import { MAX_TOKENS } from '../../shared/constants';
 
 
 export const createLandingPageTry: CreateLandingPageTry<{
+  name: string,
   userAgent: string,
   browserLanguage: string, 
   screenResolution: string,
@@ -42,7 +43,7 @@ export const createLandingPageTry: CreateLandingPageTry<{
     if (exerciseResponse.success && exerciseResponse.data) {
       exerciseJson = exerciseResponse.data;
       exerciseJsonUsage = exerciseResponse.usage || 0;
-      lessonText = cleanMarkdown(exerciseJson.lectureText);
+      lessonText = cleanMarkdown(exerciseJson.lectureContent);
       success = true;
 
       // Only generate summary if specifically requested and exercise generation was successful
@@ -62,6 +63,10 @@ export const createLandingPageTry: CreateLandingPageTry<{
     success = false;
   }
 
+  const complexityJson = await OpenAIService.generateComplexity(lessonText, args.model, MAX_TOKENS);
+  if (complexityJson.success && complexityJson.data.taggedText) {
+    exerciseJson.taggedText = complexityJson.data.taggedText;
+  }
   // Create the landing page try record
   const results = await context.entities.LandingPageTry.create({
     data: {
@@ -69,10 +74,10 @@ export const createLandingPageTry: CreateLandingPageTry<{
       browserLanguage: args.browserLanguage,
       screenResolution: args.screenResolution,
       timezone: args.timezone,
-      name: exerciseJson.name,
+      name: args.name,
       prompt: exerciseJson.prompt || '',
       promptImg: exerciseJson.promptImg || '',
-      lessonText: lessonText,
+      lessonText: exerciseJson.taggedText || '',
       paragraphSummary: paragraphSummary,
       level: args.level,
       no_words: lessonText.split(' ').length,

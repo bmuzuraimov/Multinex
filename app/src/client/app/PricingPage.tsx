@@ -9,26 +9,28 @@ import { z } from 'zod';
 
 export const tiers = [
   {
-    name: 'Basic Package',
-    id: TierIds.BASIC,
-    price: '$4.99',
-    description: 'Perfect for 4 semester courses ',
-    features: ['200,000 LLM tokens', '~45 Study Materials'],
-  },
-  {
-    name: 'Premium Package',
-    id: TierIds.PREMIUM,
-    price: '$9.99',
-    description: 'Perfect for 7 semester courses',
-    features: ['700,000 LLM tokens', '~155 PDF files'],
-    bestDeal: true,
-  },
-  {
     name: 'Pro Package',
     id: TierIds.PRO,
     price: '$7.99',
     description: 'Perfect for 5 courses per semester',
     features: ['350,000 tokens', '~75 PDF files'],
+    bestDeal: false,
+  },
+  {
+    name: 'Premium Package',
+    id: TierIds.PREMIUM,
+    price: '$9.99',
+    description: 'Perfect for 7 courses per semester',
+    features: ['700,000 LLM tokens', '~155 PDF files'],
+    bestDeal: true,
+  },
+  {
+    name: 'Enterprise',
+    id: TierIds.BASIC,
+    price: 'Contact Sales',
+    description: 'Perfect for organizations and institutions',
+    features: ['Custom token allocation', 'Dedicated support', 'Contact bmuzuraimov@typit.app'],
+    bestDeal: false,
   },
 ];
 

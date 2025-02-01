@@ -1,16 +1,10 @@
-import { useState } from "react";
+import React, { useState } from 'react';
+import { useExerciseContext } from '../contexts/ExerciseContext';
 
-interface ExerciseSidebarProps {
-  hasQuiz: boolean;
-  paragraphIndex: number;
-  summary: string[];
-  essay_length: number;
-  setMode: (mode: 'prompt' | 'typing' | 'submitted' | 'test') => void;
-}
-
-const ExerciseSidebar: React.FC<ExerciseSidebarProps> = ({ paragraphIndex, hasQuiz, summary, essay_length, setMode }) => {
+const ExerciseSidebar: React.FC = () => {
+  const { hasQuiz, summary, essay_length, setMode } = useExerciseContext();
   const [showHintsModal, setShowHintsModal] = useState(false);
-
+  
   return (
     <div className='z-99 min-w-[230px] max-w-[400px] h-[calc(100vh-64px)] p-6 bg-white dark:bg-gray-800 border-r border-gray-200/50 dark:border-gray-700 flex flex-col'>
       <div className='flex-1 overflow-hidden flex flex-col'>
@@ -20,14 +14,7 @@ const ExerciseSidebar: React.FC<ExerciseSidebarProps> = ({ paragraphIndex, hasQu
             {summary.map((s, index) => (
               <li
                 key={index}
-                className={`rounded-lg p-3 transition duration-200 ease-in-out shadow-sm 
-                ${
-                  paragraphIndex === index
-                    ? 'bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-300 font-bold'
-                    : paragraphIndex > index
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
-                      : 'bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
+                className='rounded-lg p-3 transition duration-200 ease-in-out shadow-sm bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               >
                 {s}
               </li>

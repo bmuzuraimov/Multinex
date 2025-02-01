@@ -1,4 +1,9 @@
-import { type CreateExercise, type ShareExercise, type UpdateExercise, type DeleteExercise } from 'wasp/server/operations';
+import {
+  type CreateExercise,
+  type ShareExercise,
+  type UpdateExercise,
+  type DeleteExercise,
+} from 'wasp/server/operations';
 import { HttpError } from 'wasp/server';
 import { Exercise } from 'wasp/entities';
 import { OpenAIService } from '../llm/openai';
@@ -7,10 +12,9 @@ import { truncateText, reportToAdmin, cleanMarkdown } from './utils';
 import { MAX_TOKENS, OPENAI_MODEL } from '../../shared/constants';
 import { TiktokenModel } from 'tiktoken';
 
-
-
 export const createExercise: CreateExercise<
   {
+    name: string;
     length: string;
     level: string;
     content: string;
@@ -21,7 +25,7 @@ export const createExercise: CreateExercise<
     priorKnowledge: string;
   },
   { success: boolean; message: string }
-> = async ({ length, level, content, topicId, model, includeSummary, includeMCQuiz, priorKnowledge }, context: any) => {
+> = async ({ name, length, level, content, topicId, model, includeSummary, includeMCQuiz, priorKnowledge }, context: any) => {
   // Check for user authentication
   if (!context.user) {
     throw new HttpError(401, 'Unauthorized');
@@ -43,7 +47,14 @@ export const createExercise: CreateExercise<
   let exerciseJson: any;
   let exerciseJsonUsage = 0;
   try {
-    const exerciseResponse = await OpenAIService.generateExercise(filtered_content, priorKnowledge, length, level, model, MAX_TOKENS);
+    const exerciseResponse = await OpenAIService.generateExercise(
+      filtered_content,
+      priorKnowledge,
+      length,
+      level,
+      model,
+      MAX_TOKENS
+    );
     if (!exerciseResponse.success || !exerciseResponse.data) {
       return { success: false, message: 'Error generating exercise content.' };
     }
@@ -53,13 +64,13 @@ export const createExercise: CreateExercise<
     return { success: false, message: 'Failed to generate exercise after multiple attempts.' };
   }
 
-  const lectureText = cleanMarkdown(exerciseJson.lectureText);
+  const lectureContent = cleanMarkdown(exerciseJson.lectureContent);
 
   let summaryJson = null;
   let summaryJsonUsage = 0;
   if (includeSummary) {
     try {
-      const summaryResponse = await OpenAIService.generateSummary(lectureText, model, MAX_TOKENS);
+      const summaryResponse = await OpenAIService.generateSummary(lectureContent, model, MAX_TOKENS);
       if (summaryResponse.success && summaryResponse.data) {
         summaryJson = summaryResponse.data;
         summaryJsonUsage = summaryResponse.usage || 0;
@@ -78,7 +89,7 @@ export const createExercise: CreateExercise<
   let questionsSuccess = false;
   if (includeMCQuiz) {
     try {
-      const questionsResponse = await OpenAIService.generateQuestions(lectureText, model, MAX_TOKENS);
+      const questionsResponse = await OpenAIService.generateQuestions(lectureContent, model, MAX_TOKENS);
       if (questionsResponse.success && questionsResponse.data) {
         questions = questionsResponse.data.questions;
         questionsUsage = questionsResponse.usage || 0;
@@ -96,20 +107,26 @@ export const createExercise: CreateExercise<
   // Aggregate token usage
   const totalTokensUsed = exerciseJsonUsage + summaryJsonUsage + questionsUsage;
 
+  const complexityJson = await OpenAIService.generateComplexity(lectureContent, model, MAX_TOKENS);
+
+  if (complexityJson.success && complexityJson.data.taggedText) {
+    exerciseJson.taggedText = complexityJson.data.taggedText;
+  }
+
   // Create the exercise
   let newExercise;
   try {
     newExercise = await context.entities.Exercise.create({
       data: {
-        name: exerciseJson.name || '',
+        name,
         prompt: exerciseJson.preExerciseText || '',
-        lessonText: lectureText,
+        lessonText: exerciseJson.taggedText || '',
         paragraphSummary: summaryJson?.paragraphSummary || '',
         level,
         truncated,
         tokens: totalTokensUsed,
         model,
-        no_words: lectureText.split(' ').length || parseInt(length, 10),
+        no_words: lectureContent.split(' ').length || parseInt(length, 10),
         user: { connect: { id: context.user.id } },
         ...(topicId && { topic: { connect: { id: topicId } } }),
       },
@@ -227,23 +244,10 @@ export const deleteExercise: DeleteExercise<{ id: string }, Exercise> = async ({
     throw new HttpError(401);
   }
 
-  await context.entities.Option.deleteMany({
-    where: {
-      question: {
-        exerciseId: id,
-      },
-    },
-  });
-
-  await context.entities.Question.deleteMany({
-    where: {
-      exerciseId: id,
-    },
-  });
-
   return context.entities.Exercise.delete({
     where: {
       id,
+      userId: context.user.id,
     },
   });
 };

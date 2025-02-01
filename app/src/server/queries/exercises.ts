@@ -1,6 +1,7 @@
 import { type Exercise, type Question, type Option } from 'wasp/entities';
 import { HttpError } from 'wasp/server';
 import { type GetExercisesWithNoTopic, type GetExerciseById, type GetDemoExercise, type HasCompletedExercises } from 'wasp/server/operations';
+import { getDownloadFileSignedURLFromS3 } from '../utils/s3Utils';
 
 export const getDemoExercise: GetDemoExercise<void, ExerciseResult> = async (_args, context) => {
   const exercise = await context.entities.Exercise.findFirstOrThrow({
@@ -13,20 +14,26 @@ export const getDemoExercise: GetDemoExercise<void, ExerciseResult> = async (_ar
           createdAt: 'asc',
         },
         include: {
-          options: true, // Include options for each question
+          options: true,
         },
       },
-      topic: true, // Include topic if needed
-      user: true, // Include user if needed
+      topic: true,
+      user: true,
     },
   });
-  return exercise;
+
+  const audioUrl = await getDownloadFileSignedURLFromS3({ key: exercise.id });
+  return {
+    ...exercise,
+    audioUrl
+  };
 };
 
 export const getExercisesWithNoTopic: GetExercisesWithNoTopic<void, Exercise[]> = async (_args, context) => {
   if (!context.user) {
     throw new HttpError(401);
   }
+
   return context.entities.Exercise.findMany({
     where: {
       userId: context.user.id,
@@ -38,14 +45,18 @@ export const getExercisesWithNoTopic: GetExercisesWithNoTopic<void, Exercise[]> 
   });
 };
 
-// does user have any completed exercises?
 export const hasCompletedExercises: HasCompletedExercises<void, boolean> = async (_args, context) => {
   if (!context.user) {
     throw new HttpError(401);
   }
+
   const exercise = await context.entities.Exercise.findFirst({
-    where: { userId: context.user.id, completed: true }
+    where: { 
+      userId: context.user.id, 
+      completed: true 
+    }
   });
+
   return exercise !== null;
 };
 
@@ -74,7 +85,8 @@ type ExerciseResult = {
     createdAt: Date;
     options: Option[];
   }>;
-  [key: string]: any; // Add index signature to satisfy SuperJSONObject constraint
+  audioUrl?: string;
+  [key: string]: any;
 };
 
 export const getExerciseById: GetExerciseById<{ exerciseId: string }, ExerciseResult> = async (
@@ -96,13 +108,24 @@ export const getExerciseById: GetExerciseById<{ exerciseId: string }, ExerciseRe
           createdAt: 'asc',
         },
         include: {
-          options: true, // Include options for each question
+          options: true,
         },
       },
-      topic: true, // Include topic if needed
-      user: true, // Include user if needed
+      file: true,
+      topic: true,
+      user: true,
     },
   });
+  if (!exercise.file?.key) {
+    return {
+      ...exercise,
+      audioUrl: undefined
+    };
+  }
 
-  return exercise;
+  const audioUrl = await getDownloadFileSignedURLFromS3({ key: exercise.file.key });
+  return {
+    ...exercise,
+    audioUrl
+  };
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import TextContent from './TextContent';
 import { createMeteors, animateMeteors } from './Meteors';
@@ -7,6 +7,7 @@ import { createBrainSphere, animateBrainSphere } from './BrainSphere';
 const Depiction: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>();
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -32,7 +33,7 @@ const Depiction: React.FC = () => {
 
     // Replace the meteors creation and animation code with:
     createMeteors(scene).then(({ meteors, impactPoints }) => {
-      animateMeteors(meteors, scene, sphere, impactPoints);
+      animateMeteors(meteors, scene, sphere, impactPoints, activeIndex);
     });
 
     // Enhanced lighting setup
@@ -108,10 +109,19 @@ const Depiction: React.FC = () => {
     };
   }, []);
 
+  // Add new useEffect for text animation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setActiveIndex((prev) => (prev >= 2 ? 0 : prev + 1));
+    }, activeIndex === 1 ? 8000 : 6000); // Adjust timing as needed
+
+    return () => clearTimeout(timer);
+  }, [activeIndex]);
+
   return (
     <div className="relative w-full h-full flex items-center">
       <div className="w-1/2 h-full">
-        <TextContent />
+        <TextContent activeIndex={activeIndex} />
       </div>
       <div className="w-1/2 h-full">
         <div ref={mountRef} className="w-full h-full" />

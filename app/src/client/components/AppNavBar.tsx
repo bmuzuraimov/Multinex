@@ -11,11 +11,11 @@ import DarkModeSwitcher from '../components/DarkModeSwitcher';
 import { UserMenuItems } from '../components/UserMenuItems';
 import { MdOutlineToken } from 'react-icons/md';
 
-const navigation: { name: string; href: '/' | '/login' | '/portal' | '/course-:id' | '/exercise-:exerciseId' | '/pricing' | '/account' | '/checkout' | '/feedback' | '/guide' }[] = [
-  { name: 'Portal', href: routes.PortalRoute.build() as '/portal' },
-  { name: 'Pricing', href: routes.PricingPageRoute.build() as '/pricing' },
-  { name: 'Feedback', href: routes.FeedbackRoute.build() as '/feedback' },
-];
+const navigation = [
+  { name: 'Portal', href: '/portal' },
+  { name: 'Pricing', href: '/pricing' },
+  { name: 'Feedback', href: '/feedback' },
+] as const;
 
 const NavLogo = () => <img className="h-8" src={logo} alt="Typit" />;
 

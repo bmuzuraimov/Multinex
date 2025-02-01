@@ -8,7 +8,7 @@ app Typit {
   head: [
       "<!-- General Meta Tags -->",
       "<meta name='title' content='Typit - Interactive Typing Exercises from Your Notes' />",
-      "<meta name='description' content='Typit converts your PDF lecture notes into interactive typing exercises, helping you actively engage with material and improve memory retention.' />",
+      "<meta name='description' content='Typit converts your PDF lecture notes into interactive exercises, helping you actively engage with material and improve memory retention.' />",
       "<meta name='keywords' content='interactive typing exercises, PDF to exercises, active learning platform, Typit, study tools, memory retention, efficient studying, AI-powered learning' />",
       "<meta name='author' content='Typit Team' />",
       "<meta name='viewport' content='width=device-width, initial-scale=1.0' />",
@@ -172,13 +172,13 @@ page FeedbackPage {
   component: import FeedbackPage from "@src/client/app/FeedbackPage"
 }
 
-route CourseRoute { path: "/course-:id", to: CoursePage }
+route CourseRoute { path: "/course/:id", to: CoursePage }
 page CoursePage {
   authRequired: true,
   component: import CoursePage from "@src/client/app/CoursePage"
 }
 
-route ExerciseRoute { path: "/exercise-:exerciseId", to: ExercisePage }
+route ExerciseRoute { path: "/exercise/:exerciseId", to: ExercisePage }
 page ExercisePage {
   authRequired: true,
   component: import ExercisePage from "@src/client/app/ExercisePage"
@@ -213,21 +213,6 @@ action createFeedback {
   fn: import { createFeedback } from "@src/server/actions/feedback.js",
   entities: [Feedback]
 }
-
-action createFeature {
-  fn: import { createFeature } from "@src/server/actions/features.js",
-  entities: [Feature]
-}
-
-action updateFeature {
-  fn: import { updateFeature } from "@src/server/actions/features.js",
-  entities: [Feature]
-}
-
-// action createLandingPageTry {
-//   fn: import { createLandingPageTry } from "@src/server/actions/landingPageTry.js",
-//   entities: [LandingPageTry]
-// }
 
 action createQuestion {
   fn: import { createQuestion } from "@src/server/actions/quiz.js",
@@ -326,6 +311,15 @@ action updateUserLang {
 
 
 // 📚 Queries
+query getFileByExercise {
+  fn: import { getFileByExercise } from "@src/server/queries/file.js",
+  entities: [User, File]
+}
+
+query getDownloadFileSignedURL {
+  fn: import { getDownloadFileSignedURL } from "@src/server/queries/file.js",
+  entities: [User, File]
+}
 
 query getAllCourses {
   fn: import { getAllCourses } from "@src/server/queries/courses.js",
@@ -347,11 +341,6 @@ query hasCompletedExercises {
   entities: [Exercise]
 }
 
-query getAllFeatures {
-  fn: import { getAllFeatures } from "@src/server/queries/features.js",
-  entities: [Feature]
-}
-
 query getCourseById {
   fn: import { getCourseById } from "@src/server/queries/courses.js",
   entities: [Course]
@@ -369,7 +358,7 @@ query getExercisesWithNoTopic {
 
 query getExerciseById {
   fn: import { getExerciseById } from "@src/server/queries/exercises.js",
-  entities: [Exercise]
+  entities: [Exercise, File]
 }
 
 query getDemoExercise {
@@ -394,19 +383,3 @@ api stripeWebhook {
   middlewareConfigFn: import { stripeMiddlewareFn } from "@src/server/webhooks/stripe.js",
   httpRoute: (POST, "/stripe-webhook")
 }
-
-/* 🕵️‍♂️ These are the Wasp Jobs. Use them to set up recurring tasks and/or queues.
- * https://wasp-lang.dev/docs/advanced/jobs
- */
-
-// job dailyStatsJob {
-//   executor: PgBoss,
-//   perform: {
-//     fn: import { calculateDailyStats } from "@src/server/workers/calculateDailyStats.js"
-//   },
-//   schedule: {
-//     cron: "0 * * * *" // every hour. useful in production
-//     // cron: "* * * * *" // every minute. useful for debugging
-//   },
-//   entities: [User, DailyStats, Logs, PageViewSource]
-// }

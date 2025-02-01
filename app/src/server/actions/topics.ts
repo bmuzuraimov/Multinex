@@ -37,34 +37,6 @@ export const deleteTopic: DeleteTopic<{ id: string }, Topic> = async ({ id }, co
     throw new HttpError(401);
   }
 
-  await context.entities.Option.deleteMany({
-    where: {
-      question: {
-        exercise: {
-          topic: {
-            id,
-          },
-        },
-      },
-    },
-  });
-  
-  await context.entities.Question.deleteMany({
-    where: {
-      exercise: {
-        topic: {
-          id,
-        },
-      },
-    },
-  });
-
-  await context.entities.Exercise.deleteMany({
-    where: {
-      topicId: id,
-    },
-  });
-
   return context.entities.Topic.delete({
     where: {
       id,

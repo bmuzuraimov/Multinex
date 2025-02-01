@@ -2,25 +2,26 @@ import { getPublicCourses, duplicateCourse, useQuery } from 'wasp/client/operati
 import { useCallback, memo, useState } from 'react';
 import { VscCopy } from 'react-icons/vsc';
 import { HiOutlineBookOpen, HiOutlineAcademicCap } from 'react-icons/hi';
+import NavBar from '../components/NavBar';
 import { useAuth } from 'wasp/client/auth';
 
 interface Course {
-    id: string;
-    name: string;
-    description: string;
-    image?: string;
-    userId: string;
-    isPublic: boolean;
-    totalExercises: number;
-    totalTopics: number;
-    createdAt: Date;
+  id: string;
+  name: string;
+  description: string;
+  image?: string;
+  userId: string;
+  isPublic: boolean;
+  totalExercises: number;
+  totalTopics: number;
+  createdAt: Date;
 }
 
 const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll: (id: string) => void }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const { data: user } = useAuth();
-    
+
   const handleEnroll = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -39,17 +40,15 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
 
   const toggleDescription = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsDescriptionExpanded(prev => !prev);
+    setIsDescriptionExpanded((prev) => !prev);
   }, []);
 
   const isOwner = user?.id === course.userId;
 
   return (
-    <div 
+    <div
       className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-102 overflow-hidden ${
-        isOwner 
-          ? 'border-2 border-teal-500 dark:border-teal-400' 
-          : 'border border-gray-100 dark:border-gray-700'
+        isOwner ? 'border-2 border-teal-500 dark:border-teal-400' : 'border border-gray-100 dark:border-gray-700'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -62,7 +61,9 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
           <h4 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>{course.name}</h4>
           {!isOwner && (
             <button
-              className={`p-2 rounded-full bg-white/90 dark:bg-gray-800/90 text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 transition-colors duration-200 backdrop-blur-sm ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+              className={`p-2 rounded-full bg-white/90 dark:bg-gray-800/90 text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 transition-colors duration-200 backdrop-blur-sm ${
+                isHovered ? 'opacity-100' : 'opacity-0'
+              }`}
               onClick={handleEnroll}
               title={user ? 'Enroll in this course' : 'Sign in to enroll'}
             >
@@ -83,7 +84,7 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
             </button>
           )}
         </div>
-        
+
         <div className='mt-4 flex flex-col space-y-3'>
           <div className='flex items-center justify-between text-sm text-gray-600 dark:text-gray-400'>
             <div className='flex items-center space-x-2'>
@@ -95,13 +96,14 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
               <span>{course.totalExercises} Exercises</span>
             </div>
           </div>
-          
+
           <div className='pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center'>
             <span className='text-xs text-gray-500 dark:text-gray-400'>
-              Added {new Date(course.createdAt).toLocaleDateString(undefined, { 
+              Added{' '}
+              {new Date(course.createdAt).toLocaleDateString(undefined, {
                 year: 'numeric',
                 month: 'short',
-                day: 'numeric'
+                day: 'numeric',
               })}
             </span>
             <span className='text-xs font-medium text-teal-600 dark:text-teal-400'>
@@ -162,7 +164,8 @@ const PublicCoursesPage = () => {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50 dark:bg-gray-900'>
+    <>
+      <NavBar />
       <div className='lg:mt-10 pb-10'>
         <div className='mx-auto max-w-7xl px-6 lg:px-8'>
           <div className='mx-auto max-w-4xl text-center'>
@@ -173,7 +176,7 @@ const PublicCoursesPage = () => {
               Explore and enroll in high-quality courses shared by the community. All courses are free to use.
             </p>
           </div>
-          
+
           <div className='mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
             {publicCourses.courses.map((course) => (
               <PublicCourseCard key={course.id} course={course} onEnroll={handleEnroll} />
@@ -181,7 +184,7 @@ const PublicCoursesPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

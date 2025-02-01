@@ -30,6 +30,21 @@ model User {
   exercises                 Exercise[]
   feedbacks                 Feedback[]
   landingPageTry            LandingPageTry?
+  organization              Organization?    @relation(fields: [organizationId], references: [id])
+  organizationId            String?
+  deletedAt                 DateTime?
+}
+
+model Organization {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+  name                      String
+  emailDomain              String          @unique
+  stripeCustomerId         String?
+  subscriptionStatus       String          @default("inactive")
+  subscriptionPlan         String?
+  seats                    Int             @default(0)
+  users                    User[]
 }
 
 model LandingPageTry {
@@ -47,6 +62,7 @@ model LandingPageTry {
   prompt              String      // From Exercise
   promptImg           String      @default("/task1_prompt.png") // From Exercise
   lessonText          String      // Generated lesson content
+  audioTimestamps     String[]    @default([])
   paragraphSummary    String      @default("")
   level               String      @default("")
   no_words            Int         @default(0)
@@ -103,8 +119,8 @@ model Topic {
   userId      String  
   length      Int       @default(500)
   level       String    @default("Like I am a university student")
-  course      Course    @relation(fields: [courseId], references: [id])
-  user        User      @relation(fields: [userId], references: [id])
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercises   Exercise[]
   createdAt   DateTime  @default(now())
 }
@@ -115,6 +131,7 @@ model Exercise {
   prompt              String
   promptImg           String      @default("/task1_prompt.png")
   lessonText          String
+  audioTimestamps     String[]    @default([])
   paragraphSummary    String      @default("")
   level               String      @default("")
   no_words            Int         @default(0)
@@ -128,16 +145,30 @@ model Exercise {
   questions           Question[]  @relation("ExerciseQuestions")
   userId              String
   topicId             String?
-  topic               Topic?      @relation(fields: [topicId], references: [id])
-  user                User        @relation(fields: [userId], references: [id])
+  topic               Topic?      @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt           DateTime    @default(now())
+  file                File?
+}
+
+model File {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+
+  exercise                  Exercise        @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  exerciseId                String          @unique
+
+  name                      String
+  type                      String
+  key                       String
+  uploadUrl                 String
 }
 
 model Question {
   id          String      @id @default(uuid())
   text        String
   exerciseId  String
-  exercise    Exercise    @relation("ExerciseQuestions", fields: [exerciseId], references: [id])
+  exercise    Exercise    @relation("ExerciseQuestions", fields: [exerciseId], references: [id], onDelete: Cascade)
   options     Option[]    @relation("QuestionOptions")
   createdAt   DateTime    @default(now())
 }
@@ -147,7 +178,7 @@ model Option {
   text        String
   isCorrect   Boolean     @default(false)
   questionId  String
-  question    Question    @relation("QuestionOptions", fields: [questionId], references: [id])
+  question    Question    @relation("QuestionOptions", fields: [questionId], references: [id], onDelete: Cascade)
   createdAt   DateTime    @default(now())
 }
 
@@ -159,7 +190,7 @@ model Feedback {
   message                  String
   email                    String
   userId                   String
-  user                     User            @relation(fields: [userId], references: [id])
+  user                     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   // Additional feedback fields
   rating                   Int             @default(0)  // Overall rating out of 5

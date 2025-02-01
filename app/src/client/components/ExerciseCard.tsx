@@ -103,7 +103,7 @@ const ExerciseCard: React.FC<ExerciseItemProps> = ({ index, exercise }) => {
           <LuShare />
         </button>
         <div className='absolute top-2 left-2 z-10 text-2xl font-semibold text-gray-700 dark:text-gray-200'>{index + 1}</div>
-        <a href={`/exercise-${exercise.id}`} className='w-full group'>
+        <a href={`/exercise/${exercise.id}`} className='w-full group'>
           <img
             src={exercise.completed ? ExerciseDoneImg : ExerciseImg}
             className='border-b border-grey-200 dark:border-gray-600 transition-transform duration-200 group-hover:scale-105'

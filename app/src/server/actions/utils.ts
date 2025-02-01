@@ -62,6 +62,9 @@ export const reportToAdmin = async (message: string) => {
 };
 
 export const cleanMarkdown = (text: string): string => {
+  if (!text) {
+    return '';
+  }
   return text
     // Remove bold markdown
     .replace(/\*\*([^*]+)\*\*/g, '$1')

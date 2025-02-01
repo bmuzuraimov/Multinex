@@ -3,20 +3,16 @@ import Confetti from 'react-confetti';
 import { updateExercise } from 'wasp/client/operations';
 import { Tooltip } from 'react-tooltip';
 import { HiOutlineInformationCircle } from 'react-icons/hi';
+import { useExerciseContext } from '../contexts/ExerciseContext';
 
 interface ExerciseResultProps {
   exerciseId: string;
-  essay: string;
-  errorIndices: number[];
-  setMode: (mode: 'prompt' | 'typing' | 'submitted' | 'test') => void;
 }
 
 const ExerciseResult: React.FC<ExerciseResultProps> = ({
   exerciseId,
-  essay,
-  errorIndices,
-  setMode,
 }) => {
+  const { essay, errorIndices, setMode } = useExerciseContext();
   const [displayScore, setDisplayScore] = useState(0);
   const [selectedRating, setSelectedRating] = useState(0); // To store the selected rating
   const [hoverRating, setHoverRating] = useState(0); // To store the hover state for rating stars

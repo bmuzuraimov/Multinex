@@ -1,7 +1,5 @@
 import * as THREE from 'three';
 import { gsap } from 'gsap';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 
 interface MeteorConfig {
   color: number;
@@ -16,8 +14,10 @@ interface MeteorConfig {
   fadeOutDuration: number;
 }
 
-// Reuse text geometries and materials across meteors
-let SHARED_TEXT_GEOMETRIES: {[key: string]: THREE.BufferGeometry} = {};
+// Reuse geometries and materials across meteors
+const SHARED_SPHERE_GEOMETRY = new THREE.SphereGeometry(0.5, 32, 32);
+const SHARED_CUBE_GEOMETRY = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+const SHARED_TRIANGLE_GEOMETRY = new THREE.ConeGeometry(0.5, 1, 3);
 const SHARED_FLASH_GEOMETRY = new THREE.SphereGeometry(1, 16, 16);
 
 // Reusable materials
@@ -29,10 +29,10 @@ export const meteorConfigs: MeteorConfig[] = [
     color: 0xff4444,
     speed: 4.0,
     impact: 0.2,
-    name: 'See & Hear',
+    name: 'sphere',
     penetrationDepth: 3.5,
     size: 0.4,
-    trailOpacity: 0.4,
+    trailOpacity: 0.8,
     metalness: 0.7,
     roughness: 0.3,
     fadeOutDuration: 0.4
@@ -41,10 +41,10 @@ export const meteorConfigs: MeteorConfig[] = [
     color: 0x44ff44,
     speed: 2.8,
     impact: 0.5,
-    name: 'Type',
+    name: 'cube',
     penetrationDepth: 1.5,
     size: 0.7,
-    trailOpacity: 0.6,
+    trailOpacity: 0.9,
     metalness: 0.85,
     roughness: 0.15,
     fadeOutDuration: 0.8
@@ -53,10 +53,10 @@ export const meteorConfigs: MeteorConfig[] = [
     color: 0x4444ff,
     speed: 1.8,
     impact: 1.0,
-    name: 'Take Notes',
+    name: 'triangle',
     penetrationDepth: 0,
     size: 1.0,
-    trailOpacity: 0.8,
+    trailOpacity: 1.0,
     metalness: 1.0,
     roughness: 0.1,
     fadeOutDuration: 1.2
@@ -75,78 +75,73 @@ interface MeteorsReturn {
 
 export const createMeteors = (scene: THREE.Scene): Promise<MeteorsReturn> => {
   const impactPoints: THREE.Vector3[] = [];
-  const fontLoader = new FontLoader();
 
-  // Load font first
   return new Promise((resolve) => {
-    fontLoader.load('/fonts/helvetiker_regular.typeface.json', (font) => {
-      meteorConfigs.forEach(config => {
-        if (!SHARED_TEXT_GEOMETRIES[config.name]) {
-          SHARED_TEXT_GEOMETRIES[config.name] = new TextGeometry(config.name, {
-            font: font,
-            size: 0.6,
-            height: 0.2,
-            curveSegments: 12,
-            bevelEnabled: true,
-            bevelThickness: 0.02,
-            bevelSize: 0.01,
-            bevelOffset: 0,
-            bevelSegments: 3
-          });
-          SHARED_TEXT_GEOMETRIES[config.name].center();
-        }
-      });
+    const meteors = meteorConfigs.map((config, index) => {
+      let meteorMaterial = SHARED_METEOR_MATERIALS.get(config.color);
+      if (!meteorMaterial) {
+        meteorMaterial = new THREE.MeshPhysicalMaterial({
+          color: config.color,
+          emissive: config.color,
+          emissiveIntensity: 1,
+          metalness: config.metalness,
+          roughness: config.roughness,
+          clearcoat: 1.0
+        });
+        SHARED_METEOR_MATERIALS.set(config.color, meteorMaterial);
+      }
 
-      const meteors = meteorConfigs.map((config, index) => {
-        let meteorMaterial = SHARED_METEOR_MATERIALS.get(config.color);
-        if (!meteorMaterial) {
-          meteorMaterial = new THREE.MeshPhysicalMaterial({
-            color: config.color,
-            emissive: config.color,
-            emissiveIntensity: 1,
-            metalness: config.metalness,
-            roughness: config.roughness,
-            clearcoat: 1.0
-          });
-          SHARED_METEOR_MATERIALS.set(config.color, meteorMaterial);
-        }
+      let geometry;
+      switch(config.name) {
+        case 'sphere':
+          geometry = SHARED_SPHERE_GEOMETRY;
+          break;
+        case 'cube':
+          geometry = SHARED_CUBE_GEOMETRY;
+          break;
+        case 'triangle':
+          geometry = SHARED_TRIANGLE_GEOMETRY;
+          break;
+        default:
+          geometry = SHARED_SPHERE_GEOMETRY;
+      }
 
-        const meteor = new THREE.Mesh(SHARED_TEXT_GEOMETRIES[config.name], meteorMaterial);
-        meteor.scale.setScalar(config.size);
+      const meteor = new THREE.Mesh(geometry, meteorMaterial);
+      meteor.scale.setScalar(config.size);
 
-        const trailLength = Math.floor(20 + (config.impact * 20));
-        const trailGeometry = new THREE.BufferGeometry();
-        
-        let trailMaterial = SHARED_TRAIL_MATERIALS.get(config.color);
-        if (!trailMaterial) {
-          trailMaterial = new THREE.LineBasicMaterial({
-            color: config.color,
-            transparent: true,
-            opacity: config.trailOpacity,
-            blending: THREE.AdditiveBlending
-          });
-          SHARED_TRAIL_MATERIALS.set(config.color, trailMaterial);
-        }
+      const trailLength = Math.floor(40 + (config.impact * 40));
+      const trailGeometry = new THREE.BufferGeometry();
+      
+      let trailMaterial = SHARED_TRAIL_MATERIALS.get(config.color);
+      if (!trailMaterial) {
+        trailMaterial = new THREE.LineBasicMaterial({
+          color: config.color,
+          transparent: true,
+          opacity: config.trailOpacity,
+          blending: THREE.AdditiveBlending,
+          linewidth: 2
+        });
+        SHARED_TRAIL_MATERIALS.set(config.color, trailMaterial);
+      }
 
-        const trailPoints = new Float32Array(trailLength * 3);
-        trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPoints, 3));
-        const trail = new THREE.Line(trailGeometry, trailMaterial);
-        scene.add(trail);
-        
-        (meteor as any).trail = trail;
-        
-        const angle = (index * Math.PI * 2) / meteorConfigs.length;
-        meteor.position.set(
-          Math.cos(angle) * 25,
-          Math.sin(angle) * 25,
-          (Math.random() - 0.5) * 10
-        );
-        scene.add(meteor);
-        return { meteor, config };
-      });
-
-      resolve({ meteors, impactPoints });
+      const trailPoints = new Float32Array(trailLength * 3);
+      trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPoints, 3));
+      const trail = new THREE.Line(trailGeometry, trailMaterial);
+      scene.add(trail);
+      
+      (meteor as any).trail = trail;
+      
+      const angle = (index * Math.PI * 2) / meteorConfigs.length;
+      meteor.position.set(
+        Math.cos(angle) * 25,
+        Math.sin(angle) * 25,
+        (Math.random() - 0.5) * 10
+      );
+      scene.add(meteor);
+      return { meteor, config };
     });
+
+    resolve({ meteors, impactPoints });
   });
 };
 
@@ -154,7 +149,8 @@ export const animateMeteors = (
   meteors: { meteor: THREE.Mesh, config: MeteorConfig }[], 
   scene: THREE.Scene,
   sphere: THREE.Mesh,
-  impactPoints: THREE.Vector3[]
+  impactPoints: THREE.Vector3[],
+  activeIndex: number
 ) => {
   const flashMaterials = new Map<number, THREE.MeshBasicMaterial>();
   const flashMesh = new THREE.Mesh(SHARED_FLASH_GEOMETRY);
@@ -228,8 +224,8 @@ export const animateMeteors = (
               const vertexNormal = tempVertex.clone().normalize();
               const angleDiff = tempNormal.angleTo(vertexNormal);
               
-              if (angleDiff < Math.PI / 3) {
-                const scale = 1 + (Math.PI / 3 - angleDiff) * 0.5 * config.impact;
+              if (angleDiff < Math.PI / 6) {
+                const scale = 1 + (Math.PI / 6 - angleDiff) * 0.1 * config.impact;
                 tempVertex.multiplyScalar(scale);
                 positions[i + j] = tempVertex.x;
                 positions[i + j + 1] = tempVertex.y;

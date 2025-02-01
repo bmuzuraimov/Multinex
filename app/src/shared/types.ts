@@ -47,6 +47,8 @@ export interface QuestionsResponse {
 
 // Define types for grouped props
 export type ExerciseFormContentSettings = {
+  exerciseName: string;
+  setExerciseName: (value: string) => void;
   exerciseLength: string; // Target length of generated exercise content
   setExerciseLength: (value: string) => void;
   exerciseLevel: string; // Difficulty level of exercise (e.g. Beginner, Advanced)

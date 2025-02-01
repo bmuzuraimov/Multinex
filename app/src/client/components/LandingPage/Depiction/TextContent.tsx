@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
-const TextContent: React.FC = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
+interface TextContentProps {
+  activeIndex: number;
+}
+
+const TextContent: React.FC<TextContentProps> = ({ activeIndex }) => {
   const [displayedText0, setDisplayedText0] = useState('');
   const [displayedText1, setDisplayedText1] = useState('');
   const [highlightedWordIndex, setHighlightedWordIndex] = useState(0);
@@ -12,27 +15,23 @@ const TextContent: React.FC = () => {
 
   useEffect(() => {
     let currentIndex = 0;
-    let typingSpeed = activeIndex === 1 ? 20 : 50; // Faster for typing, slower for handwriting
+    let typingSpeed = activeIndex === 1 ? 20 : 50;
 
     const typeText = () => {
       if (activeIndex === 0 && currentIndex < fullText0.length) {
         setDisplayedText0(fullText0.slice(0, currentIndex + 1));
         currentIndex++;
         setTimeout(typeText, typingSpeed);
-      } else if (activeIndex === 0 && currentIndex === fullText0.length) {
-        setActiveIndex(1);
       } else if (activeIndex === 1 && currentIndex < fullText1.length) {
-        setDisplayedText1(fullText1.slice(0, currentIndex + 1));
+        setDisplayedText1(fullText1.slice(0, currentIndex + 1) + "_");
         currentIndex++;
         setTimeout(typeText, typingSpeed);
-      } else if (activeIndex === 1 && currentIndex === fullText1.length) {
-        setActiveIndex(2);
       }
     };
 
     currentIndex = 0;
     if (activeIndex === 0) setDisplayedText0('');
-    if (activeIndex === 1) setDisplayedText1('');
+    if (activeIndex === 1) setDisplayedText1('_');
     if (activeIndex === 2) {
       // Start word highlighting for listening mode
       const words = fullText2.split(' ');
@@ -43,9 +42,11 @@ const TextContent: React.FC = () => {
           wordIndex++;
         } else {
           clearInterval(highlightInterval);
-          setActiveIndex(0);
+          setHighlightedWordIndex(0);
         }
-      }, 300); // Adjust timing as needed
+      }, 300);
+
+      return () => clearInterval(highlightInterval);
     }
     typeText();
   }, [activeIndex]);
@@ -70,17 +71,29 @@ const TextContent: React.FC = () => {
     <div className="w-full h-full flex items-center justify-center">
       <div className="text-white space-y-2 p-2 backdrop-blur-sm bg-black/30 rounded-xl shadow-2xl relative">
         {/* Active label display */}
-        <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
-          <div className="flex items-center gap-2 px-4 py-2 bg-black/40 rounded-full backdrop-blur-sm">
-            <span className="text-xl">{activeIndex === 0 ? "✍️" : activeIndex === 1 ? "⌨️" : "🎧"}</span>
-            <span className="font-semibold">{activeIndex === 0 ? "Write down" : activeIndex === 1 ? "Type" : "See & Listen"}</span>
-            <span className="text-sm opacity-75">({activeIndex === 0 ? "Must memorize" : activeIndex === 1 ? "Easy but not intuitive" : "Intuitive"})</span>
+        <div className="absolute -top-24 left-1/2 transform -translate-x-1/2">
+          <div className="group relative flex items-center gap-4 px-8 py-4 rounded-3xl border-2 border-white/20 transition-all duration-500 hover:border-white/40 hover:scale-105">
+            <span className="text-3xl transition-transform duration-500 group-hover:scale-110">
+              {activeIndex === 0 ? "✍️" : activeIndex === 1 ? "⌨️" : "🎧"}
+            </span>
+            <div className="flex flex-col">
+              <span className={`font-bold text-xl tracking-wider bg-clip-text text-transparent ${
+                activeIndex === 0 ? 'bg-gradient-to-r from-blue-400 to-indigo-400' :
+                activeIndex === 1 ? 'bg-gradient-to-r from-green-400 to-emerald-400' :
+                'bg-gradient-to-r from-red-400 to-rose-400'
+              }`}>
+                {activeIndex === 0 ? "Write down" : activeIndex === 1 ? "Type" : "See & Listen"}
+              </span>
+              <span className="text-sm font-light text-black tracking-wide">
+                {activeIndex === 0 ? "Must memorize" : activeIndex === 1 ? "Easy but not intuitive" : "Intuitive"}
+              </span>
+            </div>
           </div>
         </div>
 
         <div className="relative">
           <p 
-            className={`text-lg ${activeIndex === 0 ? 'font-dancing' : ''} leading-relaxed px-4 py-3 rounded-lg backdrop-blur-sm transition-all duration-500`}
+            className={`text-lg ${activeIndex === 0 ? 'font-dancing' : 'font-manrope'} leading-relaxed px-4 py-3 rounded-lg backdrop-blur-sm transition-all duration-500`}
             style={{
               filter: activeIndex === 0 ? 'blur(0)' : 'blur(2px)',
               opacity: activeIndex === 0 ? '1' : '0.5',

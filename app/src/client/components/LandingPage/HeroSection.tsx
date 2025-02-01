@@ -26,11 +26,10 @@ const HeroSection: React.FC = () => {
               </span>
             </h1>
             <h3 className='mt-6 text-xl leading-8 text-teal-700 dark:text-teal-300 italic font-serif'>
-              Learn by seeing, typing, and taking notes—not just by reading. Typit turns your PDF lecture notes into
-              interactive typing exercises, helping you focus, retain, and master your material faster.
+              Transform your lecture notes into interactive typing exercises.
             </h3>
             <p className='mt-6 mx-auto max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-300'>
-              Designed to fight the pitfalls of passive learning, Typit makes studying smarter, not harder.
+              Learn actively through seeing, typing, and note-taking.
             </p>
             <ExerciseForm topicId={null} demo={true} />
 

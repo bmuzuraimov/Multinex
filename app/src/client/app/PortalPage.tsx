@@ -167,7 +167,7 @@ const CourseCard = memo(({ course, onDelete, onUpdate, onNameChange }: {
   return (
     <>
       <div className='relative bg-white dark:bg-gray-800 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-102 border border-gray-100 dark:border-gray-700 overflow-hidden'>
-        <Link to={'course-' + course.id}>
+        <Link to={'/course/' + course.id}>
           <div className={`relative h-48 w-full ${course.image} bg-cover bg-center`}>
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
           </div>

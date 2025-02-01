@@ -3,14 +3,14 @@ import { updateCurrentUser } from 'wasp/client/operations';
 import { Outlet } from 'react-router-dom'
 import './Main.css';
 import AppNavBar from './components/AppNavBar';
-import { useMemo, useEffect, ReactNode } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 /**
  * use this component to wrap all child components
  * this is useful for templates, themes, and context
  */
-export default function App({ children }: { children: ReactNode }) {
+export default function App() {
   const location = useLocation();
   const { data: user } = useAuth();
 

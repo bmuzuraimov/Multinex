@@ -18,9 +18,12 @@ const NavigationLink = memo(({ item, onClick, isMobile = false }: {
   onClick?: () => void;
   isMobile?: boolean;
 }) => {
-  const baseClasses = "text-gray-900 dark:text-gray-100 hover:text-teal-500 dark:hover:text-teal-400 transition-all duration-200";
-  const mobileClasses = "block rounded-lg px-3 py-2 text-base font-medium leading-7 hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-2";
-  const desktopClasses = "text-sm font-medium leading-6 hover:scale-105";
+// Update NavigationLink component
+const baseClasses = "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors";
+const desktopClasses = "text-sm pb-2 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-teal-500 hover:after:w-full after:transition-all";
+
+// Mobile menu item update
+const mobileClasses = "block px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 font-medium";
 
   return (
     <a

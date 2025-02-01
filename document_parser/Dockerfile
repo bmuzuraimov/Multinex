@@ -1,5 +1,5 @@
 # Use the official Python slim image as the base
-FROM python:3.9.2-slim
+FROM python:3.13.1-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1

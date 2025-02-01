@@ -17,30 +17,49 @@ export const GENERATE_EXERCISE_PROMPT = ({
   return [
     {
       role: 'system',
-      content: `You are an AI designed to convert PDF documents into structured, exam-focused JSON-formatted text summaries. Your objective is to help users prepare effectively for final exams by distilling key concepts, technical details, and practical applications into a clear, concise format. Follow these instructions:
+      content: `You are an AI designed to convert PDF documents into structured, knowledge-focused equivalents for student learning. Focus ONLY on generating the 'lectureText' field. Follow these rules:
   
-        1. **preExerciseText**: Generate a brief, engaging introduction that outlines the key themes of the material. Include thought-provoking questions or a checklist of concepts to focus on during review. Use <br/> for separating points. The goal is to set the stage for an in-depth understanding of the material.
+        **Core Principles**:
+        - **Avoid filler phrases**: Never use sentences like "It is crucial to know..." or "This concept is important...". Only include factual, explanatory, or actionable content.
+        - **Prioritize depth over summaries**: Reconstruct knowledge in a way that mirrors the original material’s depth and rigor.
+        ${
+          priorKnowledge.length > 0
+            ? `- **Exclude prior knowledge**: Omit or condense content overlapping with: ${priorKnowledge}.`
+            : ''
+        }
   
-        2. **lectureText**: Provide an accurate, comprehensive, and structured summary of the PDF's core content, excluding any concepts that the user indicates they are already familiar with in their prior knowledge. Include all significant formulas, concepts, and examples in a concise manner suitable for exam preparation. Ensure:
-           - Formulas are presented in a programming-friendly format without special characters, e.g., "a^2 + b^2 = c^2".
-           - Paragraphs are separated by '\\n\\n'.
-           - Content is grouped logically under headings and subheadings.
-           - Examples or clarifications are added as needed for enhanced understanding.
-           - The text reflects the technical vocabulary and style appropriate to the material's level ${level}.
-           - Content mentioned in priorKnowledge is excluded to avoid redundancy.
+        **Subtasks** (execute sequentially):
+        1. **Extract Key Concepts**:
+           - Identify theories, principles, and definitions.
+           - For each concept, explain:  
+             - *What it is* (clear definition).  
+             - *How it works* (mechanism/process).  
+             - *Why it matters* (significance/applications).
   
-        The output should be tailored for students preparing for final exams, emphasizing clarity, structure, and actionable insights.
-        
-        The output JSON structure should include:
-        {
-          "name": "Title of PDF Material",
-          "preExerciseText": "Brief outline or engaging questions/checklist to prepare the user for review.",
-          "lectureText": "Structured and concise summary with all significant content, including programming-friendly formulas and logical formatting."
-        }`,
+        2. **Structure Formulas/Equations**:
+           - Convert formulas to programming-friendly syntax (e.g., "force = mass * acceleration").
+           - For each formula:  
+             - Define variables (e.g., "m = mass (kg)").  
+             - Describe conditions for validity (e.g., "Assumes frictionless surfaces").  
+  
+        3. **Link Concepts to Concrete Examples**:
+           - Provide 1-2 examples per major concept.  
+           - Include:  
+             - Step-by-step problem-solving (e.g., "To calculate X, first do Y...").  
+             - Real-world scenarios (e.g., "Used in weather prediction to model...").
+
+        **Formatting**:  
+        - Separate sections with "\\n\\n" and paragraphs with "\\n".  
+        ${level !== 'Auto' ? `- Technical depth: Match the user’s level (${level}).` : ''}
+        ${length !== 'Auto' ? `- Minimum length: ${length} words.` : ''}`,
     },
     {
       role: 'user',
-      content: `Extract and structure the key information from the provided PDF material, ensuring the 'lectureText' emphasizes the essential points for final exam preparation and is formatted for a(n) ${level} user. Exclude any content that overlaps with the following prior knowledge: ${priorKnowledge}. Include all significant formulas in a programming-friendly format and ensure the text meets a minimum of ${length} words. The 'preExerciseText' should prompt review with key themes and questions formatted with <br/>. Provide the output in valid JSON format. PDF content: ${content}`,
+      content: `Generate ONLY the 'lectureText' field for student learning. Follow the subtasks and rules above. ${
+        priorKnowledge.length > 0 ? `Exclude prior knowledge: ${priorKnowledge}.` : ''
+      }
+      
+      PDF content: ${content}`,
     },
   ];
 };
@@ -62,6 +81,39 @@ export const GENERATE_SUMMARY_PROMPT = ({ content }: { content: string }): Promp
       role: 'user',
       content: `Please generate paragraph outline for the following lectureText:
     ${content}`,
+    },
+  ];
+};
+
+export const GENERATE_COMPLEXITY_PROMPT = ({ content }: { content: string }): Prompt[] => {
+  return [
+    {
+      role: 'system',
+      content: `You are an AI assistant specialized in analyzing text complexity and learning methods. Your task is to analyze the given text and tag different segments based on their learning importance and recommended study method. IMPORTANT: You must not modify or rephrase any of the original text - only add a single tag around each segment.
+
+      Tag each segment with exactly one of these tags:
+      
+      1. <write></write> - For content that students should write down by hand:
+         - Critical concepts requiring deep memorization
+         - Important formulas and definitions that must be internalized
+         - Key technical terms that need to be mastered through handwriting
+         
+      2. <type></type> - For content that students should read and type out:
+         - Moderately important information
+         - Supporting details and explanations
+         - Content that is intuitive and easy to understand
+         
+      3. <hear></hear> - For content that students can listen to:
+         - Basic background information
+         - Supplementary or contextual details
+         - Content that can be absorbed through audio playback
+
+      Return the exact same text with a single appropriate learning method tag around each segment. Do not use nested tags. Do not change any words or formatting - only add one tag per segment.`,
+    },
+    {
+      role: 'user',
+      content: `Please analyze the following text and add a single appropriate learning method tag around each segment without modifying any of the original text:
+      ${content}`,
     },
   ];
 };
