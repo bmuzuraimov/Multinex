@@ -1,22 +1,27 @@
 import { useAuth } from 'wasp/client/auth';
 import { updateCurrentUser } from 'wasp/client/operations';
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom';
 import './Main.css';
 import AppNavBar from './components/AppNavBar';
+import NavBar from './components/NavBar';
 import { useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-/**
- * use this component to wrap all child components
- * this is useful for templates, themes, and context
- */
 export default function App() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { data: user } = useAuth();
 
-  const shouldDisplayAppNavBar = useMemo(() => {
-    return location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/signup' && location.pathname !== '/about' && location.pathname !== '/public-courses';
+  const isAuthPage = useMemo(() => {
+    return !['/', '/login', '/signup', '/about', '/public-courses'].includes(location.pathname);
   }, [location]);
+
+  // Redirect new users to onboarding if onBoardingCompleted is false/null
+  useEffect(() => {
+    if (user && user.onBoardingCompleted === false) { 
+      navigate('/portal/onboarding');
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     if (user) {
@@ -41,7 +46,7 @@ export default function App() {
   return (
     <>
       <div className='min-h-screen dark:text-white dark:bg-gray-900'>
-        {shouldDisplayAppNavBar && <AppNavBar />}
+        {isAuthPage ? <AppNavBar /> : <NavBar />}
         <div className='font-manrope'><Outlet /></div>
       </div>
       <div id="modal-root"></div>

@@ -1,4 +1,3 @@
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -20,6 +19,7 @@ model User {
   stripeId                  String?
   checkoutSessionId         String?
   sendEmail                 Boolean         @default(false)
+  onBoardingCompleted       Boolean         @default(false)
   datePaid                  DateTime?
   lang                      String          @default("en")
   tokens                    Int             @default(30000)
@@ -33,6 +33,45 @@ model User {
   organization              Organization?    @relation(fields: [organizationId], references: [id])
   organizationId            String?
   deletedAt                 DateTime?
+  onboarding                Onboarding?
+}
+
+model Onboarding {
+  id                        String    @id @default(uuid())
+  userType                  String    // Student, Teacher, Parent, Professor, Other
+  userTypeOther            String?   // If userType is Other
+  learningStyle            String    // Visual, Auditory, Kinesthetic, Mixed
+  
+  // Subjects (multiple can be true)
+  scienceMedicine          Boolean   @default(false)
+  technologyEngineering    Boolean   @default(false)
+  businessEconomics        Boolean   @default(false)
+  humanitiesArts           Boolean   @default(false)
+  languageLearning         Boolean   @default(false)
+  testPrep                 Boolean   @default(false)
+  subjectOther             String?   // If other subject selected
+  
+  // Motivation factors (multiple can be true)
+  motivationProgress       Boolean   @default(false)
+  motivationGamification   Boolean   @default(false)
+  motivationReminders      Boolean   @default(false)
+  motivationCommunity      Boolean   @default(false)
+  motivationToolOnly       Boolean   @default(false)
+  
+  // Marketing sources (multiple can be true)
+  sourceTwitter            Boolean   @default(false)
+  sourceInstagram          Boolean   @default(false)
+  sourceTikTok             Boolean   @default(false)
+  sourceFacebook           Boolean   @default(false)
+  sourceYoutube            Boolean   @default(false)
+  sourceGoogle             Boolean   @default(false)
+  sourceWordOfMouth        Boolean   @default(false)
+  sourceOther              String?   // If other source selected
+  
+  featureRequest          String?    // Optional feature request text
+  
+  userId                   String    @unique
+  user                     User      @relation(fields: [userId], references: [id])
 }
 
 model Organization {

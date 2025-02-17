@@ -166,6 +166,12 @@ page PortalPage {
   component: import PortalPage from "@src/client/app/PortalPage"
 }
 
+
+route OnboardingPageRoute { path: "/portal/onboarding", to: OnboardingPage }
+page OnboardingPage {
+  component: import OnboardingPage from "@src/client/app/OnboardingPage"
+}
+
 route FeedbackRoute { path: "/feedback", to: FeedbackPage }
 page FeedbackPage {
   authRequired: true,
@@ -212,6 +218,11 @@ page CheckoutPage {
 action createFeedback {
   fn: import { createFeedback } from "@src/server/actions/feedback.js",
   entities: [Feedback]
+}
+
+action createOnboarding {
+  fn: import { createOnboarding } from "@src/server/actions/onboarding.js",
+  entities: [Onboarding]
 }
 
 action createQuestion {
