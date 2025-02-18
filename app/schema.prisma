@@ -20,6 +20,7 @@ model User {
   checkoutSessionId         String?
   sendEmail                 Boolean         @default(false)
   onBoardingCompleted       Boolean         @default(false)
+  tourCompleted             Boolean         @default(false)
   datePaid                  DateTime?
   lang                      String          @default("en")
   tokens                    Int             @default(30000)

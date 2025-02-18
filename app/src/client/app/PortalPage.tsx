@@ -6,10 +6,12 @@ import ExerciseForm from '../components/ExerciseForm';
 import CourseForm from '../components/CourseForm';
 import ExerciseCard from '../components/ExerciseCard';
 import { Exercise } from '../../shared/types';
+import UserTour from '../components/UserTour';
 import FooterSection from '../components/LandingPage/FooterSection';
 import { Dialog } from '@headlessui/react';
 import { COURSE_IMAGES } from '../../shared/constants';
 import { HiLockClosed, HiGlobeAlt } from 'react-icons/hi';
+import { useAuth } from 'wasp/client/auth';
 
 interface Course {
   id: string;
@@ -229,6 +231,7 @@ export default function PortalPage() {
   const { data: courses, error: coursesError, isLoading: coursesLoading, refetch: refetchCourses } = useQuery(getAllCourses);
   const { data: exercises, error: exercisesError, isLoading: exercisesLoading, refetch: refetchExercises } = useQuery(getExercisesWithNoTopic);
   const [localCourses, setLocalCourses] = useState<Course[]>([]);
+  const { data: user } = useAuth();
 
   const handleDeleteCourse = useCallback((id: string) => {
     if (window.confirm('Are you sure you want to delete this course?')) {
@@ -258,6 +261,7 @@ export default function PortalPage() {
 
   return (
     <div className='lg:mt-10 pb-10'>
+      {user && <UserTour userId={user.id} />}
       <div className='mx-auto max-w-7xl px-6 lg:px-8'>
         <div className='mx-auto max-w-4xl text-center'>
           <h2 className='mt-2 text-title-xxl font-manrope tracking-tight text-black dark:text-white'>My Courses</h2>

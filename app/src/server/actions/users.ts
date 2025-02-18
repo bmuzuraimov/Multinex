@@ -11,17 +11,25 @@ export const updateUserById: UpdateUserById<{ id: string; data: Partial<User> },
   context
 ) => {
   if (!context.user) {
-    throw new HttpError(401);
+    throw new HttpError(401, "Unauthorized");
   }
 
-  const updatedUser = await context.entities.User.update({
-    where: {
-      id,
-    },
-    data,
-  });
+  // ✅ Ensure the user can only update their own data (security check)
+  const isAdmin = context.user.isAdmin; // Assuming `isAdmin` exists in your schema
+  if (!isAdmin && context.user.id !== id) {
+    throw new HttpError(403, "Forbidden: You can only update your own profile.");
+  }
 
-  return updatedUser;
+  try {
+    const updatedUser = await context.entities.User.update({
+      where: { id },
+      data,
+    });
+
+    return updatedUser;
+  } catch (error) {
+    throw new HttpError(500, "Failed to update user: ");
+  }
 };
 
 export const updateCurrentUser: UpdateCurrentUser<Partial<User>, User> = async (user, context) => {
