@@ -2,19 +2,15 @@ import { faqs } from '../../landing-page/contentSections';
 
 const FAQSection = () => {
   return (
-    <div className='relative mt-32 mx-auto max-w-7xl px-6 pb-24 sm:pb-32 lg:px-8'>
+    <div className='relative mx-auto h-screen max-w-7xl px-6 pb-24 sm:pb-32 lg:px-8'>
       <div className='absolute inset-0 -z-10 overflow-hidden'>
         <div className='absolute left-[50%] top-0 h-[48rem] w-[84rem] -translate-x-1/2 bg-gradient-to-r from-teal-50 to-cyan-50 opacity-30 dark:from-teal-900/30 dark:to-cyan-900/30 [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]' />
       </div>
 
       <div className='mx-auto max-w-4xl text-center'>
-        <h2 className='text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-5xl'>
-          Frequently Asked <span className='text-teal-600 dark:text-teal-400'>Questions</span>
+      <h2 className='mt-6 text-5xl font-bold bg-gradient-to-r from-gray-900 via-teal-800 to-gray-900 dark:from-white dark:via-teal-200 dark:to-white bg-clip-text text-transparent'>
+          Frequently Asked Questions
         </h2>
-        <p className='mt-4 text-lg leading-8 text-gray-600 dark:text-gray-300'>
-          Everything you need to know about our service. Can't find the answer you're looking for? Feel free to contact
-          our support team.
-        </p>
       </div>
 
       <dl className='mx-auto mt-16 max-w-4xl space-y-4'>
@@ -68,7 +64,7 @@ const FAQSection = () => {
       <div className='mt-16 flex justify-center'>
         <a
           href='#contact'
-          className='rounded-full bg-teal-600 px-8 py-4 text-lg font-semibold text-white shadow-sm hover:bg-teal-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 transition-all duration-200 hover:scale-105'
+          className='rounded-full bg-teal-600 px-4 py-2 text-lg font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600'
         >
           Still have questions? Contact us
         </a>

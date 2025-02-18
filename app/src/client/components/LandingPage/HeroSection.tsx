@@ -20,16 +20,15 @@ const HeroSection: React.FC = () => {
         <div className='mx-auto max-w-8xl px-6 lg:px-8'>
           <div className='mx-auto max-w-3xl text-center'>
             <h1 className='text-3xl font-semibold tracking-tight text-gray-900 sm:text-6xl dark:text-gray-100'>
-              <span className='text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-gray-900'>
-                Outsmart AI Laziness – Learn Faster by Doing, Not Just Reading
+              <span className='text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-gray-900'>
+                Let Knowledge Last 5x Longer
                 <span className='animate-pulse'>|</span>
               </span>
             </h1>
-            <h3 className='mt-6 text-xl leading-8 text-teal-700 dark:text-teal-300 italic font-serif'>
-              Your brain wasn’t built for ChatGPT copy-paste.
-            </h3>
             <p className='mt-6 mx-auto max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-300'>
-              <span className="font-semibold text-teal-600 dark:text-teal-400">Type key concepts</span> → <span className="font-semibold text-red-600 dark:text-red-400">Handwrite connections</span> → <span className="font-semibold text-blue-600 dark:text-blue-400">Hear explanations</span> → <span className="font-semibold text-purple-600 dark:text-purple-400">Retain 3x longer</span>.
+              <span className='font-semibold text-teal-600 dark:text-teal-400'>Type key concepts</span> →{' '}
+              <span className='font-semibold text-red-600 dark:text-red-400'>Handwrite connections</span> →{' '}
+              <span className='font-semibold text-blue-600 dark:text-blue-400'>Hear explanations</span>.
             </p>
             <ExerciseForm topicId={null} demo={true} />
 
@@ -42,9 +41,11 @@ const HeroSection: React.FC = () => {
               </Link>
             </div>
           </div>
-          <span className='text-gray-600 dark:text-gray-300 text-sm mt-8 block text-center italic'>
-            Powered by OpenAI models ✨
-          </span>
+          <div className='flex justify-center'>
+            <span className='px-4 py-1 font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-full text-sm mt-8 inline-block text-center italic'>
+              Beyond AI Summaries ✨
+            </span>
+          </div>
         </div>
       </div>
     </div>

@@ -1,12 +1,8 @@
 import { memo } from 'react';
-import NavBar from '../components/NavBar';
 import HeroSection from '../components/LandingPage/HeroSection';
 import WhyTypit from '../components/LandingPage/WhyTypit';
-import HowItWorks from '../components/LandingPage/HowItWorks';
 import ExperienceSection from '../components/LandingPage/ExperienceSection';
-import UniversitiesSection from '../components/LandingPage/UniversitiesSection';
 import FeaturesSection from '../components/LandingPage/FeatureSection';
-import TestimonialsSection from '../components/LandingPage/TestimonialsSection';
 import FAQSection from '../components/LandingPage/FAQSection';
 import FooterSection from '../components/LandingPage/FooterSection';
 
@@ -15,11 +11,8 @@ const MainContent = memo(() => (
   <main className='bg-white dark:bg-gray-900'>
     <HeroSection />
     <WhyTypit />
-    <HowItWorks />
     <ExperienceSection />
-    <UniversitiesSection />
     <FeaturesSection />
-    <TestimonialsSection />
     <FAQSection />
   </main>
 ));
@@ -30,7 +23,6 @@ MainContent.displayName = 'MainContent';
 const LandingPage = memo(() => {
   return (
     <div className='mx-auto max-w-7xl sm:px-6 lg:px-8 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'>
-      <NavBar />
       <MainContent />
       <FooterSection />
     </div>

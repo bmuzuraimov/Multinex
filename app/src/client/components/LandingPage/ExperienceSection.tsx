@@ -67,14 +67,11 @@ const ExperienceSection = () => {
 
       <div className='relative max-w-7xl mx-auto'>
         <div className='text-center mb-20'>
-          <span className='px-4 py-1 text-sm font-medium text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 rounded-full'>
-            Beyond AI Summaries
-          </span>
           <h2 className='mt-6 text-5xl font-bold bg-gradient-to-r from-gray-900 via-teal-800 to-gray-900 dark:from-white dark:via-teal-200 dark:to-white bg-clip-text text-transparent'>
-            Learn It, Type It, Own It
+            Listen, Type, Write
           </h2>
           <p className='mt-4 text-xl text-gray-600 dark:text-gray-300'>
-            Turn passive AI assistance into active mastery with Typit's three-step learning system
+            Turn passive peeking into active grasping with multi-sensory approach
           </p>
         </div>
 
