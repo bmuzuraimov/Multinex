@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Essay from './Essay';
-import { BsPlayFill, BsStopFill, BsTextareaT, BsSpeedometer, BsKeyboard, BsArrowRight } from 'react-icons/bs';
-import { TEXT_SIZES, PLAYBACK_SPEEDS } from '../../shared/constants';
+import { BsPlayFill, BsStopFill, BsTextareaT, BsKeyboard, BsArrowRight } from 'react-icons/bs';
+import { TEXT_SIZES } from '../../shared/constants';
 import { useExerciseContext } from '../contexts/ExerciseContext';
 
 const TypingInterface: React.FC = () => {
@@ -12,8 +12,6 @@ const TypingInterface: React.FC = () => {
     isPlaying,
     togglePlayback,
     setCurrentCharacterIndex,
-    setSpeed,
-    speed,
     currentCharacterIndex,
     onSubmitExercise,
     setErrorIndices,
@@ -22,7 +20,6 @@ const TypingInterface: React.FC = () => {
   } = useExerciseContext();
 
   const [showTextSizeMenu, setShowTextSizeMenu] = useState(false);
-  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   
 
   const handleBackspace = useCallback(
@@ -280,12 +277,11 @@ const TypingInterface: React.FC = () => {
         </p>
 
         {/* Text Size Controls */}
-        <div className='absolute bottom-4 right-36 z-50'>
+        <div className='absolute bottom-4 right-20 z-50'>
           <button
             onClick={(e) => {
               e.stopPropagation();
               setShowTextSizeMenu(!showTextSizeMenu);
-              setShowSpeedMenu(false);
             }}
             className='p-3 rounded-full bg-teal-500 hover:bg-teal-600 text-white transition-colors'
           >
@@ -312,44 +308,6 @@ const TypingInterface: React.FC = () => {
             </div>
           )}
         </div>
-
-        {/* Speed Controls */}
-        <div className='absolute bottom-4 right-20 z-50'>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowSpeedMenu(!showSpeedMenu);
-              setShowTextSizeMenu(false);
-            }}
-            className='p-3 rounded-full bg-teal-500 hover:bg-teal-600 text-white transition-colors'
-          >
-            <BsSpeedometer className='w-5 h-5' />
-          </button>
-
-          {showSpeedMenu && (
-            <div
-              className='absolute bottom-14 right-0 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg w-48'
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className='flex flex-col space-y-2'>
-                <label className='text-sm text-gray-600 dark:text-gray-300'>Playback Speed</label>
-                <input
-                  type='range'
-                  min='200'
-                  max='1000'
-                  step='200'
-                  value={1200 - speed}
-                  onChange={(e) => setSpeed(1200 - parseInt(e.target.value))}
-                  className='w-full accent-teal-500'
-                />
-                <div className='text-xs text-gray-500 dark:text-gray-400 text-center'>
-                  {PLAYBACK_SPEEDS[speed as keyof typeof PLAYBACK_SPEEDS]}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Playback Button */}
         <button
           onClick={() => togglePlayback()}

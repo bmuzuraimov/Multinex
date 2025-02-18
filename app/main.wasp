@@ -3,7 +3,7 @@ app Typit {
     version: "^0.15.2"
   },
 
-  title: "Typeit",
+  title: "Typit",
 
   head: [
       "<!-- General Meta Tags -->",
@@ -223,6 +223,11 @@ action createFeedback {
 action createOnboarding {
   fn: import { createOnboarding } from "@src/server/actions/onboarding.js",
   entities: [Onboarding]
+}
+
+action createFeature {
+  fn: import { createFeature } from "@src/server/actions/features.js",
+  entities: [Feature]
 }
 
 action createQuestion {

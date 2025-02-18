@@ -2,7 +2,6 @@ import { getPublicCourses, duplicateCourse, useQuery } from 'wasp/client/operati
 import { useCallback, memo, useState } from 'react';
 import { VscCopy } from 'react-icons/vsc';
 import { HiOutlineBookOpen, HiOutlineAcademicCap } from 'react-icons/hi';
-import NavBar from '../components/NavBar';
 import { useAuth } from 'wasp/client/auth';
 
 interface Course {
@@ -164,27 +163,24 @@ const PublicCoursesPage = () => {
   }
 
   return (
-    <>
-      <NavBar />
-      <div className='lg:mt-10 pb-10'>
-        <div className='mx-auto max-w-7xl px-6 lg:px-8'>
-          <div className='mx-auto max-w-4xl text-center'>
-            <h2 className='mt-2 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl'>
-              Community Courses
-            </h2>
-            <p className='mt-4 text-lg text-gray-600 dark:text-gray-400'>
-              Explore and enroll in high-quality courses shared by the community. All courses are free to use.
-            </p>
-          </div>
+    <div className='lg:mt-10 pb-10'>
+      <div className='mx-auto max-w-7xl px-6 lg:px-8'>
+        <div className='mx-auto max-w-4xl text-center'>
+          <h2 className='mt-2 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl'>
+            Community Courses
+          </h2>
+          <p className='mt-4 text-lg text-gray-600 dark:text-gray-400'>
+            Explore and enroll in high-quality courses shared by the community. All courses are free to use.
+          </p>
+        </div>
 
-          <div className='mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
-            {publicCourses.courses.map((course) => (
-              <PublicCourseCard key={course.id} course={course} onEnroll={handleEnroll} />
-            ))}
-          </div>
+        <div className='mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+          {publicCourses.courses.map((course) => (
+            <PublicCourseCard key={course.id} course={course} onEnroll={handleEnroll} />
+          ))}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

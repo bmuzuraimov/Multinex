@@ -1,4 +1,4 @@
-export const ADMIN_EMAIL = 'bmuzuraimov@typit.app';
+export const ADMIN_EMAIL = 'bmuzuraimov@gmail.com';
 
 export enum TierIds {
   BASIC = 'BASIC',

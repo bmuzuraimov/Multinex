@@ -1,6 +1,5 @@
 import { type User } from 'wasp/entities';
 import { useEffect, useRef, useState } from 'react';
-import { CgProfile } from 'react-icons/cg';
 import { UserMenuItems } from './UserMenuItems';
 import { cn } from '../../shared/utils';
 
@@ -41,9 +40,6 @@ const DropdownUser = ({ user }: { user: Partial<User> }) => {
         onClick={toggleDropdown}
         className='flex items-center gap-4 duration-300 ease-in-out text-gray-900 hover:text-teal-500'
       >
-
-          <CgProfile size='1.1rem' className='ml-1 mt-[0.1rem] dark:text-white' />
-        
         <span className='hidden text-right lg:block'>
           <span className='block text-sm font-medium dark:text-white'>{user.username}</span>
         </span>

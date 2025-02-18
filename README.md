@@ -1,4 +1,4 @@
-# TypeIt
+# Typit
 
 A platform to fill gaps in the education by revising materials efficiently and typing through important parts of the documents.
 
@@ -15,14 +15,14 @@ A platform to fill gaps in the education by revising materials efficiently and t
 ### 1. Install Wasp
 
 ```bash
-curl -sSL https://get.wasp-lang.dev/installer.sh | sh -s -- --version 0.13.2
+curl -sSL https://get.wasp-lang.dev/installer.sh | sh -s -- --version 0.15.2
 ```
 
 ### 2. Clone the Repository
 
 ```bash
-git clone https://github.com/bmuzuraimov/Typeit
-cd Typeit
+git clone https://github.com/bmuzuraimov/Typit
+cd Typit
 ```
 
 ### 3. Set Up the Database
@@ -90,4 +90,4 @@ Contributions are welcome! Please check out our [CONTRIBUTING.md](CONTRIBUTING.m
 
 ## Support
 
-For support, please [create an issue](https://github.com/bmuzuraimov/Typeit/issues) or contact [bmuzuraimov@gmail.com](mailto:bmuzuraimov@gmail.com).
+For support, please [create an issue](https://github.com/bmuzuraimov/Typit/issues) or contact [bmuzuraimov@gmail.com](mailto:bmuzuraimov@gmail.com).

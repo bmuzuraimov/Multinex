@@ -105,7 +105,7 @@ const Essay: React.FC = () => {
   };
 
   return (
-    <>
+    <div className='mb-16'>
       {formattedEssay.map((section, sectionIndex) => {
         const processedChars = processSection(section.text, section.mode);
         
@@ -143,7 +143,7 @@ const Essay: React.FC = () => {
           </span>
         );
       })}
-    </>
+    </div>
   );
 };
 

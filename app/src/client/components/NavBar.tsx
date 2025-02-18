@@ -1,11 +1,7 @@
 import { Dialog } from '@headlessui/react';
-import DropdownUser from '../components/DropdownUser';
-import { UserMenuItems } from './UserMenuItems';
-import DarkModeSwitcher from './DarkModeSwitcher';
 import { useState, useCallback, memo } from 'react';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import { HiBars3 } from 'react-icons/hi2';
-import { BiLogIn } from 'react-icons/bi';
 import { useAuth } from 'wasp/client/auth';
 import { Link } from 'wasp/client/router';
 import logo from '../static/logo.png';
@@ -38,8 +34,8 @@ const mobileClasses = "block px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg
 
 const LoginButton = memo(({ isMobile = false }: { isMobile?: boolean }) => (
   <Link to='/login'>
-    <div className={`flex items-center text-gray-900 dark:text-gray-100 hover:text-teal-500 dark:hover:text-teal-400 transition-all duration-200 ${isMobile ? 'hover:translate-x-2' : 'hover:scale-105'}`}>
-      Log in <BiLogIn size='1.1rem' className='ml-1' />
+    <div className={`flex items-center text-gray-900 dark:text-gray-100 hover:text-teal-500 dark:hover:text-teal-400 ${isMobile ? 'hover:translate-x-2' : ''}`}>
+      Log in
     </div>
   </Link>
 ));
@@ -103,11 +99,12 @@ const NavBar: React.FC = () => {
         </div>
         <div className='hidden lg:flex lg:flex-1 lg:justify-end lg:align-end'>
           <div className='flex items-center gap-4'>
-            <DarkModeSwitcher />
             {isUserLoading ? null : !user ? (
               <LoginButton />
             ) : (
-              <DropdownUser user={user} />
+              <Link to="/portal" className="rounded-full text-base bg-black text-white px-4 py-1">
+                Portal
+              </Link>
             )}
           </div>
         </div>
@@ -145,11 +142,10 @@ const NavBar: React.FC = () => {
                 {isUserLoading ? null : !user ? (
                   <LoginButton isMobile />
                 ) : (
-                  <UserMenuItems user={user} />
+                  <Link to="/portal" className="block px-3 py-2 text-base font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200">
+                    Portal
+                  </Link>
                 )}
-              </div>
-              <div className='py-6'>
-                <DarkModeSwitcher />
               </div>
             </div>
           </div>

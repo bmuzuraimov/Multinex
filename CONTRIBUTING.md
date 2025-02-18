@@ -1,6 +1,6 @@
-# Contributing to TypeIt
+# Contributing to Typit
 
-Thank you for your interest in contributing to TypeIt! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to Typit! This document provides guidelines and instructions for contributing to the project.
 
 ## Code of Conduct
 
@@ -10,7 +10,7 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
 
 1. **Fork the Repository**
    - Fork the repository to your GitHub account
-   - Clone your fork locally: `git clone https://github.com/bmuzuraimov/Typeit`
+   - Clone your fork locally: `git clone https://github.com/bmuzuraimov/Typit`
 
 2. **Create a Branch**
    - Create a branch for your changes: `git checkout -b feature/your-feature-name`
@@ -89,4 +89,4 @@ If you have questions, feel free to:
 
 ## License
 
-By contributing to TypeIt, you agree that your contributions will be licensed under the GNU Affero General Public License v3.0.
+By contributing to Typit, you agree that your contributions will be licensed under the GNU Affero General Public License v3.0.
