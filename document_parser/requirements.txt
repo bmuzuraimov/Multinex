@@ -37,7 +37,7 @@ SQLAlchemy==2.0.37
 starlette==0.41.3
 tqdm==4.67.1
 typing_extensions==4.12.2
-urllib3==2.3.0
+urllib3>=1.25.4,<2.0
 uvicorn==0.34.0
 websockets==14.2
 XlsxWriter==3.2.0

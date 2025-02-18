@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { GENERATE_EXERCISE_PROMPT, GENERATE_SUMMARY_PROMPT, GENERATE_EXAM_PROMPT, GENERATE_COMPLEXITY_PROMPT } from '../prompts/exercise';
+import { GENERATE_EXERCISE_PROMPT, GENERATE_SUMMARY_PROMPT, GENERATE_EXAM_PROMPT, GENERATE_STUDY_METHOD_TAGS_PROMPT } from '../prompts/exercise';
 import { GENERATE_COURSE_PROMPT } from '../prompts/course';
 import { retry } from './utils';
 import { HttpError } from 'wasp/server';
@@ -160,7 +160,7 @@ export class OpenAIService {
       try {
         const response = await openai.chat.completions.create({
           model,
-          messages: GENERATE_COMPLEXITY_PROMPT({ content: lectureContent }),
+          messages: GENERATE_STUDY_METHOD_TAGS_PROMPT({ content: lectureContent }),
           temperature: TEMPERATURE,
           max_tokens: maxTokens,
           top_p: 1,

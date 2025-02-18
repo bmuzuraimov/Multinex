@@ -90,7 +90,7 @@ export const GENERATE_SUMMARY_PROMPT = ({ content }: { content: string }): Promp
   ];
 };
 
-export const GENERATE_COMPLEXITY_PROMPT = ({ content }: { content: string }): Prompt[] => {
+export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({ content }: { content: string }): Prompt[] => {
   return [
     {
       role: 'system',

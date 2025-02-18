@@ -12,4 +12,5 @@
 *.pyc
 *.pyo
 *.pyd
+*.venv
 document_parser/voices.json
