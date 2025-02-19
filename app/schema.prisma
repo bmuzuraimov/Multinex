@@ -40,8 +40,8 @@ model User {
 model Onboarding {
   id                        String    @id @default(uuid())
   userType                  String    // Student, Teacher, Parent, Professor, Other
-  userTypeOther            String?   // If userType is Other
-  learningStyle            String    // Visual, Auditory, Kinesthetic, Mixed
+  userTypeOther             String?   // If userType is Other
+  learningStyle             String?   // Visual, Auditory, Kinesthetic, Mixed
   
   // Subjects (multiple can be true)
   scienceMedicine          Boolean   @default(false)
@@ -105,6 +105,7 @@ model LandingPageTry {
   audioTimestamps     String[]    @default([])
   paragraphSummary    String      @default("")
   level               String      @default("")
+  cursor              Int         @default(0)
   no_words            Int         @default(0)
   truncated           Boolean     @default(false)
   completedAt         DateTime?   // From Exercise
@@ -174,6 +175,7 @@ model Exercise {
   audioTimestamps     String[]    @default([])
   paragraphSummary    String      @default("")
   level               String      @default("")
+  cursor              Int         @default(0)
   no_words            Int         @default(0)
   completed           Boolean     @default(false)
   truncated           Boolean     @default(false)

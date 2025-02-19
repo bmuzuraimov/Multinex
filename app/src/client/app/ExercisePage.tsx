@@ -7,25 +7,26 @@ import ExerciseTest from '../components/ExerciseTest';
 import ExerciseInterface from '../components/ExerciseInterface';
 import { ExerciseProvider } from '../contexts/ExerciseContext';
 import useExercise from '../hooks/useExercise';
-// import usePlayback from '../hooks/usePlayback';
 
 const ExercisePage: React.FC = React.memo(() => {
   const { exerciseId } = useParams();
   const [textSize, setTextSize] = useState('2xl');
   const [mode, setMode] = useState<'typing' | 'submitted' | 'test'>('typing');
 
-  const { data: exercise, isLoading, error, refetch } = useQuery(getExerciseById, { 
-    exerciseId: exerciseId! 
+  const { data: exercise, isLoading } = useQuery(getExerciseById, {
+    exerciseId: exerciseId!,
   });
 
-  const {
-    essay,
-    essayList,
-    essayWordCount,
-    essayCharCount,
-    summary,
-    hasQuiz,
-  } = useExercise(exercise?.essay || '', exercise?.formattedEssay || [], exercise?.paragraphSummary || '', exercise?.questions || [], mode, textSize, 0);
+  const { essay, essayList, essayWordCount, essayCharCount, summary, hasQuiz } = useExercise(
+    exerciseId!,
+    exercise?.essay || '',
+    exercise?.formattedEssay || [],
+    exercise?.paragraphSummary || '',
+    exercise?.questions || [],
+    mode,
+    textSize,
+    exercise?.cursor || 0
+  );
 
   // Set audio URL when exercise data changes
   useEffect(() => {
@@ -49,19 +50,19 @@ const ExercisePage: React.FC = React.memo(() => {
   // Exercise submission handler
   const handleSubmitExercise = useCallback(async () => {
     const score = 100;
-    await updateExercise({ 
+    await updateExercise({
       id: exerciseId!,
-      updated_data: { 
-        completed: true, 
+      updated_data: {
+        completed: true,
         score,
-        completedAt: new Date() 
-      }
+        completedAt: new Date(),
+      },
     });
+
     setMode('submitted');
   }, [essay.length, exerciseId]);
 
   const contextValue = {
-    // Core essay content
     essay,
     essayList,
     formattedEssay: exercise?.formattedEssay || [],
@@ -70,41 +71,30 @@ const ExercisePage: React.FC = React.memo(() => {
     mode,
     setMode,
     hasQuiz,
-    
-    // Audio playback
     audioTimestamps: exercise?.audioTimestamps || [],
-    
+
     // UI references and settings
     textSize,
     setTextSize,
-    
-    // Exercise completion
     onSubmitExercise: handleSubmitExercise,
-    
+
     // Additional metadata
     summary,
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <ExerciseProvider value={contextValue}>
-      <div className="relative">
+      <div className='relative'>
         {mode === 'typing' && (
-          <div className="relative flex flex-row h-full">
+          <div className='relative flex flex-row h-full'>
             <ExerciseSidebar />
             <ExerciseInterface />
           </div>
         )}
         {mode === 'submitted' && <ExerciseResult exerciseId={exerciseId!} />}
-        {mode === 'test' && (
-          <ExerciseTest 
-            title={exercise?.name ?? ''} 
-            questions={exercise?.questions ?? []} 
-          />
-        )}
+        {mode === 'test' && <ExerciseTest title={exercise?.name ?? ''} questions={exercise?.questions ?? []} />}
       </div>
     </ExerciseProvider>
   );

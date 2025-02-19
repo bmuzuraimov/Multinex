@@ -226,17 +226,23 @@ export const updateExercise: UpdateExercise<{ id: string; updated_data: Partial<
   if (!context.user) {
     throw new HttpError(401);
   }
+
   if (updated_data.lessonText && updated_data.lessonText.length > 0) {
     updated_data.no_words = updated_data.lessonText.split(' ').length;
     updated_data.paragraphSummary = '';
   }
 
-  return context.entities.Exercise.update({
-    where: {
-      id,
-    },
+  // Ensure cursor updates are included in database updates
+  if (updated_data.cursor !== undefined) {
+    updated_data.cursor = Math.max(0, updated_data.cursor); // Prevent negative values
+  }
+
+  const updatedExercise = await context.entities.Exercise.update({
+    where: { id },
     data: updated_data,
   });
+  
+  return updatedExercise;
 };
 
 export const deleteExercise: DeleteExercise<{ id: string }, Exercise> = async ({ id }, context) => {

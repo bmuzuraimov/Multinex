@@ -12,7 +12,7 @@ const ExerciseInterface: React.FC = () => {
 
   // Handle keyboard input
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
       currentSpanRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       essayList.handleKeyDown(e);
       setHighlightedNodes(essayList.getNodes().filter(node => node.highlight).map(node => node.id));
