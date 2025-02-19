@@ -3,9 +3,8 @@ import { useQuery, getLandingPageTry } from 'wasp/client/operations';
 import ExerciseSidebar from '../components/ExerciseSidebar';
 import ExerciseTest from '../components/ExerciseTest';
 import useExercise from '../hooks/useExercise';
-// import usePlayback from '../hooks/usePlayback';
 import ExerciseInterface from '../components/ExerciseInterface';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ExerciseProvider } from '../contexts/ExerciseContext';
 
 export default function DemoPage() {
@@ -29,7 +28,7 @@ export default function DemoPage() {
   const browserLanguage = window.navigator.language;
   const screenResolution = `${window.screen.width}x${window.screen.height}`;
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const { data: landingPageTry } = useQuery(getLandingPageTry, {
+  const { data: landingPageTry, isLoading } = useQuery(getLandingPageTry, {
     userAgent,
     browserLanguage,
     screenResolution,
@@ -44,18 +43,11 @@ export default function DemoPage() {
     setMode,
     summary,
     hasQuiz,
-  } = useExercise(landingPageTry?.essay || '', landingPageTry?.formattedEssay || [], landingPageTry?.paragraphSummary || '', landingPageTry?.questions || [], 'typing', textSize, 0);
+  } = useExercise(landingPageTry?.id || '', landingPageTry?.essay || '', landingPageTry?.formattedEssay || [], landingPageTry?.paragraphSummary || '', landingPageTry?.questions || [], 'typing', textSize, landingPageTry?.cursor || 0);
 
   const onSubmitExercise = useCallback(async () => {
     setMode('submitted');
   }, [essayCharCount, setMode]);
-
-  // const { isPlaying, togglePlayback, setAudioTime } = usePlayback({
-  //   essayList,
-  //   onSubmitExercise: onSubmitExercise,
-  //   audioUrl: '',
-  //   audioTimestamps: landingPageTry?.audioTimestamps || [],
-  // });
 
   const contextValue = {
     essay,
