@@ -53,7 +53,6 @@ const ExerciseEditModal: React.FC<ExerciseEditModalProps> = ({ id, name, lessonT
         },
         body: formData,
       });
-      console.log(response)
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Failed to generate audio');
