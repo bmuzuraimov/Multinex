@@ -3,8 +3,8 @@ import { useQuery, getLandingPageTry } from 'wasp/client/operations';
 import ExerciseSidebar from '../components/ExerciseSidebar';
 import ExerciseTest from '../components/ExerciseTest';
 import useExercise from '../hooks/useExercise';
-import usePlayback from '../hooks/usePlayback';
-import TypingInterface from '../components/TypingInterface';
+// import usePlayback from '../hooks/usePlayback';
+import ExerciseInterface from '../components/ExerciseInterface';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ExerciseProvider } from '../contexts/ExerciseContext';
 
@@ -24,7 +24,6 @@ export default function DemoPage() {
     };
   }, []);
 
-  const [speed, setSpeed] = useState(400);
   const [textSize, setTextSize] = useState('2xl');
   const userAgent = window.navigator.userAgent;
   const browserLanguage = window.navigator.language;
@@ -36,64 +35,42 @@ export default function DemoPage() {
     screenResolution,
     timezone,
   });
-  const raw_essay = useMemo(() => landingPageTry?.lessonText || 'Essay not found!', [landingPageTry]);
   const {
     essay,
-    formattedEssay,
-    progress,
-    currentCharacterIndex,
-    setCurrentCharacterIndex,
-    errorIndices,
-    setErrorIndices,
+    essayList,
+    essayWordCount,
+    essayCharCount,
     mode,
     setMode,
-    essayCharsRef,
-  } = useExercise(raw_essay, 'typing');
-
-  const essay_length = useMemo(() => essay.split(' ').length, [essay]);
-  const summary = useMemo(
-    () => (landingPageTry?.paragraphSummary ? landingPageTry.paragraphSummary.split('|') : []),
-    [landingPageTry]
-  );
+    summary,
+    hasQuiz,
+  } = useExercise(landingPageTry?.essay || '', landingPageTry?.formattedEssay || [], landingPageTry?.paragraphSummary || '', landingPageTry?.questions || [], 'typing', textSize, 0);
 
   const onSubmitExercise = useCallback(async () => {
-    const score = 100 - Math.round((errorIndices.length / essay.length) * 100);
     setMode('submitted');
-  }, [errorIndices, essay, setMode]);
+  }, [essayCharCount, setMode]);
 
-  const { isPlaying, togglePlayback, setAudioTime } = usePlayback({
-    essay: raw_essay,
-    essayCharsRef: essayCharsRef,
-    setCurrentCharacterIndex: setCurrentCharacterIndex,
-    onSubmitExercise: onSubmitExercise,
-    speed,
-    audioUrl: '',
-    audioTimestamps: landingPageTry?.audioTimestamps || [],
-  });
+  // const { isPlaying, togglePlayback, setAudioTime } = usePlayback({
+  //   essayList,
+  //   onSubmitExercise: onSubmitExercise,
+  //   audioUrl: '',
+  //   audioTimestamps: landingPageTry?.audioTimestamps || [],
+  // });
 
   const contextValue = {
     essay,
-    formattedEssay,
-    progress,
-    currentCharacterIndex,
-    setCurrentCharacterIndex,
-    errorIndices,
-    setErrorIndices,
+    essayList,
+    formattedEssay: landingPageTry?.formattedEssay || [],
     mode,
     setMode,
-    essayCharsRef,
-    isPlaying,
-    togglePlayback,
-    speed,
-    setSpeed,
     onSubmitExercise,
     hasQuiz: false,
     summary,
-    essay_length,
+    essayWordCount,
+    essayCharCount,
     textSize,
     setTextSize,
     audioTimestamps: [],
-    setAudioTime,
   };
 
   return (
@@ -102,7 +79,7 @@ export default function DemoPage() {
         {mode === 'typing' && (
           <div className='relative flex flex-row h-full'>
             <ExerciseSidebar />
-            <TypingInterface />
+            <ExerciseInterface />
           </div>
         )}
         {mode === 'submitted' && <ExerciseResult exerciseId={landingPageTry?.id ?? ''} />}

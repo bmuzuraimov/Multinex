@@ -12,11 +12,11 @@ interface ExerciseResultProps {
 const ExerciseResult: React.FC<ExerciseResultProps> = ({
   exerciseId,
 }) => {
-  const { essay, errorIndices, setMode } = useExerciseContext();
+  const { setMode } = useExerciseContext();
   const [displayScore, setDisplayScore] = useState(0);
   const [selectedRating, setSelectedRating] = useState(0); // To store the selected rating
   const [hoverRating, setHoverRating] = useState(0); // To store the hover state for rating stars
-  const actualScore = 100 - Math.round((errorIndices.length / essay.split('').length) * 100);
+  const actualScore = 100;
 
   useEffect(() => {
     const scoreInterval = setInterval(() => {

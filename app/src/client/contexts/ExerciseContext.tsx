@@ -1,9 +1,11 @@
 import React, { createContext, useContext, Dispatch, SetStateAction } from 'react';
-
+import { TextList } from '../utils/TextList';
 interface ExerciseContextType {
   // Core essay content and metadata
   essay: string;
-  essay_length: number;
+  essayWordCount: number;
+  essayCharCount: number;
+  essayList: TextList;
   formattedEssay: { mode: 'hear' | 'type' | 'write'; text: string[] }[];
   summary: string[];
   hasQuiz: boolean;
@@ -11,24 +13,11 @@ interface ExerciseContextType {
   // Exercise state and mode
   mode: 'typing' | 'submitted' | 'test';
   setMode: React.Dispatch<React.SetStateAction<'typing' | 'submitted' | 'test'>>;
-  progress: number;
-
-  // Character tracking and errors
-  currentCharacterIndex: number;
-  setCurrentCharacterIndex: Dispatch<SetStateAction<number>>;
-  errorIndices: number[];
-  setErrorIndices: Dispatch<SetStateAction<number[]>>;
 
   // Audio playback controls
-  isPlaying: boolean;
-  togglePlayback: () => void;
-  speed: number;
-  setSpeed: Dispatch<SetStateAction<number>>;
-  audioTimestamps: string[];
-  setAudioTime: (time: number) => void;
+  audioTimestamps: Array<{word: string, start: number, end: number}> | string[];
 
   // UI references and settings
-  essayCharsRef: React.RefObject<(HTMLSpanElement | null)[]> & { current: (HTMLSpanElement | null)[] };
   textSize: string;
   setTextSize: Dispatch<SetStateAction<string>>;
 
