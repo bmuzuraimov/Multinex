@@ -1,7 +1,13 @@
-import { type Exercise, type Question, type Option } from 'wasp/entities';
+import { type Exercise, type Option } from 'wasp/entities';
 import { HttpError } from 'wasp/server';
 import { type GetExercisesWithNoTopic, type GetExerciseById, type GetDemoExercise, type HasCompletedExercises } from 'wasp/server/operations';
 import { getDownloadFileSignedURLFromS3 } from '../utils/s3Utils';
+import { preprocessEssay } from '../utils/exerciseUtils';
+
+type FormattedEssaySection = {
+  mode: 'hear' | 'type' | 'write';
+  text: string[];
+};
 
 export const getDemoExercise: GetDemoExercise<void, ExerciseResult> = async (_args, context) => {
   const exercise = await context.entities.Exercise.findFirstOrThrow({
@@ -23,8 +29,12 @@ export const getDemoExercise: GetDemoExercise<void, ExerciseResult> = async (_ar
   });
 
   const audioUrl = await getDownloadFileSignedURLFromS3({ key: exercise.id });
+  const { essay, formattedEssay } = preprocessEssay(exercise.lessonText);
+  
   return {
     ...exercise,
+    essay,
+    formattedEssay,
     audioUrl
   };
 };
@@ -65,7 +75,6 @@ type ExerciseResult = {
   name: string;
   prompt: string;
   promptImg: string;
-  lessonText: string;
   paragraphSummary: string;
   level: string;
   truncated: boolean;
@@ -86,6 +95,9 @@ type ExerciseResult = {
     options: Option[];
   }>;
   audioUrl?: string;
+  audioTimestamps?: Array<{word: string, start: number, end: number}> | string[];
+  essay: string;
+  formattedEssay: FormattedEssaySection[];
   [key: string]: any;
 };
 
@@ -116,16 +128,30 @@ export const getExerciseById: GetExerciseById<{ exerciseId: string }, ExerciseRe
       user: true,
     },
   });
+
   if (!exercise.file?.key) {
+    const { essay, formattedEssay } = preprocessEssay(exercise.lessonText);
     return {
       ...exercise,
+      essay,
+      formattedEssay,
       audioUrl: undefined
     };
   }
 
+  if (exercise.audioTimestamps && typeof exercise.audioTimestamps[0] === 'string') {
+    exercise.audioTimestamps = exercise.audioTimestamps.map((timestamp: string) => 
+      JSON.parse(timestamp)
+    );
+  }
+  
   const audioUrl = await getDownloadFileSignedURLFromS3({ key: exercise.file.key });
+  const { essay, formattedEssay } = preprocessEssay(exercise.lessonText);
+  
   return {
     ...exercise,
+    essay,
+    formattedEssay,
     audioUrl
   };
 };

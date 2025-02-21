@@ -6,10 +6,34 @@ import { createExercise, countTokens, getLandingPageTry, createLandingPageTry, u
 import ExerciseFormModal from './ExerciseFormModal';
 import { ExerciseFormContentSettings, ExerciseFormGenerationSettings } from '../../shared/types';
 import { Link } from 'react-router-dom';
-import { LandingPageTry } from 'wasp/entities';
+
+type LandingPageTryResult = {
+  id: string;
+  createdAt: Date;
+  userAgent: string;
+  browserLanguage: string | null;
+  screenResolution: string | null;
+  timezone: string | null;
+  name: string;
+  prompt: string;
+  promptImg: string;
+  audioTimestamps: Array<{word: string, start: number, end: number}> | string[];
+  paragraphSummary: string;
+  level: string;
+  no_words: number;
+  truncated: boolean;
+  completedAt: Date | null;
+  score: number;
+  tokensUsed: number;
+  successful: boolean;
+  model: string;
+  userEvaluation: number | null;
+  convertedUserId: string | null;
+  [key: string]: any;
+};
 
 const ExerciseForm: React.FC<{ topicId: string | null; demo: boolean }> = ({ topicId, demo = false }) => {
-  const [landingPageTry, setLandingPageTry] = useState<LandingPageTry | null>(null);
+  const [landingPageTry, setLandingPageTry] = useState<LandingPageTryResult | null>(null);
 
   const { data: landingPageTryData } = useQuery(getLandingPageTry, {
     userAgent: window.navigator.userAgent,
@@ -20,7 +44,7 @@ const ExerciseForm: React.FC<{ topicId: string | null; demo: boolean }> = ({ top
 
   useEffect(() => {
     if (demo && landingPageTryData) {
-      setLandingPageTry(landingPageTryData);
+      setLandingPageTry(landingPageTryData as LandingPageTryResult);
     }
   }, [demo, landingPageTryData]);
 

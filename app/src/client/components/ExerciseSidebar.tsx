@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useExerciseContext } from '../contexts/ExerciseContext';
 
 const ExerciseSidebar: React.FC = () => {
-  const { hasQuiz, summary, essay_length, setMode } = useExerciseContext();
+  const { hasQuiz, summary, essayWordCount, setMode } = useExerciseContext();
   const [showHintsModal, setShowHintsModal] = useState(false);
   
   return (
@@ -71,7 +71,7 @@ const ExerciseSidebar: React.FC = () => {
 
         <div className='flex items-center justify-between'>
           <span className='text-sm text-gray-500 dark:text-gray-400'>
-            Total words: {essay_length}
+            Total words: {essayWordCount}
           </span>
 
           {hasQuiz && (
