@@ -12,7 +12,9 @@ interface ExerciseContextType {
 
   // Exercise state and mode
   mode: 'typing' | 'submitted' | 'test';
+  highlightedNodes: number[];
   setMode: React.Dispatch<React.SetStateAction<'typing' | 'submitted' | 'test'>>;
+  setHighlightedNodes: React.Dispatch<React.SetStateAction<number[]>>;
 
   // Audio playback controls
   audioTimestamps: Array<{word: string, start: number, end: number}> | string[];

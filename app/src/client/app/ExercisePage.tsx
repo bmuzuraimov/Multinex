@@ -12,7 +12,7 @@ const ExercisePage: React.FC = React.memo(() => {
   const { exerciseId } = useParams();
   const [textSize, setTextSize] = useState('2xl');
   const [mode, setMode] = useState<'typing' | 'submitted' | 'test'>('typing');
-
+  const [highlightedNodes, setHighlightedNodes] = useState<number[]>([0]);
   const { data: exercise, isLoading } = useQuery(getExerciseById, {
     exerciseId: exerciseId!,
   });
@@ -54,6 +54,7 @@ const ExercisePage: React.FC = React.memo(() => {
       id: exerciseId!,
       updated_data: {
         completed: true,
+        cursor: 0,
         score,
         completedAt: new Date(),
       },
@@ -72,7 +73,8 @@ const ExercisePage: React.FC = React.memo(() => {
     setMode,
     hasQuiz,
     audioTimestamps: exercise?.audioTimestamps || [],
-
+    highlightedNodes,
+    setHighlightedNodes,
     // UI references and settings
     textSize,
     setTextSize,
