@@ -1,4 +1,3 @@
-// AudioController.ts
 export interface AudioTimestamp {
   word: string;
   start: number;
@@ -26,7 +25,6 @@ export class AudioController {
       return Promise.reject(new Error('Audio or timestamp not available'));
     }
     const { start, end } = this.audioTimestamps[wordIndex];
-    this.audio.currentTime = start;
     return new Promise((resolve, reject) => {
       const onTimeUpdate = () => {
         if (!this.audio) {
@@ -60,5 +58,61 @@ export class AudioController {
 
   public getIsPlaying(): boolean {
     return this.isPlaying;
+  }
+
+  public setCurrentTime(wordIndex: number | undefined): void {
+    if (!this.audio || !wordIndex) {
+      return;
+    }
+    this.audio.currentTime = this.audioTimestamps[wordIndex].start;
+  }
+
+  public getCurrentTime(): number {
+    return this.audio?.currentTime || 0;
+  }
+
+  public getTimeStamp(wordIndex: number | undefined): AudioTimestamp | undefined {
+    if (wordIndex === undefined || !this.audioTimestamps[wordIndex]) {
+      return undefined;
+    }
+    return this.audioTimestamps[wordIndex];
+  }
+
+  public playUntil(endTime: number): Promise<void> {
+    if (!this.audio) {
+      return Promise.reject(new Error('Audio or timestamp not available'));
+    }
+    return new Promise((resolve, reject) => {
+      const onTimeUpdate = () => {
+        if (!this.audio) {
+          reject(new Error('Audio not available'));
+          return;
+        }
+        if (this.audio.currentTime >= endTime) {
+          this.audio.pause();
+          this.isPlaying = false;
+          this.audio.removeEventListener('timeupdate', onTimeUpdate);
+          resolve();
+        }
+      };
+
+      const onError = (e: Event) => {
+        this.audio?.removeEventListener('timeupdate', onTimeUpdate);
+        reject(e);
+      };
+
+      this.audio?.addEventListener('timeupdate', onTimeUpdate);
+      this.audio?.addEventListener('error', onError, { once: true });
+      this.audio?.play().catch(reject);
+      this.isPlaying = true;
+    });
+  }
+
+  public addEventListener(event: string, callback: () => void): void {
+    this.audio?.addEventListener(event, callback);
+  }
+
+  public removeEventListener(event: string, callback: () => void): void {
+    this.audio?.removeEventListener(event, callback);
   }
 }

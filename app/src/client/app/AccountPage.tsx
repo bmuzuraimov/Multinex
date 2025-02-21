@@ -1,7 +1,7 @@
 import { Link } from 'wasp/client/router';
 import { type User } from 'wasp/entities';
 import { logout } from 'wasp/client/auth';
-import { FiArrowRight, FiLogOut, FiLock, FiUser, FiMail, FiShoppingBag, FiBell, FiShield } from 'react-icons/fi';
+import { FiLogOut, FiLock, FiUser, FiMail, FiShoppingBag, FiBell } from 'react-icons/fi';
 import { Switch } from '@headlessui/react';
 import { useState } from 'react';
 
