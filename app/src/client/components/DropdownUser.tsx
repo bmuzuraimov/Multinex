@@ -34,7 +34,7 @@ const DropdownUser = ({ user }: { user: Partial<User> }) => {
   });
 
   return (
-    <div className='relative z-999'>
+    <div className='relative' style={{ zIndex: 999 }}>
       <button
         ref={trigger}
         onClick={toggleDropdown}
@@ -63,15 +63,16 @@ const DropdownUser = ({ user }: { user: Partial<User> }) => {
         </svg>
       </button>
 
-      {/* Dropdown - Updated className */}
+      {/* Dropdown */}
       <div
         ref={dropdown}
         className={cn(
-          'absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark dark:text-white z-[9999]',
+          'absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark dark:text-white',
           {
             hidden: !dropdownOpen,
           }
         )}
+        style={{ zIndex: 9999 }}
       >
         <UserMenuItems user={user} setMobileMenuOpen={toggleDropdown} />
       </div>

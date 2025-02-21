@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ExerciseProvider } from '../contexts/ExerciseContext';
 
 export default function DemoPage() {
+  const [highlightedNodes, setHighlightedNodes] = useState<number[]>([0]);
   // Prevent default tab, space and enter behavior
   useEffect(() => {
     const preventDefaultKeys = (e: KeyboardEvent) => {
@@ -56,6 +57,8 @@ export default function DemoPage() {
     mode,
     setMode,
     onSubmitExercise,
+    highlightedNodes,
+    setHighlightedNodes,
     hasQuiz: false,
     summary,
     essayWordCount,

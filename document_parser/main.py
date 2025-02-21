@@ -135,22 +135,23 @@ async def generate_audio(
 ) -> Dict:
     try:
         if not generate_text or not exerciseId:
-            raise HTTPException(
-                status_code=422,
-                detail="Missing required fields: generate_text and exerciseId are required"
-            )
-
-        filtered_text = generate_text
-        filtered_text = re.findall(r'<hear>(.*?)</hear>', filtered_text)
-        filtered_text = ' '.join(filtered_text)
+            return {
+                "status": "error",
+                "message": "Missing required fields: generate_text and exerciseId are required"
+            }
+        filtered_text = re.findall(r'<hear>(.*?)</hear>', generate_text)
+        filtered_text = [re.sub(r'[^a-zA-Z0-9\s]', '', text).strip()
+                         for text in filtered_text]
+        filtered_text = '.\n'.join(filtered_text)
         filtered_text = re.sub(r'\n{2,}', '', filtered_text.strip())
         filtered_text = re.sub(r' +', ' ', filtered_text)
+
         # Generate audio with timestamps
         response = elevenlabs_client.text_to_speech.convert_with_timestamps(
             voice_id="JBFqnCBsd6RMkjVDRZzb",
             output_format="mp3_22050_32",
             text=filtered_text,
-            model_id="eleven_multilingual_v2"
+            model_id="eleven_multilingual_v2",
         )
 
         # Extract word-level timestamps
@@ -201,7 +202,8 @@ async def generate_audio(
         db = SessionLocal()
         try:
             # Convert timestamps array to JSON string for storage
-            audio_timestamps = [str(json.dumps(word_object)) for word_object in timestamps]
+            audio_timestamps = [str(json.dumps(word_object))
+                                for word_object in timestamps]
             # Update Exercise table with audioTimestamps
             query = text("""
                 UPDATE "public"."Exercise" 
@@ -213,17 +215,22 @@ async def generate_audio(
                 "timestamps": audio_timestamps,
                 "exercise_id": exerciseId,
             })
-
-            # Insert file record
+            # Upsert file record
             file_query = text("""
                 INSERT INTO "public"."File" (id, "createdAt", "exerciseId", name, type, key, "uploadUrl")
                 VALUES (gen_random_uuid(), NOW(), :exercise_id, :name, :type, :key, :upload_url)
+                ON CONFLICT ("exerciseId") DO UPDATE
+                SET "createdAt" = NOW(),
+                    name = EXCLUDED.name,
+                    type = EXCLUDED.type,
+                    key = EXCLUDED.key,
+                    "uploadUrl" = EXCLUDED."uploadUrl"
             """)
 
             db.execute(file_query, {
                 "exercise_id": exerciseId,
                 "name": str(exerciseId),
-                "type": "audio/mpeg",
+                "type": "audio/mpeg", 
                 "key": s3_key,
                 "upload_url": f"https://{bucket_name}.s3.amazonaws.com/{s3_key}"
             })
@@ -244,10 +251,10 @@ async def generate_audio(
         print(f"Error type: {type(e).__name__}")
         print(f"Error traceback:")
         traceback.print_exc()
-        
+
         # Log the error details
         logging.error(f"Error occurred: {str(e)}", exc_info=True)
-        
+
         raise HTTPException(
             status_code=500,
             detail={

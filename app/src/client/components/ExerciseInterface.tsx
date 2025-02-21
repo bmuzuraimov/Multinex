@@ -1,33 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BsPlayFill, BsStopFill, BsTextareaT, BsKeyboard, BsArrowRight } from 'react-icons/bs';
 import { TEXT_SIZES } from '../../shared/constants';
 import { useExerciseContext } from '../contexts/ExerciseContext';
 import { cn } from '../../shared/utils';
 
 const ExerciseInterface: React.FC = () => {
-  const { essayList, textSize, setTextSize } = useExerciseContext();
+  const { essayList, textSize, setTextSize, highlightedNodes, setHighlightedNodes, onSubmitExercise } =
+    useExerciseContext();
   const [showTextSizeMenu, setShowTextSizeMenu] = useState(false);
-  const [highlightedNodes, setHighlightedNodes] = useState<number[]>([0]);
+
   const [currentSpanRef, setCurrentSpanRef] = useState<HTMLSpanElement | null>(null);
+
+  // Create update callback
+  const handleUpdate = useCallback(() => {
+    setHighlightedNodes(
+      essayList
+        .getNodes()
+        .filter((node) => node.highlight)
+        .map((node) => node.id)
+    );
+  }, [essayList, setHighlightedNodes]);
+
+  // Set up the update callback when essayList is created
+  useEffect(() => {
+    // @ts-ignore - Add onUpdate to TextList instance
+    essayList.onUpdate = handleUpdate;
+  }, [essayList, handleUpdate]);
 
   // Handle keyboard input
   useEffect(() => {
     const handleKeyDown = async (e: KeyboardEvent) => {
-      currentSpanRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      essayList.handleKeyDown(e);
-      setHighlightedNodes(essayList.getNodes().filter(node => node.highlight).map(node => node.id));
+      if (essayList.getNodes().length - 1 === essayList.getCursor()?.id) {
+        onSubmitExercise();
+      } else {
+        currentSpanRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        await essayList.handleKeyDown(e);
+        handleUpdate(); // Use the same update handler
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [essayList, currentSpanRef]);
+  }, [essayList, currentSpanRef, handleUpdate]);
 
   return (
     <div className='w-full h-[calc(100vh-64px)] flex flex-col relative'>
-      <div 
-        className='absolute top-0 left-0 right-0 bg-teal-500 h-1 rounded-full' 
+      <div
+        className='absolute top-0 left-0 right-0 bg-teal-500 h-1 rounded-full'
         style={{ width: `${((essayList.getCursor()?.id ?? 0) / essayList.getNodes().length) * 100}%` }}
       ></div>
-      <div className='relative flex-1 w-5/6 mx-auto leading-10 h-full pt-8'>
+      <div className='relative flex-1 w-5/6 mx-auto mb-16 leading-10 h-full pt-8'>
         {essayList.getCursor()?.id === 0 && (
           <div className='absolute top-6 left-0 flex flex-row items-center space-x-2 z-999 transform -translate-x-[105%] bg-white dark:bg-gray-800 p-1 rounded-lg animate-pulse'>
             <BsKeyboard className='w-5 h-5' />
@@ -51,6 +72,12 @@ const ExerciseInterface: React.FC = () => {
                 )}
                 onClick={() => {
                   essayList.setCursor(textNode);
+                  setHighlightedNodes(
+                    essayList
+                      .getNodes()
+                      .filter((node) => node.highlight)
+                      .map((node) => node.id)
+                  );
                 }}
                 key={textNode.id}
               >

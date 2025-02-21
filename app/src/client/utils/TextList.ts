@@ -13,22 +13,19 @@ export class TextList {
   private nodes: TextNode[] = [];
   private readonly baseCharClass: Record<Mode, string>;
   private audioController: AudioController | null = null;
+  private onUpdate?: () => void;
 
-  constructor(
-    formattedEssay: FormattedEssaySection[],
-    textSize: string,
-    progressCursor: number
-  ) {
+  constructor(formattedEssay: FormattedEssaySection[], textSize: string, progressCursor: number, onUpdate?: () => void) {
     this.baseCharClass = {
       hear: `text-${textSize} cursor-pointer tracking-wider font-montserrat text-blue-900 dark:text-gray-300`,
-      type: `text-${textSize} cursor-pointer tracking-wider font-manrope text-green-900 dark:text-gray-300`, 
+      type: `text-${textSize} cursor-pointer tracking-wider font-manrope text-green-900 dark:text-gray-300`,
       write: `text-${textSize} cursor-pointer tracking-wider font-courgette text-red-900 dark:text-gray-300`,
     };
-
+    this.onUpdate = onUpdate;
     this.nodes = this.buildNodes(formattedEssay);
     this.currentNode = this.nodes[progressCursor] || this.nodes[0] || null;
     if (this.currentNode) {
-      this.currentNode.currentClass = 'border-b-4 border-sky-400';
+      this.currentNode.currentClass = 'border-b-2 border-sky-400';
     }
   }
 
@@ -65,32 +62,48 @@ export class TextList {
 
   // Cursor management
   public moveCursor(next: boolean = true): boolean {
-    if (!this.currentNode) return false;
+    // Handle case where there is no current node
+    if (!this.currentNode) {
+      // Try to set cursor to first/last node if available
+      const targetNode = next ? this.nodes[0] : this.nodes[this.nodes.length - 1];
+      if (!targetNode) return false;
+      
+      this.currentNode = targetNode;
+      if (!(this.currentNode.mode === 'hear')) {
+        this.currentNode.currentClass = 'border-b-2 border-sky-400';
+      }
+      return true;
+    }
 
     // Clear current node styling
     this.currentNode.currentClass = '';
 
     // Reset highlight when moving backwards
     if (!next) {
-      this.currentNode.prev?.resetHighlight();
+      // Check if prev exists before resetting highlight
+      if (this.currentNode.prev) {
+        this.currentNode.prev.resetHighlight();
+      }
     }
 
     // Get next node in sequence
     const newNode = next ? this.currentNode.next : this.currentNode.prev;
-    if (!newNode) return false;
+    
+    // Handle reaching start/end of list
+    if (!newNode) {
+      // Keep current node highlighted
+      if (!(this.currentNode.mode === 'hear')) {
+        this.currentNode.currentClass = 'border-b-2 border-sky-400';
+      }
+      return false;
+    }
 
     // Update cursor
     this.currentNode = newNode;
-    this.currentNode.currentClass = 'border-b-4 border-sky-400';
-    return true;
-  }
-
-  public moveCursorTo(node: TextNode): void {
-    if (this.currentNode) {
-      this.currentNode.currentClass = '';
+    if (!(this.currentNode.mode === 'hear')) {
+      this.currentNode.currentClass = 'border-b-2 border-sky-400';
     }
-    this.currentNode = node;
-    this.currentNode.currentClass = 'border-b-4 border-sky-400';
+    return true;
   }
 
   public getCursor(): TextNode | null {
@@ -104,16 +117,7 @@ export class TextList {
       this.currentNode.currentClass = '';
     }
     this.currentNode = node;
-    this.currentNode.currentClass = 'border-b-4 border-sky-400';
-    if (
-      this.currentNode.mode === 'hear' &&
-      this.audioController &&
-      this.currentNode.wordIndex !== undefined
-    ) {
-      this.audioController
-        .playSegment(this.currentNode.wordIndex)
-        .catch((err) => console.error(err));
-    }
+    this.currentNode.currentClass = 'border-b-2 border-sky-400';
   }
 
   // Audio integration
@@ -151,7 +155,7 @@ export class TextList {
     }
   }
 
-  private async handleHearMode(e: KeyboardEvent): Promise<void> {
+  private async handleHearMode(e: KeyboardEvent) {
     if (e.key === 'Backspace') {
       while (this.currentNode?.prev?.value === ' ') {
         this.moveCursor(false);
@@ -160,30 +164,55 @@ export class TextList {
       return;
     }
 
-    while (this.currentNode && this.currentNode.mode === 'hear') {
-      if (this.currentNode.wordIndex === undefined) {
-        this.currentNode.highlightText();
-        if (!this.moveCursor(true)) break;
-        continue;
+    let startNode = this.currentNode;
+    while (startNode && startNode.wordIndex === undefined) {
+      if (!startNode.next) break;
+      startNode = startNode.next;
+    }
+    this.audioController?.setCurrentTime(startNode?.wordIndex);
+
+    let lastNode = this.currentNode;
+    let playEnd = 0;
+    while (lastNode && lastNode.mode === 'hear') {
+      if (lastNode.wordIndex !== undefined) {
+        playEnd = this.audioController?.getTimeStamp(lastNode.wordIndex)?.end || 0;
       }
-      try {
-        this.isPlaying = true;
-        if (this.audioController) {
-          await this.audioController.playSegment(this.currentNode.wordIndex);
+      if (!lastNode.next) break;
+      lastNode = lastNode.next;
+    }
+
+    // Create an audio update callback
+    const onAudioUpdate = () => {
+      const currentTime = this.audioController?.getCurrentTime() || 0;
+      let node = this.currentNode;
+      
+      while (node && node.mode === 'hear') {
+        const timestamp = node.wordIndex !== undefined ? 
+          this.audioController?.getTimeStamp(node.wordIndex) : undefined;
+        
+        if (timestamp && currentTime >= timestamp.start) {
+          node.highlightText();
+          this.moveCursor(true);
+          this.onUpdate?.();
         }
-        this.currentNode.highlightText();
-        if (this.currentNode.prev) {
-          this.currentNode.prev.currentClass = '';
-        }
-        if (!this.moveCursor(true)) break;
-      } catch (error) {
-        console.error('Audio playback error:', error);
-        this.isPlaying = false;
-        break;
+        node = node.next || null;
+      }
+    };
+
+    // Add the update listener to AudioController
+    this.audioController?.addEventListener('timeupdate', onAudioUpdate);
+
+    try {
+      await this.audioController?.playUntil(playEnd);
+    } finally {
+      // Clean up the listener
+      this.audioController?.removeEventListener('timeupdate', onAudioUpdate);
+      
+      // Move cursor to first non-hear mode node if still in hear mode
+      while (this.currentNode?.mode === 'hear' && this.currentNode.next) {
+        this.moveCursor(true);
       }
     }
-    this.isPlaying = false;
-    this.audioController?.pause();
   }
 
   private handleTypeMode(e: KeyboardEvent): void {
@@ -202,11 +231,7 @@ export class TextList {
         this.moveCursor(true);
         break;
       case 'Tab':
-        while (
-          this.currentNode &&
-          this.currentNode.value !== ' ' &&
-          this.currentNode.value !== '\n'
-        ) {
+        while (this.currentNode && this.currentNode.value !== ' ' && this.currentNode.value !== '\n') {
           this.currentNode.highlightText();
           if (!this.moveCursor(true)) break;
         }
