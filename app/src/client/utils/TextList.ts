@@ -227,7 +227,7 @@ export class TextList {
         this.moveCursor(false);
         break;
       case 'Enter':
-        this.currentNode.highlightText();
+        this.currentNode.highlightText(this.currentNode.value === '\n');
         this.moveCursor(true);
         break;
       case 'Tab':

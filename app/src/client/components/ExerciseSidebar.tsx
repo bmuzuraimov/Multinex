@@ -33,7 +33,7 @@ const ExerciseSidebar: React.FC = () => {
         )}
       </div>
 
-      <div className='flex-shrink-0 flex flex-col gap-4 mt-6 border-t border-gray-200 dark:border-gray-700 pt-4'>
+      <div className='flex-shrink-0 flex flex-col items-center gap-4 mt-6 border-t border-gray-200 dark:border-gray-700 pt-4'>
         <button 
           onClick={() => setShowHintsModal(true)}
           className='flex items-center gap-2 text-sm text-teal-500 dark:text-teal-400 hover:text-teal-600 dark:hover:text-teal-300'
@@ -69,11 +69,7 @@ const ExerciseSidebar: React.FC = () => {
           </div>
         )}
 
-        <div className='flex items-center justify-between'>
-          <span className='text-sm text-gray-500 dark:text-gray-400'>
-            Total words: {essayWordCount}
-          </span>
-
+        <div className='flex flex-col gap-y-2 items-center justify-between'>
           {hasQuiz && (
             <button
               onClick={() => setMode('test')}
@@ -82,6 +78,9 @@ const ExerciseSidebar: React.FC = () => {
               Take Test
             </button>
           )}
+          <span className='text-sm text-gray-500 dark:text-gray-400'>
+            Total words: {essayWordCount}
+          </span>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { universities } from '../../landing-page/contentSections';
+import { universities } from '../../common/contentSections';
 
 const UniversitiesSection: React.FC = () => {
   return (

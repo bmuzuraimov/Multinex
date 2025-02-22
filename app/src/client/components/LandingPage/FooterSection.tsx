@@ -1,4 +1,4 @@
-import { footerNavigation } from '../../landing-page/contentSections';
+import { footerNavigation } from '../../common/contentSections';
 import { FaFacebook, FaXTwitter, FaInstagram, FaLinkedin, FaTiktok } from 'react-icons/fa6';
 
 const FooterSection = () => {

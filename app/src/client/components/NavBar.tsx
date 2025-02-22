@@ -5,7 +5,7 @@ import { HiBars3 } from 'react-icons/hi2';
 import { useAuth } from 'wasp/client/auth';
 import { Link } from 'wasp/client/router';
 import logo from '../static/logo.png';
-import { navigation } from '../landing-page/contentSections';
+import { navigation } from '../common/contentSections';
 
 const NavLogo = memo(() => <img className='h-8' src={logo} alt='Typit' />);
 

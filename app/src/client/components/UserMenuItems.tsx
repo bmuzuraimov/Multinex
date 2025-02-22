@@ -14,7 +14,7 @@ export const UserMenuItems = ({ user, setMobileMenuOpen }: { user?: Partial<User
 
   return (
     <>
-      <ul className='flex flex-col z-99 gap-5 border-b sm:px-6 border-stroke py-4 dark:border-strokedark'>
+      <ul className='flex flex-col gap-5 border-b sm:px-6 border-stroke py-4 dark:border-strokedark relative z-[999]'>
         <li>
           <Link
             to='/portal'

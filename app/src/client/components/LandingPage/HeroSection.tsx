@@ -1,9 +1,21 @@
 import { Link } from 'wasp/client/router';
 import ExerciseForm from '../ExerciseForm';
-
+import { useAuth } from 'wasp/client/auth';
+import { useState, useEffect } from 'react';
 const HeroSection: React.FC = () => {
+  const { data: user, isLoading } = useAuth();
+  const [demoMode, setDemoMode] = useState(false);
+  
+  useEffect(() => {
+    if (user) {
+      setDemoMode(true);
+    } else {
+      setDemoMode(false);
+    }
+  }, [user]);
+
   return (
-    <div className='relative pt-14 w-full min-h-screen flex items-center pointer-events-none'>
+    <div className='relative pt-14 w-full min-h-[85vh] flex items-center pointer-events-none'>
       {/* Cool background stuff */}
       <div
         className='absolute top-0 right-0 -z-10 transform-gpu blur-3xl overflow-hidden w-full h-full'
@@ -21,7 +33,7 @@ const HeroSection: React.FC = () => {
           <div className='mx-auto max-w-3xl text-center'>
             <h1 className='text-3xl font-semibold tracking-tight text-gray-900 sm:text-6xl dark:text-gray-100'>
               <span className='text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-gray-900'>
-                Let Knowledge Last 5x Longer
+                Triathlon But For Brain
                 <span className='animate-pulse'>|</span>
               </span>
             </h1>
@@ -30,16 +42,17 @@ const HeroSection: React.FC = () => {
               <span className='font-semibold text-red-600 dark:text-red-400'>Handwrite connections</span> →{' '}
               <span className='font-semibold text-blue-600 dark:text-blue-400'>Hear explanations</span>.
             </p>
-            <ExerciseForm topicId={null} demo={true} />
-
-            <div className='mt-10 flex items-center justify-center gap-x-6'>
-              <Link
-                to='/login'
-                className='rounded-md bg-teal-500 px-5 py-3 text-sm font-medium text-white hover:bg-teal-600 transition-colors duration-200 pointer-events-auto'
-              >
-                Sign up for more free credits <span aria-hidden='true'>→</span>
-              </Link>
-            </div>
+            <ExerciseForm topicId={null} demo={demoMode} />
+            {!user && !isLoading && (
+              <div className='mt-10 flex items-center justify-center gap-x-6'>
+                <Link
+                  to='/signup'
+                  className='rounded-md bg-teal-500 px-5 py-3 text-sm font-medium text-white hover:bg-teal-600 transition-colors duration-200 pointer-events-auto'
+                >
+                  Sign up for more free credits <span aria-hidden='true'>→</span>
+                </Link>
+              </div>
+            )}
           </div>
           <div className='flex justify-center'>
             <span className='px-4 py-1 font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-full text-sm mt-8 inline-block text-center italic'>

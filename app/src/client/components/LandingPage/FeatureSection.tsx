@@ -1,4 +1,4 @@
-import { features } from '../../landing-page/contentSections';
+import { features } from '../../common/contentSections';
 
 const FeaturesSection: React.FC = () => {
   return (

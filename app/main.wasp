@@ -100,37 +100,37 @@ app Typit {
 
 route LandingPageRoute { path: "/", to: LandingPage }
 page LandingPage {
-  component: import LandingPage from "@src/client/landing-page/LandingPage"
+  component: import LandingPage from "@src/client/common/LandingPage"
 }
 
 route PublicCoursesRoute { path: "/public-courses", to: PublicCoursesPage }
 page PublicCoursesPage {
-  component: import PublicCoursesPage from "@src/client/landing-page/PublicCoursesPage"
+  component: import PublicCoursesPage from "@src/client/common/PublicCoursesPage"
 }
 
 route GuidePageRoute { path: "/guide", to: GuidePage }
 page GuidePage {
-  component: import GuidePage from "@src/client/landing-page/GuidePage"
+  component: import GuidePage from "@src/client/common/GuidePage"
 }
 
 route AboutPageRoute { path: "/about", to: AboutPage }
 page AboutPage {
-  component: import AboutPage from "@src/client/landing-page/AboutPage"
+  component: import AboutPage from "@src/client/common/AboutPage"
 }
 
 route PrivacyPageRoute { path: "/privacy", to: PrivacyPage }
 page PrivacyPage {
-  component: import PrivacyPage from "@src/client/landing-page/PrivacyPage"
+  component: import PrivacyPage from "@src/client/common/PrivacyPage"
 }
 
 route TermsPageRoute { path: "/terms", to: TermsPage }
 page TermsPage {
-  component: import TermsPage from "@src/client/landing-page/TermsPage"
+  component: import TermsPage from "@src/client/common/TermsPage"
 }
 
 route DemoPageRoute { path: "/demo", to: DemoPage }
 page DemoPage {
-  component: import DemoPage from "@src/client/landing-page/DemoPage"
+  component: import DemoPage from "@src/client/common/DemoPage"
 }
 
 //#region Auth Pages
@@ -169,6 +169,7 @@ page PortalPage {
 
 route OnboardingPageRoute { path: "/portal/onboarding", to: OnboardingPage }
 page OnboardingPage {
+  authRequired: true,
   component: import OnboardingPage from "@src/client/app/OnboardingPage"
 }
 

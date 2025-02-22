@@ -1,4 +1,4 @@
-import { faqs } from '../../landing-page/contentSections';
+import { faqs } from '../../common/contentSections';
 
 const FAQSection = () => {
   return (
