@@ -8,137 +8,136 @@ generator client {
 }
 
 model User {
-  id                        String          @id @default(uuid())
-  createdAt                 DateTime        @default(now())
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
 
-  email                     String?         @unique
-  username                  String?         @unique
-  lastActiveTimestamp       DateTime        @default(now())
-  isAdmin                   Boolean         @default(false)
+  email               String?  @unique
+  username            String?  @unique
+  lastActiveTimestamp DateTime @default(now())
+  isAdmin             Boolean  @default(false)
 
-  stripeId                  String?
-  checkoutSessionId         String?
-  sendEmail                 Boolean         @default(false)
-  onBoardingCompleted       Boolean         @default(false)
-  tourCompleted             Boolean         @default(false)
-  datePaid                  DateTime?
-  lang                      String          @default("en")
-  tokens                    Int             @default(30000)
+  stripeId            String?
+  checkoutSessionId   String?
+  sendEmail           Boolean   @default(false)
+  onBoardingCompleted Boolean   @default(false)
+  tourCompleted       Boolean   @default(false)
+  datePaid            DateTime?
+  lang                String    @default("en")
+  tokens              Int       @default(30000)
 
   // Relations
-  courses                   Course[]
-  topics                    Topic[]
-  exercises                 Exercise[]
-  feedbacks                 Feedback[]
-  landingPageTry            LandingPageTry?
-  organization              Organization?    @relation(fields: [organizationId], references: [id])
-  organizationId            String?
-  deletedAt                 DateTime?
-  onboarding                Onboarding?
+  courses        Course[]
+  topics         Topic[]
+  exercises      Exercise[]
+  feedbacks      Feedback[]
+  landingPageTry LandingPageTry?
+  organization   Organization?   @relation(fields: [organizationId], references: [id])
+  organizationId String?
+  deletedAt      DateTime?
+  onboarding     Onboarding?
 }
 
 model Onboarding {
-  id                        String    @id @default(uuid())
-  userType                  String    // Student, Teacher, Parent, Professor, Other
-  userTypeOther             String?   // If userType is Other
-  learningStyle             String?   // Visual, Auditory, Kinesthetic, Mixed
-  
+  id            String  @id @default(uuid())
+  userType      String // Student, Teacher, Parent, Professor, Other
+  userTypeOther String? // If userType is Other
+  learningStyle String? // Visual, Auditory, Kinesthetic, Mixed
+
   // Subjects (multiple can be true)
-  scienceMedicine          Boolean   @default(false)
-  technologyEngineering    Boolean   @default(false)
-  businessEconomics        Boolean   @default(false)
-  humanitiesArts           Boolean   @default(false)
-  languageLearning         Boolean   @default(false)
-  testPrep                 Boolean   @default(false)
-  subjectOther             String?   // If other subject selected
-  
+  scienceMedicine       Boolean @default(false)
+  technologyEngineering Boolean @default(false)
+  businessEconomics     Boolean @default(false)
+  humanitiesArts        Boolean @default(false)
+  languageLearning      Boolean @default(false)
+  testPrep              Boolean @default(false)
+  subjectOther          String? // If other subject selected
+
   // Motivation factors (multiple can be true)
-  motivationProgress       Boolean   @default(false)
-  motivationGamification   Boolean   @default(false)
-  motivationReminders      Boolean   @default(false)
-  motivationCommunity      Boolean   @default(false)
-  motivationToolOnly       Boolean   @default(false)
-  
+  motivationProgress     Boolean @default(false)
+  motivationGamification Boolean @default(false)
+  motivationReminders    Boolean @default(false)
+  motivationCommunity    Boolean @default(false)
+  motivationToolOnly     Boolean @default(false)
+
   // Marketing sources (multiple can be true)
-  sourceTwitter            Boolean   @default(false)
-  sourceInstagram          Boolean   @default(false)
-  sourceTikTok             Boolean   @default(false)
-  sourceFacebook           Boolean   @default(false)
-  sourceYoutube            Boolean   @default(false)
-  sourceGoogle             Boolean   @default(false)
-  sourceWordOfMouth        Boolean   @default(false)
-  sourceOther              String?   // If other source selected
-  
-  featureRequest          String?    // Optional feature request text
-  
-  userId                   String    @unique
-  user                     User      @relation(fields: [userId], references: [id])
+  sourceTwitter     Boolean @default(false)
+  sourceInstagram   Boolean @default(false)
+  sourceTikTok      Boolean @default(false)
+  sourceFacebook    Boolean @default(false)
+  sourceYoutube     Boolean @default(false)
+  sourceGoogle      Boolean @default(false)
+  sourceWordOfMouth Boolean @default(false)
+  sourceOther       String? // If other source selected
+
+  featureRequest String? // Optional feature request text
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model Organization {
-  id                        String          @id @default(uuid())
-  createdAt                 DateTime        @default(now())
-  name                      String
-  emailDomain              String          @unique
-  stripeCustomerId         String?
-  subscriptionStatus       String          @default("inactive")
-  subscriptionPlan         String?
-  seats                    Int             @default(0)
-  users                    User[]
+  id                 String   @id @default(uuid())
+  createdAt          DateTime @default(now())
+  name               String
+  emailDomain        String   @unique
+  stripeCustomerId   String?
+  subscriptionStatus String   @default("inactive")
+  subscriptionPlan   String?
+  seats              Int      @default(0)
+  users              User[]
 }
 
 model LandingPageTry {
-  id                  String      @id @default(uuid())
-  createdAt           DateTime    @default(now())
-  
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
   // Visitor identification
-  userAgent           String      // Browser and OS info
-  browserLanguage     String?
-  screenResolution    String?
-  timezone           String?
-  
+  userAgent        String // Browser and OS info
+  browserLanguage  String?
+  screenResolution String?
+  timezone         String?
+
   // Request details
-  name                String      // From Exercise
-  prompt              String      // From Exercise
-  promptImg           String      @default("/task1_prompt.png") // From Exercise
-  lessonText          String      // Generated lesson content
-  audioTimestamps     String[]    @default([])
-  paragraphSummary    String      @default("")
-  level               String      @default("")
-  cursor              Int         @default(0)
-  no_words            Int         @default(0)
-  truncated           Boolean     @default(false)
-  completedAt         DateTime?   // From Exercise
-  score               Int         @default(0) // From Exercise
-  tokensUsed          Int         @default(0)
-  successful          Boolean     @default(false)
-  model               String      @default("gpt-4o-mini")
-  userEvaluation      Int?        @default(0) // From Exercise
-  
+  name             String // From Exercise
+  prompt           String // From Exercise
+  promptImg        String    @default("/task1_prompt.png") // From Exercise
+  lessonText       String // Generated lesson content
+  audioTimestamps  String[]  @default([])
+  paragraphSummary String    @default("")
+  level            String    @default("")
+  cursor           Int       @default(0)
+  no_words         Int       @default(0)
+  truncated        Boolean   @default(false)
+  completedAt      DateTime? // From Exercise
+  score            Int       @default(0) // From Exercise
+  tokensUsed       Int       @default(0)
+  successful       Boolean   @default(false)
+  model            String    @default("gpt-4o-mini")
+  userEvaluation   Int?      @default(0) // From Exercise
+
   // If they later sign up, we can link it
-  convertedUserId     String?     @unique
-  convertedUser       User?       @relation(fields: [convertedUserId], references: [id])
+  convertedUserId String? @unique
+  convertedUser   User?   @relation(fields: [convertedUserId], references: [id])
 }
 
 model Feature {
-  id                String    @id @default(uuid())
-  name              String
-  bounty            Int
-  date              DateTime
-  approved          Boolean   @default(false)
-  completed         Boolean   @default(false)
-  createdAt         DateTime  @default(now())
-  description       String?
-  priority          Int       @default(1)
-  assignedTo        String?
-  estimatedHours    Float?
-  actualHours       Float?
-  status            String    @default("pending")
-  tags              String[]
-  githubIssueUrl    String?
-  completedAt       DateTime?
+  id             String    @id @default(uuid())
+  name           String
+  bounty         Int
+  date           DateTime
+  approved       Boolean   @default(false)
+  completed      Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  description    String?
+  priority       Int       @default(1)
+  assignedTo     String?
+  estimatedHours Float?
+  actualHours    Float?
+  status         String    @default("pending")
+  tags           String[]
+  githubIssueUrl String?
+  completedAt    DateTime?
 }
-
 
 model Course {
   id          String   @id @default(uuid())
@@ -146,110 +145,118 @@ model Course {
   name        String
   image       String
   description String
-  isPublic    Boolean   @default(false)
-  userId      String 
+  isPublic    Boolean  @default(false)
+  userId      String
   user        User     @relation(fields: [userId], references: [id])
   topics      Topic[]
   createdAt   DateTime @default(now())
 }
 
 model Topic {
-  id          String    @id @default(uuid())
-  name        String
-  courseId    String
-  userId      String  
-  length      Int       @default(500)
-  level       String    @default("Like I am a university student")
-  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercises   Exercise[]
-  createdAt   DateTime  @default(now())
+  id        String     @id @default(uuid())
+  name      String
+  courseId  String
+  userId    String
+  length    Int        @default(500)
+  level     String     @default("Like I am a university student")
+  course    Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercises Exercise[]
+  createdAt DateTime   @default(now())
+}
+
+enum ExerciseStatus {
+  CREATED
+  FILE_UPLOADED
+  DOCUMENT_SCANNED
+  EXERCISE_GENERATED
+  EXERCISE_TAGGED
+  SUMMARY_GENERATED
+  QUESTIONS_GENERATED
+  FINISHED
 }
 
 model Exercise {
-  id                  String      @id @default(uuid())
-  name                String
-  prompt              String
-  promptImg           String      @default("/task1_prompt.png")
-  lessonText          String
-  audioTimestamps     String[]    @default([])
-  paragraphSummary    String      @default("")
-  level               String      @default("")
-  cursor              Int         @default(0)
-  no_words            Int         @default(0)
-  completed           Boolean     @default(false)
-  truncated           Boolean     @default(false)
-  completedAt         DateTime?
-  score               Int         @default(0)
-  tokens              Int         @default(0)
-  model               String      @default("gpt-4o-mini")
-  userEvaluation      Int?        @default(0)
-  questions           Question[]  @relation("ExerciseQuestions")
-  userId              String
-  topicId             String?
-  topic               Topic?      @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt           DateTime    @default(now())
-  file                File?
+  id               String         @id @default(uuid())
+  status           ExerciseStatus @default(CREATED)
+  name             String
+  lessonText       String
+  audioTimestamps  String[]       @default([])
+  paragraphSummary String         @default("")
+  level            String         @default("")
+  cursor           Int            @default(0)
+  no_words         Int            @default(0)
+  completed        Boolean        @default(false)
+  completedAt      DateTime?
+  truncated        Boolean        @default(false)
+  score            Int            @default(0)
+  tokens           Int            @default(0)
+  model            String         @default("gpt-4o-mini")
+  userEvaluation   Int?           @default(0)
+  questions        Question[]     @relation("ExerciseQuestions")
+  userId           String
+  topicId          String?
+  topic            Topic?         @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime       @default(now())
+  file             File?
 }
 
 model File {
-  id                        String          @id @default(uuid())
-  createdAt                 DateTime        @default(now())
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
 
-  exercise                  Exercise        @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  exerciseId                String          @unique
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  exerciseId String   @unique
 
-  name                      String
-  type                      String
-  key                       String
-  uploadUrl                 String
+  name      String
+  type      String
+  key       String
+  uploadUrl String
 }
 
 model Question {
-  id          String      @id @default(uuid())
-  text        String
-  exerciseId  String
-  exercise    Exercise    @relation("ExerciseQuestions", fields: [exerciseId], references: [id], onDelete: Cascade)
-  options     Option[]    @relation("QuestionOptions")
-  createdAt   DateTime    @default(now())
+  id         String   @id @default(uuid())
+  text       String
+  exerciseId String
+  exercise   Exercise @relation("ExerciseQuestions", fields: [exerciseId], references: [id], onDelete: Cascade)
+  options    Option[] @relation("QuestionOptions")
+  createdAt  DateTime @default(now())
 }
 
 model Option {
-  id          String      @id @default(uuid())
-  text        String
-  isCorrect   Boolean     @default(false)
-  questionId  String
-  question    Question    @relation("QuestionOptions", fields: [questionId], references: [id], onDelete: Cascade)
-  createdAt   DateTime    @default(now())
+  id         String   @id @default(uuid())
+  text       String
+  isCorrect  Boolean  @default(false)
+  questionId String
+  question   Question @relation("QuestionOptions", fields: [questionId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
 }
-
 
 model Feedback {
-  id                       Int             @id @default(autoincrement())
-  createdAt                DateTime        @default(now())
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
 
-  message                  String
-  email                    String
-  userId                   String
-  user                     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  message String
+  email   String
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Additional feedback fields
-  rating                   Int             @default(0)  // Overall rating out of 5
-  usability               String?         // Feedback about app usability
-  features                String?         // Feedback about specific features
-  improvements            String?         // Suggestions for improvements
-  wouldRecommend          Boolean         @default(false)
-  experienceLevel         String?         // User's typing/learning experience level
-  browserInfo             String?         // Technical context
-  category                String          @default("GENERAL") // Category of feedback (BUG, FEATURE, GENERAL etc)
+  rating          Int     @default(0) // Overall rating out of 5
+  usability       String? // Feedback about app usability
+  features        String? // Feedback about specific features
+  improvements    String? // Suggestions for improvements
+  wouldRecommend  Boolean @default(false)
+  experienceLevel String? // User's typing/learning experience level
+  browserInfo     String? // Technical context
+  category        String  @default("GENERAL") // Category of feedback (BUG, FEATURE, GENERAL etc)
 }
 
-
 model Logs {
-  id                       Int             @id @default(autoincrement())
-  createdAt                DateTime        @default(now())
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
 
-  message                  String
-  level                    String
+  message String
+  level   String
 }

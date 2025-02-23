@@ -3,35 +3,71 @@ import {
   type ShareExercise,
   type UpdateExercise,
   type DeleteExercise,
+  type GenerateExercise,
 } from 'wasp/server/operations';
 import { HttpError } from 'wasp/server';
 import { Exercise } from 'wasp/entities';
+import { getS3DownloadUrl } from '../utils/s3Utils';
 import { OpenAIService } from '../llm/openai';
 import { TokenService } from '../llm/tokenService';
 import { truncateText, reportToAdmin, cleanMarkdown } from './utils';
 import { MAX_TOKENS, OPENAI_MODEL } from '../../shared/constants';
 import { TiktokenModel } from 'tiktoken';
+import { deleteS3Objects } from '../utils/s3Utils';
 
-export const createExercise: CreateExercise<
-  {
-    name: string;
-    length: string;
-    level: string;
-    content: string;
-    topicId: string | null;
-    model: string;
-    includeSummary: boolean;
-    includeMCQuiz: boolean;
-    priorKnowledge: string;
-  },
-  { success: boolean; message: string }
-> = async ({ name, length, level, content, topicId, model, includeSummary, includeMCQuiz, priorKnowledge }, context: any) => {
-  // Check for user authentication
+// Create empty exercise
+export const createExercise: CreateExercise<{ name: string }, Exercise> = async ({ name }, context) => {
   if (!context.user) {
     throw new HttpError(401, 'Unauthorized');
   }
 
-  const { text: filtered_content, truncated } = truncateText(content);
+  try {
+    return await context.entities.Exercise.create({
+      data: {
+        name,
+        user: { connect: { id: context.user.id } },
+        lessonText: '',
+        paragraphSummary: '',
+        level: '',
+        truncated: false,
+        tokens: 0,
+        model: '',
+        no_words: 0,
+      },
+    });
+  } catch (error: any) {
+    await reportToAdmin(`Failed to create exercise: ${error.message}`);
+    console.error('Database Error:', error);
+    throw new HttpError(500, 'Failed to create exercise. Please try again later.');
+  }
+};
+
+export const generateExercise: GenerateExercise<
+  {
+    exerciseId: string;
+    priorKnowledge: string[];
+    length: string;
+    level: string;
+    model: string;
+    includeSummary: boolean;
+    includeMCQuiz: boolean;
+  },
+  { success: boolean; message: string }
+> = async ({ exerciseId, priorKnowledge, length, level, model, includeSummary, includeMCQuiz }, context) => {
+  if (!context.user) {
+    throw new HttpError(401, 'Unauthorized');
+  }
+
+  // Get the signed URL for the S3 file
+  let exerciseContentUrl = await getS3DownloadUrl({ key: exerciseId + '.txt' });
+
+  // Fetch the content using fetch API since readFile doesn't work with URLs
+  const response = await fetch(exerciseContentUrl);
+  if (!response.ok) {
+    return { success: false, message: 'Failed to download exercise content' };
+  }
+  let exerciseText = await response.text();
+  const { text: filtered_content, truncated } = truncateText(exerciseText);
 
   // Calculate required tokens
   const required_tokens = TokenService.calculateRequiredTokens(filtered_content, OPENAI_MODEL as TiktokenModel);
@@ -49,7 +85,7 @@ export const createExercise: CreateExercise<
   try {
     const exerciseResponse = await OpenAIService.generateExercise(
       filtered_content,
-      priorKnowledge,
+      priorKnowledge.join(','),
       length,
       level,
       model,
@@ -60,11 +96,46 @@ export const createExercise: CreateExercise<
     }
     exerciseJson = exerciseResponse.data;
     exerciseJsonUsage = exerciseResponse.usage || 0;
+
+    // Update status to EXERCISE_GENERATED
+    await context.entities.Exercise.update({
+      where: { id: exerciseId },
+      data: { status: 'EXERCISE_GENERATED' },
+    });
   } catch (error) {
+    console.error('Failed to generate exercise after multiple attempts:', error);
     return { success: false, message: 'Failed to generate exercise after multiple attempts.' };
   }
 
   const lectureContent = cleanMarkdown(exerciseJson.lectureContent);
+
+  const complexityJson = await OpenAIService.generateComplexity(lectureContent, model, MAX_TOKENS);
+
+  if (complexityJson.success && complexityJson.data.taggedText) {
+    exerciseJson.taggedText = complexityJson.data.taggedText;
+
+    // Update status to EXERCISE_TAGGED
+    await context.entities.Exercise.update({
+      where: { id: exerciseId },
+      data: { status: 'EXERCISE_TAGGED' },
+    });
+  }
+
+  const documentParserUrl = process.env.DOCUMENT_PARSER_URL;
+  if (documentParserUrl) {
+    // Generate audio
+    const formData = new FormData();
+    formData.append('exerciseId', exerciseId);
+    formData.append('generate_text', exerciseJson.taggedText);
+    const audioResponse = await fetch(`${documentParserUrl}/generate-audio`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!audioResponse.ok) {
+      await reportToAdmin('Failed to generate audio.');
+    }
+  }
 
   let summaryJson = null;
   let summaryJsonUsage = 0;
@@ -74,12 +145,17 @@ export const createExercise: CreateExercise<
       if (summaryResponse.success && summaryResponse.data) {
         summaryJson = summaryResponse.data;
         summaryJsonUsage = summaryResponse.usage || 0;
+
+        // Update status to SUMMARY_GENERATED
+        await context.entities.Exercise.update({
+          where: { id: exerciseId },
+          data: { status: 'SUMMARY_GENERATED' },
+        });
       } else {
-        // Log and continue without summary
         await reportToAdmin('Failed to generate summary.');
       }
     } catch (error) {
-      // Log and continue without summary
+      console.error('Failed to generate summary after multiple attempts:', error);
       await reportToAdmin('Failed to generate summary after multiple attempts.');
     }
   }
@@ -94,12 +170,17 @@ export const createExercise: CreateExercise<
         questions = questionsResponse.data.questions;
         questionsUsage = questionsResponse.usage || 0;
         questionsSuccess = true;
+
+        // Update status to QUESTIONS_GENERATED
+        await context.entities.Exercise.update({
+          where: { id: exerciseId },
+          data: { status: 'QUESTIONS_GENERATED' },
+        });
       } else {
-        // Log and continue without questions
         await reportToAdmin('Failed to generate questions.');
       }
     } catch (error) {
-      // Log and continue without questions
+      console.error('Failed to generate questions after multiple attempts:', error);
       await reportToAdmin('Failed to generate questions after multiple attempts.');
     }
   }
@@ -107,19 +188,10 @@ export const createExercise: CreateExercise<
   // Aggregate token usage
   const totalTokensUsed = exerciseJsonUsage + summaryJsonUsage + questionsUsage;
 
-  const complexityJson = await OpenAIService.generateComplexity(lectureContent, model, MAX_TOKENS);
-
-  if (complexityJson.success && complexityJson.data.taggedText) {
-    exerciseJson.taggedText = complexityJson.data.taggedText;
-  }
-
-  // Create the exercise
-  let newExercise;
   try {
-    newExercise = await context.entities.Exercise.create({
+    await context.entities.Exercise.update({
+      where: { id: exerciseId },
       data: {
-        name,
-        prompt: exerciseJson.preExerciseText || '',
         lessonText: exerciseJson.taggedText || '',
         paragraphSummary: summaryJson?.paragraphSummary || '',
         level,
@@ -127,14 +199,13 @@ export const createExercise: CreateExercise<
         tokens: totalTokensUsed,
         model,
         no_words: lectureContent.split(' ').length || parseInt(length, 10),
-        user: { connect: { id: context.user.id } },
-        ...(topicId && { topic: { connect: { id: topicId } } }),
+        status: 'FINISHED',
       },
     });
   } catch (error: any) {
-    await reportToAdmin(`Failed to create exercise in the database: ${error.message}`);
+    await reportToAdmin(`Failed to update exercise in the database: ${error.message}`);
     console.error('Database Error:', error);
-    return { success: false, message: 'Failed to create exercise. Please try again later.' };
+    return { success: false, message: 'Failed to update exercise. Please try again later.' };
   }
 
   // Create questions if generated successfully
@@ -145,7 +216,7 @@ export const createExercise: CreateExercise<
           await context.entities.Question.create({
             data: {
               text: question.text,
-              exercise: { connect: { id: newExercise.id } },
+              exercise: { connect: { id: exerciseId } },
               options: {
                 create: question.options.map((option) => ({
                   text: option.text,
@@ -159,7 +230,6 @@ export const createExercise: CreateExercise<
     } catch (error: any) {
       await reportToAdmin(`Failed to create questions: ${error.message}`);
       console.error('Database Error:', error);
-      // Optionally, you might want to rollback the exercise creation or notify the user.
     }
   }
 
@@ -169,10 +239,9 @@ export const createExercise: CreateExercise<
   } catch (error: any) {
     await reportToAdmin(`Failed to deduct tokens: ${error.message}`);
     console.error('Token Deduction Error:', error);
-    // Optionally, you might want to notify the user or revert the exercise creation.
   }
 
-  return { success: true, message: 'Exercise created successfully' };
+  return { success: true, message: 'Exercise updated successfully' };
 };
 
 export const shareExercise: ShareExercise<{ exerciseId: string; emails: Array<string> }, string> = async (
@@ -197,7 +266,6 @@ export const shareExercise: ShareExercise<{ exerciseId: string; emails: Array<st
         await context.entities.Exercise.create({
           data: {
             name: exercise.name,
-            prompt: exercise.prompt,
             lessonText: exercise.lessonText,
             paragraphSummary: exercise.paragraphSummary,
             level: exercise.level,
@@ -241,7 +309,7 @@ export const updateExercise: UpdateExercise<{ id: string; updated_data: Partial<
     where: { id },
     data: updated_data,
   });
-  
+
   return updatedExercise;
 };
 
@@ -249,6 +317,8 @@ export const deleteExercise: DeleteExercise<{ id: string }, Exercise> = async ({
   if (!context.user) {
     throw new HttpError(401);
   }
+
+  await deleteS3Objects({ key: id });
 
   return context.entities.Exercise.delete({
     where: {

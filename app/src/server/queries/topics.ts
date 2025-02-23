@@ -2,6 +2,8 @@ import { HttpError } from 'wasp/server';
 import {
   type GetTopicsByCourse,
 } from 'wasp/server/operations';
+import { Exercise } from 'wasp/entities';
+import { ExerciseStatus } from '@prisma/client';
 
 type TopicsByCourse = {
   id: string;
@@ -11,8 +13,8 @@ type TopicsByCourse = {
   level: string;
   exercises: {
     id: string;
+    status: ExerciseStatus;
     name: string;
-    prompt: string;
     level: string;
     lessonText: string;
     truncated: boolean;
@@ -40,8 +42,8 @@ export const getTopicsByCourse: GetTopicsByCourse<{ courseId: string }, TopicsBy
         },
         select: {
           id: true,
+          status: true,
           name: true,
-          prompt: true,
           level: true,
           lessonText: true,
           truncated: true,

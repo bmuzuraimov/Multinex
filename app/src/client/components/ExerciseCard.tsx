@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { deleteExercise, shareExercise } from 'wasp/client/operations';
-import { ExerciseItemProps } from '../../shared/types';
+import { Exercise } from '../../shared/types';
 import { RiDeleteBin4Line } from 'react-icons/ri';
 import ExerciseImg from '../static/exercise.png';
 import ExerciseDoneImg from '../static/exercise_done.png';
@@ -10,7 +10,51 @@ import { Tooltip } from 'react-tooltip';
 import ExerciseEditModal from './ExerciseEditModal';
 import { LuShare } from "react-icons/lu";
 
-const ExerciseCard: React.FC<ExerciseItemProps> = ({ index, exercise }) => {
+// Memoized ShareMenu component
+const ShareMenu = memo(({ isOpen, onClose, emailsInput, setEmailsInput, onShare }: {
+  isOpen: boolean;
+  onClose: () => void;
+  emailsInput: string;
+  setEmailsInput: (value: string) => void;
+  onShare: () => void;
+}) => {
+  if (!isOpen) return null;
+  
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+      <div className="bg-white w-full max-w-xl dark:bg-gray-800 p-6 rounded shadow-lg">
+        <h2 className="text-xl font-bold mb-4 text-black dark:text-white">Share Exercise</h2>
+        <input
+          type="text"
+          placeholder="Enter emails separated by commas"
+          value={emailsInput}
+          onChange={(e) => setEmailsInput(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded mb-4"
+        />
+        <div className="flex justify-end">
+          <button
+            onClick={onClose}
+            className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onShare}
+            className="bg-teal-500 text-white px-4 py-2 rounded"
+          >
+            Share
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// Memoized ExerciseCard component
+const ExerciseCard: React.FC<{
+  index: number;
+  exercise: Exercise;
+}> = memo(({ index, exercise }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
   const [emailsInput, setEmailsInput] = useState('');
@@ -18,11 +62,17 @@ const ExerciseCard: React.FC<ExerciseItemProps> = ({ index, exercise }) => {
   const handleShare = async () => {
     const emails = emailsInput.split(',').map(email => email.trim()).filter(email => email !== '');
     if (emails.length > 0) {
-     await shareExercise({ exerciseId: exercise.id, emails });
+      await shareExercise({ exerciseId: exercise.id, emails });
       setIsShareMenuOpen(false);
       setEmailsInput('');
     } else {
       alert('Please enter at least one email.');
+    }
+  };
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this exercise?')) {
+      deleteExercise({ id: exercise.id });
     }
   };
 
@@ -36,34 +86,15 @@ const ExerciseCard: React.FC<ExerciseItemProps> = ({ index, exercise }) => {
           onClose={() => setIsModalOpen(false)}
         />
       )}
-      {isShareMenuOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-          <div className="bg-white w-full max-w-xl dark:bg-gray-800 p-6 rounded shadow-lg">
-            <h2 className="text-xl font-bold mb-4 text-black dark:text-white">Share Exercise</h2>
-            <input
-              type="text"
-              placeholder="Enter emails separated by commas"
-              value={emailsInput}
-              onChange={(e) => setEmailsInput(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded mb-4"
-            />
-            <div className="flex justify-end">
-              <button
-                onClick={() => setIsShareMenuOpen(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleShare}
-                className="bg-teal-500 text-white px-4 py-2 rounded"
-              >
-                Share
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      
+      <ShareMenu 
+        isOpen={isShareMenuOpen}
+        onClose={() => setIsShareMenuOpen(false)}
+        emailsInput={emailsInput}
+        setEmailsInput={setEmailsInput}
+        onShare={handleShare}
+      />
+
       <div className='relative flex flex-col items-center p-3 bg-white dark:bg-gray-700 border dark:border-gray-700 rounded shadow-md cursor-pointer'>
         {exercise.truncated && (
           <>
@@ -82,11 +113,7 @@ const ExerciseCard: React.FC<ExerciseItemProps> = ({ index, exercise }) => {
         )}
         <button
           className='absolute top-1 right-1 z-10 text-lg text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors duration-200'
-          onClick={() => {
-            if (window.confirm('Are you sure you want to delete this exercise?')) {
-              deleteExercise({ id: exercise.id });
-            }
-          }}
+          onClick={handleDelete}
         >
           <RiDeleteBin4Line />
         </button>
@@ -102,7 +129,6 @@ const ExerciseCard: React.FC<ExerciseItemProps> = ({ index, exercise }) => {
         >
           <LuShare />
         </button>
-        <div className='absolute top-2 left-2 z-10 text-2xl font-semibold text-gray-700 dark:text-gray-200'>{index + 1}</div>
         <a href={`/exercise/${exercise.id}`} className='w-full group'>
           <img
             src={exercise.completed ? ExerciseDoneImg : ExerciseImg}
@@ -116,8 +142,8 @@ const ExerciseCard: React.FC<ExerciseItemProps> = ({ index, exercise }) => {
         <div className='mt-1 text-md font-medium text-center text-blue-500 dark:text-blue-400'>{exercise.level}</div>
         <div className='mt-1 text-sm font-light text-gray-500 dark:text-gray-400'>{exercise.no_words} words</div>
       </div>
-      </>
+    </>
   );
-};
+});
 
 export default ExerciseCard;
