@@ -1,7 +1,6 @@
 import logging
 import os
 from typing import Dict
-import asyncio
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,7 +17,6 @@ from dotenv import load_dotenv
 import boto3
 import json
 import re
-import traceback
 from pydantic import BaseModel
 from fastapi import Body
 load_dotenv()
@@ -112,31 +110,27 @@ async def process_file(filename: str, content: bytes, scan_images: bool = False)
         "topics": topics
     }
 
-
-@app.post("/extract-text")
-async def extract_text(
-    file: UploadFile = File(...),
-    scan_images: bool = False,
-    user_id: str = None
+@app.post("/get-exercise-topics")
+async def get_exercise_topics(
+    fileId: str = Form(...),
+    fileType: str = Form(...)
 ) -> JSONResponse:
-    filename = file.filename
-    logger.info(f"Processing file: {filename} for user: {user_id}")
-
-    start_time = asyncio.get_event_loop().time()
-
     try:
-        content = await file.read()
+        # Download the file from S3
+        bucket_name = os.environ.get('AWS_S3_EXERCISES_BUCKET')
+        s3_key = f"{fileId}"
+        response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
+        file_content = response['Body'].read()
+        # Process the file
+        file_name = f"{fileId}.{fileType}"
+        results = await process_file(file_name, file_content)
+        return JSONResponse(content=results)
     except Exception as e:
-        logger.exception("File reading error")
-        raise HTTPException(
-            status_code=500, detail=f"Error reading file: {str(e)}")
+        logger.exception("Error processing file")
+        raise HTTPException(status_code=500, detail=str(e))
+        
 
-    results = await process_file(filename, content, scan_images)
 
-    end_time = asyncio.get_event_loop().time()
-    execution_time = end_time - start_time
-    logger.info(f"Processing completed in {execution_time:.2f} seconds")
-    return JSONResponse(content=results)
 
 @app.post("/get-exercise-topics")
 async def get_exercise_topics(

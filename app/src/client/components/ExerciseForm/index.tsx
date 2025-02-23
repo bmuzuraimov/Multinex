@@ -147,7 +147,7 @@ const ExerciseForm: React.FC<{ topicId: string | null; demo: boolean }> = React.
     setExerciseSettings(prev => ({ ...prev, exerciseName: file.name }));
 
     try {
-      const exerciseResult = await createExercise({ name: file.name });
+      const exerciseResult = await createExercise({ name: file.name, topicId: topicId });
       setExercise(exerciseResult);
 
       if (!exerciseResult?.id) {

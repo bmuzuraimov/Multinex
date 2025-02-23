@@ -16,7 +16,7 @@ import { TiktokenModel } from 'tiktoken';
 import { deleteS3Objects } from '../utils/s3Utils';
 
 // Create empty exercise
-export const createExercise: CreateExercise<{ name: string }, Exercise> = async ({ name }, context) => {
+export const createExercise: CreateExercise<{ name: string, topicId: string | null }, Exercise> = async ({ name, topicId }, context) => {
   if (!context.user) {
     throw new HttpError(401, 'Unauthorized');
   }
@@ -33,6 +33,7 @@ export const createExercise: CreateExercise<{ name: string }, Exercise> = async 
         tokens: 0,
         model: '',
         no_words: 0,
+        topic: topicId ? { connect: { id: topicId } } : undefined,
       },
     });
   } catch (error: any) {

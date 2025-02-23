@@ -96,7 +96,7 @@ export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({ content }: { content: string
       role: 'system',
       content: `You are an AI assistant specialized in analyzing text complexity and learning methods. Your task is to analyze the given text and tag different segments based on their learning importance and recommended study method. IMPORTANT: You must not modify or rephrase any of the original text - only add a single tag around each segment.
 
-      Tag each segment with exactly one of these tags:
+      Tag each segment with exactly one of these tags, ensuring proper spacing between tags:
       
       1. <write></write> - For content that students should write down by hand:
          - Critical concepts requiring deep memorization
@@ -113,11 +113,16 @@ export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({ content }: { content: string
          - Supplementary or contextual details
          - Content that can be absorbed through audio playback
 
-      Return the exact same text with a single appropriate learning method tag around each segment. Do not use nested tags. Do not change any words or formatting - only add one tag per segment.`,
+      Return the exact same text with a single appropriate learning method tag around each segment. Add a newline between different tagged segments. Do not use nested tags. Do not change any words or formatting - only add tags with proper spacing between them.
+      
+      Example:
+      Original: "The speed of light is 299,792,458 m/s. This constant is fundamental to physics."
+      Tagged: 
+      "<write>The speed of light is 299,792,458 m/s</write> <type>This constant is fundamental to physics</type>"`,
     },
     {
       role: 'user',
-      content: `Please analyze the following text and add a single appropriate learning method tag around each segment without modifying any of the original text:
+      content: `Please analyze the following text and add a single appropriate learning method tag around each segment, ensuring proper spacing and newlines between different tagged segments:
       ${content}`,
     },
   ];

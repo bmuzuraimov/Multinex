@@ -8,12 +8,34 @@ export class AudioController {
   private audio: HTMLAudioElement | null = null;
   private audioTimestamps: AudioTimestamp[] = [];
   private isPlaying = false;
+  private isLoaded = false;
 
-  public setAudioUrl(audioUrl: string): void {
+  public setAudioUrl(audioUrl: string): Promise<void> {
+    if (this.isLoaded && this.audio?.src === audioUrl) {
+      return Promise.resolve();
+    }
+
     const audio = new Audio();
-    audio.src = audioUrl;
-    audio.onerror = (e) => console.error('Error loading audio:', e);
-    this.audio = audio;
+    
+    return new Promise((resolve, reject) => {
+      audio.addEventListener('canplaythrough', () => {
+        this.isLoaded = true;
+        resolve();
+      }, { once: true });
+
+      audio.addEventListener('error', (e) => {
+        console.error('Error loading audio:', e);
+        this.isLoaded = false;
+        reject(e);
+      }, { once: true });
+
+      audio.src = audioUrl;
+      this.audio = audio;
+    });
+  }
+
+  public isAudioLoaded(): boolean {
+    return this.isLoaded;
   }
 
   public setAudioTimestamps(timestamps: AudioTimestamp[]): void {
@@ -114,5 +136,13 @@ export class AudioController {
 
   public removeEventListener(event: string, callback: () => void): void {
     this.audio?.removeEventListener(event, callback);
+  }
+
+  public reset(): void {
+    if (this.audio) {
+      this.audio.pause();
+      this.audio.currentTime = 0;
+    }
+    this.isPlaying = false;
   }
 }

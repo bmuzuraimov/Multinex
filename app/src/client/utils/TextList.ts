@@ -121,12 +121,18 @@ export class TextList {
   }
 
   // Audio integration
-  public setAudio(audioUrl: string, audioTimestamps: AudioTimestamp[]): void {
+  public async setAudio(audioUrl: string, audioTimestamps: AudioTimestamp[]): Promise<void> {
     if (!this.audioController) {
       this.audioController = new AudioController();
     }
-    this.audioController.setAudioUrl(audioUrl);
-    this.audioController.setAudioTimestamps(audioTimestamps);
+    
+    try {
+      await this.audioController.setAudioUrl(audioUrl);
+      this.audioController.setAudioTimestamps(audioTimestamps);
+    } catch (error) {
+      console.error('Failed to load audio:', error);
+      throw error;
+    }
   }
 
   public togglePlayback(): void {

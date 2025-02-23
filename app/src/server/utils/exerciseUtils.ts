@@ -7,7 +7,9 @@ export function preprocessEssay(rawEssay: string) {
   const cleanEssay = rawEssay.replace(/\\n/g, '\n').replace(/<br\/>/g, '\n');
 
   // Parse the essay into formatted sections
-  const matches = Array.from(cleanEssay.matchAll(/<(hear|write|type)>([\s\S]*?)<\/\1>/g));
+  // wrap newlines in <type> tags
+  const wrappedEssay = cleanEssay.replace(/\n/g, '<type>\n</type>');
+  const matches = Array.from(wrappedEssay.matchAll(/<(hear|write|type)>([\s\S]*?)<\/\1>/g));
   const formattedEssay = matches.map(match => {
     const [fullMatch, mode, content] = match;
     // Get the character immediately after the matched section.
