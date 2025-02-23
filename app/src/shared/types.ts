@@ -5,8 +5,8 @@ export type StripePaymentResult = {
 
 export type Exercise = {
   id: string;
+  status: string;
   name: string;
-  prompt: string;
   level: string;
   truncated: boolean;
   lessonText: string;
@@ -14,21 +14,6 @@ export type Exercise = {
   completed: boolean;
   completedAt: Date | null;
   score: number;
-}
-
-export type ExerciseItemProps = {
-  index: number;
-  exercise: Exercise;
-}
-
-export type ExerciseSectionProps = {
-  topic: {
-    id: string;
-    name: string;
-    length: number;
-    level: string;
-    exercises: Exercise[];
-  };
 }
 
 export interface Option {
@@ -62,12 +47,35 @@ export type ExerciseFormContentSettings = {
 export type ExerciseFormGenerationSettings = {
   scanImages: boolean; // Whether to extract text from images
   setScanImages: (value: boolean) => void;
-  showAdvanced: boolean; // Toggle advanced settings visibility
-  setShowAdvanced: (value: boolean) => void;
   selectedModel: string; // AI model used for generation
   setSelectedModel: (value: string) => void;
   includeSummary: boolean; // Include content summary in output
   setIncludeSummary: (value: boolean) => void;
   includeMCQuiz: boolean; // Include multiple choice questions
   setIncludeMCQuiz: (value: boolean) => void;
+};
+
+export type LandingPageTryResult = {
+  id: string;
+  createdAt: Date;
+  userAgent: string;
+  browserLanguage: string | null;
+  screenResolution: string | null;
+  timezone: string | null;
+  name: string;
+  prompt: string;
+  promptImg: string;
+  audioTimestamps: Array<{word: string, start: number, end: number}> | string[];
+  paragraphSummary: string;
+  level: string;
+  no_words: number;
+  truncated: boolean;
+  completedAt: Date | null;
+  score: number;
+  tokensUsed: number;
+  successful: boolean;
+  model: string;
+  userEvaluation: number | null;
+  convertedUserId: string | null;
+  [key: string]: any;
 };

@@ -95,9 +95,20 @@ async def process_file(filename: str, content: bytes, scan_images: bool = False)
     analyzer = ContentAnalyzer()
     topics = await analyzer.extract_topics(text)
 
+    # Upload text content to S3
+    bucket_name = os.environ.get('AWS_S3_EXERCISES_BUCKET')
+    text_filename = f"{filename.split('.')[0]}.txt"
+    try:
+        s3_client.put_object(
+            Bucket=bucket_name,
+            Key=text_filename,
+            Body=text.encode('utf-8'),
+            ContentType='text/plain'
+        )
+    except Exception as e:
+        logger.error(f"Failed to upload text file to S3: {str(e)}")
+
     return {
-        "filename": filename,
-        "text": text,
         "topics": topics
     }
 
@@ -127,6 +138,28 @@ async def extract_text(
     logger.info(f"Processing completed in {execution_time:.2f} seconds")
     return JSONResponse(content=results)
 
+@app.post("/get-exercise-topics")
+async def get_exercise_topics(
+    fileId: str = Form(...),
+    fileType: str = Form(...)
+) -> JSONResponse:
+    try:
+        # Download the file from S3
+        bucket_name = os.environ.get('AWS_S3_EXERCISES_BUCKET')
+        s3_key = f"{fileId}"
+        response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
+        file_content = response['Body'].read()
+        # Process the file
+        file_name = f"{fileId}.{fileType}"
+        results = await process_file(file_name, file_content)
+        return JSONResponse(content=results)
+    except Exception as e:
+        logger.exception("Error processing file")
+        raise HTTPException(status_code=500, detail=str(e))
+        
+
+
+
 
 @app.post("/generate-audio")
 async def generate_audio(
@@ -135,24 +168,74 @@ async def generate_audio(
 ) -> Dict:
     try:
         if not generate_text or not exerciseId:
-            return {
-                "status": "error",
-                "message": "Missing required fields: generate_text and exerciseId are required"
-            }
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "success": False,
+                    "message": "Missing required fields: generate_text and exerciseId are required"
+                }
+            )
+        
+        # Validate ElevenLabs API key
+        if not os.environ.get("ELEVENLABS_API_KEY"):
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "message": "ELEVENLABS_API_KEY is not configured"
+                }
+            )
+
+        # Log incoming request
+        logger.info(f"Processing audio generation for exercise {exerciseId}")
+        logger.debug(f"Text to process: {generate_text}")
+        
         filtered_text = re.findall(r'<hear>(.*?)</hear>', generate_text)
+        if not filtered_text:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "success": True,
+                    "message": "No audio content to generate"
+                }
+            )
+            
         filtered_text = [re.sub(r'[^a-zA-Z0-9\s]', '', text).strip()
                          for text in filtered_text]
         filtered_text = '.\n'.join(filtered_text)
         filtered_text = re.sub(r'\n{2,}', '', filtered_text.strip())
         filtered_text = re.sub(r' +', ' ', filtered_text)
 
-        # Generate audio with timestamps
-        response = elevenlabs_client.text_to_speech.convert_with_timestamps(
-            voice_id="JBFqnCBsd6RMkjVDRZzb",
-            output_format="mp3_22050_32",
-            text=filtered_text,
-            model_id="eleven_multilingual_v2",
-        )
+        logger.info(f"Processed text for audio: {filtered_text}")
+
+        try:
+            # Generate audio with timestamps
+            response = elevenlabs_client.text_to_speech.convert_with_timestamps(
+                voice_id="JBFqnCBsd6RMkjVDRZzb",
+                output_format="mp3_22050_32",
+                text=filtered_text,
+                model_id="eleven_multilingual_v2",
+            )
+        except Exception as e:
+            logger.error(f"ElevenLabs API error: {str(e)}")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "message": f"Failed to generate audio: {str(e)}"
+                }
+            )
+
+        # Validate response structure
+        if not isinstance(response, dict) or "normalized_alignment" not in response:
+            logger.error(f"Unexpected response format from ElevenLabs: {response}")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "message": "Invalid response from audio service"
+                }
+            )
 
         # Extract word-level timestamps
         timestamps = []
@@ -187,7 +270,7 @@ async def generate_audio(
             })
 
         # Upload to S3
-        bucket_name = os.environ.get('AWS_S3_FILES_BUCKET')
+        bucket_name = os.environ.get('AWS_S3_EXERCISES_BUCKET')
         s3_key = f"{exerciseId}.mp3"
 
         # Upload decoded audio data directly to S3
@@ -237,31 +320,28 @@ async def generate_audio(
 
             db.commit()
 
-            return {
-                "status": "success",
-                "timestamps": timestamps,
-                "audioUrl": f"https://{bucket_name}.s3.amazonaws.com/{s3_key}"
-            }
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "success": True,
+                    "message": "Audio generated successfully",
+                    "data": {
+                        "timestamps": timestamps,
+                        "audioUrl": f"https://{bucket_name}.s3.amazonaws.com/{s3_key}"
+                    }
+                }
+            )
 
         finally:
             db.close()
 
     except Exception as e:
-        print(f"Error details: {str(e)}")
-        print(f"Error type: {type(e).__name__}")
-        print(f"Error traceback:")
-        traceback.print_exc()
-
-        # Log the error details
-        logging.error(f"Error occurred: {str(e)}", exc_info=True)
-
-        raise HTTPException(
+        logger.error(f"Error in generate_audio: {str(e)}", exc_info=True)
+        return JSONResponse(
             status_code=500,
-            detail={
-                "message": "An error occurred while processing the request",
-                "error": str(e),
-                "type": type(e).__name__,
-                "traceback": traceback.format_exc()
+            content={
+                "success": False,
+                "message": str(e)
             }
         )
 

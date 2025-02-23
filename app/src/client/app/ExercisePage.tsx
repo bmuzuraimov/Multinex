@@ -17,6 +17,7 @@ const ExercisePage: React.FC = React.memo(() => {
     exerciseId: exerciseId!,
   });
 
+
   const { essay, essayList, essayWordCount, essayCharCount, summary, hasQuiz } = useExercise(
     exerciseId!,
     exercise?.essay || '',

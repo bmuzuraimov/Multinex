@@ -229,7 +229,7 @@ CourseCard.displayName = 'CourseCard';
 
 export default function PortalPage() {
   const { data: courses, error: coursesError, isLoading: coursesLoading, refetch: refetchCourses } = useQuery(getAllCourses);
-  const { data: exercises, error: exercisesError, isLoading: exercisesLoading, refetch: refetchExercises } = useQuery(getExercisesWithNoTopic);
+  const { data: exercises } = useQuery(getExercisesWithNoTopic);
   const [localCourses, setLocalCourses] = useState<Course[]>([]);
   const { data: user } = useAuth();
 

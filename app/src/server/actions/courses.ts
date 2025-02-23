@@ -86,8 +86,6 @@ export const duplicateCourse: DuplicateCourse<{ id: string }, Course> = async ({
       const newExercise = await context.entities.Exercise.create({
         data: {
           name: exercise.name,
-          prompt: exercise.prompt,
-          promptImg: exercise.promptImg,
           lessonText: exercise.lessonText,
           paragraphSummary: exercise.paragraphSummary,
           level: exercise.level,

@@ -12,7 +12,6 @@ import {
 import { IoAddOutline } from 'react-icons/io5';
 import { RiDeleteBin4Line } from 'react-icons/ri';
 import { HiLockClosed, HiGlobeAlt } from 'react-icons/hi';
-import { ExerciseSectionProps } from '../../shared/types';
 import ExerciseCard from '../components/ExerciseCard';
 import ExerciseForm from '../components/ExerciseForm';
 
@@ -96,15 +95,32 @@ export default function CoursePage() {
           </button>
         </div>
 
-        <div className='space-y-12'>{topics?.map((topic) => (
-          <TaskSection key={topic.id} topic={topic} />
-        ))}</div>
+        <div className='space-y-12'>{topics?.map((topic) => <TaskSection key={topic.id} topic={topic} />)}</div>
       </div>
     </div>
   );
 }
 
-const TaskSection: React.FC<ExerciseSectionProps> = React.memo(({ topic }) => {
+const TaskSection: React.FC<{
+  topic: {
+    id: string;
+    name: string;
+    length: number;
+    level: string;
+    exercises: {
+      id: string;
+      status: string;
+      name: string;
+      level: string;
+      lessonText: string;
+      truncated: boolean;
+      no_words: number;
+      completed: boolean;
+      completedAt: Date | null;
+      score: number;
+    }[];
+  };
+}> = React.memo(({ topic }) => {
   const [topicName, setTopicName] = useState(topic.name);
   const [topicLength, setTopicLength] = useState(topic.length);
   const [topicLevel, setTopicLevel] = useState(topic.level);
@@ -150,10 +166,8 @@ const TaskSection: React.FC<ExerciseSectionProps> = React.memo(({ topic }) => {
       </div>
 
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 relative'>
-        <ExerciseForm topicId={topic.id} demo={false}/>
-        {topic.exercises?.map((exercise, idx) => (
-          <ExerciseCard key={exercise.id} index={idx} exercise={exercise} />
-        ))}
+        <ExerciseForm topicId={topic.id} demo={false} />
+        {topic.exercises?.map((exercise, idx) => <ExerciseCard key={exercise.id} index={idx} exercise={exercise} />)}
       </div>
     </div>
   );

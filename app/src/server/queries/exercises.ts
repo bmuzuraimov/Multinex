@@ -1,9 +1,9 @@
 import { type Exercise, type Option } from 'wasp/entities';
 import { HttpError } from 'wasp/server';
 import { type GetExercisesWithNoTopic, type GetExerciseById, type GetDemoExercise, type HasCompletedExercises } from 'wasp/server/operations';
-import { getDownloadFileSignedURLFromS3 } from '../utils/s3Utils';
+import { getS3DownloadUrl } from '../utils/s3Utils';
 import { preprocessEssay } from '../utils/exerciseUtils';
-
+import { ExerciseStatus } from '@prisma/client';
 type FormattedEssaySection = {
   mode: 'hear' | 'type' | 'write';
   text: string[];
@@ -28,7 +28,7 @@ export const getDemoExercise: GetDemoExercise<void, ExerciseResult> = async (_ar
     },
   });
 
-  const audioUrl = await getDownloadFileSignedURLFromS3({ key: exercise.id });
+  const audioUrl = await getS3DownloadUrl({ key: exercise.id });
   const { essay, formattedEssay } = preprocessEssay(exercise.lessonText);
   
   return {
@@ -42,6 +42,11 @@ export const getDemoExercise: GetDemoExercise<void, ExerciseResult> = async (_ar
 export const getExercisesWithNoTopic: GetExercisesWithNoTopic<void, Exercise[]> = async (_args, context) => {
   if (!context.user) {
     throw new HttpError(401);
+  }
+
+  const documentParserUrl = process.env.DOCUMENT_PARSER_URL;
+  if (!documentParserUrl) {
+    throw new HttpError(500, 'DOCUMENT_PARSER_URL is not set');
   }
 
   return context.entities.Exercise.findMany({
@@ -72,9 +77,8 @@ export const hasCompletedExercises: HasCompletedExercises<void, boolean> = async
 
 type ExerciseResult = {
   id: string;
+  status: ExerciseStatus;
   name: string;
-  prompt: string;
-  promptImg: string;
   paragraphSummary: string;
   level: string;
   truncated: boolean;
@@ -145,7 +149,7 @@ export const getExerciseById: GetExerciseById<{ exerciseId: string }, ExerciseRe
     );
   }
   
-  const audioUrl = await getDownloadFileSignedURLFromS3({ key: exercise.file.key });
+  const audioUrl = await getS3DownloadUrl({ key: exercise.id + '.mp3' });
   const { essay, formattedEssay } = preprocessEssay(exercise.lessonText);
   
   return {

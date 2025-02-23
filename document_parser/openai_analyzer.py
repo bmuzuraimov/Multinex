@@ -1,5 +1,6 @@
 import os
 from openai import OpenAI
+import openai
 from typing import List
 import logging
 from dotenv import load_dotenv
@@ -8,6 +9,14 @@ load_dotenv()
 
 client = OpenAI()
 logger = logging.getLogger(__name__)
+
+class OpenAIAPIError(Exception):
+    """Custom exception for OpenAI API errors"""
+    def __init__(self, message, error_code=None, error_type=None):
+        self.message = message
+        self.error_code = error_code
+        self.error_type = error_type
+        super().__init__(self.message)
 
 class ContentAnalyzer:
     def __init__(self):
@@ -41,4 +50,21 @@ class ContentAnalyzer:
             return [topic.strip() for topic in topics]
         except Exception as e:
             logger.error(f"OpenAI API error: {e}")
-            return [] 
+            
+            if isinstance(e, openai.PermissionDeniedError):
+                error_code = "unsupported_country_region_territory"
+                error_type = "request_forbidden"
+                raise OpenAIAPIError(
+                    "Service is not available in your region. Please check your VPN settings or contact support.",
+                    error_code=error_code,
+                    error_type=error_type
+                )
+            
+            error_code = getattr(e, 'code', None)
+            error_type = type(e).__name__
+            
+            raise OpenAIAPIError(
+                "Failed to analyze text content. Please try again later.",
+                error_code=error_code,
+                error_type=error_type
+            ) 

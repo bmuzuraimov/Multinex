@@ -2,34 +2,31 @@ import { Tooltip } from 'react-tooltip';
 import ReactDOM from 'react-dom';
 import { BsFiletypeAi, BsChevronDown } from 'react-icons/bs';
 import { HiOutlineInformationCircle } from 'react-icons/hi';
-import { EXERCISE_LENGTHS, EXERCISE_LEVELS, AVAILABLE_MODELS } from '../../shared/constants';
-import { ExerciseFormContentSettings, ExerciseFormGenerationSettings } from '../../shared/types';
+import { EXERCISE_LENGTHS, EXERCISE_LEVELS, AVAILABLE_MODELS } from '../../../shared/constants';
+import { ExerciseFormContentSettings, ExerciseFormGenerationSettings } from '../../../shared/types';
+import { useState } from 'react';
 
-
-type ExerciseFormModalProps = {
-  selectedFile: File;
+type FormModalProps = {
   onGenerate: () => void;
   onDiscard: () => void;
   loadingStatus: string;
   isUploading: boolean;
   exerciseSettings: ExerciseFormContentSettings;
   advancedSettings: ExerciseFormGenerationSettings;
-  topicId: string | null;
-  topics: string[];
 };
 
-const ExerciseFormModal: React.FC<ExerciseFormModalProps> = ({
-  selectedFile,
+const FormModal: React.FC<FormModalProps> = ({
   onGenerate,
   onDiscard,
   loadingStatus,
   isUploading,
   exerciseSettings,
   advancedSettings,
-  topicId,
 }) => {
   const modalRoot = document.getElementById('modal-root');
   if (!modalRoot) return null;
+
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   return ReactDOM.createPortal(
     <div className='fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50'>
@@ -38,7 +35,7 @@ const ExerciseFormModal: React.FC<ExerciseFormModalProps> = ({
           <div className='relative p-4 bg-teal-50 dark:bg-teal-900/20 rounded-full'>
             <BsFiletypeAi className='w-12 h-12 text-teal-500' />
           </div>
-          <p className='text-lg font-medium text-gray-700 dark:text-gray-300'>{selectedFile.name}</p>
+          <p className='text-lg font-medium text-gray-700 dark:text-gray-300'>{exerciseSettings.exerciseName}</p>
           <div className='flex space-x-4'>
             <button
               onClick={(e) => {
@@ -65,10 +62,10 @@ const ExerciseFormModal: React.FC<ExerciseFormModalProps> = ({
               <HiOutlineInformationCircle
                 className='absolute -top-1 right-0 w-6 h-6 text-gray-600 dark:text-gray-400'
                 data-multiline
-                data-tooltip-id={`my-tooltip-${topicId || 'all'}`}
+                data-tooltip-id={`my-tooltip-${exerciseSettings.exerciseName || 'all'}`}
               />
               <Tooltip
-                id={`my-tooltip-${topicId || 'all'}`}
+                id={`my-tooltip-${exerciseSettings.exerciseName || 'all'}`}
                 place='top'
                 className='z-99'
                 content='Exercise length varies by level; higher levels require more words.'
@@ -173,7 +170,7 @@ const ExerciseFormModal: React.FC<ExerciseFormModalProps> = ({
 
             <div className='w-full'>
               <button
-                onClick={() => advancedSettings.setShowAdvanced(!advancedSettings.showAdvanced)}
+                onClick={() => setShowAdvanced(!showAdvanced)}
                 className='w-full flex items-center justify-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 py-2'
               >
                 <span className='border-b border-gray-200 dark:border-gray-700 w-16 mx-3'></span>
@@ -181,12 +178,12 @@ const ExerciseFormModal: React.FC<ExerciseFormModalProps> = ({
                 <span className='border-b border-gray-200 dark:border-gray-700 w-16 mx-3'></span>
                 <BsChevronDown
                   className={`w-4 h-4 transform transition-transform duration-150 ${
-                    advancedSettings.showAdvanced ? 'rotate-180' : ''
+                    showAdvanced ? 'rotate-180' : ''
                   }`}
                 />
               </button>
 
-              {advancedSettings.showAdvanced && (
+              {showAdvanced && (
                 <div className='mt-4 p-4 space-y-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg'>
                   <div className='grid grid-cols-2 gap-4'>
                     <div className='space-y-2'>
@@ -219,4 +216,4 @@ const ExerciseFormModal: React.FC<ExerciseFormModalProps> = ({
   );
 };
 
-export default ExerciseFormModal;
+export default FormModal;

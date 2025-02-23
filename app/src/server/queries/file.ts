@@ -1,40 +1,28 @@
-import { type File } from 'wasp/entities';
 import { HttpError } from 'wasp/server';
-import { type GetFileByExercise, type GetDownloadFileSignedURL } from 'wasp/server/operations';
-import { getDownloadFileSignedURLFromS3 } from '../utils/s3Utils';
+import { type GetUploadURL, type GetDownloadURL } from 'wasp/server/operations';
+import { getS3DownloadUrl, getS3UploadUrl } from '../utils/s3Utils';
 
-export const getFileByExercise: GetFileByExercise<
-  { exerciseId: string },
-  File[]
-> = async (_args, context) => {
+export const getUploadURL: GetUploadURL<{ key: string, fileType: string }, { uploadUrl: string, key: string }> = async (
+  { key, fileType },
+  context
+) => {
   if (!context.user) {
     throw new HttpError(401, 'User not authenticated.');
   }
 
-  try {
-    const file = await context.entities.File.findUnique({
-      where: {
-        exerciseId: _args.exerciseId,
-      },
-      select: {
-        id: true,
-        name: true,
-        key: true,
-        exerciseId: true,
-        type: true,
-        uploadUrl: true,
-        createdAt: true,
-      },
-    });
+  if (!key || !fileType) {
+    throw new HttpError(400, 'File key and type are required.');
+  }
 
-    return file ? [file] : [];
+  try {
+    return await getS3UploadUrl({ key, fileType });
   } catch (error) {
-    console.error('Error fetching file:', error);
-    throw new HttpError(500, 'Failed to fetch file. Please try again later.');
+    console.error('Error generating upload URL:', error);
+    throw new HttpError(500, 'Failed to generate upload URL. Please try again later.');
   }
 };
 
-export const getDownloadFileSignedURL: GetDownloadFileSignedURL<{ key: string }, string> = async (
+export const getDownloadURL: GetDownloadURL<{ key: string }, string> = async (
   { key },
   _context
 ) => {
@@ -43,7 +31,7 @@ export const getDownloadFileSignedURL: GetDownloadFileSignedURL<{ key: string },
   }
 
   try {
-    return await getDownloadFileSignedURLFromS3({ key });
+    return await getS3DownloadUrl({ key });
   } catch (error) {
     console.error('Error generating signed URL:', error);
     throw new HttpError(500, 'Failed to generate download URL. Please try again later.');

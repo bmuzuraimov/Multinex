@@ -84,6 +84,10 @@ app Typit {
       email: "auth@admin.typit.app"
     },
   },
+  // webSocket: {
+  //   fn: import { webSocketFn } from "@src/server/websocket.js",
+  //   autoConnect: false, // optional, default: true
+  // },
 }
 
 /* 💽 Wasp defines DB entities via Prisma Database Models:
@@ -286,6 +290,11 @@ action createExercise {
   entities: [Exercise, Question, User]
 }
 
+action generateExercise {
+  fn: import { generateExercise } from "@src/server/actions/exercises.js",
+  entities: [Exercise, Question, User]
+}
+
 action shareExercise {
   fn: import { shareExercise } from "@src/server/actions/exercises.js",
   entities: [Exercise]
@@ -328,13 +337,13 @@ action updateUserLang {
 
 
 // 📚 Queries
-query getFileByExercise {
-  fn: import { getFileByExercise } from "@src/server/queries/file.js",
+query getUploadURL {
+  fn: import { getUploadURL } from "@src/server/queries/file.js",
   entities: [User, File]
 }
 
-query getDownloadFileSignedURL {
-  fn: import { getDownloadFileSignedURL } from "@src/server/queries/file.js",
+query getDownloadURL {
+  fn: import { getDownloadURL } from "@src/server/queries/file.js",
   entities: [User, File]
 }
 
