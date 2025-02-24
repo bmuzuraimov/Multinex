@@ -194,7 +194,7 @@ async def generate_audio(
                 }
             )
             
-        filtered_text = [re.sub(r'[^a-zA-Z0-9\s]', '', text).strip()
+        filtered_text = [re.sub(r'(?<![a-zA-Z0-9])[^a-zA-Z0-9\s]|[^a-zA-Z0-9\s](?![a-zA-Z0-9])', '', text).strip()
                          for text in filtered_text]
         filtered_text = '.\n'.join(filtered_text)
         filtered_text = re.sub(r'\n{2,}', '', filtered_text.strip())
@@ -205,7 +205,7 @@ async def generate_audio(
         try:
             # Generate audio with timestamps
             response = elevenlabs_client.text_to_speech.convert_with_timestamps(
-                voice_id="JBFqnCBsd6RMkjVDRZzb",
+                voice_id="XrExE9yKIg1WjnnlVkGX", # Matilda
                 output_format="mp3_22050_32",
                 text=filtered_text,
                 model_id="eleven_multilingual_v2",

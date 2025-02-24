@@ -17,15 +17,11 @@ import { deleteS3Objects } from '../utils/s3Utils';
 
 // Create empty exercise
 export const createExercise: CreateExercise<{ name: string, topicId: string | null }, Exercise> = async ({ name, topicId }, context) => {
-  if (!context.user) {
-    throw new HttpError(401, 'Unauthorized');
-  }
-
   try {
     return await context.entities.Exercise.create({
       data: {
         name,
-        user: { connect: { id: context.user.id } },
+        user: context.user ? { connect: { id: context.user.id } } : undefined,
         lessonText: '',
         paragraphSummary: '',
         level: '',
@@ -55,10 +51,13 @@ export const generateExercise: GenerateExercise<
   },
   { success: boolean; message: string }
 > = async ({ exerciseId, priorKnowledge, length, level, model, includeSummary, includeMCQuiz }, context) => {
-  if (!context.user) {
-    throw new HttpError(401, 'Unauthorized');
+  // Ensure the exercise exists
+  const exercise = await context.entities.Exercise.findUnique({
+    where: { id: exerciseId },
+  });
+  if (!exercise) {
+    return { success: false, message: 'Exercise not found' };
   }
-
   // Get the signed URL for the S3 file
   let exerciseContentUrl = await getS3DownloadUrl({ key: exerciseId + '.txt' });
 
@@ -73,12 +72,14 @@ export const generateExercise: GenerateExercise<
   // Calculate required tokens
   const required_tokens = TokenService.calculateRequiredTokens(filtered_content, OPENAI_MODEL as TiktokenModel);
 
-  // Check if the user has enough tokens
-  if (context.user.tokens < required_tokens) {
-    return {
-      success: false,
-      message: `The request requires approximately ${required_tokens} tokens, but you only have ${context.user.tokens} tokens. Please purchase more tokens.`,
-    };
+  // Check if the user has enough tokens only if there is a user context
+  if (context.user) {
+    if (context.user.tokens < required_tokens) {
+      return {
+        success: false,
+        message: `The request requires approximately ${required_tokens} tokens, but you only have ${context.user.tokens} tokens. Please purchase more tokens.`,
+      };
+    }
   }
 
   let exerciseJson: any;
@@ -234,12 +235,14 @@ export const generateExercise: GenerateExercise<
     }
   }
 
-  // Deduct tokens from the user's account
-  try {
-    await TokenService.deductTokens(context, totalTokensUsed);
-  } catch (error: any) {
-    await reportToAdmin(`Failed to deduct tokens: ${error.message}`);
-    console.error('Token Deduction Error:', error);
+  // Deduct tokens from the user's account only if there is a user context
+  if (context.user) {
+    try {
+      await TokenService.deductTokens(context, totalTokensUsed);
+    } catch (error: any) {
+      await reportToAdmin(`Failed to deduct tokens: ${error.message}`);
+      console.error('Token Deduction Error:', error);
+    }
   }
 
   return { success: true, message: 'Exercise updated successfully' };

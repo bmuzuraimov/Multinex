@@ -1,42 +1,17 @@
 import { type Exercise, type Option } from 'wasp/entities';
 import { HttpError } from 'wasp/server';
-import { type GetExercisesWithNoTopic, type GetExerciseById, type GetDemoExercise, type HasCompletedExercises } from 'wasp/server/operations';
+import {
+  type GetExercisesWithNoTopic,
+  type GetExerciseById,
+  type HasCompletedExercises,
+} from 'wasp/server/operations';
 import { getS3DownloadUrl } from '../utils/s3Utils';
 import { preprocessEssay } from '../utils/exerciseUtils';
 import { ExerciseStatus } from '@prisma/client';
+
 type FormattedEssaySection = {
   mode: 'hear' | 'type' | 'write';
   text: string[];
-};
-
-export const getDemoExercise: GetDemoExercise<void, ExerciseResult> = async (_args, context) => {
-  const exercise = await context.entities.Exercise.findFirstOrThrow({
-    where: {
-      id: process.env.DEMO_EXERCISE_ID,
-    },
-    include: {
-      questions: {
-        orderBy: {
-          createdAt: 'asc',
-        },
-        include: {
-          options: true,
-        },
-      },
-      topic: true,
-      user: true,
-    },
-  });
-
-  const audioUrl = await getS3DownloadUrl({ key: exercise.id });
-  const { essay, formattedEssay } = preprocessEssay(exercise.lessonText);
-  
-  return {
-    ...exercise,
-    essay,
-    formattedEssay,
-    audioUrl
-  };
 };
 
 export const getExercisesWithNoTopic: GetExercisesWithNoTopic<void, Exercise[]> = async (_args, context) => {
@@ -66,10 +41,10 @@ export const hasCompletedExercises: HasCompletedExercises<void, boolean> = async
   }
 
   const exercise = await context.entities.Exercise.findFirst({
-    where: { 
-      userId: context.user.id, 
-      completed: true 
-    }
+    where: {
+      userId: context.user.id,
+      completed: true,
+    },
   });
 
   return exercise !== null;
@@ -99,9 +74,12 @@ type ExerciseResult = {
     options: Option[];
   }>;
   audioUrl?: string;
-  audioTimestamps?: Array<{word: string, start: number, end: number}> | string[];
+  audioTimestamps?: Array<{ word: string; start: number; end: number }> | string[];
   essay: string;
-  formattedEssay: FormattedEssaySection[];
+  formattedEssay: {
+    mode: 'hear' | 'type' | 'write';
+    text: string[];
+  }[];
   [key: string]: any;
 };
 
@@ -139,23 +117,21 @@ export const getExerciseById: GetExerciseById<{ exerciseId: string }, ExerciseRe
       ...exercise,
       essay,
       formattedEssay,
-      audioUrl: undefined
+      audioUrl: undefined,
     };
   }
 
   if (exercise.audioTimestamps && typeof exercise.audioTimestamps[0] === 'string') {
-    exercise.audioTimestamps = exercise.audioTimestamps.map((timestamp: string) => 
-      JSON.parse(timestamp)
-    );
+    exercise.audioTimestamps = exercise.audioTimestamps.map((timestamp: string) => JSON.parse(timestamp));
   }
-  
+
   const audioUrl = await getS3DownloadUrl({ key: exercise.id + '.mp3' });
   const { essay, formattedEssay } = preprocessEssay(exercise.lessonText);
-  
+
   return {
     ...exercise,
     essay,
     formattedEssay,
-    audioUrl
+    audioUrl,
   };
 };

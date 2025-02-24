@@ -325,9 +325,9 @@ action updateUserById {
   entities: [User]
 }
 
-action createLandingPageTry {
-  fn: import { createLandingPageTry } from "@src/server/actions/landingPageTry.js",
-  entities: [LandingPageTry]
+action createDemoExercise {
+  fn: import { createDemoExercise } from "@src/server/actions/demoExercise.js",
+  entities: [DemoExercise, Exercise]
 }
 
 action updateUserLang {
@@ -388,13 +388,8 @@ query getExerciseById {
 }
 
 query getDemoExercise {
-  fn: import { getDemoExercise } from "@src/server/queries/exercises.js",
-  entities: [Exercise]
-}
-
-query getLandingPageTry {
-  fn: import { getLandingPageTry } from "@src/server/queries/landingPageTry.js",
-  entities: [LandingPageTry]
+  fn: import { getDemoExercise } from "@src/server/queries/demoExercise.js",
+  entities: [DemoExercise]
 }
 
 /*

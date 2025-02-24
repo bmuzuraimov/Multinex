@@ -4,19 +4,69 @@ import { AVAILABLE_MODELS } from '../../../shared/constants';
 import {
   createExercise,
   generateExercise,
-  getLandingPageTry,
+  getDemoExercise,
   getUploadURL,
+  createDemoExercise,
   useQuery,
 } from 'wasp/client/operations';
 import FormModal from './FormModal';
 import {
   ExerciseFormContentSettings,
   ExerciseFormGenerationSettings,
-  LandingPageTryResult,
 } from '../../../shared/types';
 import { Link } from 'react-router-dom';
 import FileUploadArea from './FileUploadArea';
 import { Exercise } from 'wasp/entities';
+import { AudioTimestamp } from '../../utils/AudioController';
+import { ExerciseStatus } from '@prisma/client';
+
+type DemoExerciseResult = {
+  id: string;
+  createdAt: Date;
+  userAgent: string;
+  browserLanguage: string | null;
+  screenResolution: string | null;
+  timezone: string | null;
+  exerciseId: string;
+  exercise: {
+    id: string;
+    name: string;
+    paragraphSummary: string;
+    level: string;
+    truncated: boolean;
+    no_words: number;
+    completed: boolean;
+    completedAt: Date | null;
+    score: number;
+    model: string;
+    userEvaluation: number | null;
+    userId: string;
+    topicId: string | null;
+    questions: Array<{
+      id: string;
+      text: string;
+      exerciseId: string;
+      createdAt: Date;
+      options: Array<{
+        id: string;
+        text: string;
+        isCorrect: boolean;
+        questionId: string;
+        createdAt: Date;
+      }>;
+    }>;
+    audioTimestamps: AudioTimestamp[];
+    lessonText: string;
+    cursor: number;
+    tokens: any; // Adding missing property
+    status: ExerciseStatus;
+    createdAt: Date;
+  };
+  essay: string;
+  formattedEssay: Array<{ mode: "hear" | "type" | "write"; text: string[] }>;
+  audioUrl: string;
+};
+
 
 // Initial states moved outside component to avoid recreation
 const initialExerciseSettings: ExerciseFormContentSettings = {
@@ -44,11 +94,12 @@ const initialAdvancedSettings: ExerciseFormGenerationSettings = {
 };
 
 const ExerciseForm: React.FC<{ topicId: string | null; demo: boolean }> = React.memo(({ topicId, demo = false }) => {
-  const [landingPageTry, setLandingPageTry] = useState<LandingPageTryResult | null>(null);
+  const [demoExercise, setDemoExercise] = useState<DemoExerciseResult | null>(null);
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('');
+  const [processingFile, setProcessingFile] = useState(false);
 
   // Query params memoized
   const queryParams = useMemo(() => ({
@@ -58,8 +109,8 @@ const ExerciseForm: React.FC<{ topicId: string | null; demo: boolean }> = React.
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   }), []);
 
-  const { data: landingPageTryData } = useQuery(getLandingPageTry, queryParams, {
-    enabled: demo
+  const { data: demoExerciseData } = useQuery(getDemoExercise, queryParams, {
+    enabled: demo && !processingFile
   });
 
   // Grouped state for exercise settings with memoized setters
@@ -82,10 +133,10 @@ const ExerciseForm: React.FC<{ topicId: string | null; demo: boolean }> = React.
   }));
 
   useEffect(() => {
-    if (landingPageTryData) {
-      setLandingPageTry(landingPageTryData as LandingPageTryResult);
+    if (demoExerciseData && !processingFile) {
+      setDemoExercise(demoExerciseData as DemoExerciseResult);
     }
-  }, [landingPageTryData]);
+  }, [demoExerciseData, processingFile]);
 
   const resetAllStates = useCallback(() => {
     setIsUploading(false);
@@ -135,6 +186,7 @@ const ExerciseForm: React.FC<{ topicId: string | null; demo: boolean }> = React.
     } catch (error) {
       console.error('Error generating exercise:', error);
     } finally {
+      setProcessingFile(false);
       resetAllStates();
     }
   }, [exercise, exerciseSettings, advancedSettings, isUploading, resetAllStates]);
@@ -144,10 +196,21 @@ const ExerciseForm: React.FC<{ topicId: string | null; demo: boolean }> = React.
     const file = acceptedFiles[0];
     
     setIsUploading(true);
+    setProcessingFile(true);
     setExerciseSettings(prev => ({ ...prev, exerciseName: file.name }));
 
     try {
       const exerciseResult = await createExercise({ name: file.name, topicId: topicId });
+      if (demo) {
+        await createDemoExercise({
+          exerciseId: exerciseResult.id,
+          userAgent: queryParams.userAgent,
+          browserLanguage: queryParams.browserLanguage,
+          screenResolution: queryParams.screenResolution,
+          timezone: queryParams.timezone,
+        });
+      }
+      
       setExercise(exerciseResult);
 
       if (!exerciseResult?.id) {
@@ -219,22 +282,22 @@ const ExerciseForm: React.FC<{ topicId: string | null; demo: boolean }> = React.
             </div>
             <div className='text-center'>
               <p className='text-lg font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                Ready to start your exercise: "{landingPageTry?.name}"
+                Ready to start your exercise: "{demoExercise?.exercise?.name}"
               </p>
             </div>
           </div>
         </div>
       </div>
     </Link>
-  ), [landingPageTry?.name]);
+  ), [demoExercise]);
 
-  if (demo && landingPageTry?.successful) {
+  if (demo && demoExercise && !processingFile) {
     return renderDemoLink;
   }
 
   return (
     <div className='w-full h-full scale-95 opacity-95 flex flex-col items-center bg-white dark:bg-gray-800 transition-all duration-300 ease-in-out pointer-events-auto'>
-      {!demo || !landingPageTry?.successful ? (
+      {!demo || !demoExercise || processingFile ? (
         <FileUploadArea
           onDrop={onDrop}
           isUploading={isUploading}

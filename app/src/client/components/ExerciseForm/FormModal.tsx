@@ -5,6 +5,7 @@ import { HiOutlineInformationCircle } from 'react-icons/hi';
 import { EXERCISE_LENGTHS, EXERCISE_LEVELS, AVAILABLE_MODELS } from '../../../shared/constants';
 import { ExerciseFormContentSettings, ExerciseFormGenerationSettings } from '../../../shared/types';
 import { useState } from 'react';
+import voices from './voices';
 
 type FormModalProps = {
   onGenerate: () => void;

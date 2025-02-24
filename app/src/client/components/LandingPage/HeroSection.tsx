@@ -4,15 +4,15 @@ import { useAuth } from 'wasp/client/auth';
 import { useState, useEffect } from 'react';
 const HeroSection: React.FC = () => {
   const { data: user, isLoading } = useAuth();
-  const [demoMode, setDemoMode] = useState(false);
+  const [demoMode, setDemoMode] = useState(true);
   
   useEffect(() => {
-    if (user) {
-      setDemoMode(true);
-    } else {
+    if (user && !isLoading) {
       setDemoMode(false);
+    } else {
+      setDemoMode(true);
     }
-  }, [user]);
+  }, [user, isLoading]);
 
   return (
     <div className='relative pt-14 w-full min-h-[85vh] flex items-center pointer-events-none'>

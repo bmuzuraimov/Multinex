@@ -6,10 +6,6 @@ export const getUploadURL: GetUploadURL<{ key: string, fileType: string }, { upl
   { key, fileType },
   context
 ) => {
-  if (!context.user) {
-    throw new HttpError(401, 'User not authenticated.');
-  }
-
   if (!key || !fileType) {
     throw new HttpError(400, 'File key and type are required.');
   }

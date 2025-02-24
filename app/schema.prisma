@@ -30,7 +30,6 @@ model User {
   topics         Topic[]
   exercises      Exercise[]
   feedbacks      Feedback[]
-  landingPageTry LandingPageTry?
   organization   Organization?   @relation(fields: [organizationId], references: [id])
   organizationId String?
   deletedAt      DateTime?
@@ -85,39 +84,6 @@ model Organization {
   subscriptionPlan   String?
   seats              Int      @default(0)
   users              User[]
-}
-
-model LandingPageTry {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-
-  // Visitor identification
-  userAgent        String // Browser and OS info
-  browserLanguage  String?
-  screenResolution String?
-  timezone         String?
-
-  // Request details
-  name             String // From Exercise
-  prompt           String // From Exercise
-  promptImg        String    @default("/task1_prompt.png") // From Exercise
-  lessonText       String // Generated lesson content
-  audioTimestamps  String[]  @default([])
-  paragraphSummary String    @default("")
-  level            String    @default("")
-  cursor           Int       @default(0)
-  no_words         Int       @default(0)
-  truncated        Boolean   @default(false)
-  completedAt      DateTime? // From Exercise
-  score            Int       @default(0) // From Exercise
-  tokensUsed       Int       @default(0)
-  successful       Boolean   @default(false)
-  model            String    @default("gpt-4o-mini")
-  userEvaluation   Int?      @default(0) // From Exercise
-
-  // If they later sign up, we can link it
-  convertedUserId String? @unique
-  convertedUser   User?   @relation(fields: [convertedUserId], references: [id])
 }
 
 model Feature {
@@ -194,12 +160,28 @@ model Exercise {
   model            String         @default("gpt-4o-mini")
   userEvaluation   Int?           @default(0)
   questions        Question[]     @relation("ExerciseQuestions")
-  userId           String
+  userId           String? // Made optional since landing page tries won't have a user
   topicId          String?
   topic            Topic?         @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User?          @relation(fields: [userId], references: [id], onDelete: Cascade) // Made optional
   createdAt        DateTime       @default(now())
   file             File?
+  demoExercise     DemoExercise?
+}
+
+model DemoExercise {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  // Visitor identification
+  userAgent        String // Browser and OS info
+  browserLanguage  String?
+  screenResolution String?
+  timezone         String?
+
+  // Exercise details
+  exerciseId String   @unique
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 }
 
 model File {

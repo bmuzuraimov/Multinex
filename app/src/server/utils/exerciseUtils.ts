@@ -8,8 +8,7 @@ export function preprocessEssay(rawEssay: string) {
 
   // Parse the essay into formatted sections
   // wrap newlines in <type> tags
-  const wrappedEssay = cleanEssay.replace(/\n/g, '<type>\n</type>');
-  const matches = Array.from(wrappedEssay.matchAll(/<(hear|write|type)>([\s\S]*?)<\/\1>/g));
+  const matches = Array.from(cleanEssay.matchAll(/<(hear|write|type)>([\s\S]*?)<\/\1>/g));
   const formattedEssay = matches.map(match => {
     const [fullMatch, mode, content] = match;
     // Get the character immediately after the matched section.
@@ -22,6 +21,7 @@ export function preprocessEssay(rawEssay: string) {
         // Instead of appending to the last element, add as a separate item.
         chars.push(endChar);
       }
+      chars.push('\n');
       return {
         mode: 'type',
         text: chars
@@ -34,6 +34,7 @@ export function preprocessEssay(rawEssay: string) {
         // Push the trailing character as a separate element.
         words.push(endChar);
       }
+      words.push('\n');
       return {
         mode: 'hear',
         text: words
@@ -44,6 +45,7 @@ export function preprocessEssay(rawEssay: string) {
       if (endChar === '\n' || endChar === ' ') {
         textArray.push(endChar);
       }
+      textArray.push('\n');
       return {
         mode: 'write',
         text: textArray
@@ -53,7 +55,6 @@ export function preprocessEssay(rawEssay: string) {
 
   // Create the final essay string by joining all sections
   const essay = formattedEssay.map(section => section.text.join('')).join('');
-
   return { 
     essay, 
     formattedEssay: formattedEssay as FormattedEssaySection[] 
