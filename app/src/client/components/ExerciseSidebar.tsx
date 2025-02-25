@@ -58,6 +58,16 @@ const ExerciseSidebar: React.FC = () => {
                 <li className="flex items-center gap-2">
                   <span className="font-medium">Playback:</span> Read the text aloud
                 </li>
+                <li className="flex items-center gap-2">
+                  <span className="font-medium">Red Text:</span> Means to write down!
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="font-medium">Green Text:</span> Means to type it!
+                </li>
+
+                <li className="flex items-center gap-2">
+                  <span className="font-medium">Blue Text:</span> Means to listen it!
+                </li>
               </ul>
               <button
                 onClick={() => setShowHintsModal(false)}

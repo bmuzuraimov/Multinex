@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useId } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
 import { updateUserById } from 'wasp/client/operations';
 import { useAuth } from 'wasp/client/auth';
@@ -10,14 +11,23 @@ interface UserTourProps {
 
 const UserTour: React.FC<UserTourProps> = ({ userId }) => {
   const [runTour, setRunTour] = useState<boolean>(false);
-  const [colorMode, setColorMode] = useColorMode();
+  const [colorMode] = useColorMode();
   const { data: user, isLoading } = useAuth();
-  // ✅ Fetch `tourCompleted` from Backend
+  const navigate = useNavigate();
+  const [stepIndex, setStepIndex] = useState<number>(0);
+
   useEffect(() => {
     const fetchUserTourStatus = async () => {
       try {
         if (user && !user.tourCompleted) {
-          setRunTour(true); // ✅ Run tour if not completed
+          const savedStep = localStorage.getItem('tourStep');
+          if (savedStep !== null) {
+            setStepIndex(parseInt(savedStep));
+            setRunTour(true);
+          } else {
+            setStepIndex(0);
+            setRunTour(true);
+          }
         }
       } catch (error) {
         console.error('Error fetching user tour status:', error);
@@ -27,39 +37,64 @@ const UserTour: React.FC<UserTourProps> = ({ userId }) => {
     fetchUserTourStatus();
   }, [user, isLoading]);
 
-  // ✅ Define Tour Steps
   const tourSteps: Step[] = [
     {
       target: 'body',
       content: (
         <div className='text-center dark:text-white'>
-          <h2 className='text-2xl font-bold mb-2 dark:text-white'>Welcome to Your Portal!</h2>
+          <h2 className='text-2xl font-bold mb-2'>Welcome to Typit!</h2>
           <p className='mb-4 dark:text-gray-400'>This quick tour will guide you through the platform’s key features.</p>
-          <p className='text-gray-400'>
-            Click <strong>Next</strong> to proceed or <strong>Skip</strong> to exit the tour.
-          </p>
+          <p className='text-gray-400'>Click <strong>Next</strong> to proceed.</p>
         </div>
       ),
       placement: 'center',
       disableOverlay: true,
     },
-    { target: '.text-title-xxl', content: 'Welcome to your courses! Here you can see all the courses you are managing.', placement: 'bottom' },
-    { target: '.shadow-card', content: 'This is where your courses are displayed. You can edit or delete them here.', placement: 'top' },
-    { target: '.grid-cols-1.mb-12', content: 'Here are exercises that have not been assigned to any course yet.', placement: 'top' },
-    { target: '.cursor-pointer', content: 'Click here to create a new course and start adding exercises!', placement: 'right' },
-    // { target: '.course-card', content: 'This is a course card! Click to explore.', placement: 'bottom' },
+    {
+      target: '.shadow-card',
+      content: "Here are your courses! Let's make your first one. Click 'Create New Course' to proceed.",
+      spotlightClicks: true,
+      placement: 'bottom',
+    },
+    {
+      target: '.backdrop-blur-sm',
+      content: "Add an exercise now! Click 'Upload' to proceed.",
+      spotlightClicks: true,
+      placement: 'bottom',
+    },
+    {
+      target: '.shadow-md',
+      content: "This is your Exercise! Click the Exercise icon to proceed.",
+      spotlightClicks: true,
+      placement: 'auto',
+    },
   ];
 
-  // ✅ Handle Tour Completion (Update Database)
   const handleJoyrideCallback = async (data: CallBackProps) => {
-    const { status } = data;
+    const { status, index, action, type } = data;
+
+    if (type === 'step:after' || type === 'error:target_not_found') {
+      localStorage.setItem('tourStep', (index + 1).toString());
+      setStepIndex(index + 1);
+    }
+
+    if (index === 2 && action === 'next') {
+      navigate('/course/default-course', { replace: true });
+    }
+
+    if (index === 4 && action === 'next') {
+      navigate('/exercise/default-exercise', { replace: true });
+    }
+
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       setRunTour(false);
+      localStorage.removeItem('tourStep');
       try {
         await updateUserById({
           id: userId,
-          data: { tourCompleted: true }, // ✅ Update DB to mark tour as completed
+          data: { tourCompleted: true },
         });
+        navigate('/portal');
       } catch (error) {
         console.error('Error updating tour status:', error);
       }
@@ -70,7 +105,9 @@ const UserTour: React.FC<UserTourProps> = ({ userId }) => {
     <Joyride
       steps={tourSteps}
       run={runTour}
+      stepIndex={stepIndex}
       callback={handleJoyrideCallback}
+      spotlightClicks={true}
       continuous
       showSkipButton
       showProgress
@@ -88,10 +125,10 @@ const UserTour: React.FC<UserTourProps> = ({ userId }) => {
           color: colorMode === 'dark' ? '#fff' : 'white',
         },
         buttonBack: {
-          color: colorMode === 'dark' ? '#f0f4f8' : '#00000',
+          color: colorMode === 'dark' ? '#f0f4f8' : '#000000',
         },
         buttonSkip: {
-          color: colorMode === 'dark' ? '#008080' : '#00000',
+          color: colorMode === 'dark' ? '#008080' : '#000000',
         },
       }}
     />

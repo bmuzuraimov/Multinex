@@ -6,12 +6,14 @@ import { OpenAIService } from '../llm/openai';
 
 export const createCourse: CreateCourse<
   { name: string; description: string; image: string },
-  { success: boolean; message: string }
+  { success: boolean; message: string; id?: string }
 > = async ({ name, description, image }, context) => {
   if (!context.user) {
     throw new HttpError(401);
   }
-  await context.entities.Course.create({
+
+  // Create the course and store the result
+  const newCourse = await context.entities.Course.create({
     data: {
       name,
       description,
@@ -19,8 +21,15 @@ export const createCourse: CreateCourse<
       user: { connect: { id: context.user.id } },
     },
   });
-  return { success: true, message: 'Course created successfully' };
+
+  // Return success response with the new course ID
+  return {
+    success: true,
+    message: 'Course created successfully',
+    id: newCourse.id, // Return the newly created course ID
+  };
 };
+
 
 export const duplicateCourse: DuplicateCourse<{ id: string }, Course> = async ({ id }, context) => {
   if (!context.user) {

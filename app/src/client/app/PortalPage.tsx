@@ -260,7 +260,7 @@ export default function PortalPage() {
   }, [courses]);
 
   return (
-    <div className='lg:mt-10 pb-10'>
+    <div id='boddy' className='lg:mt-10 pb-10'>
       {user && <UserTour userId={user.id} />}
       <div className='mx-auto max-w-7xl px-6 lg:px-8'>
         <div className='mx-auto max-w-4xl text-center'>

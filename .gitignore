@@ -12,6 +12,10 @@
 *.pyc
 *.pyo
 *.pyd
+<<<<<<< Updated upstream
 *.venv
 document_parser/voices.json
 app/deploy_client.sh
+=======
+*.venv
+>>>>>>> Stashed changes
