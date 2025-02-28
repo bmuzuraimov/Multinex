@@ -9,7 +9,7 @@ interface Course {
   name: string;
   description: string;
   image?: string;
-  userId: string;
+  userId: string | null;
   isPublic: boolean;
   totalExercises: number;
   totalTopics: number;

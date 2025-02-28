@@ -12,6 +12,8 @@ import {
 import { IoAddOutline } from 'react-icons/io5';
 import { RiDeleteBin4Line } from 'react-icons/ri';
 import { HiLockClosed, HiGlobeAlt } from 'react-icons/hi';
+import UserTour from '../components/UserTour';
+import { useAuth } from 'wasp/client/auth';
 import ExerciseCard from '../components/ExerciseCard';
 import ExerciseForm from '../components/ExerciseForm';
 
@@ -86,7 +88,7 @@ export default function CoursePage() {
           </button>
           <button
             onClick={() => createTopic({ name: 'New Section', courseId })}
-            className='group relative inline-flex items-center px-6 py-3 text-base font-medium rounded-xl text-white bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-300'
+            className='tour-step-2 group relative inline-flex items-center px-6 py-3 text-base font-medium rounded-xl text-white bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-300'
           >
             <IoAddOutline className='mr-2 h-5 w-5 transition-all duration-300 group-hover:rotate-90' />
             <span className='relative'>
@@ -124,6 +126,7 @@ const TaskSection: React.FC<{
   const [topicName, setTopicName] = useState(topic.name);
   const [topicLength, setTopicLength] = useState(topic.length);
   const [topicLevel, setTopicLevel] = useState(topic.level);
+  const { data: user } = useAuth();
 
   const handleUpdateTopic = useCallback(() => {
     updateTopic({
@@ -143,7 +146,8 @@ const TaskSection: React.FC<{
   }, [topic]);
 
   return (
-    <div className='backdrop-blur-sm bg-white/90 dark:bg-gray-800/90 rounded-3xl shadow-xl p-10 transition-all duration-300 hover:shadow-2xl border border-gray-200/50 dark:border-gray-700/50 relative'>
+    <div className='tour-step-3 backdrop-blur-sm bg-white/90 dark:bg-gray-800/90 rounded-3xl shadow-xl p-10 transition-all duration-300 hover:shadow-2xl border border-gray-200/50 dark:border-gray-700/50 relative'>
+      {user && <UserTour userId={user.id} />}
       <div className='flex items-center mb-10 group'>
         <input
           type='text'
@@ -167,7 +171,9 @@ const TaskSection: React.FC<{
 
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 relative'>
         <ExerciseForm topicId={topic.id} demo={false} />
-        {topic.exercises?.map((exercise, idx) => <ExerciseCard key={exercise.id} index={idx} exercise={exercise} />)}
+        {topic.exercises?.map((exercise, idx) => (
+          <ExerciseCard key={exercise.id} index={idx} exercise={exercise} />
+        ))}
       </div>
     </div>
   );

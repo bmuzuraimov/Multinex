@@ -135,7 +135,9 @@ export const generateExercise: GenerateExercise<
     });
 
     if (!audioResponse.ok) {
-      await reportToAdmin('Failed to generate audio.');
+      const errorData = await audioResponse.json();
+      console.error('Failed to generate audio:', errorData);
+      await reportToAdmin(`Failed to generate audio: ${errorData.message}`);
     }
   }
 

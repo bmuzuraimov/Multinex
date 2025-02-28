@@ -4,15 +4,13 @@ type FormattedEssaySection = {
 };
 
 export function preprocessEssay(rawEssay: string) {
-  const cleanEssay = rawEssay.replace(/\\n/g, '\n').replace(/<br\/>/g, '\n');
-
   // Parse the essay into formatted sections
   // wrap newlines in <type> tags
-  const matches = Array.from(cleanEssay.matchAll(/<(hear|write|type)>([\s\S]*?)<\/\1>/g));
+  const matches = Array.from(rawEssay.matchAll(/<(hear|write|type)>([\s\S]*?)<\/\1>/g));
   const formattedEssay = matches.map(match => {
     const [fullMatch, mode, content] = match;
     // Get the character immediately after the matched section.
-    const endChar = cleanEssay.charAt(match.index! + fullMatch.length);
+    const endChar = rawEssay.charAt(match.index! + fullMatch.length);
 
     if (mode === 'type') {
       // For type sections, keep character-level granularity.
@@ -21,7 +19,10 @@ export function preprocessEssay(rawEssay: string) {
         // Instead of appending to the last element, add as a separate item.
         chars.push(endChar);
       }
-      chars.push('\n');
+      // Add newline after type sections
+      if (endChar !== '\n') {
+        chars.push('\n');
+      }
       return {
         mode: 'type',
         text: chars
@@ -34,7 +35,6 @@ export function preprocessEssay(rawEssay: string) {
         // Push the trailing character as a separate element.
         words.push(endChar);
       }
-      words.push('\n');
       return {
         mode: 'hear',
         text: words
@@ -45,7 +45,6 @@ export function preprocessEssay(rawEssay: string) {
       if (endChar === '\n' || endChar === ' ') {
         textArray.push(endChar);
       }
-      textArray.push('\n');
       return {
         mode: 'write',
         text: textArray

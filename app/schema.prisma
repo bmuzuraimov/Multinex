@@ -14,7 +14,6 @@ model User {
   email               String?  @unique
   username            String?  @unique
   lastActiveTimestamp DateTime @default(now())
-  isAdmin             Boolean  @default(false)
 
   stripeId            String?
   checkoutSessionId   String?
@@ -34,6 +33,11 @@ model User {
   organizationId String?
   deletedAt      DateTime?
   onboarding     Onboarding?
+
+  @@index([email])
+  @@index([username])
+  @@index([organizationId])
+  @@index([lastActiveTimestamp])
 }
 
 model Onboarding {
@@ -71,7 +75,9 @@ model Onboarding {
   featureRequest String? // Optional feature request text
 
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Organization {
@@ -84,6 +90,9 @@ model Organization {
   subscriptionPlan   String?
   seats              Int      @default(0)
   users              User[]
+
+  @@index([emailDomain])
+  @@index([subscriptionStatus])
 }
 
 model Feature {
@@ -103,6 +112,10 @@ model Feature {
   tags           String[]
   githubIssueUrl String?
   completedAt    DateTime?
+
+  @@index([status])
+  @@index([assignedTo])
+  @@index([completed])
 }
 
 model Course {
@@ -113,9 +126,12 @@ model Course {
   description String
   isPublic    Boolean  @default(false)
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   topics      Topic[]
   createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([isPublic])
 }
 
 model Topic {
@@ -129,6 +145,9 @@ model Topic {
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercises Exercise[]
   createdAt DateTime   @default(now())
+
+  @@index([courseId])
+  @@index([userId])
 }
 
 enum ExerciseStatus {
@@ -165,8 +184,12 @@ model Exercise {
   topic            Topic?         @relation(fields: [topicId], references: [id], onDelete: Cascade)
   user             User?          @relation(fields: [userId], references: [id], onDelete: Cascade) // Made optional
   createdAt        DateTime       @default(now())
-  file             File?
   demoExercise     DemoExercise?
+
+  @@index([userId])
+  @@index([topicId])
+  @@index([status])
+  @@index([completed])
 }
 
 model DemoExercise {
@@ -182,19 +205,12 @@ model DemoExercise {
   // Exercise details
   exerciseId String   @unique
   exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-}
 
-model File {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-
-  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  exerciseId String   @unique
-
-  name      String
-  type      String
-  key       String
-  uploadUrl String
+  @@index([userAgent])
+  @@index([browserLanguage])
+  @@index([screenResolution]) 
+  @@index([timezone])
+  @@index([exerciseId])
 }
 
 model Question {
@@ -204,6 +220,8 @@ model Question {
   exercise   Exercise @relation("ExerciseQuestions", fields: [exerciseId], references: [id], onDelete: Cascade)
   options    Option[] @relation("QuestionOptions")
   createdAt  DateTime @default(now())
+
+  @@index([exerciseId])
 }
 
 model Option {
@@ -213,6 +231,9 @@ model Option {
   questionId String
   question   Question @relation("QuestionOptions", fields: [questionId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
+
+  @@index([questionId])
+  @@index([isCorrect])
 }
 
 model Feedback {
