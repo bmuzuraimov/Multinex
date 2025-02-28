@@ -68,6 +68,8 @@ app Typit {
     },
     onAuthFailedRedirectTo: "/login",
     onAuthSucceededRedirectTo: "/portal",
+    onAfterSignup: import { onAfterSignup } from "@src/server/auth/hooks",
+    onAfterLogin: import { onAfterLogin } from "@src/server/auth/hooks",
   },
 
   db: {
@@ -320,11 +322,6 @@ action updateCurrentUser {
   entities: [User]
 }
 
-action updateUserById {
-  fn: import { updateUserById } from "@src/server/actions/users.js",
-  entities: [User]
-}
-
 action createDemoExercise {
   fn: import { createDemoExercise } from "@src/server/actions/demoExercise.js",
   entities: [DemoExercise, Exercise]
@@ -339,12 +336,12 @@ action updateUserLang {
 // 📚 Queries
 query getUploadURL {
   fn: import { getUploadURL } from "@src/server/queries/file.js",
-  entities: [User, File]
+  entities: [User]
 }
 
 query getDownloadURL {
   fn: import { getDownloadURL } from "@src/server/queries/file.js",
-  entities: [User, File]
+  entities: [User]
 }
 
 query getAllCourses {
@@ -384,7 +381,7 @@ query getExercisesWithNoTopic {
 
 query getExerciseById {
   fn: import { getExerciseById } from "@src/server/queries/exercises.js",
-  entities: [Exercise, File]
+  entities: [Exercise]
 }
 
 query getDemoExercise {

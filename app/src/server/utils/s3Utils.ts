@@ -1,4 +1,4 @@
-import { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const s3Client = new S3Client({
@@ -75,4 +75,29 @@ export const deleteS3Objects = async ({ key }: { key: string }) => {
       }
     })
   ));
+}
+
+export const duplicateS3Object = async ({ sourceKey, destinationKey }: { sourceKey: string, destinationKey: string }) => {
+  const copyCommands = [
+    { source: sourceKey, destination: destinationKey },
+    { source: `${sourceKey}.txt`, destination: `${destinationKey}.txt` },
+    { source: `${sourceKey}.mp3`, destination: `${destinationKey}.mp3` }
+  ];
+
+  await Promise.all(copyCommands.map(async ({ source, destination }) => {
+    try {
+      const command = new CopyObjectCommand({
+        Bucket: process.env.AWS_S3_EXERCISES_BUCKET,
+        CopySource: `${process.env.AWS_S3_EXERCISES_BUCKET}/${source}`,
+        Key: destination
+      });
+      await s3Client.send(command);
+    } catch (err: any) {
+      // Ignore if source file doesn't exist
+      if (err.$metadata?.httpStatusCode !== 404) {
+        console.error(`Error copying S3 object from ${source} to ${destination}: ${err}`);
+        throw err;
+      }
+    }
+  }));
 }

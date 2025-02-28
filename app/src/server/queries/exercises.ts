@@ -63,7 +63,7 @@ type ExerciseResult = {
   score: number;
   model: string;
   userEvaluation: number | null;
-  userId: string;
+  userId: string | null;
   topicId: string | null;
   createdAt: Date;
   questions: Array<{
@@ -105,21 +105,10 @@ export const getExerciseById: GetExerciseById<{ exerciseId: string }, ExerciseRe
           options: true,
         },
       },
-      file: true,
       topic: true,
       user: true,
     },
   });
-
-  if (!exercise.file?.key) {
-    const { essay, formattedEssay } = preprocessEssay(exercise.lessonText);
-    return {
-      ...exercise,
-      essay,
-      formattedEssay,
-      audioUrl: undefined,
-    };
-  }
 
   if (exercise.audioTimestamps && typeof exercise.audioTimestamps[0] === 'string') {
     exercise.audioTimestamps = exercise.audioTimestamps.map((timestamp: string) => JSON.parse(timestamp));

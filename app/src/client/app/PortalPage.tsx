@@ -262,7 +262,7 @@ export default function PortalPage() {
   return (
     <div className='lg:mt-10 pb-10'>
       {user && <UserTour userId={user.id} />}
-      <div className='mx-auto max-w-7xl px-6 lg:px-8'>
+      <div className='tour-step-1 mx-auto max-w-7xl px-6 lg:px-8'>
         <div className='mx-auto max-w-4xl text-center'>
           <h2 className='mt-2 text-title-xxl font-manrope tracking-tight text-black dark:text-white'>My Courses</h2>
         </div>

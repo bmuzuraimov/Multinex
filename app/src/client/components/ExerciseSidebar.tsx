@@ -34,6 +34,23 @@ const ExerciseSidebar: React.FC = () => {
       </div>
 
       <div className='flex-shrink-0 flex flex-col items-center gap-4 mt-6 border-t border-gray-200 dark:border-gray-700 pt-4'>
+        <div className='w-full p-3 rounded-lg'>
+          <div className='space-y-1'>
+            <div className='flex items-center gap-2'>
+              <span className='text-red-500'>■</span>
+              <span className='text-sm text-gray-600 dark:text-gray-300'>Write it down</span>
+            </div>
+            <div className='flex items-center gap-2'>
+              <span className='text-green-500'>■</span>
+              <span className='text-sm text-gray-600 dark:text-gray-300'>Type it</span>
+            </div>
+            <div className='flex items-center gap-2'>
+              <span className='text-blue-500'>■</span>
+              <span className='text-sm text-gray-600 dark:text-gray-300'>Listen to it</span>
+            </div>
+          </div>
+        </div>
+
         <button 
           onClick={() => setShowHintsModal(true)}
           className='flex items-center gap-2 text-sm text-teal-500 dark:text-teal-400 hover:text-teal-600 dark:hover:text-teal-300'
@@ -41,13 +58,13 @@ const ExerciseSidebar: React.FC = () => {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span>View Typing Hints</span>
+          <span>More hints</span>
         </button>
 
         {showHintsModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Typing Hints</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Hints</h3>
               <ul className="space-y-3 text-gray-600 dark:text-gray-300">
                 <li className="flex items-center gap-2">
                   <span className="font-medium">Tab:</span> Autocomplete the current word
