@@ -3,7 +3,7 @@ import { defineUserSignupFields } from 'wasp/auth/providers/types';
 export const getEmailUserFields = defineUserSignupFields({
   username: (data: any) => data.email,
   email: (data: any) => data.email,
-  tokens: (data: any) => data.email.endsWith('@life.hkbu.edu.hk') ? 1000000 : 50000,
+  credits: (data: any) => data.email.endsWith('@life.hkbu.edu.hk') ? 30 : 10,
 });
 
 export const getGitHubUserFields = defineUserSignupFields({
@@ -11,7 +11,7 @@ export const getGitHubUserFields = defineUserSignupFields({
   // instead of ["user"] and access args.profile.username instead
   email: (data: any) => data.profile.emails[0].email,
   username: (data: any) => data.profile.login,
-  tokens: (data: any) => data.profile.emails[0].email.endsWith('@life.hkbu.edu.hk') ? 1000000 : 50000,
+  credits: (data: any) => data.profile.emails[0].email.endsWith('@life.hkbu.edu.hk') ? 30 : 10,
 });
 
 export function getGitHubAuthConfig() {
@@ -23,7 +23,7 @@ export function getGitHubAuthConfig() {
 export const getGoogleUserFields = defineUserSignupFields({
   email: (data: any) => data.profile.email,
   username: (data: any) => data.profile.name,
-  tokens: (data: any) => data.profile.email.endsWith('@life.hkbu.edu.hk') ? 1000000 : 50000,
+  credits: (data: any) => data.profile.email.endsWith('@life.hkbu.edu.hk') ? 30 : 10,
 });
 
 export function getGoogleAuthConfig() {

@@ -292,25 +292,6 @@ async def generate_audio(
                 "timestamps": audio_timestamps,
                 "exercise_id": exerciseId,
             })
-            # Upsert file record
-            file_query = text("""
-                INSERT INTO "public"."File" (id, "createdAt", "exerciseId", name, type, key, "uploadUrl")
-                VALUES (gen_random_uuid(), NOW(), :exercise_id, :name, :type, :key, :upload_url)
-                ON CONFLICT ("exerciseId") DO UPDATE
-                SET "createdAt" = NOW(),
-                    name = EXCLUDED.name,
-                    type = EXCLUDED.type,
-                    key = EXCLUDED.key,
-                    "uploadUrl" = EXCLUDED."uploadUrl"
-            """)
-
-            db.execute(file_query, {
-                "exercise_id": exerciseId,
-                "name": str(exerciseId),
-                "type": "audio/mpeg", 
-                "key": s3_key,
-                "upload_url": f"https://{bucket_name}.s3.amazonaws.com/{s3_key}"
-            })
 
             db.commit()
 

@@ -1,38 +1,11 @@
 import { useAuth } from 'wasp/client/auth';
 import { stripePayment } from 'wasp/client/operations';
-import { TierIds } from '../../shared/constants';
+import { TIERS } from '../../shared/constants';
 import { AiFillCheckCircle } from 'react-icons/ai';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../../shared/utils';
 import { z } from 'zod';
-
-export const tiers = [
-  {
-    name: 'Pro Package',
-    id: TierIds.PRO,
-    price: '$7.99',
-    description: 'Perfect for 5 courses per semester',
-    features: ['350,000 tokens', '~75 PDF files'],
-    bestDeal: false,
-  },
-  {
-    name: 'Premium Package',
-    id: TierIds.PREMIUM,
-    price: '$9.99',
-    description: 'Perfect for 7 courses per semester',
-    features: ['700,000 LLM tokens', '~155 PDF files'],
-    bestDeal: true,
-  },
-  {
-    name: 'Enterprise',
-    id: TierIds.BASIC,
-    price: 'Contact Sales',
-    description: 'Perfect for organizations and institutions',
-    features: ['Custom token allocation', 'Dedicated support', 'Contact bmuzuraimov@typit.app'],
-    bestDeal: false,
-  },
-];
 
 const PricingPage = () => {
   const [isStripePaymentLoading, setIsStripePaymentLoading] = useState<boolean | string>(false);
@@ -87,7 +60,7 @@ const PricingPage = () => {
           secured by SSL encryption.
         </p>
         <div className='isolate mx-auto mt-16 grid max-w-md grid-cols-1 gap-y-8 lg:gap-x-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3'>
-          {tiers.map((tier) => (
+          {TIERS.map((tier) => (
             <div
               key={tier.id}
               className={cn(
@@ -137,12 +110,12 @@ const PricingPage = () => {
                     'text-gray-600  ring-1 ring-inset ring-teal-200 hover:ring-teal-400': !tier.bestDeal,
                   },
                   {
-                    'opacity-50 cursor-wait cursor-not-allowed': isStripePaymentLoading === tier.id,
+                    'opacity-50 cursor-not-allowed': isStripePaymentLoading === tier.id,
                   },
                   'mt-8 block rounded-md py-2 px-3 text-center text-sm dark:text-white font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-400'
                 )}
               >
-                {!!user ? 'Purchase Tokens' : 'Log in to buy tokens'}
+                {!!user ? 'Purchase Credits' : 'Log in to buy credits'}
               </button>
             </div>
           ))}

@@ -242,11 +242,6 @@ action createQuestion {
   entities: [Question]
 }
 
-action countTokens {
-  fn: import { countTokens } from "@src/server/actions/utils.js",
-  entities: []
-}
-
 action createCourse {
   fn: import { createCourse } from "@src/server/actions/courses.js",
   entities: [Course]

@@ -2,7 +2,7 @@ import { emailSender } from 'wasp/server/email';
 import { type MiddlewareConfigFn } from 'wasp/server';
 import { type StripeWebhook } from 'wasp/server/api';
 import express from 'express';
-import { TierIds, TierTokens } from '../../shared/constants.js';
+import { TIERS } from '../../shared/constants.js';
 
 import Stripe from 'stripe';
 
@@ -49,8 +49,8 @@ export const stripeWebhook: StripeWebhook = async (request, response, context) =
             stripeId: userStripeId,
           },
           data: {
-            tokens: {
-              increment: TierTokens.BASIC_TOKENS
+            credits: {
+              increment: TIERS.find(tier => tier.id === 'BASIC')?.credits
             },
             datePaid: new Date(),
           },
@@ -62,21 +62,21 @@ export const stripeWebhook: StripeWebhook = async (request, response, context) =
             stripeId: userStripeId,
           },
           data: {
-            tokens: {
-              increment: TierTokens.PRO_TOKENS
+            credits: {
+              increment: TIERS.find(tier => tier.id === 'PRO')?.credits
             },
             datePaid: new Date(),
           },
         });
-      } else if (line_items?.data[0]?.price?.id === process.env.PREMIUM_PRICE_ID) {
-        console.log('Premium package purchased');
+      } else if (line_items?.data[0]?.price?.id === process.env.ENTERPRISE_PRICE_ID) {
+        console.log('Enterprise package purchased');
         await context.entities.User.updateMany({
           where: {
             stripeId: userStripeId,
           },
           data: {
-            tokens: {
-              increment: TierTokens.PREMIUM_TOKENS
+            credits: {
+              increment: TIERS.find(tier => tier.id === 'ENTERPRISE')?.credits
             },
             datePaid: new Date(),
           },

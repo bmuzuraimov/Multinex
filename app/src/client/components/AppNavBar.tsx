@@ -87,7 +87,7 @@ export default function AppNavBar() {
           {!isUserLoading && user && (
             <div className="group relative flex items-center gap-1 text-sm font-medium leading-6 text-teal-600 dark:text-teal-400 transition-transform duration-100">
               <MdOutlineToken className="w-5 h-5 group-hover:rotate-180 transition-transform duration-300" />
-              {user.tokens}
+              {user.credits}
               <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-48 bg-gray-600 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none">
                 Used to generate exercises, MC quizzes and summaries
               </div>
