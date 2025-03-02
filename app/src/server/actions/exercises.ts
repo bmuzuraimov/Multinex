@@ -14,7 +14,7 @@ import { MAX_TOKENS } from '../../shared/constants';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
 import { ExerciseStatus } from '@prisma/client';
-
+import { DEFAULT_PRE_PROMPT, DEFAULT_POST_PROMPT } from '../../shared/constants';
 export const createExercise: CreateExercise<{ name: string; topicId: string | null }, Exercise> = async (
   { name, topicId },
   context
@@ -53,7 +53,10 @@ export const generateExercise: GenerateExercise<
     sensoryModes: ('listen' | 'type' | 'write')[];
   },
   { success: boolean; message: string }
-> = async ({ exerciseId, priorKnowledge, length, level, model, includeSummary, includeMCQuiz, sensoryModes }, context) => {
+> = async (
+  { exerciseId, priorKnowledge, length, level, model, includeSummary, includeMCQuiz, sensoryModes },
+  context
+) => {
   // Ensure the exercise exists
   const exercise = await context.entities.Exercise.findUnique({
     where: { id: exerciseId },
@@ -80,34 +83,36 @@ export const generateExercise: GenerateExercise<
   const exerciseText = await response.text();
   const { text: filtered_content, truncated } = truncateText(exerciseText);
 
-  // Calculate required tokens
-
   // Check if the user has enough tokens only if there is a user context
-  if (context.user) {
-    if (context.user.credits < 1) {
-      return {
-        success: false,
-        message: "You don't have enough credits. Please top up your credits to continue.",
-      };
-    }
+  if (context.user && context.user.credits < 1) {
+    return {
+      success: false,
+      message: "You don't have enough credits. Please top up your credits to continue.",
+    };
   }
 
   let exerciseJson: any;
   try {
     // Ensure priorKnowledge is an array
-    const priorKnowledgeArray = Array.isArray(priorKnowledge) 
-      ? priorKnowledge 
-      : typeof priorKnowledge === 'string' 
-        ? [priorKnowledge] 
+    const priorKnowledgeArray = Array.isArray(priorKnowledge)
+      ? priorKnowledge
+      : typeof priorKnowledge === 'string'
+        ? [priorKnowledge]
         : []; // Default to empty array if not a string or array
-    
+    const exercisePrompt = context.user 
+      ? await context.entities.ExerciseGeneratePrompt.findFirst({
+          where: { userId: context.user.id },
+        })
+      : null;
     const exerciseResponse = await OpenAIService.generateExercise(
       filtered_content,
-      priorKnowledgeArray.join(','), // Use the validated array
+      priorKnowledgeArray.join(','),
       length,
       level,
       model,
       MAX_TOKENS,
+      exercisePrompt?.pre_prompt || DEFAULT_PRE_PROMPT,
+      exercisePrompt?.post_prompt || DEFAULT_POST_PROMPT
     );
 
     if (!exerciseResponse.success || !exerciseResponse.data) {
@@ -132,12 +137,7 @@ export const generateExercise: GenerateExercise<
   let complexityJson: any;
   let complexityUsage = 0;
   try {
-    const complexityResponse = await OpenAIService.generateComplexity(
-      lectureContent,
-      model,
-      MAX_TOKENS,
-      sensoryModes
-    );
+    const complexityResponse = await OpenAIService.generateComplexity(lectureContent, model, MAX_TOKENS, sensoryModes);
     if (complexityResponse.success && complexityResponse.data?.taggedText) {
       complexityJson = complexityResponse.data;
       complexityUsage = complexityResponse.usage || 0;
@@ -181,11 +181,7 @@ export const generateExercise: GenerateExercise<
   let summaryJson = null;
   if (includeSummary) {
     try {
-      const summaryResponse = await OpenAIService.generateSummary(
-        lectureContent,
-        model,
-        MAX_TOKENS
-      );
+      const summaryResponse = await OpenAIService.generateSummary(lectureContent, model, MAX_TOKENS);
       if (summaryResponse.success && summaryResponse.data) {
         summaryJson = summaryResponse.data;
 
@@ -207,11 +203,7 @@ export const generateExercise: GenerateExercise<
   let questions = null;
   if (includeMCQuiz) {
     try {
-      const questionsResponse = await OpenAIService.generateQuestions(
-        lectureContent,
-        model,
-        MAX_TOKENS
-      );
+      const questionsResponse = await OpenAIService.generateQuestions(lectureContent, model, MAX_TOKENS);
       if (questionsResponse.success && questionsResponse.data) {
         questions = questionsResponse.data.questions;
 
@@ -228,6 +220,7 @@ export const generateExercise: GenerateExercise<
       await reportToAdmin('Failed to generate questions after multiple attempts.');
     }
   }
+
   // 10. Update the exercise record
   try {
     await context.entities.Exercise.update({
@@ -237,7 +230,11 @@ export const generateExercise: GenerateExercise<
         paragraphSummary: summaryJson?.paragraphSummary || '',
         level,
         truncated,
-        tokens: (exerciseJson?.tokens || 0) + (summaryJson?.tokens || 0) + (questions?.tokens || 0) + (complexityJson?.tokens || 0),
+        tokens:
+          (exerciseJson?.tokens || 0) +
+          (summaryJson?.tokens || 0) +
+          (questions?.tokens || 0) +
+          (complexityJson?.tokens || 0),
         model,
         no_words: lectureContent.split(' ').length || parseInt(length, 10),
         status: 'FINISHED',
@@ -274,15 +271,17 @@ export const generateExercise: GenerateExercise<
     }
   }
 
-  // 12. Deduct exactly 1 credit from the user
-  try {
-    await context.entities.User.update({
-      where: { id: context.user?.id },
-      data: { credits: { decrement: 1 } },
-    });
-  } catch (err) {
-    await reportToAdmin(`Failed to deduct 1 credit from user: ${String(err)}`);
-    console.error('Credit deduction error:', err);
+  // 12. Deduct exactly 1 credit from the user if they exist
+  if (context.user) {
+    try {
+      await context.entities.User.update({
+        where: { id: context.user.id },
+        data: { credits: { decrement: 1 } },
+      });
+    } catch (err) {
+      await reportToAdmin(`Failed to deduct 1 credit from user: ${String(err)}`);
+      console.error('Credit deduction error:', err);
+    }
   }
 
   return { success: true, message: 'Exercise updated successfully' };
