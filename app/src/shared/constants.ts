@@ -82,7 +82,7 @@ export const COURSE_IMAGES = [
   'bg-gradient-to-r from-green-200 via-green-300 to-green-500',
 ];
 
-export const FREE_TOKENS = 50000;
+export const FREE_CREDITS = 10;
 
 export const EXERCISE_LEVELS = {
   Auto: 'Auto',

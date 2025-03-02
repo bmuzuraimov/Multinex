@@ -9,7 +9,7 @@ import polyu from '../static/polyu.png';
 import hkbu from '../static/hkbu.png';
 import eduhk from '../static/eduhk.png';
 import lignan from '../static/lignan.png';
-import { FREE_TOKENS, ADMIN_EMAIL } from '../../shared/constants';
+import { FREE_CREDITS, ADMIN_EMAIL } from '../../shared/constants';
 import { routes } from 'wasp/client/router';
 
 export const navigation = [
@@ -115,7 +115,7 @@ export const faqs = [
   {
     id: 0,
     question: 'Do you provide free tier?',
-    answer: `Yes, we offer ${FREE_TOKENS} free credits to get you started.`,
+    answer: `Yes, we offer ${FREE_CREDITS} free credits to get you started.`,
   },
   {
     id: 1,
