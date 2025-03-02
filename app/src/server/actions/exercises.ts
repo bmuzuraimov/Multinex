@@ -7,14 +7,18 @@ import {
 } from 'wasp/server/operations';
 import { HttpError } from 'wasp/server';
 import { Exercise } from 'wasp/entities';
-import { getS3DownloadUrl } from '../utils/s3Utils';
+import { getS3DownloadUrl, deleteS3Objects } from '../utils/s3Utils';
 import { OpenAIService } from '../llm/openai';
 import { truncateText, reportToAdmin, cleanMarkdown } from './utils';
 import { MAX_TOKENS } from '../../shared/constants';
-import { deleteS3Objects } from '../utils/s3Utils';
+import fetch from 'node-fetch';
+import FormData from 'form-data';
+import { ExerciseStatus } from '@prisma/client';
 
-// Create empty exercise
-export const createExercise: CreateExercise<{ name: string, topicId: string | null }, Exercise> = async ({ name, topicId }, context) => {
+export const createExercise: CreateExercise<{ name: string; topicId: string | null }, Exercise> = async (
+  { name, topicId },
+  context
+) => {
   try {
     return await context.entities.Exercise.create({
       data: {
@@ -46,33 +50,11 @@ export const generateExercise: GenerateExercise<
     model: string;
     includeSummary: boolean;
     includeMCQuiz: boolean;
+    sensoryModes: ('listen' | 'type' | 'write')[];
   },
   { success: boolean; message: string }
-> = async (
-  {
-    exerciseId,
-    priorKnowledge,
-    length,
-    level,
-    model,
-    includeSummary,
-    includeMCQuiz,
-  },
-  context
-) => {
-  // 1. Ensure user is logged in and has at least 1 credit
-  if (!context.user) {
-    throw new HttpError(401, 'Unauthorized');
-  }
-
-  if (context.user.credits < 1) {
-    return {
-      success: false,
-      message: 'Not enough credits. You need at least 1 credit to generate an exercise.',
-    };
-  }
-
-  // 2. Ensure the exercise exists
+> = async ({ exerciseId, priorKnowledge, length, level, model, includeSummary, includeMCQuiz, sensoryModes }, context) => {
+  // Ensure the exercise exists
   const exercise = await context.entities.Exercise.findUnique({
     where: { id: exerciseId },
   });
@@ -80,7 +62,7 @@ export const generateExercise: GenerateExercise<
     return { success: false, message: 'Exercise not found' };
   }
 
-  // 3. Download the raw content from S3
+  // 2. Download the raw content from S3
   let exerciseContentUrl;
   try {
     exerciseContentUrl = await getS3DownloadUrl({ key: exerciseId + '.txt' });
@@ -94,88 +76,108 @@ export const generateExercise: GenerateExercise<
     return { success: false, message: 'Failed to download exercise content' };
   }
 
-  // 4. Possibly truncate if too long
+  // 3. Possibly truncate if too long
   const exerciseText = await response.text();
   const { text: filtered_content, truncated } = truncateText(exerciseText);
 
-  // 5. Generate main exercise content
+  // Calculate required tokens
+
+  // Check if the user has enough tokens only if there is a user context
+  if (context.user) {
+    if (context.user.credits < 1) {
+      return {
+        success: false,
+        message: "You don't have enough credits. Please top up your credits to continue.",
+      };
+    }
+  }
+
   let exerciseJson: any;
   try {
     // Ensure priorKnowledge is an array
-    const priorKnowledgeArray = Array.isArray(priorKnowledge)
-      ? priorKnowledge
-      : typeof priorKnowledge === 'string'
-      ? [priorKnowledge]
-      : [];
-
+    const priorKnowledgeArray = Array.isArray(priorKnowledge) 
+      ? priorKnowledge 
+      : typeof priorKnowledge === 'string' 
+        ? [priorKnowledge] 
+        : []; // Default to empty array if not a string or array
+    
     const exerciseResponse = await OpenAIService.generateExercise(
       filtered_content,
-      priorKnowledge.join(','),
+      priorKnowledgeArray.join(','), // Use the validated array
       length,
       level,
       model,
-      MAX_TOKENS
+      MAX_TOKENS,
     );
+
     if (!exerciseResponse.success || !exerciseResponse.data) {
       return { success: false, message: 'Error generating exercise content.' };
     }
     exerciseJson = exerciseResponse.data;
 
-    // Update status to EXERCISE_GENERATED
+    // Mark status
     await context.entities.Exercise.update({
       where: { id: exerciseId },
-      data: { status: 'EXERCISE_GENERATED' },
+      data: { status: ExerciseStatus.EXERCISE_GENERATED },
     });
   } catch (error) {
-    console.error('Failed to generate exercise after multiple attempts:', error);
-    return { success: false, message: 'Failed to generate exercise after multiple attempts.' };
+    console.error('Failed to generate exercise:', error);
+    return { success: false, message: 'Failed to generate exercise.' };
   }
 
+  // Clean the main lecture content
   const lectureContent = cleanMarkdown(exerciseJson.lectureContent);
 
-  // 6. Generate complexity tags if you want
+  // 6. Generate complexity tags (where we REALLY use sensoryModes)
   let complexityJson: any;
+  let complexityUsage = 0;
   try {
     const complexityResponse = await OpenAIService.generateComplexity(
       lectureContent,
       model,
       MAX_TOKENS,
+      sensoryModes
     );
     if (complexityResponse.success && complexityResponse.data?.taggedText) {
       complexityJson = complexityResponse.data;
-      exerciseJson.taggedText = complexityJson.taggedText;
-      // Update status to EXERCISE_TAGGED
+      complexityUsage = complexityResponse.usage || 0;
+
+      // Update status
       await context.entities.Exercise.update({
         where: { id: exerciseId },
-        data: { status: 'EXERCISE_TAGGED' },
+        data: { status: ExerciseStatus.EXERCISE_TAGGED },
       });
     }
   } catch (error) {
     console.error('Failed to generate complexity tags:', error);
-    await reportToAdmin(`Failed to generate complexity tags: ${error}`);
+    // Not necessarily fatal; continue
   }
 
-  // 7. Optionally generate audio (if you have this service)
+  if (complexityJson?.taggedText) {
+    exerciseJson.taggedText = complexityJson.taggedText;
+  }
+
+  // 7. Optionally generate audio
   const documentParserUrl = process.env.DOCUMENT_PARSER_URL;
   if (documentParserUrl) {
-    // Generate audio
-    const formData = new FormData();
-    formData.append('exerciseId', exerciseId);
-    formData.append('generate_text', exerciseJson.taggedText || lectureContent);
-
-    const audioResponse = await fetch(`${documentParserUrl}/generate-audio`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!audioResponse.ok) {
-      const errorData = await audioResponse.json();
-      console.error('Failed to generate audio:', errorData);
-      const errorMessage = (errorData as { message?: string }).message || 'Unknown error';
-      await reportToAdmin(`Failed to generate audio: ${errorMessage}`);
+    try {
+      const formData = new FormData();
+      formData.append('exerciseId', exerciseId);
+      formData.append('generate_text', exerciseJson.taggedText || '');
+      const audioResponse = await fetch(`${documentParserUrl}/generate-audio`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!audioResponse.ok) {
+        await reportToAdmin('Failed to generate audio (non-200 response).');
+      }
+    } catch (err) {
+      await reportToAdmin(`Failed to generate audio: ${String(err)}`);
+      console.error('Audio generation error:', err);
     }
   }
 
+  // 8. Optionally generate summary
   let summaryJson = null;
   if (includeSummary) {
     try {
@@ -187,37 +189,42 @@ export const generateExercise: GenerateExercise<
       if (summaryResponse.success && summaryResponse.data) {
         summaryJson = summaryResponse.data;
 
-        // Update status to SUMMARY_GENERATED
+        // Mark status
         await context.entities.Exercise.update({
           where: { id: exerciseId },
-          data: { status: 'SUMMARY_GENERATED' },
+          data: { status: ExerciseStatus.SUMMARY_GENERATED },
         });
       } else {
-        await reportToAdmin('Failed to generate summary.');
+        await reportToAdmin('Failed to generate summary (no success).');
       }
-    } catch (error) {
-      console.error('Failed to generate summary after multiple attempts:', error);
+    } catch (err) {
+      console.error('Failed to generate summary:', err);
       await reportToAdmin('Failed to generate summary after multiple attempts.');
     }
   }
 
+  // 9. Optionally generate MC Quiz
   let questions = null;
   if (includeMCQuiz) {
     try {
-      const questionsResponse = await OpenAIService.generateQuestions(lectureContent, model, MAX_TOKENS);
+      const questionsResponse = await OpenAIService.generateQuestions(
+        lectureContent,
+        model,
+        MAX_TOKENS
+      );
       if (questionsResponse.success && questionsResponse.data) {
         questions = questionsResponse.data.questions;
 
-        // Update status to QUESTIONS_GENERATED
+        // Mark status
         await context.entities.Exercise.update({
           where: { id: exerciseId },
-          data: { status: 'QUESTIONS_GENERATED' },
+          data: { status: ExerciseStatus.QUESTIONS_GENERATED },
         });
       } else {
-        await reportToAdmin('Failed to generate questions.');
+        await reportToAdmin('Failed to generate questions (no success).');
       }
-    } catch (error) {
-      console.error('Failed to generate questions after multiple attempts:', error);
+    } catch (err) {
+      console.error('Failed to generate questions:', err);
       await reportToAdmin('Failed to generate questions after multiple attempts.');
     }
   }
@@ -237,42 +244,40 @@ export const generateExercise: GenerateExercise<
       },
     });
   } catch (error: any) {
-    await reportToAdmin(`Failed to update exercise in the database: ${error.message}`);
-    console.error('Database Error:', error);
+    await reportToAdmin(`Failed to update exercise in DB: ${error.message}`);
+    console.error('Database Error updating exercise:', error);
     return { success: false, message: 'Failed to update exercise. Please try again later.' };
   }
 
-  // 11. Create MC Questions if generated
+  // 12. Create the MC Questions if we generated them
   if (questions && Array.isArray(questions)) {
     try {
       await Promise.all(
-        questions.map(
-          async (question: { text: string; options: Array<{ text: string; isCorrect: boolean }> }) => {
-            await context.entities.Question.create({
-              data: {
-                text: question.text,
-                exercise: { connect: { id: exerciseId } },
-                options: {
-                  create: question.options.map((opt) => ({
-                    text: opt.text,
-                    isCorrect: opt.isCorrect,
-                  })),
-                },
+        questions.map(async (question: { text: string; options: Array<{ text: string; isCorrect: boolean }> }) => {
+          await context.entities.Question.create({
+            data: {
+              text: question.text,
+              exercise: { connect: { id: exerciseId } },
+              options: {
+                create: question.options.map((opt) => ({
+                  text: opt.text,
+                  isCorrect: opt.isCorrect,
+                })),
               },
-            });
-          }
-        )
+            },
+          });
+        })
       );
-    } catch (error: any) {
-      await reportToAdmin(`Failed to create questions: ${error.message}`);
-      console.error('Database Error:', error);
+    } catch (err) {
+      await reportToAdmin(`Failed to create MC questions: ${String(err)}`);
+      console.error('Error creating questions:', err);
     }
   }
 
   // 12. Deduct exactly 1 credit from the user
   try {
     await context.entities.User.update({
-      where: { id: context.user.id },
+      where: { id: context.user?.id },
       data: { credits: { decrement: 1 } },
     });
   } catch (err) {

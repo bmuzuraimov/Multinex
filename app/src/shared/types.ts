@@ -30,19 +30,22 @@ export interface QuestionsResponse {
   questions: Question[];
 }
 
-// Define types for grouped props
-export type ExerciseFormContentSettings = {
+export type SensoryMode = 'listen' | 'type' | 'write';
+
+export interface ExerciseFormContentSettings {
+  sensoryModes: SensoryMode[];
+  setSensoryMods: (value: SensoryMode[]) => void;
   exerciseName: string;
   setExerciseName: (value: string) => void;
-  exerciseLength: string; // Target length of generated exercise content
+  exerciseLength: string;
   setExerciseLength: (value: string) => void;
-  exerciseLevel: string; // Difficulty level of exercise (e.g. Beginner, Advanced)
+  exerciseLevel: string;
   setExerciseLevel: (value: string) => void;
-  priorKnowledge: string[]; // Required background knowledge for exercise
+  priorKnowledge: string[];
   setPriorKnowledge: (value: string[]) => void;
-  topics: string[]; // Main topics covered in exercise
+  topics: string[];
   setTopics: (value: string[]) => void;
-};
+}
 
 export type ExerciseFormGenerationSettings = {
   scanImages: boolean; // Whether to extract text from images
@@ -53,29 +56,6 @@ export type ExerciseFormGenerationSettings = {
   setIncludeSummary: (value: boolean) => void;
   includeMCQuiz: boolean; // Include multiple choice questions
   setIncludeMCQuiz: (value: boolean) => void;
-};
-
-export type LandingPageTryResult = {
-  id: string;
-  createdAt: Date;
-  userAgent: string;
-  browserLanguage: string | null;
-  screenResolution: string | null;
-  timezone: string | null;
-  name: string;
-  prompt: string;
-  promptImg: string;
-  audioTimestamps: Array<{word: string, start: number, end: number}> | string[];
-  paragraphSummary: string;
-  level: string;
-  no_words: number;
-  truncated: boolean;
-  completedAt: Date | null;
-  score: number;
-  tokensUsed: number;
-  successful: boolean;
-  model: string;
-  userEvaluation: number | null;
-  convertedUserId: string | null;
-  [key: string]: any;
+  sensoryModes: string[]; // Add sensoryModes as an array of strings
+  setSensoryMods: (value: string[]) => void
 };

@@ -5,7 +5,13 @@ import { retry } from './utils';
 import { HttpError } from 'wasp/server';
 import { reportToAdmin } from '../actions/utils';
 import { TEMPERATURE } from '../../shared/constants';
-import { lectureContentFormat, summaryFormat, questionsFormat, complexityFormat } from '../prompts/responseFormat';
+import {
+  lectureContentFormat,
+  summaryFormat,
+  questionsFormat,
+  complexityFormat
+} from '../prompts/responseFormat';
+
 function setupOpenAI() {
   if (!process.env.OPENAI_API_KEY) {
     throw new HttpError(500, 'OpenAI API key is not set');
@@ -22,14 +28,27 @@ interface OpenAIResponse {
   message?: string;
 }
 
-
 export class OpenAIService {
-  static async generateExercise(content: string, priorKnowledge: string, length: string, level: string, model: string, maxTokens: number): Promise<OpenAIResponse> {
+  // 1) Generate main exercise
+  static async generateExercise(
+    content: string,
+    priorKnowledge: string,
+    length: string,
+    level: string,
+    model: string,
+    maxTokens: number
+  ): Promise<OpenAIResponse> {
     return retry(async () => {
       try {
+        // We only use them if needed. If you want the final text to reflect modes, you'd add them to the prompt call:
         const response = await openai.chat.completions.create({
           model,
-          messages: GENERATE_EXERCISE_PROMPT({ content, priorKnowledge, length, level }),
+          messages: GENERATE_EXERCISE_PROMPT({
+            content,
+            priorKnowledge,
+            length,
+            level,
+          }),
           temperature: TEMPERATURE,
           max_tokens: maxTokens,
           top_p: 1,
@@ -42,7 +61,7 @@ export class OpenAIService {
         const exerciseJson = JSON.parse(responseContent);
 
         if (!exerciseJson?.lectureContent) {
-          throw new Error('lectureContent is missing from the response.');
+          throw new Error('lectureContent missing from response.');
         }
 
         const exerciseJsonUsage = response.usage?.total_tokens || 0;
@@ -55,7 +74,12 @@ export class OpenAIService {
     });
   }
 
-  static async generateSummary(lectureContent: string, model: string, maxTokens: number): Promise<OpenAIResponse> {
+  // 2) Generate paragraph summary
+  static async generateSummary(
+    lectureContent: string,
+    model: string,
+    maxTokens: number
+  ): Promise<OpenAIResponse> {
     return retry(async () => {
       try {
         const response = await openai.chat.completions.create({
@@ -73,7 +97,7 @@ export class OpenAIService {
         const summaryJson = JSON.parse(summaryContent);
 
         if (!summaryJson?.paragraphSummary) {
-          throw new Error('paragraphSummary is missing from the response.');
+          throw new Error('paragraphSummary missing from summary JSON.');
         }
 
         const summaryJsonUsage = response.usage?.total_tokens || 0;
@@ -86,7 +110,12 @@ export class OpenAIService {
     });
   }
 
-  static async generateQuestions(lectureContent: string, model: string, maxTokens: number): Promise<OpenAIResponse> {
+  // 3) Generate MC questions
+  static async generateQuestions(
+    lectureContent: string,
+    model: string,
+    maxTokens: number
+  ): Promise<OpenAIResponse> {
     return retry(async () => {
       try {
         const response = await openai.chat.completions.create({
@@ -103,8 +132,8 @@ export class OpenAIService {
         const responseContent = response.choices[0]?.message?.content || '';
         const questionsJson = JSON.parse(responseContent);
 
-        if (!questionsJson?.questions || !Array.isArray(questionsJson.questions) || questionsJson.questions.length === 0) {
-          throw new Error('Invalid JSON structure: "questions" array is missing or empty.');
+        if (!questionsJson?.questions || !Array.isArray(questionsJson.questions)) {
+          throw new Error('Invalid questions JSON. Missing "questions" array.');
         }
 
         const totalTokens = response.usage?.total_tokens || 0;
@@ -116,7 +145,13 @@ export class OpenAIService {
       }
     });
   }
-  static async generateCourse(syllabusContent: string, model: string, maxTokens: number): Promise<OpenAIResponse> {
+
+  // 4) Generate course structure
+  static async generateCourse(
+    syllabusContent: string,
+    model: string,
+    maxTokens: number
+  ): Promise<OpenAIResponse> {
     return retry(async () => {
       try {
         const response = await openai.chat.completions.create({
@@ -127,22 +162,20 @@ export class OpenAIService {
           top_p: 1,
           frequency_penalty: 0,
           presence_penalty: 0,
-          response_format: {
-            type: 'json_object',
-          },
+          response_format: { type: 'json_object' },
         });
 
         const responseContent = response.choices[0]?.message?.content || '';
         const jsonContent = JSON.parse(responseContent);
 
         if (!jsonContent?.courseName) {
-          throw new Error('courseName is missing from the response.');
+          throw new Error('courseName missing from response.');
         }
         if (!jsonContent?.courseDescription) {
-          throw new Error('courseDescription is missing from the response.');
+          throw new Error('courseDescription missing from response.');
         }
         if (!Array.isArray(jsonContent.topics)) {
-          throw new Error('topics array is missing from the response.');
+          throw new Error('topics missing from response.');
         }
 
         const totalTokens = response.usage?.total_tokens || 0;
@@ -155,12 +188,22 @@ export class OpenAIService {
     });
   }
 
-  static async generateComplexity(lectureContent: string, model: string, maxTokens: number): Promise<OpenAIResponse> {
+  // 5) Generate complexity tags with user-selected modes
+  static async generateComplexity(
+    lectureContent: string,
+    model: string,
+    maxTokens: number,
+    sensoryModes: ('listen' | 'type' | 'write')[]
+  ): Promise<OpenAIResponse> {
+    console.log('Generating complexity tags with sensoryModes:', sensoryModes);
     return retry(async () => {
       try {
         const response = await openai.chat.completions.create({
           model,
-          messages: GENERATE_STUDY_METHOD_TAGS_PROMPT({ content: lectureContent }),
+          messages: GENERATE_STUDY_METHOD_TAGS_PROMPT({
+            content: lectureContent,
+            sensoryModes: sensoryModes,
+          }),
           temperature: TEMPERATURE,
           max_tokens: maxTokens,
           top_p: 1,
@@ -171,9 +214,9 @@ export class OpenAIService {
 
         const responseContent = response.choices[0]?.message?.content || '';
         const complexityJson = JSON.parse(responseContent);
-        
+
         if (!complexityJson?.taggedText) {
-          throw new Error('Complexity analysis response is empty.');
+          throw new Error('No "taggedText" found in complexity JSON.');
         }
 
         const totalTokens = response.usage?.total_tokens || 0;
