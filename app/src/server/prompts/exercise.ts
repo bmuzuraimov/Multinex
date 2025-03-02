@@ -33,25 +33,25 @@ export const GENERATE_EXERCISE_PROMPT = ({
         **Subtasks** (execute sequentially):
         1. **Extract Key Concepts**:
            - Identify theories, principles, and definitions.
-           - For each concept, explain:  
-             - *What it is* (clear definition).  
-             - *How it works* (mechanism/process).  
+           - For each concept, explain:
+             - *What it is* (clear definition).
+             - *How it works* (mechanism/process).
              - *Why it matters* (significance/applications).
   
         2. **Structure Formulas/Equations**:
            - Convert formulas to programming-friendly syntax (e.g., "force = mass * acceleration").
-           - For each formula:  
-             - Define variables (e.g., "m = mass (kg)").  
-             - Describe conditions for validity (e.g., "Assumes frictionless surfaces").  
+           - For each formula:
+             - Define variables (e.g., "m = mass (kg)").
+             - Describe conditions for validity (e.g., "Assumes frictionless surfaces").
   
         3. **Link Concepts to Concrete Examples**:
-           - Provide 1-2 examples per major concept.  
-           - Include:  
-             - Step-by-step problem-solving (e.g., "To calculate X, first do Y...").  
+           - Provide 1-2 examples per major concept.
+           - Include:
+             - Step-by-step problem-solving (e.g., "To calculate X, first do Y...").
              - Real-world scenarios (e.g., "Used in weather prediction to model...").
 
-        **Formatting**:  
-        - Separate sections with "\\n\\n" and paragraphs with "\\n".  
+        **Formatting**:
+        - Separate sections with "\\n\\n" and paragraphs with "\\n".
         ${level !== 'Auto' ? `- Technical depth: Match the user’s level (${level}).` : ''}
         ${length !== 'Auto' ? `- Minimum length: ${length} words.` : ''}`,
     },
@@ -64,7 +64,7 @@ export const GENERATE_EXERCISE_PROMPT = ({
       PDF content: ${content}`,
     },
   ];
-  // save prompt to file
+  // Save prompt to file for debugging, if needed
   fs.writeFileSync('./prompt.json', JSON.stringify(prompt, null, 2));
   return prompt;
 };
@@ -90,7 +90,61 @@ export const GENERATE_SUMMARY_PROMPT = ({ content }: { content: string }): Promp
   ];
 };
 
-export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({ content }: { content: string }): Prompt[] => {
+/**
+ * Dynamically generate the "study method tags" prompt so it only includes
+ * instructions for the modes that the user actually selected.
+ */
+export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({
+  content,
+  sensoryModes,
+}: {
+  content: string;
+  sensoryModes: string[];
+}): { role: 'system' | 'user'; content: string }[] => {
+  // Build instructions based on the selected modes.
+  let instructions = '';
+
+  // Map of mode to its instructions
+  const modeInstructions = {
+    write: {
+      tag: 'write',
+      description: 'For content that students should write down by hand:',
+      examples: [
+        'Critical concepts requiring deep memorization',
+        'Important formulas and definitions that must be internalized', 
+        'Key technical terms that need to be mastered through handwriting'
+      ]
+    },
+    type: {
+      tag: 'type', 
+      description: 'For content that students should read and type out:',
+      examples: [
+        'Moderately important information',
+        'Supporting details and explanations',
+        'Content that is intuitive and easy to understand'
+      ]
+    },
+    listen: {
+      tag: 'listen',
+      description: 'For content that students can listen to:',
+      examples: [
+        'Basic background information',
+        'Supplementary or contextual details',
+        'Content that can be absorbed through audio playback'
+      ]
+    }
+  };
+
+  // Build instructions string from selected modes
+  sensoryModes.forEach((mode, index) => {
+    const { tag, description, examples } = modeInstructions[mode as keyof typeof modeInstructions];
+    instructions += `${index + 1}. <${tag}></${tag}> - ${description}\n`;
+    examples.forEach(example => {
+      instructions += `   - ${example}\n`; 
+    });
+    instructions += '\n';
+  });
+
   return [
     {
       role: 'system',
@@ -98,27 +152,8 @@ export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({ content }: { content: string
 
       Tag each segment with exactly one of these tags, ensuring proper spacing between tags:
       
-      1. <write></write> - For content that students should write down by hand:
-         - Critical concepts requiring deep memorization
-         - Important formulas and definitions that must be internalized
-         - Key technical terms that need to be mastered through handwriting
-         
-      2. <type></type> - For content that students should read and type out:
-         - Moderately important information
-         - Supporting details and explanations
-         - Content that is intuitive and easy to understand
-         
-      3. <hear></hear> - For content that students can listen to:
-         - Basic background information
-         - Supplementary or contextual details
-         - Content that can be absorbed through audio playback
-
-      Return the exact same text with a single appropriate learning method tag around each segment. Add a newline between different tagged segments. Do not use nested tags. Do not change any words or formatting - only add tags with proper spacing between them.
-      
-      Example:
-      Original: "The speed of light is 299,792,458 m/s. This constant is fundamental to physics."
-      Tagged: 
-      "<write>The speed of light is 299,792,458 m/s</write> <type>This constant is fundamental to physics</type>"`,
+      ${instructions}
+      Return the exact same text with a single appropriate learning method tag around each segment. Add a newline between different tagged segments. Do not use nested tags. Do not change any words or formatting - only add tags with proper spacing between them.`,
     },
     {
       role: 'user',
@@ -129,7 +164,6 @@ export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({ content }: { content: string
 };
 
 export const GENERATE_EXAM_PROMPT = ({ content }: { content: string }): Prompt[] => {
-  // Define the system prompt for generating MC questions
   const systemPrompt = `You are an AI assistant specialized in creating final exam-quality multiple-choice questions (MCQs). Your task is to design comprehensive and challenging MCQs based on the provided lecture text, emphasizing critical concepts, formulas, and key details. These questions should help students test their understanding and recall of essential material.
 
   Please follow these guidelines:
@@ -173,7 +207,7 @@ export const GENERATE_EXAM_PROMPT = ({ content }: { content: string }): Prompt[]
   **Important Notes**:
   - Questions should challenge the user as if they were part of a final exam.
   - Ensure all content is accurate and error-free.
-  
+
   ---
   Lecture Text:
   ${content}
