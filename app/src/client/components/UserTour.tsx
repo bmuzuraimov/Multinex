@@ -30,42 +30,44 @@ const UserTour: React.FC<UserTourProps> = ({ userId }) => {
         <div className='text-center dark:text-white'>
           <h2 className='text-2xl font-bold mb-2'>Welcome to Typit!</h2>
           <p className='mb-4 dark:text-gray-400'>This quick tour will guide you through the platform's key features.</p>
-          <p className='text-gray-400'>Click <strong>Next</strong> to proceed.</p>
+          <p className='text-gray-400'>
+            Click <strong>Next</strong> to proceed.
+          </p>
         </div>
       ),
       placement: 'center',
       disableOverlay: false,
-      disableBeacon: true
+      disableBeacon: true,
     },
     {
       target: '.tour-step-1',
       content: "Here are your courses! We've created a demo course for you to get started. Click 'Next' to proceed.",
       spotlightClicks: true,
       placement: 'bottom',
-      disableBeacon: true
+      disableBeacon: true,
     },
     {
       target: '.tour-step-2',
-      content: "Create sections here to organize your course content into chapters.",
+      content: 'Create sections here to organize your course content into chapters.',
       spotlightClicks: true,
       placement: 'bottom',
       event: 'hover',
-      disableBeacon: true
+      disableBeacon: true,
     },
     {
       target: '.tour-step-3',
-      content: "Each section can contain multiple exercises in a structured sequence.",
+      content: 'Each section can contain multiple exercises in a structured sequence.',
       spotlightClicks: true,
       placement: 'bottom',
       event: 'hover',
-      disableBeacon: true
+      disableBeacon: true,
     },
     {
       target: '.shadow-md',
       content: "Let's walk through the demo exercise to get you started!",
       spotlightClicks: true,
       placement: 'auto',
-      disableBeacon: true
+      disableBeacon: true,
     },
   ];
 
@@ -90,7 +92,6 @@ const UserTour: React.FC<UserTourProps> = ({ userId }) => {
         await updateCurrentUser({
           tourCompleted: true,
         });
-        navigate(`/exercise/welcome-exercise-${userId}`);
       } catch (error) {
         console.error('Error updating tour status:', error);
       }
@@ -114,7 +115,7 @@ const UserTour: React.FC<UserTourProps> = ({ userId }) => {
         close: 'Close',
         last: 'Finish',
         next: 'Next',
-        skip: 'Skip Tour'
+        skip: 'Skip Tour',
       }}
       styles={{
         options: {
@@ -123,31 +124,31 @@ const UserTour: React.FC<UserTourProps> = ({ userId }) => {
           textColor: colorMode === 'dark' ? '#f0f4f8' : '#333',
           width: 500,
           zIndex: 9999,
-          primaryColor: colorMode === 'dark' ? '#008080' : '#000000'
+          primaryColor: colorMode === 'dark' ? '#008080' : '#000000',
         },
         buttonNext: {
           backgroundColor: colorMode === 'dark' ? '#008080' : 'black',
           color: colorMode === 'dark' ? '#fff' : 'white',
           padding: '8px 16px',
-          borderRadius: '4px'
+          borderRadius: '4px',
         },
         buttonBack: {
           color: colorMode === 'dark' ? '#f0f4f8' : '#000000',
-          marginRight: 10
+          marginRight: 10,
         },
         buttonSkip: {
-          color: colorMode === 'dark' ? '#008080' : '#000000'
+          color: colorMode === 'dark' ? '#008080' : '#000000',
         },
         tooltip: {
           borderRadius: '8px',
-          padding: '16px'
+          padding: '16px',
         },
         tooltipContent: {
-          padding: '10px 0'
+          padding: '10px 0',
         },
         tooltipFooter: {
-          marginTop: '10px'
-        }
+          marginTop: '10px',
+        },
       }}
     />
   );
