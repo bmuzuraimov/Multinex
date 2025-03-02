@@ -263,3 +263,12 @@ model Logs {
   message String
   level   String
 }
+
+model ExerciseGeneratePrompt {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  pre_prompt    String
+  post_prompt    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

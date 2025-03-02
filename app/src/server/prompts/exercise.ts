@@ -10,66 +10,48 @@ export const GENERATE_EXERCISE_PROMPT = ({
   level,
   length,
   content,
+  pre_prompt,
+  post_prompt,
 }: {
   priorKnowledge: string;
   level: string;
   length: string;
   content: string;
-}): Prompt[] => {
-  const prompt: Prompt[] = [
-    {
-      role: 'system',
-      content: `You are an AI designed to convert PDF documents into structured, knowledge-focused equivalents for student learning. Focus ONLY on generating the 'lectureText' field. Follow these rules:
-  
-        **Core Principles**:
-        - **Avoid filler phrases**: Never use sentences like "It is crucial to know..." or "This concept is important...". Only include factual, explanatory, or actionable content.
-        - **Prioritize depth over summaries**: Reconstruct knowledge in a way that mirrors the original material’s depth and rigor.
-        ${
-          priorKnowledge.length > 0
-            ? `- **Exclude prior knowledge**: Omit or condense content overlapping with: ${priorKnowledge}.`
-            : ''
-        }
-  
-        **Subtasks** (execute sequentially):
-        1. **Extract Key Concepts**:
-           - Identify theories, principles, and definitions.
-           - For each concept, explain:
-             - *What it is* (clear definition).
-             - *How it works* (mechanism/process).
-             - *Why it matters* (significance/applications).
-  
-        2. **Structure Formulas/Equations**:
-           - Convert formulas to programming-friendly syntax (e.g., "force = mass * acceleration").
-           - For each formula:
-             - Define variables (e.g., "m = mass (kg)").
-             - Describe conditions for validity (e.g., "Assumes frictionless surfaces").
-  
-        3. **Link Concepts to Concrete Examples**:
-           - Provide 1-2 examples per major concept.
-           - Include:
-             - Step-by-step problem-solving (e.g., "To calculate X, first do Y...").
-             - Real-world scenarios (e.g., "Used in weather prediction to model...").
+  pre_prompt: string;
+  post_prompt: string;
+}): {
+  role: 'system' | 'user';
+  content: string;
+}[] => {
+  const prompt = `${pre_prompt}
 
-        **Formatting**:
-        - Separate sections with "\\n\\n" and paragraphs with "\\n".
-        ${level !== 'Auto' ? `- Technical depth: Match the user’s level (${level}).` : ''}
-        ${length !== 'Auto' ? `- Minimum length: ${length} words.` : ''}`,
-    },
+  Document content: ${content}
+
+  You must follow these rules:
+  - Separate sections with "\n\n" and paragraphs with "\n".
+  ${priorKnowledge.length > 0 ? `- Exclude these topics: ${priorKnowledge}.\n` : ''}.
+  ${level !== 'Auto' ? `- Technical depth: Match the user's level (${level}).\n` : ''}.
+  ${length !== 'Auto' ? `- Minimum length: ${length} words.\n` : ''}.
+  
+  ${post_prompt}`;
+
+  console.log('prompt', prompt);
+  return [
     {
       role: 'user',
-      content: `Generate ONLY the 'lectureText' field for student learning. Follow the subtasks and rules above. ${
-        priorKnowledge.length > 0 ? `Exclude prior knowledge: ${priorKnowledge}.` : ''
-      }
-      
-      PDF content: ${content}`,
+      content: prompt,
     },
   ];
-  // Save prompt to file for debugging, if needed
-  fs.writeFileSync('./prompt.json', JSON.stringify(prompt, null, 2));
-  return prompt;
 };
 
-export const GENERATE_SUMMARY_PROMPT = ({ content }: { content: string }): Prompt[] => {
+export const GENERATE_SUMMARY_PROMPT = ({
+  content,
+}: {
+  content: string;
+}): {
+  role: 'system' | 'user';
+  content: string;
+}[] => {
   return [
     {
       role: 'system',
@@ -111,18 +93,18 @@ export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({
       description: 'For content that students should write down by hand:',
       examples: [
         'Critical concepts requiring deep memorization',
-        'Important formulas and definitions that must be internalized', 
-        'Key technical terms that need to be mastered through handwriting'
-      ]
+        'Important formulas and definitions that must be internalized',
+        'Key technical terms that need to be mastered through handwriting',
+      ],
     },
     type: {
-      tag: 'type', 
+      tag: 'type',
       description: 'For content that students should read and type out:',
       examples: [
         'Moderately important information',
         'Supporting details and explanations',
-        'Content that is intuitive and easy to understand'
-      ]
+        'Content that is intuitive and easy to understand',
+      ],
     },
     listen: {
       tag: 'listen',
@@ -130,17 +112,17 @@ export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({
       examples: [
         'Basic background information',
         'Supplementary or contextual details',
-        'Content that can be absorbed through audio playback'
-      ]
-    }
+        'Content that can be absorbed through audio playback',
+      ],
+    },
   };
 
   // Build instructions string from selected modes
   sensoryModes.forEach((mode, index) => {
     const { tag, description, examples } = modeInstructions[mode as keyof typeof modeInstructions];
     instructions += `${index + 1}. <${tag}></${tag}> - ${description}\n`;
-    examples.forEach(example => {
-      instructions += `   - ${example}\n`; 
+    examples.forEach((example) => {
+      instructions += `   - ${example}\n`;
     });
     instructions += '\n';
   });
@@ -163,7 +145,15 @@ export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({
   ];
 };
 
-export const GENERATE_EXAM_PROMPT = ({ content }: { content: string }): Prompt[] => {
+export const GENERATE_EXAM_PROMPT = ({
+  content,
+}: {
+  content: string;
+}): {
+  role: 'system' | 'user';
+  content: string;
+}[] => {
+  // Define the system prompt for generating MC questions
   const systemPrompt = `You are an AI assistant specialized in creating final exam-quality multiple-choice questions (MCQs). Your task is to design comprehensive and challenging MCQs based on the provided lecture text, emphasizing critical concepts, formulas, and key details. These questions should help students test their understanding and recall of essential material.
 
   Please follow these guidelines:

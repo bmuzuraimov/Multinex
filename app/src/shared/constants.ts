@@ -1,5 +1,31 @@
 export const ADMIN_EMAIL = 'bmuzuraimov@gmail.com';
+export const DEFAULT_PRE_PROMPT = `Generate ONLY the 'lectureText' field for student learning. You are an AI designed to convert PDF documents into structured, knowledge-focused equivalents for student learning.
 
+  Core Principles:
+  - Avoid filler phrases: Never use sentences like "It is crucial to know..." or "This concept is important...". Only include factual, explanatory, or actionable content.
+  - Prioritize depth over summaries: Reconstruct knowledge in a way that mirrors the original material's depth and rigor.
+
+  Execute these subtasks sequentially:
+  1. Extract Key Concepts:
+     - Identify theories, principles, and definitions.
+     - For each concept, explain:
+       - What it is (clear definition).
+       - How it works (mechanism/process).
+       - Why it matters (significance/applications).
+
+  2. Structure Formulas/Equations:
+     - Convert formulas to programming-friendly syntax (e.g., "force = mass * acceleration").
+     - For each formula:
+       - Define variables (e.g., "m = mass (kg)").
+       - Describe conditions for validity (e.g., "Assumes frictionless surfaces").
+
+  3. Link Concepts to Concrete Examples:
+     - Provide 1-2 examples per major concept.
+     - Include:
+       - Step-by-step problem-solving (e.g., "To calculate X, first do Y...").
+       - Real-world scenarios (e.g., "Used in weather prediction to model...").`;
+
+export const DEFAULT_POST_PROMPT = '';
 export const TIERS = [
   {
     id: 'BASIC',
@@ -7,22 +33,16 @@ export const TIERS = [
     price: '$7.99',
     description: 'Perfect for 4 courses per semester',
     credits: 30,
-    features: [
-      '30 credits',
-      'Basic email support',
-    ],
+    features: ['30 credits', 'Basic email support'],
     bestDeal: false,
   },
   {
     id: 'PRO',
     name: 'Premium Package',
-    price: '$9.99', 
+    price: '$9.99',
     description: 'Perfect for 6 courses per semester',
     credits: 50,
-    features: [
-      '50 credits',
-      'Priority email support',
-    ],
+    features: ['50 credits', 'Priority email support'],
     bestDeal: true,
   },
   {
@@ -37,7 +57,7 @@ export const TIERS = [
       'Advanced analytics dashboard',
       'Custom LMS integrations',
       'Priority 24/7 support',
-      'Contact bmuzuraimov@gmail.com'
+      'Contact bmuzuraimov@gmail.com',
     ],
     bestDeal: false,
   },
@@ -65,7 +85,7 @@ export const COURSE_IMAGES = [
 export const FREE_TOKENS = 50000;
 
 export const EXERCISE_LEVELS = {
-  'Auto': 'Auto',
+  Auto: 'Auto',
   'Beginner Level': 'Beginner Level',
   'Intermediate Level': 'Intermediate Level',
   'Advanced Level': 'Advanced Level',
@@ -73,15 +93,12 @@ export const EXERCISE_LEVELS = {
   'Master Level': 'Master Level',
 };
 
-export const AVAILABLE_MODELS = [
-  'gpt-4o-mini',
-  'gpt-4o',
-];
+export const AVAILABLE_MODELS = ['gpt-4o-mini', 'gpt-4o'];
 export const EXERCISE_LENGTHS = {
-  'Auto': 'Auto',
+  Auto: 'Auto',
   '200 words (important)': 'Short (~200 words)',
   '400 words (important)': 'Medium (~400 words)',
-  '600 words (important)': 'Detailed (~600 words)', 
+  '600 words (important)': 'Detailed (~600 words)',
   '800 words (important)': 'Long (~800 words)',
   '1000 words (important)': 'Very Long (~1000 words)',
 };
@@ -93,15 +110,15 @@ export const PLAYBACK_SPEEDS = {
   400: '150 WPM',
   600: '100 WPM',
   800: '75 WPM',
-  1000: '60 WPM'
+  1000: '60 WPM',
 };
 
-export const TRACKING_MAP: Record<typeof TEXT_SIZES[number], string> = {
-  'xs': 'tracking-tight',
-  'sm': 'tracking-tight',
-  'base': 'tracking-normal',
-  'lg': 'tracking-normal',
-  'xl': 'tracking-normal',
+export const TRACKING_MAP: Record<(typeof TEXT_SIZES)[number], string> = {
+  xs: 'tracking-tight',
+  sm: 'tracking-tight',
+  base: 'tracking-normal',
+  lg: 'tracking-normal',
+  xl: 'tracking-normal',
   '2xl': 'tracking-normal',
   '3xl': 'tracking-wide',
   '4xl': 'tracking-wider',
@@ -109,15 +126,15 @@ export const TRACKING_MAP: Record<typeof TEXT_SIZES[number], string> = {
   '6xl': 'tracking-[0.15em]',
   '7xl': 'tracking-[0.2em]',
   '8xl': 'tracking-[0.25em]',
-  '9xl': 'tracking-[0.3em]'
+  '9xl': 'tracking-[0.3em]',
 };
 
-export const BORDER_MAP: Record<typeof TEXT_SIZES[number], string> = {
-  'xs': 'border-b-[1px]',
-  'sm': 'border-b-2',
-  'base': 'border-b-2',
-  'lg': 'border-b-3',
-  'xl': 'border-b-3',
+export const BORDER_MAP: Record<(typeof TEXT_SIZES)[number], string> = {
+  xs: 'border-b-[1px]',
+  sm: 'border-b-2',
+  base: 'border-b-2',
+  lg: 'border-b-3',
+  xl: 'border-b-3',
   '2xl': 'border-b-4',
   '3xl': 'border-b-[5px]',
   '4xl': 'border-b-[6px]',
@@ -125,5 +142,5 @@ export const BORDER_MAP: Record<typeof TEXT_SIZES[number], string> = {
   '6xl': 'border-b-[8px]',
   '7xl': 'border-b-[9px]',
   '8xl': 'border-b-[10px]',
-  '9xl': 'border-b-[11px]'
+  '9xl': 'border-b-[11px]',
 };

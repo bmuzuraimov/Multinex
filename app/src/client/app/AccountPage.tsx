@@ -1,10 +1,15 @@
-import { Link } from 'wasp/client/router';
-import { type User } from 'wasp/entities';
-import { logout } from 'wasp/client/auth';
-import { FiLogOut, FiLock, FiUser, FiMail, FiShoppingBag, FiBell } from 'react-icons/fi';
-import { Switch } from '@headlessui/react';
-import { useState } from 'react';
+import { Link } from 'wasp/client/router'
+import { type User } from 'wasp/entities'
+import { logout } from 'wasp/client/auth'
+import { FiLogOut, FiLock, FiUser, FiMail, FiShoppingBag, FiBell, FiEdit } from 'react-icons/fi'
+import { Switch } from '@headlessui/react'
+import { useState, useEffect } from 'react'
+import { useQuery, updatePrompt, getPrompt } from 'wasp/client/operations'
+import { useRevalidator } from 'react-router-dom'
 
+// ------------------------------------------------------------------
+// MAIN ACCOUNT PAGE
+// ------------------------------------------------------------------
 export default function AccountPage({ user }: { user: User }) {
   return (
     <div className='mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8'>
@@ -12,7 +17,9 @@ export default function AccountPage({ user }: { user: User }) {
         {/* Account Header */}
         <div className='flex items-center justify-between pb-8 border-b border-gray-200 dark:border-gray-700'>
           <div>
-            <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>Account Settings</h1>
+            <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
+              Account Settings
+            </h1>
             <p className='mt-2 text-sm text-gray-500 dark:text-gray-400'>
               Manage your Typit account and security preferences
             </p>
@@ -26,68 +33,52 @@ export default function AccountPage({ user }: { user: User }) {
           </button>
         </div>
 
-        {/* Main Content Grid */}
+        {/* MAIN WRAPPER: 2-column grid for top sections */}
         <div className='grid gap-8 lg:grid-cols-3'>
-          {/* Account Details Card */}
+          {/* LEFT: Profile Information */}
           <div className='lg:col-span-2 space-y-6'>
             <section className='bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700'>
               <div className='flex items-center gap-3 mb-6'>
                 <FiUser className='w-6 h-6 text-teal-600 dark:text-teal-400' />
-                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>Profile Information</h2>
+                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+                  Profile Information
+                </h2>
               </div>
-              
-              <dl className='space-y-4 divide-y divide-gray-100 dark:divide-gray-700'>
+              <dl className='space-y-6 divide-y divide-gray-100 dark:divide-gray-700'>
                 <InfoRow label='Email' value={user.email} icon={<FiMail />} />
                 <InfoRow label='Username' value={user.username} icon={<FiUser />} />
                 <TokenBalance credits={user.credits} />
               </dl>
             </section>
-
-            {/* Security Card */}
-            <section className='bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700'>
-              <div className='flex items-center gap-3 mb-6'>
-                <FiLock className='w-6 h-6 text-teal-600 dark:text-teal-400' />
-                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>Security</h2>
-              </div>
-
-              <div className='space-y-4'>
-                <SecurityItem
-                  title='Two-Factor Authentication'
-                  description='Add an extra layer of security to your account'
-                  action={<SwitchButton />}
-                />
-                <SecurityItem
-                  title='Active Sessions'
-                  description='3 devices currently signed in'
-                  action={
-                    <button className='text-sm font-medium text-teal-600 dark:text-teal-400 hover:underline'>
-                      Manage Sessions
-                    </button>
-                  }
-                />
-              </div>
-            </section>
           </div>
 
-          {/* Preferences Sidebar */}
-          <div className='lg:col-span-1'>
+          {/* RIGHT: Preferences & Security */}
+          <div className='space-y-6'>
+            {/* Preferences */}
             <section className='bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700'>
               <div className='flex items-center gap-3 mb-6'>
                 <FiBell className='w-6 h-6 text-teal-600 dark:text-teal-400' />
-                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>Preferences</h2>
+                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+                  Preferences
+                </h2>
               </div>
-
               <div className='space-y-4'>
                 <div className='flex items-center justify-between'>
                   <div>
-                    <h3 className='text-sm font-medium text-gray-900 dark:text-white'>Email Notifications</h3>
-                    <p className='text-sm text-gray-500 dark:text-gray-400'>Product updates and newsletters</p>
+                    <h3 className='text-sm font-medium text-gray-900 dark:text-white'>
+                      Email Notifications
+                    </h3>
+                    <p className='text-sm text-gray-500 dark:text-gray-400'>
+                      Product updates and newsletters
+                    </p>
                   </div>
                   <Switch
                     checked={user.sendEmail}
                     onChange={() => {}}
                     className={`${
-                      user.sendEmail ? 'bg-teal-600' : 'bg-gray-200 dark:bg-gray-600'
+                      user.sendEmail
+                        ? 'bg-teal-600'
+                        : 'bg-gray-200 dark:bg-gray-600'
                     } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
                   >
                     <span
@@ -99,27 +90,196 @@ export default function AccountPage({ user }: { user: User }) {
                 </div>
               </div>
             </section>
+
+            {/* @Baiel aka moshete zdes sami pomestit security section, у меня не очень получилось */}
+            {/* Security
+            <section className='bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700'>
+              <div className='flex items-center gap-3 mb-4'>
+                <FiBell className='w-6 h-6 text-teal-600 dark:text-teal-400' />
+                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+                  Security
+                </h2>
+              </div>
+
+              <div>
+                <div className='flex items-center justify-between'>
+                  <div>
+                    <SecurityItem
+                      title='Two-Factor Authentication'
+                      description='Add an extra layer of security to your account'
+                      action={<SwitchButton />}
+                    />
+                    <SecurityItem
+                      title='Active Sessions'
+                      description='3 devices currently signed in'
+                      action={
+                        <button className='text-sm font-medium text-teal-600 dark:text-teal-400 hover:underline'>
+                          Manage Sessions
+                        </button>
+                      }
+                    />
+                  </div>
+                  <Switch
+                    checked={user.sendEmail}
+                    onChange={() => {}}
+                    className={${
+                      user.sendEmail
+                        ? 'bg-teal-600'
+                        : 'bg-gray-200 dark:bg-gray-600'
+                    } relative inline-flex h-6 w-1 items-center rounded-full transition-colors}
+                  >
+                    <span
+                      className={${
+                        user.sendEmail ? 'translate-x-6' : 'translate-x-1'
+                      } inline-block h-4 w-4 transform rounded-full bg-white transition-transform}
+                    />
+                  </Switch>
+                </div>
+              </div>
+            </section> */}
           </div>
+        </div>
+
+        {/* BOTTOM FULL-WIDTH ROW: Prompt Customization */}
+        <div className='space-y-6'>
+          <PromptCustomizationCard user={user} />
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-function InfoRow({ label, value, icon }: { label: string; value?: string | null; icon: React.ReactNode }) {
-  if (!value) return null;
-  
+// ------------------------------------------------------------------
+// PROMPT CUSTOMIZATION CARD
+// ------------------------------------------------------------------
+function PromptCustomizationCard({ user }: { user: User }) {
+  // Query the existing user prompt from the backend
+  const { data: promptData, isLoading, error } = useQuery(getPrompt)
+  const [prePrompt, setPrePrompt] = useState('')
+  const [postPrompt, setPostPrompt] = useState('')
+
+  useEffect(() => {
+    if (promptData) {
+      // Fill up local state from DB
+      setPrePrompt(promptData.pre_prompt || '')
+      setPostPrompt(promptData.post_prompt || '')
+    }
+  }, [promptData])
+
+  // Save changes to backend
+  const handleSave = async () => {
+    try {
+      await updatePrompt({
+        id: Number(user.id),
+        data: {
+          userId: String(user.id),
+          pre_prompt: prePrompt,
+          post_prompt: postPrompt,
+        },
+      })
+      alert('Prompt settings saved!')
+    } catch (err) {
+      alert('Failed to save prompt settings. See console for more info.')
+      console.error(err)
+    }
+  }
+
+  if (isLoading) {
+    return <div>Loading prompt data...</div>
+  }
+  if (error) {
+    return <div>Error loading prompt data!</div>
+  }
+
+  return (
+    <section className='bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700'>
+      <div className='flex items-center gap-3 mb-6'>
+        <FiEdit className='w-6 h-6 text-teal-600 dark:text-teal-400' />
+        <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+          Prompt Customization
+        </h2>
+      </div>
+      <div className='space-y-6'>
+        {/* Pre‐Prompt */}
+        <div>
+          <label
+            htmlFor='prePrompt'
+            className='block text-sm font-medium text-gray-700 dark:text-gray-300'
+          >
+            Pre‐Prompt
+          </label>
+          <textarea
+            id='prePrompt'
+            className='mt-1 block w-full p-2 text-sm border border-gray-300 dark:border-gray-700 
+                       rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white'
+            rows={5}
+            value={prePrompt}
+            onChange={(e) => setPrePrompt(e.target.value)}
+          />
+          <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
+            Content prepended to the final prompt (prefix).
+          </p>
+        </div>
+
+        {/* Post‐Prompt */}
+        <div>
+          <label
+            htmlFor='postPrompt'
+            className='block text-sm font-medium text-gray-700 dark:text-gray-300'
+          >
+            Post‐Prompt
+          </label>
+          <textarea
+            id='postPrompt'
+            className='mt-1 block w-full p-2 text-sm border border-gray-300 dark:border-gray-700
+                       rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white'
+            rows={5}
+            value={postPrompt}
+            onChange={(e) => setPostPrompt(e.target.value)}
+          />
+          <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
+            Content appended after the main body (suffix).
+          </p>
+        </div>
+
+        {/* Save Button */}
+        <button
+          onClick={handleSave}
+          className='inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors'
+        >
+          Save Prompt
+        </button>
+      </div>
+    </section>
+  )
+}
+
+// ------------------------------------------------------------------
+// HELPER COMPONENTS
+// ------------------------------------------------------------------
+function InfoRow({
+  label,
+  value,
+  icon
+}: {
+  label: string
+  value?: string | null
+  icon: React.ReactNode
+}) {
+  if (!value) return null
   return (
     <div className='pt-4 first:pt-0'>
       <div className='flex items-center gap-3'>
         <span className='text-gray-400 dark:text-gray-500'>{icon}</span>
         <div className='flex-1'>
-          <dt className='text-sm font-medium text-gray-500 dark:text-gray-300'>{label}</dt>
+          <dt className='text-sm font-medium text-gray-500 dark:text-gray-300'>
+            {label}
+          </dt>
           <dd className='mt-1 text-sm text-gray-900 dark:text-white'>{value}</dd>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function TokenBalance({ credits }: { credits: number }) {
@@ -144,7 +304,7 @@ function TokenBalance({ credits }: { credits: number }) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function CustomerPortalButton() {
@@ -156,28 +316,33 @@ function CustomerPortalButton() {
       <FiShoppingBag className='w-4 h-4' />
       Add credits
     </Link>
-  );
+  )
 }
 
-function SecurityItem({ title, description, action }: { 
-  title: string;
-  description: string;
-  action: React.ReactNode;
+function SecurityItem({
+  title,
+  description,
+  action
+}: {
+  title: string
+  description: string
+  action: React.ReactNode
 }) {
   return (
     <div className='flex items-center justify-between pt-4 first:pt-0'>
       <div>
-        <h3 className='text-sm font-medium text-gray-900 dark:text-white'>{title}</h3>
+        <h3 className='text-sm font-medium text-gray-900 dark:text-white'>
+          {title}
+        </h3>
         <p className='text-sm text-gray-500 dark:text-gray-400'>{description}</p>
       </div>
       {action}
     </div>
-  );
+  )
 }
 
 function SwitchButton() {
-  const [enabled, setEnabled] = useState(false);
-
+  const [enabled, setEnabled] = useState(false)
   return (
     <Switch
       checked={enabled}
@@ -192,5 +357,5 @@ function SwitchButton() {
         } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
       />
     </Switch>
-  );
+  )
 }

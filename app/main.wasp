@@ -227,6 +227,11 @@ action createFeedback {
   entities: [Feedback]
 }
 
+action updatePrompt {
+  fn: import { updatePrompt } from "@src/server/actions/prompt.js",
+  entities: [ExerciseGeneratePrompt]
+}
+
 action createOnboarding {
   fn: import { createOnboarding } from "@src/server/actions/onboarding.js",
   entities: [Onboarding]
@@ -289,7 +294,7 @@ action createExercise {
 
 action generateExercise {
   fn: import { generateExercise } from "@src/server/actions/exercises.js",
-  entities: [Exercise, Question, User]
+  entities: [Exercise, Question, User, ExerciseGeneratePrompt]
 }
 
 action shareExercise {
@@ -337,6 +342,11 @@ query getUploadURL {
 query getDownloadURL {
   fn: import { getDownloadURL } from "@src/server/queries/file.js",
   entities: [User]
+}
+
+query getPrompt {
+  fn: import { getPrompt } from "@src/server/queries/prompt.js",
+  entities: [ExerciseGeneratePrompt]
 }
 
 query getAllCourses {

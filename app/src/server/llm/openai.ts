@@ -36,7 +36,9 @@ export class OpenAIService {
     length: string,
     level: string,
     model: string,
-    maxTokens: number
+    maxTokens: number,
+    pre_prompt: string,
+    post_prompt: string
   ): Promise<OpenAIResponse> {
     return retry(async () => {
       try {
@@ -48,6 +50,8 @@ export class OpenAIService {
             priorKnowledge,
             length,
             level,
+            pre_prompt,
+            post_prompt,
           }),
           temperature: TEMPERATURE,
           max_tokens: maxTokens,
