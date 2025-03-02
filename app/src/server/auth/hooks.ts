@@ -1,5 +1,7 @@
 import type { OnAfterLoginHook, OnAfterSignupHook } from 'wasp/server/auth';
-import { duplicateS3Object } from '../utils/s3Utils';
+import { duplicateS3Object } from '../utils/s3Utils'; 
+import { emailSender } from 'wasp/server/email';
+import { welcomeEmail } from '../email-templates/auth';
 import { DEFAULT_PRE_PROMPT, DEFAULT_POST_PROMPT } from '../../shared/constants';
 
 export const onAfterSignup: OnAfterSignupHook = async ({ user, prisma }) => {
@@ -12,6 +14,23 @@ export const onAfterSignup: OnAfterSignupHook = async ({ user, prisma }) => {
     },
   });
   // Create a demo course for the user
+  // Create a demo course
+  if (user.email) {
+    const { text, html } = welcomeEmail({
+      userId: user.id,
+      userName: user.username || user.email,
+      userEmail: user.email,
+      loginLink: "https://typit.app/login" // Add your actual login URL here
+    });
+    
+    await emailSender.send({
+      to: user.email,
+      subject: 'Welcome to Typit!',
+      text,
+      html
+    });
+  }
+
   const course = await prisma.course.create({
     data: {
       id: `welcome-course-${user.id}`,
@@ -52,7 +71,7 @@ export const onAfterSignup: OnAfterSignupHook = async ({ user, prisma }) => {
 <type>- How it works: By identifying tasks that yield significant results with minimal effort, individuals can achieve quick wins that boost motivation and progress.</type>
 <type>- Why it matters: This approach helps in maximizing productivity by focusing on tasks that deliver the best return on investment in terms of time and effort.</type>
 
-<hear>5. Key Goals</hear>
+<hear>5. Key Goals</hear>a
 <type>- What it is: A defined, singular objective to achieve each day.</type>
 <type>- How it works: Each morning, individuals write down one primary goal that must be accomplished by the end of the day.</type>
 <type>- Why it matters: This focus simplifies decision-making and helps in prioritizing tasks, reducing the likelihood of distractions.</type>
@@ -63,7 +82,7 @@ export const onAfterSignup: OnAfterSignupHook = async ({ user, prisma }) => {
 <type>- Why it matters: Accountability enhances commitment to goals and often leads to higher levels of achievement through external motivation.</type>
 
 <hear>7. Workspace Optimization</hear>
-<type>- What it is: The arrangement and design of one’s work environment to enhance productivity.</type>
+<type>- What it is: The arrangement and design of one's work environment to enhance productivity.</type>
 <type>- How it works: By creating distinct zones for different activities (e.g., a quiet area for focused work and a creative space for brainstorming), individuals can tailor their environments to suit their tasks.</type>
 <type>- Why it matters: An optimized workspace reduces distractions and supports concentration, leading to improved work performance.</type>  
 <write>Formulas/Equations</write>  
