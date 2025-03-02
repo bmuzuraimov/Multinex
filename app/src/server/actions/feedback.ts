@@ -1,7 +1,7 @@
 import { HttpError } from 'wasp/server';
 import { type CreateFeedback } from 'wasp/server/operations';
 import { emailSender } from 'wasp/server/email';
-import feedbackTemplate from '../email-templates/feedback';
+import { feedbackTemplate } from '../email-templates/feedback';
 
 export const createFeedback: CreateFeedback<{
   message: string;
@@ -34,11 +34,23 @@ export const createFeedback: CreateFeedback<{
     },
   });
 
+  const feedbackEmail = await feedbackTemplate({
+    message: newFeedback.message,
+    email: newFeedback.email,
+    rating: newFeedback.rating,
+    usability: newFeedback.usability ?? undefined,
+    features: newFeedback.features ?? undefined,
+    improvements: newFeedback.improvements ?? undefined,
+    wouldRecommend: newFeedback.wouldRecommend,
+    experienceLevel: newFeedback.experienceLevel ?? undefined,
+    category: newFeedback.category,
+    browserInfo: newFeedback.browserInfo ?? '',
+  });
   await emailSender.send({
     to: process.env.ADMIN_EMAILS!,
-    subject: 'New Feedback from ' + context.user.email,
-    text: feedback.message,
-    html: feedbackTemplate(newFeedback),
+    subject: feedbackEmail.subject,
+    text: feedbackEmail.text,
+    html: feedbackEmail.html,
   });
 
   return newFeedback;
