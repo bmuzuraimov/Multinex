@@ -241,7 +241,7 @@ const kebabCase = (str: string): string => {
 
 // Common components that can be reused across templates
 export const components = {
-  button: (text: string, link: string, variant: 'primary' | 'secondary' = 'primary') => `
+  button: (text: string, link: string, variant: 'primary' | 'secondary' = 'primary') => text && link ? `
     <tr>
       <td align="center" style="padding: ${spacing.md} 0;">
         <!--[if mso]>
@@ -253,36 +253,36 @@ export const components = {
         <a href="${link}" style="${styleToString(variant === 'primary' ? styles.button : styles.secondaryButton)}">${text}</a>
       </td>
     </tr>
-  `,
-  heading: (text: string) => `
+  ` : '',
+  heading: (text: string) => text ? `
     <tr>
       <td style="${styleToString(styles.heading)}">${text}</td>
     </tr>
-  `,
-  subheading: (text: string) => `
+  ` : '',
+  subheading: (text: string) => text ? `
     <tr>
       <td style="${styleToString(styles.subheading)}">${text}</td>
     </tr>
-  `,
-  paragraph: (text: string) => `
+  ` : '',
+  paragraph: (text: string) => text ? `
     <tr>
       <td style="${styleToString(styles.text)}">${text}</td>
     </tr>
-  `,
-  bulletList: (items: string[]) => `
+  ` : '',
+  bulletList: (items: string[]) => items && items.length > 0 ? `
     <tr>
       <td style="${styleToString({ ...styles.text, paddingLeft: spacing.md })}">
         ${items.map(item => `<div style="margin-bottom: ${spacing.xs};">• ${item}</div>`).join('')}
       </td>
     </tr>
-  `,
-  card: (content: string) => `
+  ` : '',
+  card: (content: string) => content ? `
     <tr>
       <td style="${styleToString(styles.card)}">
         ${content}
       </td>
     </tr>
-  `,
+  ` : '',
   divider: () => `
     <tr>
       <td style="${styleToString(styles.divider)}"></td>
