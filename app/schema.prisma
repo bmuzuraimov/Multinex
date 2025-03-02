@@ -22,7 +22,7 @@ model User {
   tourCompleted       Boolean   @default(false)
   datePaid            DateTime?
   lang                String    @default("en")
-  tokens              Int       @default(30000)
+  credits              Int       @default(10)
 
   // Relations
   courses        Course[]

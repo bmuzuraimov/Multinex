@@ -78,7 +78,7 @@ const FormModal: React.FC<FormModalProps> = ({
                     Length of the Exercise
                   </label>
                   <select
-                    className='w-full p-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:border-teal-400 dark:hover:border-teal-500'
+                    className='w-full p-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-200 ease-in-out focus:outline-none focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:border-teal-400 dark:hover:border-teal-500'
                     value={exerciseSettings.exerciseLength}
                     onChange={(e) => exerciseSettings.setExerciseLength(e.target.value)}
                   >
@@ -93,7 +93,7 @@ const FormModal: React.FC<FormModalProps> = ({
                 <div className='space-y-2'>
                   <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>Exercise Level</label>
                   <select
-                    className='w-full p-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:border-teal-400 dark:hover:border-teal-500'
+                    className='w-full p-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-200 ease-in-out focus:outline-none focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:border-teal-400 dark:hover:border-teal-500'
                     value={exerciseSettings.exerciseLevel}
                     onChange={(e) => exerciseSettings.setExerciseLevel(e.target.value)}
                   >
@@ -115,7 +115,7 @@ const FormModal: React.FC<FormModalProps> = ({
                 {exerciseSettings.topics.map((topic) => (
                   <div 
                     key={topic}
-                    className="flex items-center"
+                    className="inline-block"
                   >
                     <input
                       type="checkbox"
@@ -131,11 +131,11 @@ const FormModal: React.FC<FormModalProps> = ({
                     />
                     <label
                       htmlFor={`topic-${topic}`}
-                      className={`px-3 py-2 rounded-md text-sm font-medium cursor-pointer
-                        transition-all duration-200 ease-in-out select-none
+                      className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium cursor-pointer
+                        transition-all duration-200 ease-in-out select-none shadow-sm hover:shadow
                         ${exerciseSettings.priorKnowledge.includes(topic)
-                          ? 'bg-teal-500 text-white hover:bg-teal-600'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                          ? 'bg-teal-500 text-white hover:bg-teal-600 ring-2 ring-teal-300'
+                          : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:border-gray-600'
                         }`}
                     >
                       {topic}
@@ -144,7 +144,7 @@ const FormModal: React.FC<FormModalProps> = ({
                 ))}
               </div>
             </div>
-
+            <div className="w-full border-t border-gray-200 dark:border-gray-700 my-4"></div>
             <div className='flex flex-col md:flex-row md:items-center md:justify-around space-y-4 md:space-y-0'>
               <button
                 onClick={() => advancedSettings.setIncludeSummary(!advancedSettings.includeSummary)}
@@ -193,7 +193,7 @@ const FormModal: React.FC<FormModalProps> = ({
                       </label>
                       <div className='h-[40px]'>
                         <select
-                          className='w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                          className='w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-teal-400 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                           value={advancedSettings.selectedModel}
                           onChange={(e) => advancedSettings.setSelectedModel(e.target.value)}
                         >

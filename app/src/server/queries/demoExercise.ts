@@ -31,7 +31,7 @@ type DemoExerciseResult = {
     score: number;
     model: string;
     userEvaluation: number | null;
-    userId: string;
+    userId: string | null;
     topicId: string | null;
     questions: Array<{
       id: string;
@@ -65,7 +65,7 @@ export const getDemoExercise: GetDemoExercise<
     screenResolution: string;
     timezone: string;
   },
-  DemoExerciseResult
+  DemoExerciseResult | null
 > = async (args, context) => {
   const result = await context.entities.DemoExercise.findFirst({
     where: {

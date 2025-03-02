@@ -39,7 +39,7 @@ export default function AccountPage({ user }: { user: User }) {
               <dl className='space-y-4 divide-y divide-gray-100 dark:divide-gray-700'>
                 <InfoRow label='Email' value={user.email} icon={<FiMail />} />
                 <InfoRow label='Username' value={user.username} icon={<FiUser />} />
-                <TokenBalance tokens={user.tokens} />
+                <TokenBalance credits={user.credits} />
               </dl>
             </section>
 
@@ -122,7 +122,7 @@ function InfoRow({ label, value, icon }: { label: string; value?: string | null;
   );
 }
 
-function TokenBalance({ tokens }: { tokens: number }) {
+function TokenBalance({ credits }: { credits: number }) {
   return (
     <div className='pt-4'>
       <div className='flex items-center gap-3'>
@@ -131,14 +131,14 @@ function TokenBalance({ tokens }: { tokens: number }) {
           <div className='flex items-center justify-between'>
             <div>
               <dt className='text-sm font-medium text-gray-500 dark:text-gray-300'>Token Balance</dt>
-              <dd className='mt-1 text-sm text-gray-900 dark:text-white'>{tokens} tokens remaining</dd>
+              <dd className='mt-1 text-sm text-gray-900 dark:text-white'>{credits} credits remaining</dd>
             </div>
             <CustomerPortalButton />
           </div>
           <div className='mt-3 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden'>
             <div 
               className='h-full bg-teal-600 dark:bg-teal-500' 
-              style={{ width: `${Math.min((tokens / 1000) * 100, 100)}%` }}
+              style={{ width: `${Math.min((credits / 100) * 100, 100)}%` }}
             />
           </div>
         </div>
@@ -154,7 +154,7 @@ function CustomerPortalButton() {
       className='inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors shadow-sm'
     >
       <FiShoppingBag className='w-4 h-4' />
-      Add Tokens
+      Add credits
     </Link>
   );
 }

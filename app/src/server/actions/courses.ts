@@ -134,7 +134,7 @@ export const generateCourse: GenerateCourse<
     const result = await OpenAIService.generateCourse(
       syllabusContent,
       OPENAI_MODEL,
-      Math.min(MAX_TOKENS, context.user.tokens)
+      MAX_TOKENS
     );
 
     if (!result.success) {
@@ -168,14 +168,14 @@ export const generateCourse: GenerateCourse<
     }
 
     // Deduct tokens from the user's account
-    const totalTokensUsed = result.usage || 0;
+    const totalCreditsUsed = result.usage || 0;
     await context.entities.User.update({
       where: {
         id: context.user.id,
       },
       data: {
-        tokens: {
-          decrement: Math.min(context.user.tokens, Math.floor(totalTokensUsed)),
+        credits: {
+          decrement: Math.min(context.user.credits, Math.floor(totalCreditsUsed)),
         },
       },
     });

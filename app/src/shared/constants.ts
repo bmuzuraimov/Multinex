@@ -1,10 +1,48 @@
 export const ADMIN_EMAIL = 'bmuzuraimov@gmail.com';
 
-export enum TierIds {
-  BASIC = 'BASIC',
-  PRO = 'PRO',
-  PREMIUM = 'PREMIUM',
-}
+export const TIERS = [
+  {
+    id: 'BASIC',
+    name: 'Pro Package',
+    price: '$7.99',
+    description: 'Perfect for 4 courses per semester',
+    credits: 30,
+    features: [
+      '30 credits',
+      'Basic email support',
+    ],
+    bestDeal: false,
+  },
+  {
+    id: 'PRO',
+    name: 'Premium Package',
+    price: '$9.99', 
+    description: 'Perfect for 6 courses per semester',
+    credits: 50,
+    features: [
+      '50 credits',
+      'Priority email support',
+    ],
+    bestDeal: true,
+  },
+  {
+    id: 'ENTERPRISE',
+    name: 'Enterprise',
+    price: 'Contact Sales',
+    description: 'Perfect for universities and educational institutions',
+    credits: 100,
+    features: [
+      'Enterprise-level course management',
+      'Student enrollment portal',
+      'Advanced analytics dashboard',
+      'Custom LMS integrations',
+      'Priority 24/7 support',
+      'Contact bmuzuraimov@gmail.com'
+    ],
+    bestDeal: false,
+  },
+];
+
 export const OPENAI_MODEL = 'gpt-4o-mini';
 export const MAX_TOKENS = 16383;
 export const TEMPERATURE = 0.7;
@@ -26,12 +64,6 @@ export const COURSE_IMAGES = [
 
 export const FREE_TOKENS = 50000;
 
-export enum TierTokens {
-  BASIC_TOKENS = 200000,
-  PRO_TOKENS = 350000,
-  PREMIUM_TOKENS = 700000,
-}
-
 export const EXERCISE_LEVELS = {
   'Auto': 'Auto',
   'Beginner Level': 'Beginner Level',
@@ -43,7 +75,6 @@ export const EXERCISE_LEVELS = {
 
 export const AVAILABLE_MODELS = [
   'gpt-4o-mini',
-  'o1-mini',
   'gpt-4o',
 ];
 export const EXERCISE_LENGTHS = {

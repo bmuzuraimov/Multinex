@@ -1,31 +1,9 @@
 import { encoding_for_model } from 'tiktoken';
 import { OPENAI_MODEL, MAX_TOKENS } from '../../shared/constants';
 import { emailSender } from 'wasp/server/email';
-import { HttpError } from 'wasp/server';
-import { CountTokens } from 'wasp/server/operations';
 
 
 const encoding = encoding_for_model(OPENAI_MODEL);
-
-export const countTokens: CountTokens<
-  { content: string; },
-  { tokens: number; sufficient: boolean }
-> = async ({ content }, context) => {
-  if (!context.user) {
-    throw new HttpError(401);
-  }
-
-  // Type Check and Logging
-  if (typeof content !== 'string') {
-    console.error('Invalid type for content:', typeof content);
-    throw new TypeError('Content must be a string.');
-  }
-  const required_tokens: number = encoding.encode(content).length;
-  return {
-    tokens: required_tokens,
-    sufficient: context.user.tokens >= required_tokens,
-  };
-};
 
 export const truncateText = (text: any) => {
   try {

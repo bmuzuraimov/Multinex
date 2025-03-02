@@ -115,7 +115,7 @@ export const faqs = [
   {
     id: 0,
     question: 'Do you provide free tier?',
-    answer: `Yes, we offer ${FREE_TOKENS} free tokens to get you started.`,
+    answer: `Yes, we offer ${FREE_TOKENS} free credits to get you started.`,
   },
   {
     id: 1,

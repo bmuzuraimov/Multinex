@@ -2,7 +2,7 @@ import { HttpError } from 'wasp/server';
 import Stripe from 'stripe';
 import type { StripePaymentResult } from '../../shared/types';
 import { fetchStripeCustomer, createStripeCheckoutSession } from '../payments/stripeUtils.js';
-import { TierIds } from '../../shared/constants.js';
+import { TIERS } from '../../shared/constants.js';
 import { type StripePayment } from 'wasp/server/operations';
 
 export const stripePayment: StripePayment<string, StripePaymentResult> = async (tier, context) => {
@@ -18,12 +18,12 @@ export const stripePayment: StripePayment<string, StripePaymentResult> = async (
   }
 
   let priceId;
-  if (tier === TierIds.BASIC) {
+  if (tier === TIERS.find(t => t.id === 'BASIC')?.id) {
     priceId = process.env.BASIC_PRICE_ID!;
-  } else if (tier === TierIds.PRO) {
+  } else if (tier === TIERS.find(t => t.id === 'PRO')?.id) {
     priceId = process.env.PRO_PRICE_ID!;
-  } else if (tier === TierIds.PREMIUM) {
-    priceId = process.env.PREMIUM_PRICE_ID!;
+  } else if (tier === TIERS.find(t => t.id === 'ENTERPRISE')?.id) {
+    priceId = process.env.ENTERPRISE_PRICE_ID!;
   } else {
     throw new HttpError(404, 'Invalid tier');
   }

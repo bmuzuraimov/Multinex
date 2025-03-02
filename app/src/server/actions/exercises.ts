@@ -9,10 +9,8 @@ import { HttpError } from 'wasp/server';
 import { Exercise } from 'wasp/entities';
 import { getS3DownloadUrl } from '../utils/s3Utils';
 import { OpenAIService } from '../llm/openai';
-import { TokenService } from '../llm/tokenService';
 import { truncateText, reportToAdmin, cleanMarkdown } from './utils';
-import { MAX_TOKENS, OPENAI_MODEL } from '../../shared/constants';
-import { TiktokenModel } from 'tiktoken';
+import { MAX_TOKENS } from '../../shared/constants';
 import { deleteS3Objects } from '../utils/s3Utils';
 
 // Create empty exercise
@@ -50,41 +48,66 @@ export const generateExercise: GenerateExercise<
     includeMCQuiz: boolean;
   },
   { success: boolean; message: string }
-> = async ({ exerciseId, priorKnowledge, length, level, model, includeSummary, includeMCQuiz }, context) => {
-  // Ensure the exercise exists
+> = async (
+  {
+    exerciseId,
+    priorKnowledge,
+    length,
+    level,
+    model,
+    includeSummary,
+    includeMCQuiz,
+  },
+  context
+) => {
+  // 1. Ensure user is logged in and has at least 1 credit
+  if (!context.user) {
+    throw new HttpError(401, 'Unauthorized');
+  }
+
+  if (context.user.credits < 1) {
+    return {
+      success: false,
+      message: 'Not enough credits. You need at least 1 credit to generate an exercise.',
+    };
+  }
+
+  // 2. Ensure the exercise exists
   const exercise = await context.entities.Exercise.findUnique({
     where: { id: exerciseId },
   });
   if (!exercise) {
     return { success: false, message: 'Exercise not found' };
   }
-  // Get the signed URL for the S3 file
-  let exerciseContentUrl = await getS3DownloadUrl({ key: exerciseId + '.txt' });
 
-  // Fetch the content using fetch API since readFile doesn't work with URLs
+  // 3. Download the raw content from S3
+  let exerciseContentUrl;
+  try {
+    exerciseContentUrl = await getS3DownloadUrl({ key: exerciseId + '.txt' });
+  } catch (error) {
+    console.error('Error getting S3 download URL:', error);
+    return { success: false, message: 'Failed to retrieve exercise content URL' };
+  }
+
   const response = await fetch(exerciseContentUrl);
   if (!response.ok) {
     return { success: false, message: 'Failed to download exercise content' };
   }
-  let exerciseText = await response.text();
+
+  // 4. Possibly truncate if too long
+  const exerciseText = await response.text();
   const { text: filtered_content, truncated } = truncateText(exerciseText);
 
-  // Calculate required tokens
-  const required_tokens = TokenService.calculateRequiredTokens(filtered_content, OPENAI_MODEL as TiktokenModel);
-
-  // Check if the user has enough tokens only if there is a user context
-  if (context.user) {
-    if (context.user.tokens < required_tokens) {
-      return {
-        success: false,
-        message: `The request requires approximately ${required_tokens} tokens, but you only have ${context.user.tokens} tokens. Please purchase more tokens.`,
-      };
-    }
-  }
-
+  // 5. Generate main exercise content
   let exerciseJson: any;
-  let exerciseJsonUsage = 0;
   try {
+    // Ensure priorKnowledge is an array
+    const priorKnowledgeArray = Array.isArray(priorKnowledge)
+      ? priorKnowledge
+      : typeof priorKnowledge === 'string'
+      ? [priorKnowledge]
+      : [];
+
     const exerciseResponse = await OpenAIService.generateExercise(
       filtered_content,
       priorKnowledge.join(','),
@@ -97,7 +120,6 @@ export const generateExercise: GenerateExercise<
       return { success: false, message: 'Error generating exercise content.' };
     }
     exerciseJson = exerciseResponse.data;
-    exerciseJsonUsage = exerciseResponse.usage || 0;
 
     // Update status to EXERCISE_GENERATED
     await context.entities.Exercise.update({
@@ -111,24 +133,36 @@ export const generateExercise: GenerateExercise<
 
   const lectureContent = cleanMarkdown(exerciseJson.lectureContent);
 
-  const complexityJson = await OpenAIService.generateComplexity(lectureContent, model, MAX_TOKENS);
-
-  if (complexityJson.success && complexityJson.data.taggedText) {
-    exerciseJson.taggedText = complexityJson.data.taggedText;
-
-    // Update status to EXERCISE_TAGGED
-    await context.entities.Exercise.update({
-      where: { id: exerciseId },
-      data: { status: 'EXERCISE_TAGGED' },
-    });
+  // 6. Generate complexity tags if you want
+  let complexityJson: any;
+  try {
+    const complexityResponse = await OpenAIService.generateComplexity(
+      lectureContent,
+      model,
+      MAX_TOKENS,
+    );
+    if (complexityResponse.success && complexityResponse.data?.taggedText) {
+      complexityJson = complexityResponse.data;
+      exerciseJson.taggedText = complexityJson.taggedText;
+      // Update status to EXERCISE_TAGGED
+      await context.entities.Exercise.update({
+        where: { id: exerciseId },
+        data: { status: 'EXERCISE_TAGGED' },
+      });
+    }
+  } catch (error) {
+    console.error('Failed to generate complexity tags:', error);
+    await reportToAdmin(`Failed to generate complexity tags: ${error}`);
   }
 
+  // 7. Optionally generate audio (if you have this service)
   const documentParserUrl = process.env.DOCUMENT_PARSER_URL;
   if (documentParserUrl) {
     // Generate audio
     const formData = new FormData();
     formData.append('exerciseId', exerciseId);
-    formData.append('generate_text', exerciseJson.taggedText);
+    formData.append('generate_text', exerciseJson.taggedText || lectureContent);
+
     const audioResponse = await fetch(`${documentParserUrl}/generate-audio`, {
       method: 'POST',
       body: formData,
@@ -137,18 +171,21 @@ export const generateExercise: GenerateExercise<
     if (!audioResponse.ok) {
       const errorData = await audioResponse.json();
       console.error('Failed to generate audio:', errorData);
-      await reportToAdmin(`Failed to generate audio: ${errorData.message}`);
+      const errorMessage = (errorData as { message?: string }).message || 'Unknown error';
+      await reportToAdmin(`Failed to generate audio: ${errorMessage}`);
     }
   }
 
   let summaryJson = null;
-  let summaryJsonUsage = 0;
   if (includeSummary) {
     try {
-      const summaryResponse = await OpenAIService.generateSummary(lectureContent, model, MAX_TOKENS);
+      const summaryResponse = await OpenAIService.generateSummary(
+        lectureContent,
+        model,
+        MAX_TOKENS
+      );
       if (summaryResponse.success && summaryResponse.data) {
         summaryJson = summaryResponse.data;
-        summaryJsonUsage = summaryResponse.usage || 0;
 
         // Update status to SUMMARY_GENERATED
         await context.entities.Exercise.update({
@@ -165,15 +202,11 @@ export const generateExercise: GenerateExercise<
   }
 
   let questions = null;
-  let questionsUsage = 0;
-  let questionsSuccess = false;
   if (includeMCQuiz) {
     try {
       const questionsResponse = await OpenAIService.generateQuestions(lectureContent, model, MAX_TOKENS);
       if (questionsResponse.success && questionsResponse.data) {
         questions = questionsResponse.data.questions;
-        questionsUsage = questionsResponse.usage || 0;
-        questionsSuccess = true;
 
         // Update status to QUESTIONS_GENERATED
         await context.entities.Exercise.update({
@@ -188,10 +221,7 @@ export const generateExercise: GenerateExercise<
       await reportToAdmin('Failed to generate questions after multiple attempts.');
     }
   }
-
-  // Aggregate token usage
-  const totalTokensUsed = exerciseJsonUsage + summaryJsonUsage + questionsUsage;
-
+  // 10. Update the exercise record
   try {
     await context.entities.Exercise.update({
       where: { id: exerciseId },
@@ -200,7 +230,7 @@ export const generateExercise: GenerateExercise<
         paragraphSummary: summaryJson?.paragraphSummary || '',
         level,
         truncated,
-        tokens: totalTokensUsed,
+        tokens: (exerciseJson?.tokens || 0) + (summaryJson?.tokens || 0) + (questions?.tokens || 0) + (complexityJson?.tokens || 0),
         model,
         no_words: lectureContent.split(' ').length || parseInt(length, 10),
         status: 'FINISHED',
@@ -212,24 +242,26 @@ export const generateExercise: GenerateExercise<
     return { success: false, message: 'Failed to update exercise. Please try again later.' };
   }
 
-  // Create questions if generated successfully
-  if (includeMCQuiz && questionsSuccess && questions) {
+  // 11. Create MC Questions if generated
+  if (questions && Array.isArray(questions)) {
     try {
       await Promise.all(
-        questions.map(async (question: { text: string; options: { text: string; isCorrect: boolean }[] }) => {
-          await context.entities.Question.create({
-            data: {
-              text: question.text,
-              exercise: { connect: { id: exerciseId } },
-              options: {
-                create: question.options.map((option) => ({
-                  text: option.text,
-                  isCorrect: option.isCorrect,
-                })),
+        questions.map(
+          async (question: { text: string; options: Array<{ text: string; isCorrect: boolean }> }) => {
+            await context.entities.Question.create({
+              data: {
+                text: question.text,
+                exercise: { connect: { id: exerciseId } },
+                options: {
+                  create: question.options.map((opt) => ({
+                    text: opt.text,
+                    isCorrect: opt.isCorrect,
+                  })),
+                },
               },
-            },
-          });
-        })
+            });
+          }
+        )
       );
     } catch (error: any) {
       await reportToAdmin(`Failed to create questions: ${error.message}`);
@@ -237,14 +269,15 @@ export const generateExercise: GenerateExercise<
     }
   }
 
-  // Deduct tokens from the user's account only if there is a user context
-  if (context.user) {
-    try {
-      await TokenService.deductTokens(context, totalTokensUsed);
-    } catch (error: any) {
-      await reportToAdmin(`Failed to deduct tokens: ${error.message}`);
-      console.error('Token Deduction Error:', error);
-    }
+  // 12. Deduct exactly 1 credit from the user
+  try {
+    await context.entities.User.update({
+      where: { id: context.user.id },
+      data: { credits: { decrement: 1 } },
+    });
+  } catch (err) {
+    await reportToAdmin(`Failed to deduct 1 credit from user: ${String(err)}`);
+    console.error('Credit deduction error:', err);
   }
 
   return { success: true, message: 'Exercise updated successfully' };
