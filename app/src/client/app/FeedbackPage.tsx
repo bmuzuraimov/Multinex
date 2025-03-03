@@ -11,7 +11,7 @@ const FeedbackPage: React.FC = () => {
         improvements: '',
         wouldRecommend: false,
         experienceLevel: '',
-        category: 'URGENT', // Changed default to URGENT
+        category: 'URGENT',
         browserInfo: ''
     });
     const [submitted, setSubmitted] = useState(false);
@@ -42,31 +42,31 @@ const FeedbackPage: React.FC = () => {
     };
 
     return (
-        <div className='min-h-screen flex items-center justify-center px-4'>
-            <div className='w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 md:p-12'>
-                <h2 className='text-3xl font-serif font-semibold text-gray-800 dark:text-white text-center tracking-wide'>We Value Your Feedback</h2>
-                <p className='mt-4 text-gray-600 dark:text-gray-300 text-center font-light leading-relaxed'>
+        <div className='min-h-screen bg-white flex items-center justify-center px-4 py-16'>
+            <div className='w-full max-w-4xl bg-white rounded-3xl shadow-xl border border-primary-100/20 p-12'>
+                <h2 className='text-title-xl font-manrope font-bold bg-gradient-to-r from-primary-600 to-secondary-500 bg-clip-text text-transparent text-center'>We Value Your Feedback</h2>
+                <p className='mt-6 text-lg font-montserrat text-primary-600/70 text-center'>
                     Your insights help us improve. We read and implement feedback quickly, so don't hesitate to share!
                 </p>
 
                 {submitted ? (
-                    <div className='mt-8 flex flex-col items-center p-6 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg'>
-                        <FiCheckCircle className='text-green-500 w-12 h-12' />
-                        <h3 className='mt-4 text-xl font-serif font-medium text-green-700 dark:text-green-300 tracking-wide'>Thank You!</h3>
-                        <p className='mt-2 text-center text-green-600 dark:text-green-400 font-light leading-relaxed'>
+                    <div className='mt-12 flex flex-col items-center p-8 bg-success/10 backdrop-blur-sm rounded-2xl'>
+                        <FiCheckCircle className='text-success w-16 h-16' />
+                        <h3 className='mt-6 text-title-md font-manrope font-bold text-success'>Thank You!</h3>
+                        <p className='mt-4 text-center text-success/80 font-montserrat'>
                             We'll review your feedback right away and implement necessary changes as soon as possible.
                         </p>
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit} className='mt-8 space-y-6'>
+                    <form onSubmit={handleSubmit} className='mt-12 space-y-8'>
                         <div>
-                            <label htmlFor='category' className='block text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide'>Priority Level</label>
+                            <label htmlFor='category' className='block text-sm font-montserrat font-medium text-primary-700'>Priority Level</label>
                             <select
                                 id='category'
                                 name='category'
                                 value={formData.category}
                                 onChange={handleChange}
-                                className='mt-1 w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:text-white font-light'
+                                className='mt-2 w-full px-4 py-3 bg-white border border-primary-200 rounded-xl focus:ring-2 focus:ring-secondary-300 focus:border-secondary-300 font-satoshi text-primary-800'
                             >
                                 <option value='URGENT'>Urgent - Needs Immediate Attention</option>
                                 <option value='BUG'>Critical Bug Report</option>
@@ -76,12 +76,12 @@ const FeedbackPage: React.FC = () => {
                         </div>
 
                         <div>
-                            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 tracking-wide'>How would you rate your experience?</label>
-                            <div className='flex gap-6 items-center justify-center bg-gray-50 dark:bg-gray-700 p-4 rounded-lg'>
+                            <label className='block text-sm font-montserrat font-medium text-primary-700 mb-4'>Rate Your Experience</label>
+                            <div className='flex gap-4 items-center justify-center bg-primary-50 p-6 rounded-xl'>
                                 {[1, 2, 3, 4, 5].map((value) => (
                                     <div 
                                         key={value} 
-                                        className={`flex flex-col items-center gap-2 cursor-pointer transition-all ${
+                                        className={`flex flex-col items-center gap-2 cursor-pointer transition-all duration-300 ${
                                             formData.rating === value 
                                                 ? 'transform scale-110' 
                                                 : 'hover:scale-105'
@@ -97,16 +97,16 @@ const FeedbackPage: React.FC = () => {
                                             onChange={handleChange}
                                             className='hidden'
                                         />
-                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
                                             formData.rating === value
-                                                ? 'bg-teal-500 text-white'
-                                                : 'bg-white dark:bg-gray-600 text-gray-600 dark:text-gray-300'
-                                        } border-2 border-teal-500 transition-colors font-medium`}>
+                                                ? 'bg-secondary-500 text-white shadow-lg'
+                                                : 'bg-white text-primary-600 shadow-md'
+                                        } border-2 border-secondary-200 transition-all duration-300 font-manrope font-bold`}>
                                             {value}
                                         </div>
                                         <label
                                             htmlFor={`rating-${value}`}
-                                            className='text-sm font-medium text-gray-600 dark:text-gray-300 tracking-wide'
+                                            className='text-sm font-montserrat text-primary-600'
                                         >
                                             {value === 1 ? 'Poor' : value === 5 ? 'Excellent' : ''}
                                         </label>
@@ -116,42 +116,42 @@ const FeedbackPage: React.FC = () => {
                         </div>
 
                         <div>
-                            <label htmlFor='message' className='block text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide'>Your Feedback</label>
+                            <label htmlFor='message' className='block text-sm font-montserrat font-medium text-primary-700'>Your Feedback</label>
                             <textarea
                                 id='message'
                                 name='message'
                                 value={formData.message}
                                 onChange={handleChange}
-                                placeholder='Share your thoughts - we read and act on feedback quickly!'
+                                placeholder='Share your thoughts with us...'
                                 rows={4}
-                                className='mt-1 w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:text-white resize-none font-light'
+                                className='mt-2 w-full px-4 py-3 bg-white border border-primary-200 rounded-xl focus:ring-2 focus:ring-secondary-300 focus:border-secondary-300 font-satoshi text-primary-800 resize-none'
                                 required
                             />
                         </div>
 
                         <div>
-                            <label htmlFor='usability' className='block text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide'>Usability Feedback</label>
+                            <label htmlFor='usability' className='block text-sm font-montserrat font-medium text-primary-700'>Usability Feedback</label>
                             <textarea
                                 id='usability'
                                 name='usability'
                                 value={formData.usability}
                                 onChange={handleChange}
-                                placeholder='How easy was it to use our app? Any difficulties encountered? We address issues promptly.'
+                                placeholder='How was your experience using our app?'
                                 rows={3}
-                                className='mt-1 w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:text-white resize-none font-light'
+                                className='mt-2 w-full px-4 py-3 bg-white border border-primary-200 rounded-xl focus:ring-2 focus:ring-secondary-300 focus:border-secondary-300 font-satoshi text-primary-800 resize-none'
                             />
                         </div>
 
                         <div>
-                            <label htmlFor='experienceLevel' className='block text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide'>Your Field of Study</label>
+                            <label htmlFor='experienceLevel' className='block text-sm font-montserrat font-medium text-primary-700'>Your Field of Study</label>
                             <select
                                 id='experienceLevel'
                                 name='experienceLevel'
                                 value={formData.experienceLevel}
                                 onChange={handleChange}
-                                className='mt-1 w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:text-white font-light'
+                                className='mt-2 w-full px-4 py-3 bg-white border border-primary-200 rounded-xl focus:ring-2 focus:ring-secondary-300 focus:border-secondary-300 font-satoshi text-primary-800'
                             >
-                                <option value=''>Select your field of study...</option>
+                                <option value=''>Select your field...</option>
                                 <option value='Business'>Business</option>
                                 <option value='STEM'>STEM</option>
                                 <option value='Arts'>Arts & Humanities</option>
@@ -160,26 +160,26 @@ const FeedbackPage: React.FC = () => {
                             </select>
                         </div>
 
-                        <div className='flex items-center'>
+                        <div className='flex items-center bg-primary-50 p-4 rounded-xl'>
                             <input
                                 type='checkbox'
                                 id='wouldRecommend'
                                 name='wouldRecommend'
                                 checked={formData.wouldRecommend}
                                 onChange={handleCheckboxChange}
-                                className='h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded'
+                                className='h-5 w-5 text-secondary-500 focus:ring-secondary-300 border-primary-200 rounded'
                             />
-                            <label htmlFor='wouldRecommend' className='ml-2 block text-sm text-gray-700 dark:text-gray-300 font-light'>
-                                Would you recommend this app to others?
+                            <label htmlFor='wouldRecommend' className='ml-3 text-sm font-montserrat text-primary-700'>
+                                Would you recommend our app to others?
                             </label>
                         </div>
 
                         <button
-                            disabled={submitted}
                             type='submit'
-                            className='w-full flex items-center justify-center px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 font-medium tracking-wide'
+                            disabled={submitted}
+                            className='w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-xl hover:from-primary-600 hover:to-secondary-600 focus:ring-2 focus:ring-secondary-300 transition-all duration-300 font-manrope font-medium text-lg'
                         >
-                            <FiSend className='mr-2 w-5 h-5' />
+                            <FiSend className='w-5 h-5' />
                             {submitted ? 'Thank You!' : 'Submit Feedback'}
                         </button>
                     </form>

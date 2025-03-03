@@ -46,8 +46,8 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
 
   return (
     <div
-      className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-102 overflow-hidden ${
-        isOwner ? 'border-2 border-teal-500 dark:border-teal-400' : 'border border-gray-100 dark:border-gray-700'
+      className={`relative bg-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-102 overflow-hidden ${
+        isOwner ? 'border border-primary-500' : 'border border-primary-100'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -57,10 +57,10 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
       </div>
       <div className='p-6 relative'>
         <div className='flex justify-between items-start mb-3'>
-          <h4 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>{course.name}</h4>
+          <h4 className='text-lg font-manrope font-semibold text-gray-900'>{course.name}</h4>
           {!isOwner && (
             <button
-              className={`p-2 rounded-full bg-white/90 dark:bg-gray-800/90 text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 transition-colors duration-200 backdrop-blur-sm ${
+              className={`p-2 rounded-full bg-white/90 text-secondary-500 hover:text-secondary-600 transition-colors duration-200 backdrop-blur-sm ${
                 isHovered ? 'opacity-100' : 'opacity-0'
               }`}
               onClick={handleEnroll}
@@ -71,13 +71,13 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
           )}
         </div>
         <div className='relative'>
-          <p className={`text-sm text-gray-600 dark:text-gray-400 ${isDescriptionExpanded ? '' : 'line-clamp-3'}`}>
+          <p className={`text-sm font-montserrat text-gray-600 ${isDescriptionExpanded ? '' : 'line-clamp-3'}`}>
             {course.description}
           </p>
           {course.description.length > 150 && (
             <button
               onClick={toggleDescription}
-              className='mt-1 text-sm font-medium text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors'
+              className='mt-1 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors'
             >
               {isDescriptionExpanded ? 'Show less' : 'Read more'}
             </button>
@@ -85,19 +85,19 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
         </div>
 
         <div className='mt-4 flex flex-col space-y-3'>
-          <div className='flex items-center justify-between text-sm text-gray-600 dark:text-gray-400'>
+          <div className='flex items-center justify-between text-sm text-gray-600'>
             <div className='flex items-center space-x-2'>
-              <HiOutlineBookOpen className='w-5 h-5' />
-              <span>{course.totalTopics} Topics</span>
+              <HiOutlineBookOpen className='w-5 h-5 text-secondary-400' />
+              <span className='font-satoshi'>{course.totalTopics} Topics</span>
             </div>
             <div className='flex items-center space-x-2'>
-              <HiOutlineAcademicCap className='w-5 h-5' />
-              <span>{course.totalExercises} Exercises</span>
+              <HiOutlineAcademicCap className='w-5 h-5 text-secondary-400' />
+              <span className='font-satoshi'>{course.totalExercises} Exercises</span>
             </div>
           </div>
 
-          <div className='pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center'>
-            <span className='text-xs text-gray-500 dark:text-gray-400'>
+          <div className='pt-3 border-t border-primary-100 flex justify-between items-center'>
+            <span className='text-xs font-satoshi text-gray-500'>
               Added{' '}
               {new Date(course.createdAt).toLocaleDateString(undefined, {
                 year: 'numeric',
@@ -105,7 +105,7 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
                 day: 'numeric',
               })}
             </span>
-            <span className='text-xs font-medium text-teal-600 dark:text-teal-400'>
+            <span className='text-xs font-medium text-primary-600'>
               {isOwner ? 'Your Course' : 'Free'}
             </span>
           </div>
@@ -139,7 +139,7 @@ const PublicCoursesPage = () => {
   if (isLoadingPublicCourses) {
     return (
       <div className='flex justify-center items-center min-h-screen'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white'></div>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600'></div>
       </div>
     );
   }
@@ -147,7 +147,7 @@ const PublicCoursesPage = () => {
   if (errorPublicCourses) {
     return (
       <div className='flex justify-center items-center min-h-screen'>
-        <div className='text-red-500'>Error loading courses. Please try again later.</div>
+        <div className='text-danger'>Error loading courses. Please try again later.</div>
       </div>
     );
   }
@@ -155,9 +155,9 @@ const PublicCoursesPage = () => {
   if (!publicCourses?.courses?.length) {
     return (
       <div className='flex flex-col justify-center items-center min-h-screen space-y-4'>
-        <HiOutlineBookOpen className='w-16 h-16 text-gray-400' />
-        <div className='text-gray-500 text-lg'>No public courses available yet</div>
-        <p className='text-gray-400 text-sm'>Check back later for new content</p>
+        <HiOutlineBookOpen className='w-16 h-16 text-primary-300' />
+        <div className='text-gray-500 text-lg font-manrope'>No public courses available yet</div>
+        <p className='text-gray-400 text-sm font-montserrat'>Check back later for new content</p>
       </div>
     );
   }
@@ -166,10 +166,10 @@ const PublicCoursesPage = () => {
     <div className='lg:mt-10 pb-10'>
       <div className='mx-auto max-w-7xl px-6 lg:px-8'>
         <div className='mx-auto max-w-4xl text-center'>
-          <h2 className='mt-2 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl'>
+          <h2 className='mt-2 text-title-xl font-bold font-manrope tracking-tight text-gray-900'>
             Community Courses
           </h2>
-          <p className='mt-4 text-lg text-gray-600 dark:text-gray-400'>
+          <p className='mt-4 text-lg font-montserrat text-gray-600'>
             Explore and enroll in high-quality courses shared by the community. All courses are free to use.
           </p>
         </div>

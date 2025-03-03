@@ -40,7 +40,7 @@ const HeroSection: React.FC = () => {
             <p className='mt-6 mx-auto max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-300'>
               <span className='font-semibold text-teal-600 dark:text-teal-400'>Type key concepts</span> →{' '}
               <span className='font-semibold text-red-600 dark:text-red-400'>Handwrite connections</span> →{' '}
-              <span className='font-semibold text-blue-600 dark:text-blue-400'>Hear explanations</span>.
+              <span className='font-semibold text-blue-600 dark:text-blue-400'>Listen explanations</span>.
             </p>
             <ExerciseForm topicId={null} demo={demoMode} />
             {!user && !isLoading && (

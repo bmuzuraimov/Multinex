@@ -1,4 +1,4 @@
-import { RETRIES, DELAY_MS } from '../../shared/constants';
+import { RETRIES, DELAY_MS } from '../../../shared/constants';
 export async function retry<T>(fn: () => Promise<T>, retries: number = RETRIES, delayMs: number = DELAY_MS): Promise<T> {
   try {
     return await fn();

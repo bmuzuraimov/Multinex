@@ -12,21 +12,21 @@ import { useRevalidator } from 'react-router-dom'
 // ------------------------------------------------------------------
 export default function AccountPage({ user }: { user: User }) {
   return (
-    <div className='mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8'>
-      <div className='space-y-8'>
+    <div className='mx-auto max-w-7xl px-6 py-12 font-montserrat'>
+      <div className='space-y-10'>
         {/* Account Header */}
-        <div className='flex items-center justify-between pb-8 border-b border-gray-200 dark:border-gray-700'>
+        <div className='flex items-center justify-between pb-8 border-b border-primary-100'>
           <div>
-            <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
+            <h1 className='text-title-xl font-manrope font-bold text-primary-900'>
               Account Settings
             </h1>
-            <p className='mt-2 text-sm text-gray-500 dark:text-gray-400'>
+            <p className='mt-2 text-base text-primary-600 font-satoshi'>
               Manage your Typit account and security preferences
             </p>
           </div>
           <button
             onClick={logout}
-            className='flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors'
+            className='flex items-center gap-2 px-6 py-3 text-sm font-medium text-danger bg-white hover:bg-danger/5 rounded-xl transition-all duration-200 shadow-sm border border-danger/20'
           >
             <FiLogOut className='w-5 h-5' />
             Sign Out
@@ -36,15 +36,17 @@ export default function AccountPage({ user }: { user: User }) {
         {/* MAIN WRAPPER: 2-column grid for top sections */}
         <div className='grid gap-8 lg:grid-cols-3'>
           {/* LEFT: Profile Information */}
-          <div className='lg:col-span-2 space-y-6'>
-            <section className='bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700'>
-              <div className='flex items-center gap-3 mb-6'>
-                <FiUser className='w-6 h-6 text-teal-600 dark:text-teal-400' />
-                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+          <div className='lg:col-span-2 space-y-8'>
+            <section className='bg-white rounded-2xl p-8 shadow-lg border border-primary-100'>
+              <div className='flex items-center gap-4 mb-8'>
+                <div className='p-3 bg-primary-50 rounded-xl'>
+                  <FiUser className='w-6 h-6 text-primary-600' />
+                </div>
+                <h2 className='text-title-md font-manrope font-semibold text-primary-900'>
                   Profile Information
                 </h2>
               </div>
-              <dl className='space-y-6 divide-y divide-gray-100 dark:divide-gray-700'>
+              <dl className='space-y-6 divide-y divide-primary-100'>
                 <InfoRow label='Email' value={user.email} icon={<FiMail />} />
                 <InfoRow label='Username' value={user.username} icon={<FiUser />} />
                 <TokenBalance credits={user.credits} />
@@ -53,22 +55,24 @@ export default function AccountPage({ user }: { user: User }) {
           </div>
 
           {/* RIGHT: Preferences & Security */}
-          <div className='space-y-6'>
+          <div className='space-y-8'>
             {/* Preferences */}
-            <section className='bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700'>
-              <div className='flex items-center gap-3 mb-6'>
-                <FiBell className='w-6 h-6 text-teal-600 dark:text-teal-400' />
-                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+            <section className='bg-white rounded-2xl p-8 shadow-lg border border-primary-100'>
+              <div className='flex items-center gap-4 mb-8'>
+                <div className='p-3 bg-primary-50 rounded-xl'>
+                  <FiBell className='w-6 h-6 text-primary-600' />
+                </div>
+                <h2 className='text-title-md font-manrope font-semibold text-primary-900'>
                   Preferences
                 </h2>
               </div>
-              <div className='space-y-4'>
+              <div className='space-y-6'>
                 <div className='flex items-center justify-between'>
                   <div>
-                    <h3 className='text-sm font-medium text-gray-900 dark:text-white'>
+                    <h3 className='text-sm font-medium text-primary-900'>
                       Email Notifications
                     </h3>
-                    <p className='text-sm text-gray-500 dark:text-gray-400'>
+                    <p className='mt-1 text-sm text-primary-600'>
                       Product updates and newsletters
                     </p>
                   </div>
@@ -76,72 +80,23 @@ export default function AccountPage({ user }: { user: User }) {
                     checked={user.sendEmail}
                     onChange={() => {}}
                     className={`${
-                      user.sendEmail
-                        ? 'bg-teal-600'
-                        : 'bg-gray-200 dark:bg-gray-600'
-                    } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+                      user.sendEmail ? 'bg-primary-500' : 'bg-gray-200'
+                    } relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out`}
                   >
                     <span
                       className={`${
                         user.sendEmail ? 'translate-x-6' : 'translate-x-1'
-                      } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                      } inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out`}
                     />
                   </Switch>
                 </div>
               </div>
             </section>
-
-            {/* @Baiel aka moshete zdes sami pomestit security section, у меня не очень получилось */}
-            {/* Security
-            <section className='bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700'>
-              <div className='flex items-center gap-3 mb-4'>
-                <FiBell className='w-6 h-6 text-teal-600 dark:text-teal-400' />
-                <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
-                  Security
-                </h2>
-              </div>
-
-              <div>
-                <div className='flex items-center justify-between'>
-                  <div>
-                    <SecurityItem
-                      title='Two-Factor Authentication'
-                      description='Add an extra layer of security to your account'
-                      action={<SwitchButton />}
-                    />
-                    <SecurityItem
-                      title='Active Sessions'
-                      description='3 devices currently signed in'
-                      action={
-                        <button className='text-sm font-medium text-teal-600 dark:text-teal-400 hover:underline'>
-                          Manage Sessions
-                        </button>
-                      }
-                    />
-                  </div>
-                  <Switch
-                    checked={user.sendEmail}
-                    onChange={() => {}}
-                    className={${
-                      user.sendEmail
-                        ? 'bg-teal-600'
-                        : 'bg-gray-200 dark:bg-gray-600'
-                    } relative inline-flex h-6 w-1 items-center rounded-full transition-colors}
-                  >
-                    <span
-                      className={${
-                        user.sendEmail ? 'translate-x-6' : 'translate-x-1'
-                      } inline-block h-4 w-4 transform rounded-full bg-white transition-transform}
-                    />
-                  </Switch>
-                </div>
-              </div>
-            </section> */}
           </div>
         </div>
 
         {/* BOTTOM FULL-WIDTH ROW: Prompt Customization */}
-        <div className='space-y-6'>
+        <div className='space-y-8'>
           <PromptCustomizationCard user={user} />
         </div>
       </div>
@@ -153,20 +108,17 @@ export default function AccountPage({ user }: { user: User }) {
 // PROMPT CUSTOMIZATION CARD
 // ------------------------------------------------------------------
 function PromptCustomizationCard({ user }: { user: User }) {
-  // Query the existing user prompt from the backend
   const { data: promptData, isLoading, error } = useQuery(getPrompt)
   const [prePrompt, setPrePrompt] = useState('')
   const [postPrompt, setPostPrompt] = useState('')
 
   useEffect(() => {
     if (promptData) {
-      // Fill up local state from DB
       setPrePrompt(promptData.pre_prompt || '')
       setPostPrompt(promptData.post_prompt || '')
     }
   }, [promptData])
 
-  // Save changes to backend
   const handleSave = async () => {
     try {
       await updatePrompt({
@@ -184,39 +136,36 @@ function PromptCustomizationCard({ user }: { user: User }) {
     }
   }
 
-  if (isLoading) {
-    return <div>Loading prompt data...</div>
-  }
-  if (error) {
-    return <div>Error loading prompt data!</div>
-  }
+  if (isLoading) return <div className='text-primary-600'>Loading prompt data...</div>
+  if (error) return <div className='text-danger'>Error loading prompt data!</div>
 
   return (
-    <section className='bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700'>
-      <div className='flex items-center gap-3 mb-6'>
-        <FiEdit className='w-6 h-6 text-teal-600 dark:text-teal-400' />
-        <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+    <section className='bg-white rounded-2xl p-8 shadow-lg border border-primary-100'>
+      <div className='flex items-center gap-4 mb-8'>
+        <div className='p-3 bg-primary-50 rounded-xl'>
+          <FiEdit className='w-6 h-6 text-primary-600' />
+        </div>
+        <h2 className='text-title-md font-manrope font-semibold text-primary-900'>
           Prompt Customization
         </h2>
       </div>
-      <div className='space-y-6'>
+      <div className='space-y-8'>
         {/* Pre‐Prompt */}
         <div>
           <label
             htmlFor='prePrompt'
-            className='block text-sm font-medium text-gray-700 dark:text-gray-300'
+            className='block text-sm font-medium text-primary-900 mb-2'
           >
             Pre‐Prompt
           </label>
           <textarea
             id='prePrompt'
-            className='mt-1 block w-full p-2 text-sm border border-gray-300 dark:border-gray-700 
-                       rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white'
+            className='w-full p-4 text-sm border border-primary-200 rounded-xl bg-white text-primary-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200'
             rows={5}
             value={prePrompt}
             onChange={(e) => setPrePrompt(e.target.value)}
           />
-          <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
+          <p className='mt-2 text-xs text-primary-600'>
             Content prepended to the final prompt (prefix).
           </p>
         </div>
@@ -225,19 +174,18 @@ function PromptCustomizationCard({ user }: { user: User }) {
         <div>
           <label
             htmlFor='postPrompt'
-            className='block text-sm font-medium text-gray-700 dark:text-gray-300'
+            className='block text-sm font-medium text-primary-900 mb-2'
           >
             Post‐Prompt
           </label>
           <textarea
             id='postPrompt'
-            className='mt-1 block w-full p-2 text-sm border border-gray-300 dark:border-gray-700
-                       rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white'
+            className='w-full p-4 text-sm border border-primary-200 rounded-xl bg-white text-primary-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200'
             rows={5}
             value={postPrompt}
             onChange={(e) => setPostPrompt(e.target.value)}
           />
-          <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
+          <p className='mt-2 text-xs text-primary-600'>
             Content appended after the main body (suffix).
           </p>
         </div>
@@ -245,7 +193,7 @@ function PromptCustomizationCard({ user }: { user: User }) {
         {/* Save Button */}
         <button
           onClick={handleSave}
-          className='inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors'
+          className='inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-xl transition-colors duration-200 shadow-md'
         >
           Save Prompt
         </button>
@@ -268,14 +216,14 @@ function InfoRow({
 }) {
   if (!value) return null
   return (
-    <div className='pt-4 first:pt-0'>
-      <div className='flex items-center gap-3'>
-        <span className='text-gray-400 dark:text-gray-500'>{icon}</span>
+    <div className='pt-6 first:pt-0'>
+      <div className='flex items-center gap-4'>
+        <span className='p-2 bg-primary-50 rounded-lg text-primary-600'>{icon}</span>
         <div className='flex-1'>
-          <dt className='text-sm font-medium text-gray-500 dark:text-gray-300'>
+          <dt className='text-sm font-medium text-primary-600'>
             {label}
           </dt>
-          <dd className='mt-1 text-sm text-gray-900 dark:text-white'>{value}</dd>
+          <dd className='mt-1 text-sm text-primary-900'>{value}</dd>
         </div>
       </div>
     </div>
@@ -284,20 +232,22 @@ function InfoRow({
 
 function TokenBalance({ credits }: { credits: number }) {
   return (
-    <div className='pt-4'>
-      <div className='flex items-center gap-3'>
-        <FiShoppingBag className='w-5 h-5 text-gray-400 dark:text-gray-500' />
+    <div className='pt-6'>
+      <div className='flex items-center gap-4'>
+        <span className='p-2 bg-primary-50 rounded-lg'>
+          <FiShoppingBag className='w-5 h-5 text-primary-600' />
+        </span>
         <div className='flex-1'>
           <div className='flex items-center justify-between'>
             <div>
-              <dt className='text-sm font-medium text-gray-500 dark:text-gray-300'>Token Balance</dt>
-              <dd className='mt-1 text-sm text-gray-900 dark:text-white'>{credits} credits remaining</dd>
+              <dt className='text-sm font-medium text-primary-600'>Token Balance</dt>
+              <dd className='mt-1 text-sm text-primary-900'>{credits} credits remaining</dd>
             </div>
             <CustomerPortalButton />
           </div>
-          <div className='mt-3 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden'>
+          <div className='mt-4 h-2 bg-primary-100 rounded-full overflow-hidden'>
             <div 
-              className='h-full bg-teal-600 dark:bg-teal-500' 
+              className='h-full bg-primary-500 transition-all duration-300' 
               style={{ width: `${Math.min((credits / 100) * 100, 100)}%` }}
             />
           </div>
@@ -311,7 +261,7 @@ function CustomerPortalButton() {
   return (
     <Link
       to='/pricing'
-      className='inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors shadow-sm'
+      className='inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-xl transition-colors duration-200 shadow-sm'
     >
       <FiShoppingBag className='w-4 h-4' />
       Add credits
@@ -329,12 +279,12 @@ function SecurityItem({
   action: React.ReactNode
 }) {
   return (
-    <div className='flex items-center justify-between pt-4 first:pt-0'>
+    <div className='flex items-center justify-between pt-6 first:pt-0'>
       <div>
-        <h3 className='text-sm font-medium text-gray-900 dark:text-white'>
+        <h3 className='text-sm font-medium text-primary-900'>
           {title}
         </h3>
-        <p className='text-sm text-gray-500 dark:text-gray-400'>{description}</p>
+        <p className='text-sm text-primary-600'>{description}</p>
       </div>
       {action}
     </div>
@@ -348,13 +298,13 @@ function SwitchButton() {
       checked={enabled}
       onChange={setEnabled}
       className={`${
-        enabled ? 'bg-teal-600' : 'bg-gray-200 dark:bg-gray-600'
-      } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+        enabled ? 'bg-primary-500' : 'bg-gray-200'
+      } relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out`}
     >
       <span
         className={`${
           enabled ? 'translate-x-6' : 'translate-x-1'
-        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out`}
       />
     </Switch>
   )

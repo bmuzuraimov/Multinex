@@ -51,37 +51,37 @@ export const onAfterSignup: OnAfterSignupHook = async ({ user, prisma }) => {
               name: 'Organizing Your Day',
               lessonText: `<write>Key Concepts</write>
 
-<hear>1. Daily Structure</hear>
+<listen>1. Daily Structure</listen>
 <type>- What it is: A systematic approach to organizing tasks and time throughout the day.</type>
 <type>- How it works: By establishing a routine, individuals allocate specific blocks of time to different types of work (e.g., focused tasks in the morning, meetings in the afternoon).</type>
 <type>- Why it matters: A structured day promotes efficiency, reduces stress, and increases productivity by ensuring that time is used effectively.</type>
 
-<hear>2. Prioritization of Tasks</hear>
+<listen>2. Prioritization of Tasks</listen>
 <type>- What it is: The process of determining the most important tasks to focus on within a given timeframe.</type>
 <type>- How it works: Individuals maintain a backlog of tasks and select top priorities at the beginning of each day, completing high-priority tasks before moving on to less critical ones.</type>
 <type>- Why it matters: Prioritization helps in managing time effectively, ensuring that critical tasks that contribute to long-term goals are achieved first.</type>
  
-<hear>3. Self-Care</hear>
+<listen>3. Self-Care</listen>
 <type>- What it is: The practice of taking time for oneself to maintain mental and physical health.</type>
 <type>- How it works: Incorporating exercise and relaxation into the daily schedule allows for mental breaks and physical activity.</type>
 <type>- Why it matters: A balanced schedule that includes self-care enhances overall well-being, leading to improved focus and productivity.</type>
 
-<hear>4. Impact and Effort</hear>
+<listen>4. Impact and Effort</listen>
 <type>- What it is: A strategic approach to task management where one assesses the potential impact of tasks relative to the effort required to complete them.</type>
 <type>- How it works: By identifying tasks that yield significant results with minimal effort, individuals can achieve quick wins that boost motivation and progress.</type>
 <type>- Why it matters: This approach helps in maximizing productivity by focusing on tasks that deliver the best return on investment in terms of time and effort.</type>
 
-<hear>5. Key Goals</hear>a
+<listen>5. Key Goals</listen>a
 <type>- What it is: A defined, singular objective to achieve each day.</type>
 <type>- How it works: Each morning, individuals write down one primary goal that must be accomplished by the end of the day.</type>
 <type>- Why it matters: This focus simplifies decision-making and helps in prioritizing tasks, reducing the likelihood of distractions.</type>
 
-<hear>6. Accountability</hear>
+<listen>6. Accountability</listen>
 <type>- What it is: The practice of sharing goals and progress with others to maintain motivation.</type>
 <type>- How it works: Joining or creating accountability groups, such as study groups or professional networks, allows individuals to report on their tasks and receive support.</type>
 <type>- Why it matters: Accountability enhances commitment to goals and often leads to higher levels of achievement through external motivation.</type>
 
-<hear>7. Workspace Optimization</hear>
+<listen>7. Workspace Optimization</listen>
 <type>- What it is: The arrangement and design of one's work environment to enhance productivity.</type>
 <type>- How it works: By creating distinct zones for different activities (e.g., a quiet area for focused work and a creative space for brainstorming), individuals can tailor their environments to suit their tasks.</type>
 <type>- Why it matters: An optimized workspace reduces distractions and supports concentration, leading to improved work performance.</type>  
@@ -94,36 +94,36 @@ export const onAfterSignup: OnAfterSignupHook = async ({ user, prisma }) => {
 <type>- Effort Score = estimation of time/energy required to complete (scale of 1-10)</type>
 <type>- *Conditions for Validity*: Assumes accurate self-assessment of task characteristics.</type>
  
-<hear>Linking Concepts to Concrete Examples</hear>  
-<hear>1. Building a Daily Structure</hear>
+<listen>Linking Concepts to Concrete Examples</listen>  
+<listen>1. Building a Daily Structure</listen>
 <type>- Example: A student may designate Monday mornings for studying mathematics and Thursday afternoons for group projects.</type>
 <type>- Step-by-step:</type>
 <type>- Step 1: Create a weekly calendar.</type>
 <type>- Step 2: Allocate specific days/times for each subject or task.</type>
 <type>- Step 3: Review the plan at the end of the week and adjust as necessary.</type>
 
-<hear>2. Prioritization of Tasks</hear>
+<listen>2. Prioritization of Tasks</listen>
 <type>- Example: A project manager might have a list of tasks that includes preparing a presentation, responding to emails, and finalizing a budget report.</type>
 <type>- Step-by-step:</type>
 <type>- Step 1: List all tasks for the day.</type>
 <type>- Step 2: Rate each task based on impact and effort.</type>
 <type>- Step 3: Choose 2-3 tasks with the highest priority to complete first.</type>
 
-<hear>3. Impact and Effort</hear>
+<listen>3. Impact and Effort</listen>
 <type>- Example: A content writer identifies that writing a blog post has a higher impact with less effort compared to creating a video tutorial.</type>
 <type>- Step-by-step:</type>
 <type>- Step 1: List potential tasks for the week.</type>
 <type>- Step 2: Evaluate each task based on impact and effort.</type>
 <type>- Step 3: Focus on tasks with high impact and low effort for quick wins.</type>
 
-<hear>4. Accountability</hear>
+<listen>4. Accountability</listen>
 <type>- Example: A group of friends forms a study group where they meet weekly to discuss their learning goals and progress.</type>
 <type>- Step-by-step:</type>
 <type>- Step 1: Schedule regular meetings.</type>
 <type>- Step 2: Share individual goals and report on progress during meetings.</type>
 <type>- Step 3: Provide feedback and support to each other to stay accountable.</type>
 
-<hear>5. Workspace Optimization</hear>
+<listen>5. Workspace Optimization</listen>
 <type>- Example: A writer sets up a corner of their home with a desk for focused writing and a couch for brainstorming ideas.</type>
 <type>- Step-by-step:</type>
 <type>- Step 1: Identify different tasks that require different environments.</type>

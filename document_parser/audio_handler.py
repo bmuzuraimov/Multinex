@@ -17,7 +17,7 @@ class AudioHandler:
         self.bucket_name = os.environ.get('AWS_S3_FILES_BUCKET')
 
     def _filter_text(self, text: str) -> str:
-        filtered_text = re.findall(r'<hear>(.*?)</hear>', text)
+        filtered_text = re.findall(r'<listen>(.*?)</listen>', text)
         filtered_text = [re.sub(r'[^a-zA-Z0-9\s]', '', text).strip()
                         for text in filtered_text]
         filtered_text = '.\n'.join(filtered_text)

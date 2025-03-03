@@ -1,40 +1,3 @@
-export const lectureContentFormat: {
-  type: 'json_schema';
-  json_schema: {
-    name: string;
-    strict: boolean;
-    schema: {
-      type: string;
-      properties: {
-        lectureContent: {
-          type: string;
-          description: string;
-        };
-      };
-      required: string[];
-      additionalProperties: boolean;
-    };
-  };
-} = {
-  type: 'json_schema',
-  json_schema: {
-    name: 'lecture_content',
-    strict: true,
-    schema: {
-      type: 'object',
-      properties: {
-        lectureContent: {
-          type: 'string',
-          description:
-            'Structured and concise summary with all significant content, including programming-friendly formulas and logical formatting.',
-        },
-      },
-      required: ['lectureContent'],
-      additionalProperties: false,
-    },
-  },
-};
-
 export const summaryFormat: {
   type: 'json_schema';
   json_schema: {
@@ -195,7 +158,7 @@ export const complexityFormat: {
       "properties": {
         "taggedText": {
           "type": "string",
-          "description": "Text with complexity tags (<write></write>, <type></type>, <hear></hear>) added"
+          "description": "Text with complexity tags (<write></write>, <type></type>, <listen></listen>) added"
         }
       },
       "required": [

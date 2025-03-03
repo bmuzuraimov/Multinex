@@ -6,22 +6,22 @@ const ExerciseSidebar: React.FC = () => {
   const [showHintsModal, setShowHintsModal] = useState(false);
   
   return (
-    <div className='z-99 min-w-[230px] max-w-[400px] h-[calc(100vh-64px)] p-6 bg-white dark:bg-gray-800 border-r border-gray-200/50 dark:border-gray-700 flex flex-col'>
+    <div className='z-fixed min-w-xs max-w-sm h-[calc(100vh-64px)] p-6 bg-white border-r border-primary-100 flex flex-col font-montserrat'>
       <div className='flex-1 overflow-hidden flex flex-col'>
-        <h2 className='text-xl font-semibold text-gray-700 dark:text-gray-100 mb-6'>Summary</h2>
+        <h2 className='font-manrope text-title-sm font-semibold text-primary-900 mb-6'>Summary</h2>
         {summary.length > 0 ? (
-          <ul className='space-y-2 overflow-y-auto flex-1'>
+          <ul className='space-y-3 overflow-y-auto flex-1'>
             {summary.map((s, index) => (
               <li
                 key={index}
-                className='rounded-lg p-3 transition duration-200 ease-in-out shadow-sm bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                className='rounded-lg p-4 transition-all duration-200 ease-in-out shadow-sm bg-primary-50 text-primary-800 hover:bg-primary-100 hover:shadow-md'
               >
                 {s}
               </li>
             ))}
           </ul>
         ) : (
-          <div className='text-gray-400 dark:text-gray-500 text-sm font-normal leading-relaxed p-4'>
+          <div className='text-secondary-400 text-sm font-normal leading-relaxed p-4 bg-secondary-50 rounded-lg'>
             To enable paragraph summaries:
             <br />
             1. Before uploading
@@ -33,27 +33,27 @@ const ExerciseSidebar: React.FC = () => {
         )}
       </div>
 
-      <div className='flex-shrink-0 flex flex-col items-center gap-4 mt-6 border-t border-gray-200 dark:border-gray-700 pt-4'>
-        <div className='w-full p-3 rounded-lg'>
-          <div className='space-y-1'>
-            <div className='flex items-center gap-2'>
-              <span className='text-red-500'>■</span>
-              <span className='text-sm text-gray-600 dark:text-gray-300'>Write it down</span>
+      <div className='flex-shrink-0 flex flex-col items-center gap-4 mt-6 border-t border-primary-100 pt-6'>
+        <div className='w-full p-4 rounded-lg bg-primary-50'>
+          <div className='space-y-2.5'>
+            <div className='flex items-center gap-3'>
+              <span className='text-danger'>●</span>
+              <span className='text-sm text-primary-800 font-satoshi'>Write it down</span>
             </div>
-            <div className='flex items-center gap-2'>
-              <span className='text-green-500'>■</span>
-              <span className='text-sm text-gray-600 dark:text-gray-300'>Type it</span>
+            <div className='flex items-center gap-3'>
+              <span className='text-success'>●</span>
+              <span className='text-sm text-primary-800 font-satoshi'>Type it</span>
             </div>
-            <div className='flex items-center gap-2'>
-              <span className='text-blue-500'>■</span>
-              <span className='text-sm text-gray-600 dark:text-gray-300'>Listen to it</span>
+            <div className='flex items-center gap-3'>
+              <span className='text-secondary-500'>●</span>
+              <span className='text-sm text-primary-800 font-satoshi'>Listen to it</span>
             </div>
           </div>
         </div>
 
         <button 
           onClick={() => setShowHintsModal(true)}
-          className='flex items-center gap-2 text-sm text-teal-500 dark:text-teal-400 hover:text-teal-600 dark:hover:text-teal-300'
+          className='flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 transition-colors duration-200 font-satoshi'
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -62,23 +62,23 @@ const ExerciseSidebar: React.FC = () => {
         </button>
 
         {showHintsModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Hints</h3>
-              <ul className="space-y-3 text-gray-600 dark:text-gray-300">
-                <li className="flex items-center gap-2">
+          <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-modal backdrop-blur-sm">
+            <div className="bg-white p-6 rounded-xl max-w-md shadow-xl">
+              <h3 className="text-title-xsm font-manrope font-semibold text-primary-900 mb-4">Hints</h3>
+              <ul className="space-y-3 text-primary-800 font-satoshi">
+                <li className="flex items-center gap-3">
                   <span className="font-medium">Tab:</span> Autocomplete the current word
                 </li>
-                <li className="flex items-center gap-2">
+                <li className="flex items-center gap-3">
                   <span className="font-medium">Click Text:</span> Move cursor to clicked position
                 </li>
-                <li className="flex items-center gap-2">
+                <li className="flex items-center gap-3">
                   <span className="font-medium">Playback:</span> Read the text aloud
                 </li>
               </ul>
               <button
                 onClick={() => setShowHintsModal(false)}
-                className="mt-4 px-4 py-2 bg-teal-500 text-white rounded-lg text-sm font-medium hover:bg-teal-600"
+                className="mt-6 px-6 py-2.5 bg-primary-500 text-white rounded-lg text-sm font-medium hover:bg-primary-600 transition-colors duration-200 shadow-sm hover:shadow-md"
               >
                 Close
               </button>
@@ -86,16 +86,16 @@ const ExerciseSidebar: React.FC = () => {
           </div>
         )}
 
-        <div className='flex flex-col gap-y-2 items-center justify-between'>
+        <div className='flex flex-col gap-y-3 items-center justify-between w-full'>
           {hasQuiz && (
             <button
               onClick={() => setMode('test')}
-              className='px-4 py-2 bg-teal-500 text-white rounded-lg text-sm font-medium hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 focus:ring-opacity-50 transition-colors duration-200'
+              className='w-full px-6 py-2.5 bg-primary-500 text-white rounded-lg text-sm font-medium hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 transition-all duration-200 shadow-sm hover:shadow-md'
             >
               Take Test
             </button>
           )}
-          <span className='text-sm text-gray-500 dark:text-gray-400'>
+          <span className='text-sm text-secondary-400 font-satoshi'>
             Total words: {essayWordCount}
           </span>
         </div>

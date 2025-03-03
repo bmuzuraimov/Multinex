@@ -1,12 +1,12 @@
 type FormattedEssaySection = {
-  mode: 'hear' | 'type' | 'write';
+  mode: 'listen' | 'type' | 'write';
   text: string[];
 };
 
 export function preprocessEssay(rawEssay: string) {
   // Parse the essay into formatted sections
   // wrap newlines in <type> tags
-  const matches = Array.from(rawEssay.matchAll(/<(hear|write|type)>([\s\S]*?)<\/\1>/g));
+  const matches = Array.from(rawEssay.matchAll(/<(listen|write|type)>([\s\S]*?)<\/\1>/g));
   const formattedEssay = matches.map(match => {
     const [fullMatch, mode, content] = match;
     // Get the character immediately after the matched section.
@@ -27,8 +27,8 @@ export function preprocessEssay(rawEssay: string) {
         mode: 'type',
         text: chars
       };
-    } else if (mode === 'hear') {
-      // For hear sections, keep word-level granularity.
+    } else if (mode === 'listen') {
+      // For listen sections, keep word-level granularity.
       // Split the content by whitespace, filtering out empty strings.
       let words = content.split(/(\s+)/).filter(word => word !== '');
       if (endChar === '\n' || endChar === ' ') {
@@ -36,7 +36,7 @@ export function preprocessEssay(rawEssay: string) {
         words.push(endChar);
       }
       return {
-        mode: 'hear',
+        mode: 'listen',
         text: words
       };
     } else { // mode === 'write'

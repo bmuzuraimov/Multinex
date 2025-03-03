@@ -25,7 +25,7 @@ export class FeatureTrialFeedbackEmail extends BaseEmailTemplate {
     return `
 Hi ${userName},
 
-We noticed you recently tried out ${featureName}! We'd love to hear your thoughts—your feedback helps us improve.
+We noticed you recently tried out ${featureName}! We'd love to listen your thoughts—your feedback helps us improve.
 
 Did it work as expected? Anything we can do better? Let us know by sharing your feedback.
 
@@ -42,7 +42,7 @@ ${textUtils.generateSignature()}`;
       ${components.heading(`How Was Your Experience with ${featureName}?`)}
       ${components.paragraph(`Hi ${userName},`)}
       ${components.paragraph(
-        `We noticed you recently tried out <strong>${featureName}</strong>! We'd love to hear ` +
+        `We noticed you recently tried out <strong>${featureName}</strong>! We'd love to listen ` +
         'your thoughts—your feedback helps us improve.'
       )}
       ${components.paragraph(

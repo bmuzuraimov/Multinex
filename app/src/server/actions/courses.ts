@@ -2,7 +2,7 @@ import { type Course } from 'wasp/entities';
 import { HttpError } from 'wasp/server';
 import { type CreateCourse, type GenerateCourse, type UpdateCourse, type DeleteCourse, DuplicateCourse } from 'wasp/server/operations';
 import { OPENAI_MODEL, MAX_TOKENS } from '../../shared/constants';
-import { OpenAIService } from '../llm/openai';
+import { OpenAIService } from '../llm/models/openai';
 
 export const createCourse: CreateCourse<
   { name: string; description: string; image: string },

@@ -27,10 +27,10 @@ const UserTour: React.FC<UserTourProps> = ({ userId }) => {
     {
       target: 'body',
       content: (
-        <div className='text-center dark:text-white'>
-          <h2 className='text-2xl font-bold mb-2'>Welcome to Typit!</h2>
-          <p className='mb-4 dark:text-gray-400'>This quick tour will guide you through the platform's key features.</p>
-          <p className='text-gray-400'>
+        <div className='text-center font-montserrat'>
+          <h2 className='text-title-lg font-manrope font-bold mb-4 text-primary-900 dark:text-primary-100'>Welcome to Typit!</h2>
+          <p className='mb-4 text-gray-600 dark:text-gray-300'>This quick tour will guide you through the platform's key features.</p>
+          <p className='text-secondary-600 dark:text-secondary-300 font-satoshi'>
             Click <strong>Next</strong> to proceed.
           </p>
         </div>
@@ -78,7 +78,6 @@ const UserTour: React.FC<UserTourProps> = ({ userId }) => {
       setStepIndex(index + (action === 'next' ? 1 : -1));
     }
 
-    // Handle navigation based on step transitions
     if (action === 'next' && index === 2) {
       navigate(`/course/welcome-course-${userId}`, { replace: true });
     } else if (action === 'prev' && index === 3) {
@@ -92,6 +91,9 @@ const UserTour: React.FC<UserTourProps> = ({ userId }) => {
         await updateCurrentUser({
           tourCompleted: true,
         });
+        if(status === STATUS.FINISHED) {
+          navigate(`/exercise/welcome-exercise-${userId}`, { replace: true });
+        }
       } catch (error) {
         console.error('Error updating tour status:', error);
       }
@@ -119,36 +121,51 @@ const UserTour: React.FC<UserTourProps> = ({ userId }) => {
       }}
       styles={{
         options: {
-          arrowColor: colorMode === 'dark' ? '#333' : '#f0f4f8',
-          backgroundColor: colorMode === 'dark' ? '#141E30' : '#fff',
-          textColor: colorMode === 'dark' ? '#f0f4f8' : '#333',
+          arrowColor: colorMode === 'dark' ? '#141E30' : '#ffffff',
+          backgroundColor: colorMode === 'dark' ? '#141E30' : '#ffffff',
+          textColor: colorMode === 'dark' ? '#f0f4f8' : '#374151',
           width: 500,
-          zIndex: 9999,
-          primaryColor: colorMode === 'dark' ? '#008080' : '#000000',
+          zIndex: 50,
+          primaryColor: colorMode === 'dark' ? '#66efc9' : '#05c49b',
         },
         buttonNext: {
-          backgroundColor: colorMode === 'dark' ? '#008080' : 'black',
-          color: colorMode === 'dark' ? '#fff' : 'white',
-          padding: '8px 16px',
-          borderRadius: '4px',
+          backgroundColor: colorMode === 'dark' ? '#66efc9' : '#05c49b',
+          color: colorMode === 'dark' ? '#141E30' : '#ffffff',
+          padding: '0.75rem 1.5rem',
+          borderRadius: '0.5rem',
+          fontFamily: 'Satoshi, sans-serif',
+          fontSize: '0.875rem',
+          boxShadow: colorMode === 'dark' ? '0 4px 6px -1px rgba(0, 0, 0, 0.2)' : '0 1px 3px 0 rgb(0 0 0 / 0.1)'
         },
         buttonBack: {
-          color: colorMode === 'dark' ? '#f0f4f8' : '#000000',
-          marginRight: 10,
+          color: colorMode === 'dark' ? '#f0f4f8' : '#374151',
+          marginRight: 16,
+          fontFamily: 'Satoshi, sans-serif',
+          fontSize: '0.875rem'
         },
         buttonSkip: {
-          color: colorMode === 'dark' ? '#008080' : '#000000',
+          color: colorMode === 'dark' ? '#74b4ff' : '#134fff',
+          fontFamily: 'Satoshi, sans-serif',
+          fontSize: '0.875rem'
         },
         tooltip: {
-          borderRadius: '8px',
-          padding: '16px',
+          borderRadius: '1rem',
+          padding: '1.5rem',
+          boxShadow: colorMode === 'dark' 
+            ? '0 10px 15px -3px rgba(0, 0, 0, 0.3)' 
+            : '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+          fontFamily: 'Montserrat, sans-serif'
         },
         tooltipContent: {
-          padding: '10px 0',
+          padding: '0.75rem 0',
+          fontSize: '0.875rem',
+          lineHeight: '1.5'
         },
         tooltipFooter: {
-          marginTop: '10px',
-        },
+          marginTop: '1rem',
+          paddingTop: '1rem',
+          borderTop: colorMode === 'dark' ? '1px solid #2d3748' : '1px solid #e5e7eb'
+        }
       }}
     />
   );

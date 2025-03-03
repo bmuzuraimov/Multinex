@@ -8,7 +8,7 @@ import {
 import { HttpError } from 'wasp/server';
 import { Exercise } from 'wasp/entities';
 import { getS3DownloadUrl, deleteS3Objects } from '../utils/s3Utils';
-import { OpenAIService } from '../llm/openai';
+import { OpenAIService } from '../llm/models/openai';
 import { truncateText, reportToAdmin, cleanMarkdown } from './utils';
 import { MAX_TOKENS } from '../../shared/constants';
 import fetch from 'node-fetch';
@@ -80,8 +80,8 @@ export const generateExercise: GenerateExercise<
   }
 
   // 3. Possibly truncate if too long
-  const exerciseText = await response.text();
-  const { text: filtered_content, truncated } = truncateText(exerciseText);
+  const rawExerciseText = await response.text();
+  const { text: truncatedExerciseText, truncated } = truncateText(rawExerciseText);
 
   // Check if the user has enough tokens only if there is a user context
   if (context.user && context.user.credits < 1) {
@@ -91,7 +91,9 @@ export const generateExercise: GenerateExercise<
     };
   }
 
-  let exerciseJson: any;
+  let generatedExerciseText: string;
+  let generatedExerciseTokens: number;
+  let taggedExerciseText: string;
   try {
     // Ensure priorKnowledge is an array
     const priorKnowledgeArray = Array.isArray(priorKnowledge)
@@ -99,13 +101,13 @@ export const generateExercise: GenerateExercise<
       : typeof priorKnowledge === 'string'
         ? [priorKnowledge]
         : []; // Default to empty array if not a string or array
-    const exercisePrompt = context.user 
+    const exercisePrompt = context.user
       ? await context.entities.ExerciseGeneratePrompt.findFirst({
           where: { userId: context.user.id },
         })
       : null;
     const exerciseResponse = await OpenAIService.generateExercise(
-      filtered_content,
+      truncatedExerciseText,
       priorKnowledgeArray.join(','),
       length,
       level,
@@ -116,9 +118,10 @@ export const generateExercise: GenerateExercise<
     );
 
     if (!exerciseResponse.success || !exerciseResponse.data) {
-      return { success: false, message: 'Error generating exercise content.' };
+      return { success: false, message: `Error generating exercise content: ${exerciseResponse.message}` };
     }
-    exerciseJson = exerciseResponse.data;
+    generatedExerciseText = exerciseResponse.data;
+    generatedExerciseTokens = exerciseResponse.usage || 0;
 
     // Mark status
     await context.entities.Exercise.update({
@@ -131,7 +134,7 @@ export const generateExercise: GenerateExercise<
   }
 
   // Clean the main lecture content
-  const lectureContent = cleanMarkdown(exerciseJson.lectureContent);
+  const lectureContent = cleanMarkdown(generatedExerciseText);
 
   // 6. Generate complexity tags (where we REALLY use sensoryModes)
   let complexityJson: any;
@@ -153,9 +156,7 @@ export const generateExercise: GenerateExercise<
     // Not necessarily fatal; continue
   }
 
-  if (complexityJson?.taggedText) {
-    exerciseJson.taggedText = complexityJson.taggedText;
-  }
+  taggedExerciseText = complexityJson?.taggedText ? complexityJson.taggedText : '';
 
   // 7. Optionally generate audio
   const documentParserUrl = process.env.DOCUMENT_PARSER_URL;
@@ -163,7 +164,7 @@ export const generateExercise: GenerateExercise<
     try {
       const formData = new FormData();
       formData.append('exerciseId', exerciseId);
-      formData.append('generate_text', exerciseJson.taggedText || '');
+      formData.append('generate_text', taggedExerciseText || '');
       const audioResponse = await fetch(`${documentParserUrl}/generate-audio`, {
         method: 'POST',
         body: formData,
@@ -226,12 +227,12 @@ export const generateExercise: GenerateExercise<
     await context.entities.Exercise.update({
       where: { id: exerciseId },
       data: {
-        lessonText: exerciseJson.taggedText || '',
+        lessonText: taggedExerciseText || '',
         paragraphSummary: summaryJson?.paragraphSummary || '',
         level,
         truncated,
         tokens:
-          (exerciseJson?.tokens || 0) +
+          (generatedExerciseTokens || 0) +
           (summaryJson?.tokens || 0) +
           (questions?.tokens || 0) +
           (complexityJson?.tokens || 0),

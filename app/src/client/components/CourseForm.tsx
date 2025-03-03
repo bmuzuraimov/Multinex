@@ -28,21 +28,33 @@ const CourseForm: React.FC<CourseFormProps> = () => {
   }, [isCreating]);
 
   return (
-    <div
-      className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl transition-all duration-300 hover:shadow-2xl border-2 border-gray-100 dark:border-gray-700 overflow-hidden backdrop-blur-sm h-full`}
-    >
+    <div className="relative bg-white rounded-2xl transition-all duration-300 group overflow-hidden h-full">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-secondary-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      
+      <div className="absolute inset-0 border-2 border-dashed border-gray-200 group-hover:border-primary-300 rounded-2xl transition-colors duration-300"></div>
+
       {isCreating ? (
-        <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform text-6xl text-black dark:text-white'>
-          <Loading />
+        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 backdrop-blur-sm">
+          <div className="text-primary-600">
+            <Loading />
+          </div>
         </div>
       ) : (
-        <div className='flex flex-col h-full'>
-          <div
-            className='flex justify-center items-center h-full bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:bg-opacity-90'
-            onClick={handleCreateCourse}
-          >
-            <IoAddOutline className='text-4xl text-gray-600 dark:text-gray-300 mr-2 transition-transform duration-200 group-hover:rotate-90' />
-            <span className='text-gray-600 dark:text-gray-300 font-medium hover:text-gray-800 dark:hover:text-white transition-colors duration-200'>Create New Course</span>
+        <div 
+          onClick={handleCreateCourse}
+          className="relative flex flex-col items-center justify-center h-full p-8 cursor-pointer space-y-4"
+        >
+          <div className="p-4 rounded-full bg-primary-50 group-hover:bg-primary-100 transition-colors duration-300">
+            <IoAddOutline className="w-8 h-8 text-primary-600 group-hover:text-primary-700 transition-all duration-300 transform group-hover:rotate-90" />
+          </div>
+          
+          <div className="text-center">
+            <h3 className="font-satoshi font-medium text-title-sm text-gray-800 mb-2">
+              Create New Course
+            </h3>
+            <p className="font-montserrat text-sm text-gray-500">
+              Click to add a new learning journey
+            </p>
           </div>
         </div>
       )}

@@ -24,9 +24,9 @@ export default function AppNavBar() {
   const { data: user, isLoading: isUserLoading } = useAuth();
 
   return (
-    <header className="bg-white/80 dark:bg-gray-900/90 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-800/50 z-50">
+    <header className="bg-white sticky top-0 border-b border-gray-200 shadow-sm z-fixed">
       <nav
-        className="flex items-center justify-between p-4 lg:px-8 max-w-7xl mx-auto"
+        className="flex items-center justify-between p-4 lg:px-8 max-w-7xl mx-auto font-satoshi"
         aria-label="Global"
       >
         <div className="flex lg:flex-1">
@@ -40,13 +40,13 @@ export default function AppNavBar() {
               >
                 <path 
                   d="M20 10 L40 10 L30 30 Z" 
-                  className="fill-teal-500 dark:fill-teal-400 drop-shadow-[0_2px_8px_rgba(45,212,191,0.5)]"
+                  className="fill-primary-500 drop-shadow-[0_2px_8px_rgba(5,196,155,0.5)]"
                 />
                 <text 
                   x="45" 
                   y="28" 
-                  className="text-2xl font-bold fill-gray-800 dark:fill-white filter drop-shadow-md"
-                  style={{fontFamily: 'system-ui'}}
+                  className="text-2xl font-manrope font-bold fill-gray-800"
+                  style={{fontFamily: 'Manrope'}}
                 >
                   Typit
                 </text>
@@ -54,17 +54,17 @@ export default function AppNavBar() {
                   cx="30"
                   cy="20"
                   r="15"
-                  className="stroke-teal-500 dark:stroke-teal-400 stroke-[0.5] fill-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  className="stroke-primary-500 stroke-[0.5] fill-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 />
               </svg>
-              <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 to-blue-500 rounded-lg blur opacity-0 group-hover:opacity-20 transition duration-300"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg blur opacity-0 group-hover:opacity-20 transition duration-300"></div>
             </div>
           </Link>
         </div>
         <div className="flex lg:hidden">
           <button
             type="button"
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 transition-all duration-100"
+            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-600 hover:text-primary-600 transition-all duration-200"
             onClick={() => setMobileMenuOpen(true)}
           >
             <span className="sr-only">Open main menu</span>
@@ -76,19 +76,19 @@ export default function AppNavBar() {
             <Link
               key={item.name}
               to={item.href}
-              className="text-sm font-medium leading-6 text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition-all duration-100"
+              className="text-sm font-medium leading-6 text-gray-600 hover:text-primary-600 transition-all duration-200"
             >
               {item.name}
             </Link>
           ))}
         </div>
-        <div className="hidden lg:flex lg:flex-1 gap-4 justify-end items-center">
+        <div className="hidden lg:flex lg:flex-1 gap-6 justify-end items-center">
           <DarkModeSwitcher />
           {!isUserLoading && user && (
-            <div className="group relative flex items-center gap-1 text-sm font-medium leading-6 text-teal-600 dark:text-teal-400 transition-transform duration-100">
+            <div className="group relative flex items-center gap-2 text-sm font-medium leading-6 text-primary-600 bg-primary-50 px-3 py-1.5 rounded-full transition-all duration-200">
               <MdOutlineToken className="w-5 h-5 group-hover:rotate-180 transition-transform duration-300" />
               {user.credits}
-              <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-48 bg-gray-600 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none">
+              <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 w-48 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                 Used to generate exercises, MC quizzes and summaries
               </div>
             </div>
@@ -96,9 +96,9 @@ export default function AppNavBar() {
           {isUserLoading ? null : !user ? (
             <Link
               to='/login'
-              className="flex items-center text-gray-600 hover:text-teal-600 dark:text-gray-300 dark:hover:text-teal-400 transition-all duration-100"
+              className="flex items-center gap-1 text-gray-600 hover:text-primary-600 transition-all duration-200 font-medium"
             >
-              Log in <BiLogIn size="1.1rem" className="ml-1 mt-[0.1rem]" />
+              Log in <BiLogIn size="1.1rem" />
             </Link>
           ) : (
             <div className="ml-4">
@@ -113,8 +113,8 @@ export default function AppNavBar() {
         open={mobileMenuOpen}
         onClose={setMobileMenuOpen}
       >
-        <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm dark:bg-gray-900/80" />
-        <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white dark:bg-gray-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-gray-800 transform transition-transform duration-300">
+        <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm" />
+        <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 transform transition-transform duration-300">
           <div className="flex items-center justify-between">
             <Link to="/" className="-m-1.5 p-1.5">
               <span className="sr-only">Typit</span>
@@ -122,7 +122,7 @@ export default function AppNavBar() {
             </Link>
             <button
               type="button"
-              className="-m-2.5 rounded-md p-2.5 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 transition-all duration-100"
+              className="-m-2.5 rounded-md p-2.5 text-gray-600 hover:text-primary-600 transition-all duration-200"
               onClick={() => setMobileMenuOpen(false)}
             >
               <span className="sr-only">Close menu</span>
@@ -130,14 +130,14 @@ export default function AppNavBar() {
             </button>
           </div>
           <div className="mt-6">
-            <div className="-my-6 divide-y divide-gray-100 dark:divide-gray-800">
+            <div className="-my-6 divide-y divide-gray-100">
               <div className="space-y-2 py-6">
                 {navigation.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block rounded-lg px-3 py-2 text-base font-medium leading-7 text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100 transition-all duration-100 hover:translate-x-2"
+                    className="block rounded-lg px-3 py-2 text-base font-medium leading-7 text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200 hover:translate-x-2"
                   >
                     {item.name}
                   </Link>
@@ -147,7 +147,7 @@ export default function AppNavBar() {
                 {isUserLoading ? null : !user ? (
                   <Link
                     to='/login'
-                    className="flex items-center text-gray-600 hover:text-teal-600 dark:text-gray-300 dark:hover:text-teal-400 transition-all duration-100 hover:translate-x-2"
+                    className="flex items-center text-gray-600 hover:text-primary-600 transition-all duration-200 hover:translate-x-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Log in <BiLogIn size="1.1rem" className="ml-1" />

@@ -33,7 +33,6 @@ const TextContent: React.FC<TextContentProps> = ({ activeIndex }) => {
     if (activeIndex === 0) setDisplayedText0('');
     if (activeIndex === 1) setDisplayedText1('_');
     if (activeIndex === 2) {
-      // Start word highlighting for listening mode
       const words = fullText2.split(' ');
       let wordIndex = 0;
       const highlightInterval = setInterval(() => {
@@ -59,7 +58,7 @@ const TextContent: React.FC<TextContentProps> = ({ activeIndex }) => {
       <span
         key={index}
         className={`transition-all duration-300 ${
-          index === highlightedWordIndex ? 'bg-yellow-300/30 text-white' : ''
+          index === highlightedWordIndex ? 'bg-primary-200 text-primary-900' : 'text-gray-800'
         }`}
       >
         {word}{' '}
@@ -68,23 +67,23 @@ const TextContent: React.FC<TextContentProps> = ({ activeIndex }) => {
   };
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="text-white space-y-2 p-2 backdrop-blur-sm bg-black/30 rounded-xl shadow-2xl relative">
-        {/* Active label display */}
-        <div className="absolute -top-24 left-1/2 transform -translate-x-1/2">
-          <div className="group relative flex items-center gap-4 px-8 py-4 rounded-3xl border-2 border-white/20 transition-all duration-500 hover:border-white/40 hover:scale-105">
-            <span className="text-3xl transition-transform duration-500 group-hover:scale-110">
+    <div className="w-full min-h-[32rem] flex items-center justify-center bg-white p-8">
+      <div className="max-w-4xl w-full space-y-6 relative">
+        {/* Mode indicator */}
+        <div className="absolute -top-16 left-1/2 transform -translate-x-1/2">
+          <div className="group relative flex items-center gap-4 px-6 py-3 rounded-xl bg-white shadow-lg border border-primary-100 transition-all duration-300 hover:border-primary-300">
+            <span className="text-2xl">
               {activeIndex === 0 ? "✍️" : activeIndex === 1 ? "⌨️" : "🎧"}
             </span>
             <div className="flex flex-col">
-              <span className={`font-bold text-xl tracking-wider bg-clip-text text-transparent ${
-                activeIndex === 0 ? 'bg-gradient-to-r from-blue-400 to-indigo-400' :
-                activeIndex === 1 ? 'bg-gradient-to-r from-green-400 to-emerald-400' :
-                'bg-gradient-to-r from-red-400 to-rose-400'
+              <span className={`font-satoshi font-bold text-lg ${
+                activeIndex === 0 ? 'text-primary-600' :
+                activeIndex === 1 ? 'text-secondary-600' :
+                'text-tertiary-600'
               }`}>
                 {activeIndex === 0 ? "Write down" : activeIndex === 1 ? "Type" : "See & Listen"}
               </span>
-              <span className="text-sm font-light text-black tracking-wide">
+              <span className="text-sm font-manrope text-gray-600">
                 {activeIndex === 0 ? "Must memorize" : activeIndex === 1 ? "Easy but not intuitive" : "Intuitive"}
               </span>
             </div>
@@ -92,60 +91,39 @@ const TextContent: React.FC<TextContentProps> = ({ activeIndex }) => {
         </div>
 
         <div className="relative">
-          <p 
-            className={`text-lg ${activeIndex === 0 ? 'font-dancing' : 'font-manrope'} leading-relaxed px-4 py-3 rounded-lg backdrop-blur-sm transition-all duration-500`}
-            style={{
-              filter: activeIndex === 0 ? 'blur(0)' : 'blur(2px)',
-              opacity: activeIndex === 0 ? '1' : '0.5',
-              backgroundColor: '#4444ff1a',
-              borderColor: '#4444ff33',
-              borderWidth: '1px',
-              borderStyle: 'solid'
-            }}
-            aria-label="Write down"
-          >
-            <span id="paragraph-0">
+          <div className={`p-6 rounded-xl transition-all duration-300 ${
+            activeIndex === 0 
+              ? 'bg-white shadow-lg border-2 border-primary-200' 
+              : 'bg-gray-50 border border-gray-100'
+          }`}>
+            <p className={`text-lg ${activeIndex === 0 ? 'font-dancing' : 'font-manrope'} leading-relaxed text-gray-800`}>
               {activeIndex === 0 ? displayedText0 : fullText0}
-            </span>
-          </p>
+            </p>
+          </div>
         </div>
 
         <div className="relative">
-          <p 
-            className="text-lg leading-relaxed px-4 py-3 rounded-lg backdrop-blur-sm transition-all duration-500"
-            style={{
-              filter: activeIndex === 1 ? 'blur(0)' : 'blur(2px)',
-              opacity: activeIndex === 1 ? '1' : '0.5',
-              backgroundColor: '#44ff441a',
-              borderColor: '#44ff4433',
-              borderWidth: '1px',
-              borderStyle: 'solid'
-            }}
-            aria-label="Type"
-          >
-            <span id="paragraph-1">
+          <div className={`p-6 rounded-xl transition-all duration-300 ${
+            activeIndex === 1 
+              ? 'bg-white shadow-lg border-2 border-secondary-200' 
+              : 'bg-gray-50 border border-gray-100'
+          }`}>
+            <p className="text-lg font-manrope leading-relaxed text-gray-800">
               {activeIndex === 1 ? displayedText1 : fullText1}
-            </span>
-          </p>
+            </p>
+          </div>
         </div>
 
         <div className="relative">
-          <p 
-            className="text-lg leading-relaxed px-4 py-3 rounded-lg backdrop-blur-sm transition-all duration-500"
-            style={{
-              filter: activeIndex === 2 ? 'blur(0)' : 'blur(2px)',
-              opacity: activeIndex === 2 ? '1' : '0.5',
-              backgroundColor: '#ff44441a',
-              borderColor: '#ff444433',
-              borderWidth: '1px',
-              borderStyle: 'solid'
-            }}
-            aria-label="See & Listen"
-          >
-            <span id="paragraph-2">
+          <div className={`p-6 rounded-xl transition-all duration-300 ${
+            activeIndex === 2 
+              ? 'bg-white shadow-lg border-2 border-tertiary-200' 
+              : 'bg-gray-50 border border-gray-100'
+          }`}>
+            <p className="text-lg font-manrope leading-relaxed">
               {renderHighlightedText(fullText2, true)}
-            </span>
-          </p>
+            </p>
+          </div>
         </div>
       </div>
     </div>

@@ -9,9 +9,7 @@ import { z } from 'zod';
 
 const PricingPage = () => {
   const [isStripePaymentLoading, setIsStripePaymentLoading] = useState<boolean | string>(false);
-
   const { data: user, isLoading: isUserLoading } = useAuth();
-
   const navigate = useNavigate();
 
   async function handleBuyNowClick(tierId: string) {
@@ -22,7 +20,6 @@ const PricingPage = () => {
     try {
       setIsStripePaymentLoading(tierId);
       let stripeResults = await stripePayment(tierId);
-
       if (stripeResults?.sessionUrl) {
         window.open(stripeResults.sessionUrl, '_self');
       }
@@ -48,74 +45,63 @@ const PricingPage = () => {
   };
 
   return (
-    <div className='py-10 lg:mt-10'>
-      <div className='mx-auto max-w-7xl px-6 lg:px-8'>
-        <div id='pricing' className='mx-auto max-w-4xl text-center'>
-          <h2 className='mt-2 text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl dark:text-white'>
-            Pick Your <span className='text-teal-500'>Package</span>
+    <div className='min-h-screen bg-white'>
+      <div className='mx-auto max-w-7xl px-8 py-24'>
+        <div className='mx-auto max-w-4xl text-center mb-16'>
+          <h2 className='text-title-xl font-manrope text-primary-900'>
+            Choose Your <span className='text-primary-500'>Plan</span>
           </h2>
+          <p className='mt-6 text-lg font-satoshi text-primary-600'>
+            Secure payments powered by Stripe. Your data is protected with enterprise-grade encryption.
+          </p>
         </div>
-        <p className='mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-gray-600 dark:text-white'>
-          We do not store any credit card information in server, payments are processed by Stripe also our site is
-          secured by SSL encryption.
-        </p>
-        <div className='isolate mx-auto mt-16 grid max-w-md grid-cols-1 gap-y-8 lg:gap-x-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3'>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto'>
           {TIERS.map((tier) => (
             <div
               key={tier.id}
               className={cn(
-                'relative flex flex-col grow justify-between rounded-3xl ring-gray-900/10 dark:ring-gray-100/10 overflow-hidden p-8 xl:p-10',
-                {
-                  'ring-2': tier.bestDeal,
-                  'ring-1 lg:mt-8': !tier.bestDeal,
-                }
+                'relative bg-white rounded-2xl transition-all duration-300',
+                'border-2 hover:border-primary-200',
+                tier.bestDeal ? 'border-primary-300 shadow-xl' : 'border-gray-100 shadow-lg',
+                'p-8 flex flex-col'
               )}
             >
               {tier.bestDeal && (
-                <div className='absolute top-0 right-0 -z-10 w-full h-full transform-gpu blur-3xl' aria-hidden='true'>
-                  <div
-                    className='absolute w-full h-full bg-gradient-to-br from-sky-400 to-rose-300 opacity-30 dark:opacity-50'
-                    style={{
-                      clipPath: 'circle(670% at 50% 50%)',
-                    }}
-                  />
+                <div className='absolute top-0 right-0 -mt-4 -mr-4'>
+                  <span className='bg-primary-500 text-white text-sm font-satoshi px-4 py-1 rounded-full shadow-md'>
+                    Most Popular
+                  </span>
                 </div>
               )}
+
               <div className='mb-8'>
-                <div className='flex items-center justify-between gap-x-4'>
-                  <h3 id={tier.id} className='text-gray-900 text-lg font-semibold leading-8 dark:text-white'>
-                    {tier.name}
-                  </h3>
-                </div>
-                <p className='mt-4 text-sm leading-6 text-gray-600 dark:text-white'>{tier.description}</p>
-                <p className='mt-6 flex items-baseline gap-x-1 dark:text-white'>
-                  <span className='text-4xl font-bold tracking-tight text-gray-900 dark:text-white'>{tier.price}</span>
-                </p>
-                <ul role='list' className='mt-8 space-y-3 text-sm leading-6 text-gray-600 dark:text-white'>
+                <h3 className='text-title-sm font-manrope text-primary-900 mb-3'>{tier.name}</h3>
+                <p className='text-primary-600 font-satoshi mb-6'>{tier.description}</p>
+                <div className='text-title-lg font-manrope text-primary-900 mb-8'>{tier.price}</div>
+
+                <ul className='space-y-4'>
                   {tier.features.map((feature) => (
-                    <li key={feature} className='flex gap-x-3'>
-                      <AiFillCheckCircle className='h-6 w-5 flex-none text-teal-500' aria-hidden='true' />
-                      {feature}
+                    <li key={feature} className='flex items-center text-primary-700 font-satoshi'>
+                      <AiFillCheckCircle className='h-5 w-5 text-primary-500 mr-3 flex-shrink-0' />
+                      <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
               </div>
+
               <button
-                data-rewardful='convert'
                 onClick={() => handleBuyNowClick(tier.id)}
-                aria-describedby={tier.id}
+                disabled={isStripePaymentLoading === tier.id}
                 className={cn(
-                  {
-                    'bg-teal-500 text-white hover:text-white shadow-sm hover:bg-teal-400': tier.bestDeal,
-                    'text-gray-600  ring-1 ring-inset ring-teal-200 hover:ring-teal-400': !tier.bestDeal,
-                  },
-                  {
-                    'opacity-50 cursor-not-allowed': isStripePaymentLoading === tier.id,
-                  },
-                  'mt-8 block rounded-md py-2 px-3 text-center text-sm dark:text-white font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-400'
+                  'mt-auto w-full py-4 rounded-xl font-satoshi text-base transition-all duration-200',
+                  tier.bestDeal
+                    ? 'bg-primary-500 text-white hover:bg-primary-600'
+                    : 'bg-primary-50 text-primary-700 hover:bg-primary-100',
+                  isStripePaymentLoading === tier.id && 'opacity-50 cursor-not-allowed'
                 )}
               >
-                {!!user ? 'Purchase Credits' : 'Log in to buy credits'}
+                {!!user ? 'Get Started' : 'Sign in to Purchase'}
               </button>
             </div>
           ))}

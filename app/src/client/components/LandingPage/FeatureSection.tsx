@@ -2,29 +2,29 @@ import { features } from '../../common/contentSections';
 
 const FeaturesSection: React.FC = () => {
   return (
-    <div id='features' className='relative mx-auto h-screen max-w-7xl px-6 lg:px-8'>
+    <div id='features' className='relative mx-auto min-h-screen py-24 px-6 lg:px-8 bg-white font-manrope'>
       <div className='relative mx-auto max-w-2xl text-center'>
-        <h2 className='mt-6 text-5xl font-bold bg-gradient-to-r from-gray-900 via-teal-800 to-gray-900 dark:from-white dark:via-teal-200 dark:to-white bg-clip-text text-transparent'>
+        <h2 className='font-montserrat text-title-xl font-bold bg-gradient-to-r from-primary-900 via-primary-700 to-primary-900 bg-clip-text text-transparent'>
           Features
         </h2>
       </div>
 
-      <div className='relative mx-auto mt-16 max-w-5xl sm:mt-20 lg:mt-24'>
-        <dl className='grid max-w-xl grid-cols-1 gap-x-8 gap-y-12 sm:gap-x-12 sm:gap-y-16 md:max-w-none md:grid-cols-2 lg:gap-x-16'>
+      <div className='relative mx-auto mt-16 max-w-6xl sm:mt-20'>
+        <dl className='grid max-w-xl grid-cols-1 gap-8 sm:gap-12 md:max-w-none md:grid-cols-2'>
           {features.map((feature) => (
             <div 
               key={feature.name} 
-              className='group relative p-4 rounded-xl bg-white dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300 shadow-sm hover:shadow-md border border-teal-100 dark:border-gray-700 backdrop-blur-sm'
+              className='group relative p-8 rounded-2xl bg-white hover:bg-primary-50 transition-all duration-300 shadow-md hover:shadow-lg border border-primary-100'
             >
-              <dt className='flex items-center gap-x-4 text-2xl font-semibold leading-7 text-gray-900 dark:text-gray-100'>
-                <div className='flex h-16 w-16 items-center justify-center group-hover:scale-110 transition-transform'>
-                  <div className='text-3xl'>{feature.icon}</div>
+              <dt className='flex items-center gap-x-6 text-title-md font-semibold leading-tight text-primary-900'>
+                <div className='flex h-20 w-20 items-center justify-center rounded-xl bg-primary-100/50 group-hover:bg-primary-200/50 group-hover:scale-110 transition-all duration-300'>
+                  <div className='text-4xl text-primary-600'>{feature.icon}</div>
                 </div>
-                <span className='bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent'>
+                <span className='font-satoshi bg-gradient-to-r from-primary-800 to-primary-600 bg-clip-text text-transparent'>
                   {feature.name}
                 </span>
               </dt>
-              <dd className='mt-6 text-lg leading-7 text-gray-600 dark:text-gray-300 pl-20'>
+              <dd className='mt-6 text-lg leading-relaxed text-gray-600 pl-[6.5rem] font-montserrat'>
                 {feature.description}
               </dd>
             </div>

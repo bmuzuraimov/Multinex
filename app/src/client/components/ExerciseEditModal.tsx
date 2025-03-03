@@ -20,7 +20,7 @@ const LoadingSpinner = memo(() => (
 const CloseButton = memo(({ onClose }: { onClose: () => void }) => (
   <button
     onClick={onClose}
-    className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+    className="text-tertiary-400 hover:text-tertiary-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200"
   >
     <span className="sr-only">Close</span>
     <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -59,16 +59,16 @@ const ExerciseEditModal: React.FC<ExerciseEditModalProps> = memo(({ id, name, le
   const wordCount = exerciseText.split(' ').length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300">
-      <div className="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all duration-300 ease-in-out">
-        <div className="absolute top-0 right-0 pt-4 pr-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm transition-opacity duration-300">
+      <div className="relative w-full max-w-4xl bg-white rounded-xl shadow-xl transform transition-all duration-300 ease-in-out">
+        <div className="absolute top-4 right-4">
           <CloseButton onClose={onClose} />
         </div>
-        <div className="p-6">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Edit Exercise</h2>
+        <div className="p-8">
+          <h2 className="font-manrope text-title-lg font-semibold text-gray-900 mb-6">Edit Exercise</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="name" className="block font-montserrat text-sm font-medium text-gray-700 mb-2">
                 Name
               </label>
               <input
@@ -76,15 +76,15 @@ const ExerciseEditModal: React.FC<ExerciseEditModalProps> = memo(({ id, name, le
                 id="name"
                 value={exerciseName}
                 onChange={(e) => setExerciseName(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="block w-full rounded-lg border-gray-200 shadow-sm focus:border-primary-500 focus:ring-primary-500 font-satoshi text-base transition duration-200"
               />
             </div>
             <div>
-              <div className="flex justify-between items-center">
-                <label htmlFor="lessonText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="flex justify-between items-center mb-2">
+                <label htmlFor="lessonText" className="block font-montserrat text-sm font-medium text-gray-700">
                   Lesson Text
                 </label>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+                <span className="font-satoshi text-sm text-tertiary-400">
                   {wordCount} words
                 </span>
               </div>
@@ -93,20 +93,20 @@ const ExerciseEditModal: React.FC<ExerciseEditModalProps> = memo(({ id, name, le
                 value={exerciseText}
                 onChange={(e) => setExerciseText(e.target.value)}
                 rows={4}
-                className="mt-1 block w-full h-96 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="block w-full h-96 rounded-lg border-gray-200 shadow-sm focus:border-primary-500 focus:ring-primary-500 font-satoshi text-base transition duration-200"
               />
             </div>
             {error && (
-              <div className="text-sm text-red-600 dark:text-red-400">{error}</div>
+              <div className="text-sm font-satoshi text-danger rounded-md bg-danger/10 p-3">{error}</div>
             )}
             {success && (
-              <div className="text-sm text-green-600 dark:text-green-400">{success}</div>
+              <div className="text-sm font-satoshi text-success rounded-md bg-success/10 p-3">{success}</div>
             )}
             <div>
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+                className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-satoshi font-medium text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition duration-200 ${
                   loading ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >

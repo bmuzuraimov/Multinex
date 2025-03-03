@@ -17,7 +17,7 @@ export class TextList {
 
   constructor(formattedEssay: FormattedEssaySection[], textSize: string, progressCursor: number, onUpdate?: () => void) {
     this.baseCharClass = {
-      hear: `text-${textSize} cursor-pointer tracking-wider font-montserrat text-blue-900 dark:text-gray-300`,
+      listen: `text-${textSize} cursor-pointer tracking-wider font-montserrat text-blue-900 dark:text-gray-300`,
       type: `text-${textSize} cursor-pointer tracking-wider font-manrope text-green-900 dark:text-gray-300`,
       write: `text-${textSize} cursor-pointer tracking-wider font-courgette text-red-900 dark:text-gray-300`,
     };
@@ -31,15 +31,15 @@ export class TextList {
 
   private buildNodes(sections: FormattedEssaySection[]): TextNode[] {
     let previous: TextNode | undefined;
-    let hearWordIndex = 0;
+    let listenWordIndex = 0;
     const nodes: TextNode[] = [];
 
     sections.forEach((section) => {
       const mode = section.mode as Mode;
       section.text.forEach((text) => {
         let wordIndex: number | undefined;
-        if (mode === 'hear' && text.trim() && /[a-zA-Z0-9]/.test(text)) {
-          wordIndex = hearWordIndex++;
+        if (mode === 'listen' && text.trim() && /[a-zA-Z0-9]/.test(text)) {
+          wordIndex = listenWordIndex++;
         }
         const node = new TextNode(
           this.nodeId++,
@@ -69,7 +69,7 @@ export class TextList {
       if (!targetNode) return false;
       
       this.currentNode = targetNode;
-      if (!(this.currentNode.mode === 'hear')) {
+      if (!(this.currentNode.mode === 'listen')) {
         this.currentNode.currentClass = 'border-b-2 border-sky-400';
       }
       return true;
@@ -92,7 +92,7 @@ export class TextList {
     // Handle reaching start/end of list
     if (!newNode) {
       // Keep current node highlighted
-      if (!(this.currentNode.mode === 'hear')) {
+      if (!(this.currentNode.mode === 'listen')) {
         this.currentNode.currentClass = 'border-b-2 border-sky-400';
       }
       return false;
@@ -100,7 +100,7 @@ export class TextList {
 
     // Update cursor
     this.currentNode = newNode;
-    if (!(this.currentNode.mode === 'hear')) {
+    if (!(this.currentNode.mode === 'listen')) {
       this.currentNode.currentClass = 'border-b-2 border-sky-400';
     }
     return true;
@@ -149,8 +149,8 @@ export class TextList {
     if (!this.currentNode) return;
 
     switch (this.currentNode.mode) {
-      case 'hear':
-        await this.handleHearMode(e);
+      case 'listen':
+        await this.handleListenMode(e);
         break;
       case 'type':
         this.handleTypeMode(e);
@@ -161,7 +161,7 @@ export class TextList {
     }
   }
 
-  private async handleHearMode(e: KeyboardEvent) {
+  private async handleListenMode(e: KeyboardEvent) {
     if (e.key === 'Backspace') {
       while (this.currentNode?.prev?.value === ' ') {
         this.moveCursor(false);
@@ -179,7 +179,7 @@ export class TextList {
 
     let lastNode = this.currentNode;
     let playEnd = 0;
-    while (lastNode && lastNode.mode === 'hear') {
+    while (lastNode && lastNode.mode === 'listen') {
       if (lastNode.wordIndex !== undefined) {
         playEnd = this.audioController?.getTimeStamp(lastNode.wordIndex)?.end || 0;
       }
@@ -192,7 +192,7 @@ export class TextList {
       const currentTime = this.audioController?.getCurrentTime() || 0;
       let node = this.currentNode;
       
-      while (node && node.mode === 'hear') {
+      while (node && node.mode === 'listen') {
         const timestamp = node.wordIndex !== undefined ? 
           this.audioController?.getTimeStamp(node.wordIndex) : undefined;
         
@@ -214,8 +214,8 @@ export class TextList {
       // Clean up the listener
       this.audioController?.removeEventListener('timeupdate', onAudioUpdate);
       
-      // Move cursor to first non-hear mode node if still in hear mode
-      while (this.currentNode?.mode === 'hear' && this.currentNode.next) {
+      // Move cursor to first non-listen mode node if still in listen mode
+      while (this.currentNode?.mode === 'listen' && this.currentNode.next) {
         this.moveCursor(true);
       }
     }

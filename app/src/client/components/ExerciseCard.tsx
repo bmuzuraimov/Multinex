@@ -21,26 +21,26 @@ const ShareMenu = memo(({ isOpen, onClose, emailsInput, setEmailsInput, onShare 
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-      <div className="bg-white w-full max-w-xl dark:bg-gray-800 p-6 rounded shadow-lg">
-        <h2 className="text-xl font-bold mb-4 text-black dark:text-white">Share Exercise</h2>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-modal">
+      <div className="bg-white w-full max-w-xl p-6 rounded-lg shadow-lg font-montserrat">
+        <h2 className="text-title-sm font-manrope font-semibold mb-4 text-gray-900">Share Exercise</h2>
         <input
           type="text"
           placeholder="Enter emails separated by commas"
           value={emailsInput}
           onChange={(e) => setEmailsInput(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded mb-4"
+          className="w-full p-3 border border-primary-200 rounded-md focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-all duration-200 font-satoshi"
         />
-        <div className="flex justify-end">
+        <div className="flex justify-end mt-6 gap-3">
           <button
             onClick={onClose}
-            className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
+            className="px-4 py-2 rounded-md text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 font-satoshi"
           >
             Cancel
           </button>
           <button
             onClick={onShare}
-            className="bg-teal-500 text-white px-4 py-2 rounded"
+            className="px-4 py-2 rounded-md text-white bg-primary-500 hover:bg-primary-600 transition-colors duration-200 font-satoshi"
           >
             Share
           </button>
@@ -95,52 +95,56 @@ const ExerciseCard: React.FC<{
         onShare={handleShare}
       />
 
-      <div className='relative flex flex-col items-center p-3 bg-white dark:bg-gray-700 border dark:border-gray-700 rounded shadow-md cursor-pointer'>
+      <div className='relative flex flex-col items-center p-5 bg-white border border-primary-100 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer font-montserrat'>
         {exercise.truncated && (
           <>
             <PiCropThin
-              className='absolute bottom-2 left-2 z-10 text-xl text-black dark:text-white font-bold'
+              className='absolute bottom-3 left-3 z-above text-xl text-primary-900'
               data-multiline
               data-tooltip-id={`cropped-tooltip-${index || 'all'}`}
             />
             <Tooltip
               id={`cropped-tooltip-${index || 'all'}`}
               place='bottom'
-              className='z-99'
+              className='z-tooltip font-satoshi'
               content='The length of the uploaded file was too long and has been cropped.'
             />
           </>
         )}
-        <button
-          className='absolute top-1 right-1 z-10 text-lg text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors duration-200'
-          onClick={handleDelete}
-        >
-          <RiDeleteBin4Line />
-        </button>
-        <button
-          className='absolute top-1 right-8 z-10 text-lg text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors duration-200'
-          onClick={() => setIsModalOpen(true)}
-        >
-          <CiEdit />
-        </button>
-        <button
-          className='absolute top-1 right-16 z-10 text-lg text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors duration-200'
-          onClick={() => setIsShareMenuOpen(true)}
-        >
-          <LuShare />
-        </button>
+        <div className='absolute top-3 right-3 flex gap-2 z-above'>
+          <button
+            className='text-lg text-secondary-400 hover:text-secondary-500 transition-colors duration-200'
+            onClick={() => setIsShareMenuOpen(true)}
+          >
+            <LuShare />
+          </button>
+          <button
+            className='text-lg text-primary-400 hover:text-primary-500 transition-colors duration-200'
+            onClick={() => setIsModalOpen(true)}
+          >
+            <CiEdit />
+          </button>
+          <button
+            className='text-lg text-danger hover:text-red-600 transition-colors duration-200'
+            onClick={handleDelete}
+          >
+            <RiDeleteBin4Line />
+          </button>
+        </div>
         <a href={`/exercise/${exercise.id}`} className='w-full group'>
-          <img
-            src={exercise.completed ? ExerciseDoneImg : ExerciseImg}
-            className='border-b border-grey-200 dark:border-gray-600 transition-transform duration-200 group-hover:scale-105'
-            alt='Exercise'
-          />
-          <div className='mt-3 text-lg font-medium text-center text-gray-800 dark:text-gray-100 break-words hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 line-clamp-2'>
-            {exercise.name}
+          <div className='overflow-hidden rounded-md mb-4'>
+            <img
+              src={exercise.completed ? ExerciseDoneImg : ExerciseImg}
+              className='w-full transition-transform duration-300 group-hover:scale-105'
+              alt='Exercise'
+            />
           </div>
+          <h3 className='text-title-xsm font-manrope font-medium text-center text-gray-900 group-hover:text-primary-600 transition-colors duration-200 line-clamp-2'>
+            {exercise.name}
+          </h3>
         </a>
-        <div className='mt-1 text-md font-medium text-center text-blue-500 dark:text-blue-400'>{exercise.level}</div>
-        <div className='mt-1 text-sm font-light text-gray-500 dark:text-gray-400'>{exercise.no_words} words</div>
+        <div className='mt-2 text-sm font-satoshi font-medium text-primary-500'>{exercise.level}</div>
+        <div className='mt-1 text-xs font-satoshi text-gray-500'>{exercise.no_words} words</div>
       </div>
     </>
   );

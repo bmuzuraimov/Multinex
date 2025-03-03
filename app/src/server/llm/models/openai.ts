@@ -3,14 +3,13 @@ import { GENERATE_EXERCISE_PROMPT, GENERATE_SUMMARY_PROMPT, GENERATE_EXAM_PROMPT
 import { GENERATE_COURSE_PROMPT } from '../prompts/course';
 import { retry } from './utils';
 import { HttpError } from 'wasp/server';
-import { reportToAdmin } from '../actions/utils';
-import { TEMPERATURE } from '../../shared/constants';
+import { reportToAdmin } from '../../actions/utils';
+import { TEMPERATURE } from '../../../shared/constants';
 import {
-  lectureContentFormat,
   summaryFormat,
   questionsFormat,
   complexityFormat
-} from '../prompts/responseFormat';
+} from '../response_formats/responseFormat';
 
 function setupOpenAI() {
   if (!process.env.OPENAI_API_KEY) {
@@ -58,18 +57,17 @@ export class OpenAIService {
           top_p: 1,
           frequency_penalty: 0,
           presence_penalty: 0,
-          response_format: lectureContentFormat,
+          response_format: { type: 'text' },
         });
 
         const responseContent = response.choices[0]?.message?.content || '';
-        const exerciseJson = JSON.parse(responseContent);
 
-        if (!exerciseJson?.lectureContent) {
+        if (!responseContent) {
           throw new Error('lectureContent missing from response.');
         }
 
         const exerciseJsonUsage = response.usage?.total_tokens || 0;
-        return { success: true, data: exerciseJson, usage: exerciseJsonUsage };
+        return { success: true, data: responseContent, usage: exerciseJsonUsage };
       } catch (error: any) {
         await reportToAdmin(`Error in generateExercise: ${error.message}`);
         console.error('Error in generateExercise:', error);
@@ -199,7 +197,9 @@ export class OpenAIService {
     maxTokens: number,
     sensoryModes: ('listen' | 'type' | 'write')[]
   ): Promise<OpenAIResponse> {
-    console.log('Generating complexity tags with sensoryModes:', sensoryModes);
+    if (lectureContent.length === 0) {
+      return { success: true, data: { taggedText: '' }, usage: 0 };
+    }
     return retry(async () => {
       try {
         const response = await openai.chat.completions.create({
@@ -218,7 +218,6 @@ export class OpenAIService {
 
         const responseContent = response.choices[0]?.message?.content || '';
         const complexityJson = JSON.parse(responseContent);
-
         if (!complexityJson?.taggedText) {
           throw new Error('No "taggedText" found in complexity JSON.');
         }

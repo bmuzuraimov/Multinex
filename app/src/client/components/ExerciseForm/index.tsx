@@ -64,7 +64,7 @@ type DemoExerciseResult = {
     createdAt: Date;
   };
   essay: string;
-  formattedEssay: Array<{ mode: 'hear' | 'type' | 'write'; text: string[] }>;
+  formattedEssay: Array<{ mode: 'listen' | 'type' | 'write'; text: string[] }>;
   audioUrl: string;
 };
 
@@ -323,17 +323,20 @@ const ExerciseForm: React.FC<{ topicId: string | null; demo: boolean }> = React.
       () => (
         <Link
           to={`/demo`}
-          className="w-full h-full scale-95 opacity-95 flex flex-col items-center bg-white dark:bg-gray-800 transition-all duration-300 ease-in-out pointer-events-auto"
+          className="w-full h-full flex flex-col items-center bg-white transition-all duration-300 ease-in-out"
         >
-          <div className="flex h-full items-center justify-center w-full max-w-4xl mx-auto">
-            <div className="flex flex-col items-center p-6 justify-center w-full rounded-xl cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
-              <div className="flex flex-col items-center space-y-4">
-                <div className="p-6 bg-teal-50 dark:bg-teal-900/20 rounded-full">
-                  <BsFiletypeAi className="w-12 h-12 text-teal-500" />
+          <div className="flex h-full items-center justify-center w-full max-w-5xl mx-auto px-6 py-12">
+            <div className="flex flex-col items-center p-8 justify-center w-full rounded-2xl cursor-pointer bg-gradient-to-br from-primary-50 to-white border border-primary-100 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="flex flex-col items-center space-y-6">
+                <div className="p-6 bg-primary-50 rounded-full shadow-sm">
+                  <BsFiletypeAi className="w-12 h-12 text-primary-500" />
                 </div>
-                <div className="text-center">
-                  <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Ready to start your exercise: "{demoExercise?.exercise?.name}"
+                <div className="text-center space-y-2">
+                  <h3 className="font-manrope text-title-sm font-semibold text-gray-900">
+                    Ready to start your exercise
+                  </h3>
+                  <p className="font-satoshi text-lg text-primary-900">
+                    "{demoExercise?.exercise?.name}"
                   </p>
                 </div>
               </div>
@@ -349,7 +352,7 @@ const ExerciseForm: React.FC<{ topicId: string | null; demo: boolean }> = React.
     }
 
     return (
-      <div className="w-full h-full scale-95 opacity-95 flex flex-col items-center bg-white dark:bg-gray-800 transition-all duration-300 ease-in-out pointer-events-auto">
+      <div className="w-full h-full opacity-95 flex flex-col items-center bg-white dark:bg-gray-800 transition-all duration-300 ease-in-out pointer-events-auto">
         {!demo || !demoExercise || processingFile ? (
           <FileUploadArea
             onDrop={onDrop}

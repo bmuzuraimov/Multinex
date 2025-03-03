@@ -1,5 +1,5 @@
 // text-node.ts
-export type Mode = 'hear' | 'type' | 'write';
+export type Mode = 'listen' | 'type' | 'write';
 
 export class TextNode {
   public id: number;
@@ -30,7 +30,7 @@ export class TextNode {
   public highlightText(correct: boolean = true): void {
     this.highlight = true;
     switch (this.mode) {
-      case 'hear':
+      case 'listen':
         this.highlightClass = 'bg-gray-200 dark:bg-gray-700';
         break;
       case 'type':

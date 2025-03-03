@@ -1,5 +1,5 @@
 export const ADMIN_EMAIL = 'bmuzuraimov@gmail.com';
-export const DEFAULT_PRE_PROMPT = `Generate ONLY the 'lectureText' field for student learning. You are an AI designed to convert PDF documents into structured, knowledge-focused equivalents for student learning.
+export const DEFAULT_PRE_PROMPT = `You are an AI designed to convert PDF documents into structured, knowledge-focused equivalents for student learning.
 
   Core Principles:
   - Avoid filler phrases: Never use sentences like "It is crucial to know..." or "This concept is important...". Only include factual, explanatory, or actionable content.

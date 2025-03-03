@@ -99,50 +99,55 @@ const OnboardingPage: React.FC = () => {
   const learningStyles = ['👁️ Visual', '👂 Auditory', '🤸 Kinesthetic', '🔄 Mixed'];
 
   return (
-    <div className='flex flex-col items-center min-h-screen bg-gray-100 p-6'>
+    <div className='flex flex-col items-center min-h-screen bg-white font-montserrat'>
       {/* Progress Bar */}
-      <div className='w-full max-w-8xl bg-gray-300 h-2 rounded-lg relative mt-4'>
-        <div className={`bg-teal-500 h-2 rounded-lg transition-all duration-500 ${progressWidths[step - 1]}`}></div>
+      <div className='w-full max-w-8xl bg-primary-100 h-1.5 rounded-full relative mt-8'>
+        <div className={`bg-primary-500 h-1.5 rounded-full transition-all duration-500 ${progressWidths[step - 1]}`}></div>
       </div>
 
       {/* Back and Skip Buttons */}
-      <div className='w-full max-w-4xl mt-3 flex justify-between items-center'>
+      <div className='w-full max-w-4xl mt-4 flex justify-between items-center px-8'>
         {step > 1 && (
-          <button className='text-gray-500 font-semibold' onClick={() => setStep(step - 1)}>
+          <button className='text-primary-600 font-semibold hover:text-primary-700 transition-colors' onClick={() => setStep(step - 1)}>
             &lt; Back
           </button>
         )}
-        <button className='text-gray-500 font-semibold' onClick={handleSkip}>
-          Skip&gt;
+        <button className='text-primary-600 font-semibold hover:text-primary-700 transition-colors' onClick={handleSkip}>
+          Skip &gt;
         </button>
       </div>
 
-      {/* Chat Bot */}
-      <div className='flex items-center justify-center mt-10'>
-          <div className='text-2xl font-medium tracking-wide'>{messages[step]}</div>
+      {/* Chat Bot Message */}
+      <div className='flex items-center justify-center mt-12'>
+        <div className='font-manrope text-title-lg text-primary-900 font-medium tracking-wide'>{messages[step]}</div>
       </div>
 
       {/* Steps */}
       {step === 1 && (
         <>
-          <div className='grid grid-cols-1 gap-4 mt-10 max-w-md mx-auto'>
+          <div className='grid grid-cols-1 gap-4 mt-10 max-w-md mx-auto w-full px-6'>
             {userTypes.map((type) => (
               <button
                 key={type.name}
-                className={`flex items-center px-6 py-3 border rounded-2xl text-lg hover:opacity-80 transition-all w-full ${
-                  selectedUserType === type.name ? 'bg-teal-500 text-white border-teal-500' : 'bg-white border-gray-400'
+                className={`flex items-center px-8 py-4 rounded-xl text-lg transition-all duration-300 w-full shadow-sm ${
+                  selectedUserType === type.name 
+                    ? 'bg-primary-500 text-white shadow-md hover:bg-primary-600' 
+                    : 'bg-white border border-primary-100 text-primary-900 hover:border-primary-300'
                 }`}
                 onClick={() => setSelectedUserType(type.name)}
               >
-                <span className='mr-2'>{type.icon}</span> {type.name}
+                <span className='mr-3 text-xl'>{type.icon}</span> 
+                <span className='font-satoshi'>{type.name}</span>
               </button>
             ))}
           </div>
           <button
             onClick={() => setStep(2)}
             disabled={!selectedUserType}
-            className={`mt-6 px-8 py-3 rounded-md ${
-              selectedUserType ? 'bg-teal-700 text-white' : 'bg-gray-400 text-gray-200'
+            className={`mt-8 px-12 py-4 rounded-xl font-satoshi text-lg transition-all duration-300 ${
+              selectedUserType 
+                ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-md' 
+                : 'bg-primary-100 text-primary-300 cursor-not-allowed'
             }`}
           >
             Continue
@@ -151,12 +156,16 @@ const OnboardingPage: React.FC = () => {
       )}
 
       {step === 2 && (
-        <div className='mt-10 w-full max-w-md'>
+        <div className='mt-10 w-full max-w-md px-6'>
           <div className='grid grid-cols-2 gap-4'>
             {learningStyles.map((style) => (
               <button
                 key={style}
-                className={`p-4 border rounded-2xl ${learningStyle === style ? 'bg-teal-500 text-white' : 'bg-white'}`}
+                className={`p-6 rounded-xl transition-all duration-300 font-satoshi text-lg shadow-sm ${
+                  learningStyle === style 
+                    ? 'bg-primary-500 text-white shadow-md' 
+                    : 'bg-white border border-primary-100 text-primary-900 hover:border-primary-300'
+                }`}
                 onClick={() => setLearningStyle(style)}
               >
                 {style}
@@ -166,7 +175,11 @@ const OnboardingPage: React.FC = () => {
           <button
             onClick={() => setStep(3)}
             disabled={!learningStyle}
-            className='mt-6 w-full py-3 bg-teal-700 text-white rounded-md'
+            className={`mt-8 w-full py-4 rounded-xl font-satoshi text-lg transition-all duration-300 ${
+              learningStyle 
+                ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-md'
+                : 'bg-primary-100 text-primary-300 cursor-not-allowed'
+            }`}
           >
             Continue
           </button>
@@ -174,78 +187,78 @@ const OnboardingPage: React.FC = () => {
       )}
 
       {step === 3 && (
-        <div className='mt-10 w-full max-w-md'>
+        <div className='mt-10 w-full max-w-md px-6'>
           <div className='grid grid-cols-2 gap-4'>
             {Object.entries(subjects).map(([key, value]) => (
-              <label key={key} className='flex items-center p-3 bg-white rounded-2xl shadow-sm hover:bg-gray-50 transition-colors cursor-pointer'>
+              <label key={key} className='flex items-center p-4 bg-white rounded-xl border border-primary-100 hover:border-primary-300 transition-all duration-300 cursor-pointer shadow-sm'>
                 <input
                   type='checkbox'
                   checked={value}
                   onChange={(e) => setSubjects({ ...subjects, [key]: e.target.checked })}
                   className='hidden'
                 />
-                <div className={`flex items-center justify-center w-5 h-5 border-2 rounded mr-3 transition-colors ${value ? 'bg-teal-500 border-teal-500' : 'border-gray-300'}`}>
+                <div className={`flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors ${value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'}`}>
                   {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
                 </div>
-                <span className='text-gray-700 font-medium'>
+                <span className='text-primary-900 font-satoshi'>
                   {key.split(/(?=[A-Z])/).map((word, i) => i === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : `(${word})`).join(' ')}
                 </span>
               </label>
             ))}
           </div>
-          <button onClick={() => setStep(4)} className='mt-6 w-full py-3 bg-teal-700 text-white rounded-md'>
+          <button onClick={() => setStep(4)} className='mt-8 w-full py-4 bg-primary-600 text-white rounded-xl font-satoshi text-lg hover:bg-primary-700 transition-colors shadow-md'>
             Continue
           </button>
         </div>
       )}
 
       {step === 4 && (
-        <div className='mt-10 w-full max-w-md'>
+        <div className='mt-10 w-full max-w-md px-6'>
           <div className='grid grid-cols-1 gap-4'>
             {Object.entries(motivations).map(([key, value]) => (
-              <label key={key} className='flex items-center p-3 bg-white rounded-2xl shadow-sm hover:bg-gray-50 transition-colors cursor-pointer'>
+              <label key={key} className='flex items-center p-4 bg-white rounded-xl border border-primary-100 hover:border-primary-300 transition-all duration-300 cursor-pointer shadow-sm'>
                 <input
                   type='checkbox'
                   checked={value}
                   onChange={(e) => setMotivations({ ...motivations, [key]: e.target.checked })}
                   className='hidden'
                 />
-                <div className={`flex items-center justify-center w-5 h-5 border-2 rounded mr-3 transition-colors ${value ? 'bg-teal-500 border-teal-500' : 'border-gray-300'}`}>
+                <div className={`flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors ${value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'}`}>
                   {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
                 </div>
-                <span className='text-gray-700 font-medium'>
+                <span className='text-primary-900 font-satoshi'>
                   {key.replace('motivation', '').charAt(0).toUpperCase() + key.replace('motivation', '').slice(1)}
                 </span>
               </label>
             ))}
           </div>
-          <button onClick={() => setStep(5)} className='mt-6 w-full py-3 bg-teal-700 text-white rounded-md'>
+          <button onClick={() => setStep(5)} className='mt-8 w-full py-4 bg-primary-600 text-white rounded-xl font-satoshi text-lg hover:bg-primary-700 transition-colors shadow-md'>
             Continue
           </button>
         </div>
       )}
 
       {step === 5 && (
-        <div className='mt-10 w-full max-w-md'>
+        <div className='mt-10 w-full max-w-md px-6'>
           <div className='grid grid-cols-2 gap-4'>
             {Object.entries(sources).map(([key, value]) => (
-              <label key={key} className='flex items-center p-3 bg-white rounded-2xl shadow-sm hover:bg-gray-50 transition-colors cursor-pointer'>
+              <label key={key} className='flex items-center p-4 bg-white rounded-xl border border-primary-100 hover:border-primary-300 transition-all duration-300 cursor-pointer shadow-sm'>
                 <input
                   type='checkbox'
                   checked={value}
                   onChange={(e) => setSources({ ...sources, [key]: e.target.checked })}
                   className='hidden'
                 />
-                <div className={`flex items-center justify-center w-5 h-5 border-2 rounded mr-3 transition-colors ${value ? 'bg-teal-500 border-teal-500' : 'border-gray-300'}`}>
+                <div className={`flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors ${value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'}`}>
                   {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
                 </div>
-                <span className='text-gray-700 font-medium'>
+                <span className='text-primary-900 font-satoshi'>
                   {key.replace('source', '').charAt(0).toUpperCase() + key.replace('source', '').slice(1)}
                 </span>
               </label>
             ))}
           </div>
-          <button onClick={handleOnboardingSubmit} className='mt-6 w-full py-3 bg-teal-700 text-white rounded-md'>
+          <button onClick={handleOnboardingSubmit} className='mt-8 w-full py-4 bg-primary-600 text-white rounded-xl font-satoshi text-lg hover:bg-primary-700 transition-colors shadow-md'>
             Complete
           </button>
         </div>

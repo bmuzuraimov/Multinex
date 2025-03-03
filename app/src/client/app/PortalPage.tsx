@@ -55,87 +55,91 @@ const EditCourseModal = ({ course, isOpen, onClose, onSave }: EditCourseModalPro
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
+    <Dialog open={isOpen} onClose={onClose} className="relative z-modal">
+      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="mx-auto max-w-4xl w-full rounded-xl bg-white dark:bg-gray-800 p-6 shadow-xl">
-          <Dialog.Title className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+        <Dialog.Panel className="mx-auto max-w-4xl w-full rounded-2xl bg-white p-8 shadow-xl">
+          <Dialog.Title className="text-title-lg font-manrope text-primary-900 mb-6">
             Edit Course
           </Dialog.Title>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-montserrat text-primary-800 mb-2">
                 Name
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500"
+                className="w-full rounded-xl border border-primary-100 bg-white px-4 py-3 text-primary-900 focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition duration-200"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-montserrat text-primary-800 mb-2">
                 Description
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500"
+                className="w-full rounded-xl border border-primary-100 bg-white px-4 py-3 text-primary-900 focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition duration-200"
                 rows={3}
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-montserrat text-primary-800 mb-2">
                 Background Style
               </label>
-              <div className="grid grid-cols-5 gap-3">
+              <div className="grid grid-cols-5 gap-4">
                 {COURSE_IMAGES.map((image, index) => (
                   <button
                     key={index}
                     type="button"
-                    className={`h-20 rounded-lg transition-all ${image} ${formData.image === image ? 'ring-2 ring-teal-500 ring-offset-2' : 'hover:ring-2 hover:ring-teal-500/50 hover:ring-offset-2'}`}
+                    className={`h-24 rounded-xl transition-all duration-200 ${image} ${
+                      formData.image === image 
+                        ? 'ring-2 ring-primary-500 ring-offset-2' 
+                        : 'hover:ring-2 hover:ring-primary-300 hover:ring-offset-2'
+                    }`}
                     onClick={() => setFormData(prev => ({ ...prev, image }))}
                   />
                 ))}
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setFormData(prev => ({ ...prev, isPublic: !prev.isPublic }))}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${
+                className={`flex items-center gap-2 px-5 py-3 rounded-xl border transition duration-200 ${
                   formData.isPublic 
-                    ? 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-900/20' 
-                    : 'border-teal-200 bg-teal-50 dark:border-teal-900 dark:bg-teal-900/20'
+                    ? 'border-tertiary-200 bg-tertiary-50 text-tertiary-700' 
+                    : 'border-primary-200 bg-primary-50 text-primary-700'
                 }`}
               >
                 {formData.isPublic ? (
                   <>
-                    <HiGlobeAlt className="h-5 w-5 text-red-500" />
-                    <span className="text-sm font-medium text-red-700 dark:text-red-400">Public</span>
+                    <HiGlobeAlt className="h-5 w-5" />
+                    <span className="font-satoshi">Public</span>
                   </>
                 ) : (
                   <>
-                    <HiLockClosed className="h-5 w-5 text-teal-500" />
-                    <span className="text-sm font-medium text-teal-700 dark:text-teal-400">Private</span>
+                    <HiLockClosed className="h-5 w-5" />
+                    <span className="font-satoshi">Private</span>
                   </>
                 )}
               </button>
             </div>
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-end gap-4 mt-8">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="px-6 py-3 text-sm font-satoshi text-primary-700 hover:bg-primary-50 rounded-xl transition-colors duration-200"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors"
+                className="px-6 py-3 text-sm font-satoshi text-white bg-primary-500 hover:bg-primary-600 rounded-xl transition-colors duration-200"
               >
                 Save Changes
               </button>
@@ -168,39 +172,39 @@ const CourseCard = memo(({ course, onDelete, onUpdate, onNameChange }: {
 
   return (
     <>
-      <div className='relative bg-white dark:bg-gray-800 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-102 border border-gray-100 dark:border-gray-700 overflow-hidden'>
+      <div className='group relative bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden'>
         <Link to={'/course/' + course.id}>
-          <div className={`relative h-48 w-full ${course.image} bg-cover bg-center`}>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+          <div className={`relative h-52 w-full ${course.image} bg-cover bg-center`}>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           </div>
         </Link>
-        <div className='p-6 relative'>
-          <h4 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
+        <div className='p-6'>
+          <h4 className='text-title-sm font-manrope text-primary-900'>
             <input
               type='text'
-              className='w-full bg-transparent text-lg font-semibold text-gray-900 dark:text-gray-100 outline-none border-none hover:ring-2 hover:ring-blue-500/20 rounded-md px-2 py-1 transition-all duration-200'
+              className='w-full bg-transparent outline-none ring-0 border-none rounded-lg py-2 transition-all duration-200'
               value={course.name}
               onChange={(e) => onNameChange(course.id, e.target.value)}
               onBlur={(e) => onUpdate(course.id, e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
             />
           </h4>
-          <div className='mt-4'>
-            <div className='flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1'>
+          <div className='mt-6'>
+            <div className='flex justify-between text-sm font-satoshi text-primary-600 mb-2'>
               <span>{course.completedExercises} / {course.totalExercises} exercises</span>
               <span>{completionPercentage}%</span>
             </div>
-            <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5'>
+            <div className='w-full bg-primary-100 rounded-full h-2'>
               <div 
-                className='bg-blue-600 h-2.5 rounded-full transition-all duration-300'
+                className='bg-primary-500 h-2 rounded-full transition-all duration-300'
                 style={{ width: `${completionPercentage}%` }}
               ></div>
             </div>
           </div>
         </div>
-        <div className='absolute top-3 right-3 flex gap-2'>
+        <div className='absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
           <button
-            className='p-2 rounded-full bg-white/90 dark:bg-gray-800/90 text-gray-600 hover:text-teal-500 dark:text-gray-400 dark:hover:text-teal-400 transition-colors duration-200 backdrop-blur-sm'
+            className='p-2 rounded-xl bg-white/90 text-primary-600 hover:text-primary-700 hover:bg-primary-50 transition-colors duration-200 backdrop-blur-sm'
             onClick={() => setIsEditModalOpen(true)}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +212,7 @@ const CourseCard = memo(({ course, onDelete, onUpdate, onNameChange }: {
             </svg>
           </button>
           <button
-            className='p-2 rounded-full bg-white/90 dark:bg-gray-800/90 text-gray-600 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 transition-colors duration-200 backdrop-blur-sm'
+            className='p-2 rounded-xl bg-white/90 text-danger hover:bg-danger/10 transition-colors duration-200 backdrop-blur-sm'
             onClick={handleDelete}
           >
             <VscDiffRemoved className="w-5 h-5" />
@@ -260,13 +264,13 @@ export default function PortalPage() {
   }, [courses]);
 
   return (
-    <div className='lg:mt-10 pb-10'>
+    <div className='min-h-screen bg-white'>
       {user && <UserTour userId={user.id} />}
-      <div className='tour-step-1 mx-auto max-w-7xl px-6 lg:px-8'>
-        <div className='mx-auto max-w-4xl text-center'>
-          <h2 className='mt-2 text-title-xxl font-manrope tracking-tight text-black dark:text-white'>My Courses</h2>
+      <div className='tour-step-1 mx-auto max-w-7xl px-8 pt-16 pb-24'>
+        <div className='mx-auto max-w-4xl text-center mb-16'>
+          <h2 className='text-title-xl font-manrope text-primary-900'>My Courses</h2>
         </div>
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8 shadow-card rounded-lg p-8 bg-white dark:bg-gray-800 dark:shadow-none dark:bg-gray-700'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'>
           <CourseForm />
           {localCourses?.map((course) => (
             <CourseCard
@@ -279,11 +283,11 @@ export default function PortalPage() {
           ))}
         </div>
       </div>
-      <div className='mx-auto max-w-7xl px-6 lg:px-8 mt-8'>
-        <div className='mx-auto max-w-4xl text-center'>
-          <h2 className='mt-2 text-title-xxl font-manrope tracking-tight text-black dark:text-white'>Unassigned Exercises</h2>
+      <div className='mx-auto max-w-7xl px-8 pb-24'>
+        <div className='mx-auto max-w-4xl text-center mb-16'>
+          <h2 className='text-title-xl font-manrope text-primary-900'>Unassigned Exercises</h2>
         </div>
-        <div className='grid grid-cols-1 mb-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 shadow-card rounded-lg p-8 bg-white dark:bg-gray-800 dark:shadow-none dark:bg-gray-700'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8'>
           <ExerciseForm topicId={null} demo={false} />
           {exercises?.map((exercise: Exercise, index: number) => (
             <ExerciseCard 

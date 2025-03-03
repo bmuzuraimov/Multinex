@@ -48,9 +48,9 @@ const ExerciseInterface: React.FC = () => {
         className='absolute top-0 left-0 right-0 bg-teal-500 h-1 rounded-full'
         style={{ width: `${((essayList.getCursor()?.id ?? 0) / essayList.getNodes().length) * 100}%` }}
       ></div>
-      <div className='relative flex-1 w-5/6 mx-auto leading-10 h-full py-12 scrollbar-hide'>
+      <div className='relative flex-1 w-5/6 mx-auto leading-10 h-full pb-12 pt-8 scrollbar-hide'>
         {essayList.getCursor()?.id === 0 && (
-          <div className='absolute top-6 left-0 flex flex-row items-center space-x-2 z-999 transform -translate-x-[105%] bg-white dark:bg-gray-800 p-1 rounded-lg animate-pulse'>
+          <div className='absolute top-6 left-0 flex flex-row items-center space-x-2 z-modal transform -translate-x-[105%] bg-white dark:bg-gray-800 p-1 rounded-lg animate-pulse'>
             <BsKeyboard className='w-5 h-5' />
             <span>Start typing</span>
             <BsArrowRight className='w-5 h-5' />

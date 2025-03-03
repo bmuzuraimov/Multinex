@@ -24,7 +24,7 @@ export class SubscriptionFeedbackEmail extends BaseEmailTemplate {
     return `
 Hi ${userName},
 
-Your ${enterprisePlanName} subscription has ended, and we'd love to hear your thoughts! Your feedback helps us improve and create a better experience for you and your team.
+Your ${enterprisePlanName} subscription has ended, and we'd love to listen your thoughts! Your feedback helps us improve and create a better experience for you and your team.
 
 Did the plan meet your needs? Is there anything we can do better? Let us know by sharing your feedback—it only takes a minute!
 
@@ -41,7 +41,7 @@ ${textUtils.generateSignature()}`;
       ${components.heading('Tell Us About Your Experience with Typit')}
       ${components.paragraph(`Hi ${userName},`)}
       ${components.paragraph(
-        `Your <strong>${enterprisePlanName}</strong> subscription has ended, and we'd love to hear ` +
+        `Your <strong>${enterprisePlanName}</strong> subscription has ended, and we'd love to listen ` +
         'your thoughts! Your feedback helps us improve and create a better experience for you ' +
         'and your team.'
       )}

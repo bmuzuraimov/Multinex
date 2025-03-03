@@ -54,7 +54,7 @@ type DemoExerciseResult = {
     createdAt: Date;
   };
   essay: string;
-  formattedEssay: Array<{ mode: "hear" | "type" | "write"; text: string[] }>;
+  formattedEssay: Array<{ mode: "listen" | "type" | "write"; text: string[] }>;
   audioUrl: string;
 };
 

@@ -3,253 +3,164 @@ const { resolveProjectPath } = require('wasp/dev');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  // content: ['./src/**/*.{js,jsx,ts,tsx}'],
   content: [resolveProjectPath('./src/**/*.{js,jsx,ts,tsx}')],
   darkMode: 'class',
   important: true,
   theme: {
     extend: {
-      backgroundImage: {
-        'courses': "url('./public/ielts2.png')",
-      },
       fontFamily: {
-        manrope: ['Manrope', 'sans-serif'],
-        dancing: ['Dancing Script', 'sans-serif'],
-        courgette: ['Courgette', 'sans-serif'],
-        montserrat: ['Montserrat', 'sans-serif'],
-        satoshi: ['Satoshi', 'sans-serif'],
+        // Primary brand fonts
+        manrope: ['Manrope', 'sans-serif'], // Modern, clean font for headings
+        montserrat: ['Montserrat', 'sans-serif'], // Professional font for body text
+        satoshi: ['Satoshi', 'sans-serif'], // Minimal, contemporary font for UI elements
+        
+        // Decorative fonts - use sparingly
+        dancing: ['Dancing Script', 'sans-serif'], // Script font for special occasions
+        courgette: ['Courgette', 'sans-serif'], // Casual handwritten style
       },
       colors: {
-        current: 'currentColor',
-        transparent: 'transparent',
-        white: '#FFFFFF',
-        black: '#1C2434',
-        'black-2': '#010101',
-        body: '#64748B',
-        bodydark: '#AEB7C0',
-        bodydark1: '#DEE4EE',
-        bodydark2: '#8A99AF',
-        primary: '#3C50E0',
-        secondary: '#80CAEE',
-        stroke: '#E2E8F0',
-        whiten: '#F1F5F9',
-        whiter: '#F5F7FD',
-        boxdark: '#24303F',
-        'boxdark-2': '#010101',
-        strokedark: '#2E3A47',
-        'form-strokedark': '#3d4d60',
-        'form-input': '#1d2a39',
-        'meta-1': '#DC3545',
-        'meta-2': '#EFF2F7',
-        'meta-3': '#10B981',
-        'meta-4': '#313D4A',
-        'meta-5': '#259AE6',
-        'meta-6': '#FFBA00',
-        'meta-7': '#FF6766',
-        'meta-8': '#F0950C',
-        'meta-9': '#E5E7EB',
-        success: '#219653',
-        danger: '#D34053',
-        warning: '#FFA70B',
+        // Brand color palette
+        primary: {
+          // Teal/Green - Main brand color for key UI elements
+          50: '#ebfef7',  // Background, hover states
+          100: '#cefdea', // Borders, dividers
+          200: '#a2f8da', // Secondary backgrounds
+          300: '#66efc9', // Accents
+          400: '#29deb1', // Hover states
+          500: '#05c49b', // Primary buttons, CTAs
+          600: '#00a07f', // Hover states for primary
+          700: '#008069', // Active states
+          800: '#006655', // Dark accents
+          900: '#015346', // Text on light backgrounds
+          950: '#002f28', // Deep backgrounds
+        },
+        secondary: {
+          // Blue - Supporting color for interactive elements
+          50: '#e4f3ff',  // Light backgrounds
+          100: '#cfe8ff', // Subtle highlights
+          200: '#a8d3ff', // Borders
+          300: '#74b4ff', // Icons, links
+          400: '#3e81ff', // Buttons
+          500: '#134fff', // Primary actions
+          600: '#003aff', // Hover states
+          700: '#003aff', // Active states
+          800: '#0034e4', // Dark accents
+          900: '#0022b0', // Deep accents
+          950: '#000b42', // Dark backgrounds
+        },
+        tertiary: {
+          // Orange - Used for warnings, highlights
+          50: '#fef5ef',  // Light backgrounds
+          100: '#ffdfc8', // Subtle highlights
+          200: '#ffbf90', // Borders
+          300: '#f79e51', // Icons
+          400: '#e4801d', // Text
+          500: '#c76905', // Primary actions
+          600: '#a15500', // Hover states
+          700: '#804805', // Active states
+          800: '#653d0a', // Dark accents
+          900: '#53350e', // Deep accents
+          950: '#050300', // Dark backgrounds
+        },
+        // Semantic colors for consistent messaging
+        success: '#219653', // Positive actions/feedback
+        danger: '#D34053',  // Errors/destructive actions
+        warning: '#FFA70B', // Warnings/caution states
       },
       screens: {
-        '2xsm': '375px',
-        xsm: '425px',
-        '3xl': '2000px',
-        ...defaultTheme.screens,
+        ...defaultTheme.screens, // Using Tailwind's default breakpoints
       },
-
       fontSize: {
-        'title-xxl': ['44px', '55px'],
-        'title-xl': ['36px', '45px'],
-        'title-xl2': ['33px', '45px'],
-        'title-lg': ['28px', '35px'],
-        'title-md': ['24px', '30px'],
-        'title-md2': ['26px', '30px'],
-        'title-sm': ['20px', '26px'],
-        'title-xsm': ['18px', '24px'],
+        // Consistent type scale for headings
+        'title-xxl': ['44px', '55px'], // Hero headlines
+        'title-xl': ['36px', '45px'],  // Main headlines
+        'title-lg': ['28px', '35px'],  // Section headlines
+        'title-md': ['24px', '30px'],  // Subsection headlines
+        'title-sm': ['20px', '26px'],  // Card headlines
+        'title-xsm': ['18px', '24px'], // Small headlines
       },
       spacing: {
-        4.5: '1.125rem',
-        5.5: '1.375rem',
-        6.5: '1.625rem',
-        7.5: '1.875rem',
-        8.5: '2.125rem',
-        9.5: '2.375rem',
-        10.5: '2.625rem',
-        11: '2.75rem',
-        11.5: '2.875rem',
-        12.5: '3.125rem',
-        13: '3.25rem',
-        13.5: '3.375rem',
-        14: '3.5rem',
-        14.5: '3.625rem',
-        15: '3.75rem',
-        15.5: '3.875rem',
-        16: '4rem',
-        16.5: '4.125rem',
-        17: '4.25rem',
-        17.5: '4.375rem',
-        18: '4.5rem',
-        18.5: '4.625rem',
-        19: '4.75rem',
-        19.5: '4.875rem',
-        21: '5.25rem',
-        21.5: '5.375rem',
-        22: '5.5rem',
-        22.5: '5.625rem',
-        24.5: '6.125rem',
-        25: '6.25rem',
-        25.5: '6.375rem',
-        26: '6.5rem',
-        27: '6.75rem',
-        27.5: '6.875rem',
-        29: '7.25rem',
-        29.5: '7.375rem',
-        30: '7.5rem',
-        31: '7.75rem',
-        32.5: '8.125rem',
-        34: '8.5rem',
-        34.5: '8.625rem',
-        35: '8.75rem',
-        36.5: '9.125rem',
-        37.5: '9.375rem',
-        39: '9.75rem',
-        39.5: '9.875rem',
-        40: '10rem',
-        42.5: '10.625rem',
-        44: '11rem',
-        45: '11.25rem',
-        46: '11.5rem',
-        47.5: '11.875rem',
-        49: '12.25rem',
-        50: '12.5rem',
-        52: '13rem',
-        52.5: '13.125rem',
-        54: '13.5rem',
-        54.5: '13.625rem',
-        55: '13.75rem',
-        55.5: '13.875rem',
-        59: '14.75rem',
-        60: '15rem',
-        62.5: '15.625rem',
-        65: '16.25rem',
-        67: '16.75rem',
-        67.5: '16.875rem',
-        70: '17.5rem',
-        72.5: '18.125rem',
-        73: '18.25rem',
-        75: '18.75rem',
-        90: '22.5rem',
-        94: '23.5rem',
-        95: '23.75rem',
-        100: '25rem',
-        115: '28.75rem',
-        125: '31.25rem',
-        132.5: '33.125rem',
-        150: '37.5rem',
-        171.5: '42.875rem',
-        180: '45rem',
-        187.5: '46.875rem',
-        203: '50.75rem',
-        230: '57.5rem',
-        242.5: '60.625rem',
+        // Standard spacing scale
+        0.5: '0.125rem', // 2px - Minimal spacing
+        1: '0.25rem',    // 4px - Tight spacing
+        2: '0.5rem',     // 8px - Default compact spacing
+        3: '0.75rem',    // 12px - Medium spacing
+        4: '1rem',       // 16px - Standard spacing
+        5: '1.25rem',    // 20px - Comfortable spacing
+        6: '1.5rem',     // 24px - Generous spacing
+        8: '2rem',       // 32px - Section spacing
+        10: '2.5rem',    // 40px - Large spacing
+        12: '3rem',      // 48px - Extra large spacing
+        16: '4rem',      // 64px - Section breaks
+        20: '5rem',      // 80px - Major section breaks
+        24: '6rem',      // 96px
+        32: '8rem',      // 128px
+        40: '10rem',     // 160px
+        48: '12rem',     // 192px
+        56: '14rem',     // 224px
+        64: '16rem',     // 256px
+        72: '18rem',     // 288px
+        80: '20rem',     // 320px
+        96: '24rem',     // 384px
       },
       maxWidth: {
-        2.5: '0.625rem',
-        3: '0.75rem',
-        4: '1rem',
-        11: '2.75rem',
-        13: '3.25rem',
-        14: '3.5rem',
-        15: '3.75rem',
-        22.5: '5.625rem',
-        25: '6.25rem',
-        30: '7.5rem',
-        34: '8.5rem',
-        35: '8.75rem',
-        40: '10rem',
-        42.5: '10.625rem',
-        44: '11rem',
-        45: '11.25rem',
-        70: '17.5rem',
-        90: '22.5rem',
-        94: '23.5rem',
-        125: '31.25rem',
-        132.5: '33.125rem',
-        142.5: '35.625rem',
-        150: '37.5rem',
-        180: '45rem',
-        203: '50.75rem',
-        230: '57.5rem',
-        242.5: '60.625rem',
-        270: '67.5rem',
-        280: '70rem',
-        292.5: '73.125rem',
+        // Container width constraints
+        xs: '20rem',  // 320px - Mobile
+        sm: '24rem',  // 384px - Large mobile
+        md: '28rem',  // 448px - Small tablet
+        lg: '32rem',  // 512px - Tablet
+        xl: '36rem',  // 576px - Small desktop
+        '2xl': '42rem', // 672px - Desktop
+        '3xl': '48rem', // 768px - Large desktop
+        '4xl': '56rem', // 896px - Extra large desktop
+        '5xl': '64rem', // 1024px - Wide desktop
+        '6xl': '72rem', // 1152px - Super wide
+        '7xl': '80rem', // 1280px - Ultra wide
       },
       maxHeight: {
-        35: '8.75rem',
-        70: '17.5rem',
-        90: '22.5rem',
-        550: '34.375rem',
-        300: '18.75rem',
+        // Vertical constraints
+        xs: '20rem',  // 320px - Small cards
+        sm: '24rem',  // 384px - Medium cards
+        md: '28rem',  // 448px - Large cards
+        lg: '32rem',  // 512px - Small sections
+        xl: '36rem',  // 576px - Medium sections
+        '2xl': '42rem', // 672px - Large sections
       },
       minWidth: {
-        22.5: '5.625rem',
-        42.5: '10.625rem',
-        47.5: '11.875rem',
-        75: '18.75rem',
+        // Minimum width constraints
+        xs: '20rem', // 320px - Small components
+        sm: '24rem', // 384px - Medium components
+        md: '28rem', // 448px - Large components
+        lg: '32rem', // 512px - Extra large components
       },
       zIndex: {
-        999999: '999999',
-        99999: '99999',
-        9999: '9999',
-        999: '999',
-        99: '99',
-        9: '9',
-        1: '1',
-      },
-      opacity: {
-        65: '.65',
-      },
-      content: {
-        'icon-copy': 'url("../images/icon/icon-copy-alt.svg")',
-      },
-      transitionProperty: { width: 'width', stroke: 'stroke' },
-      borderWidth: {
-        6: '6px',
+        // Z-index scale for consistent layering
+        behind: -1,    // Below normal flow
+        normal: 0,     // Default
+        above: 1,      // Slightly elevated
+        dropdown: 10,  // Dropdown menus
+        sticky: 20,    // Sticky elements
+        fixed: 30,     // Fixed elements
+        modal: 40,     // Modal dialogs
+        popover: 50,   // Popovers
+        tooltip: 60,   // Tooltips
       },
       boxShadow: {
-        default: '0px 8px 13px -3px rgba(0, 0, 0, 0.07)',
-        card: '0px 1px 3px rgba(0, 0, 0, 0.12)',
-        'card-2': '0px 1px 2px rgba(0, 0, 0, 0.05)',
-        switcher: '0px 2px 4px rgba(0, 0, 0, 0.2), inset 0px 2px 2px #FFFFFF, inset 0px -1px 1px rgba(0, 0, 0, 0.1)',
-        'switch-1': '0px 0px 5px rgba(0, 0, 0, 0.15)',
-        1: '0px 1px 3px rgba(0, 0, 0, 0.08)',
-        2: '0px 1px 4px rgba(0, 0, 0, 0.12)',
-        3: '0px 1px 5px rgba(0, 0, 0, 0.14)',
-        4: '0px 4px 10px rgba(0, 0, 0, 0.12)',
-        5: '0px 1px 1px rgba(0, 0, 0, 0.15)',
-        6: '0px 3px 15px rgba(0, 0, 0, 0.1)',
-        7: '-5px 0 0 #313D4A, 5px 0 0 #313D4A',
-        8: '1px 0 0 #313D4A, -1px 0 0 #313D4A, 0 1px 0 #313D4A, 0 -1px 0 #313D4A, 0 3px 13px rgb(0 0 0 / 8%)',
-      },
-      dropShadow: {
-        1: '0px 1px 0px #E2E8F0',
-        2: '0px 1px 4px rgba(0, 0, 0, 0.12)',
-      },
-      keyframes: {
-        rotating: {
-          '0%, 100%': { transform: 'rotate(360deg)' },
-          '50%': { transform: 'rotate(0deg)' },
-        },
+        // Elevation scale
+        sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+        DEFAULT: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+        md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+        lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+        xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+        inner: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
+        none: 'none',
       },
       animation: {
-        'ping-once': 'ping 5s cubic-bezier(0, 0, 0.2, 1)',
-        rotating: 'rotating 30s linear infinite',
-        'spin-1.5': 'spin 1.5s linear infinite',
-        'spin-2': 'spin 2s linear infinite',
-        'spin-3': 'spin 3s linear infinite',
+        // Standard animations
+        spin: 'spin 1s linear infinite',
+        ping: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite',
+        pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        bounce: 'bounce 1s infinite',
       },
     },
   },

@@ -184,7 +184,7 @@ async def generate_audio(
         logger.info(f"Processing audio generation for exercise {exerciseId}")
         logger.debug(f"Text to process: {generate_text}")
         
-        filtered_text = re.findall(r'<hear>(.*?)</hear>', generate_text)
+        filtered_text = re.findall(r'<listen>(.*?)</listen>', generate_text)
         if not filtered_text:
             return JSONResponse(
                 status_code=200,

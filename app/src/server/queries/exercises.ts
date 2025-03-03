@@ -9,11 +9,6 @@ import { getS3DownloadUrl } from '../utils/s3Utils';
 import { preprocessEssay } from '../utils/exerciseUtils';
 import { ExerciseStatus } from '@prisma/client';
 
-type FormattedEssaySection = {
-  mode: 'hear' | 'type' | 'write';
-  text: string[];
-};
-
 export const getExercisesWithNoTopic: GetExercisesWithNoTopic<void, Exercise[]> = async (_args, context) => {
   if (!context.user) {
     throw new HttpError(401);
@@ -77,7 +72,7 @@ type ExerciseResult = {
   audioTimestamps?: Array<{ word: string; start: number; end: number }> | string[];
   essay: string;
   formattedEssay: {
-    mode: 'hear' | 'type' | 'write';
+    mode: 'listen' | 'type' | 'write';
     text: string[];
   }[];
   [key: string]: any;

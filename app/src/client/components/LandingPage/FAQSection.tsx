@@ -2,30 +2,30 @@ import { faqs } from '../../common/contentSections';
 
 const FAQSection = () => {
   return (
-    <div className='relative mx-auto h-screen max-w-7xl px-6 pb-24 sm:pb-32 lg:px-8'>
+    <div className='relative mx-auto min-h-screen max-w-7xl px-6 py-24 font-montserrat'>
       <div className='absolute inset-0 -z-10 overflow-hidden'>
-        <div className='absolute left-[50%] top-0 h-[48rem] w-[84rem] -translate-x-1/2 bg-gradient-to-r from-teal-50 to-cyan-50 opacity-30 dark:from-teal-900/30 dark:to-cyan-900/30 [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]' />
+        <div className='absolute left-[50%] top-0 h-[48rem] w-[84rem] -translate-x-1/2 bg-gradient-to-r from-primary-50 to-secondary-50 opacity-20' />
       </div>
 
       <div className='mx-auto max-w-4xl text-center'>
-      <h2 className='mt-6 text-5xl font-bold bg-gradient-to-r from-gray-900 via-teal-800 to-gray-900 dark:from-white dark:via-teal-200 dark:to-white bg-clip-text text-transparent'>
+        <h2 className='font-manrope text-title-xl font-bold bg-gradient-to-r from-primary-900 via-primary-700 to-primary-900 bg-clip-text text-transparent'>
           Frequently Asked Questions
         </h2>
       </div>
 
-      <dl className='mx-auto mt-16 max-w-4xl space-y-4'>
+      <dl className='mx-auto mt-16 max-w-4xl space-y-6'>
         {faqs.map((faq) => (
           <div
             key={faq.id}
-            className='group rounded-2xl bg-white/60 dark:bg-gray-800/60 p-6 shadow-lg ring-1 ring-gray-900/5 dark:ring-white/5 backdrop-blur transition-all duration-300 hover:bg-white hover:shadow-xl dark:hover:bg-gray-800'
+            className='group rounded-2xl bg-white p-8 shadow-lg ring-1 ring-primary-100 transition-all duration-300 hover:shadow-xl hover:ring-primary-200'
           >
-            <dt className='flex items-center justify-between gap-x-3 text-lg font-semibold leading-7 text-gray-900 dark:text-gray-100'>
-              <span className='flex items-center gap-x-3'>
+            <dt className='flex items-center justify-between gap-x-4 text-title-sm font-semibold text-primary-900'>
+              <span className='flex items-center gap-x-4'>
                 <svg
-                  className='h-6 w-6 text-teal-500'
+                  className='h-6 w-6 text-primary-500'
                   fill='none'
                   viewBox='0 0 24 24'
-                  strokeWidth='1.5'
+                  strokeWidth='2'
                   stroke='currentColor'
                 >
                   <path
@@ -37,14 +37,14 @@ const FAQSection = () => {
                 {faq.question}
               </span>
             </dt>
-            <dd className='mt-4 text-base leading-7 text-gray-600 dark:text-gray-300'>
-              <p className='group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors duration-200'>
+            <dd className='mt-6 text-base leading-relaxed text-gray-600'>
+              <p className='group-hover:text-primary-900 transition-colors duration-200'>
                 {faq.answer}
               </p>
               {faq.href && (
                 <a
                   href={faq.href}
-                  className='mt-4 inline-flex items-center text-teal-600 dark:text-teal-400 hover:text-teal-500 dark:hover:text-teal-300 transition-colors duration-200'
+                  className='mt-4 inline-flex items-center font-satoshi text-primary-600 hover:text-primary-500 transition-colors duration-200'
                 >
                   Learn more
                   <svg className='ml-2 h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
@@ -61,10 +61,10 @@ const FAQSection = () => {
         ))}
       </dl>
 
-      <div className='mt-16 flex justify-center'>
+      <div className='mt-20 flex justify-center'>
         <a
           href='#contact'
-          className='rounded-full bg-teal-600 px-4 py-2 text-lg font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600'
+          className='rounded-full bg-primary-600 px-8 py-4 font-satoshi text-lg font-semibold text-white shadow-md transition-all duration-200 hover:bg-primary-500 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600'
         >
           Still have questions? Contact us
         </a>

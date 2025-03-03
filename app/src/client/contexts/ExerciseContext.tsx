@@ -6,7 +6,7 @@ interface ExerciseContextType {
   essayWordCount: number;
   essayCharCount: number;
   essayList: TextList;
-  formattedEssay: { mode: 'hear' | 'type' | 'write'; text: string[] }[];
+  formattedEssay: { mode: 'listen' | 'type' | 'write'; text: string[] }[];
   summary: string[];
   hasQuiz: boolean;
 
