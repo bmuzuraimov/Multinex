@@ -5,57 +5,82 @@ type FormattedEssaySection = {
 
 export function preprocessEssay(rawEssay: string) {
   // Parse the essay into formatted sections
-  // wrap newlines in <type> tags
-  const matches = Array.from(rawEssay.matchAll(/<(listen|write|type)>([\s\S]*?)<\/\1>/g));
-  const formattedEssay = matches.map(match => {
-    const [fullMatch, mode, content] = match;
-    // Get the character immediately after the matched section.
-    const endChar = rawEssay.charAt(match.index! + fullMatch.length);
-
-    if (mode === 'type') {
-      // For type sections, keep character-level granularity.
-      const chars = Array.from(content);
-      if (endChar === '\n' || endChar === ' ') {
-        // Instead of appending to the last element, add as a separate item.
-        chars.push(endChar);
+  // Use a regex that properly matches nested tags by counting opening/closing tags
+  const matches = [];
+  let pos = 0;
+  
+  while (pos < rawEssay.length) {
+    const tagMatch = rawEssay.slice(pos).match(/<(listen|write|type)>/);
+    if (!tagMatch) break;
+    
+    const mode = tagMatch[1];
+    const startPos = pos + tagMatch.index!;
+    pos = startPos + tagMatch[0].length;
+    
+    let depth = 1;
+    let contentStart = pos;
+    
+    // Find matching closing tag accounting for nesting
+    while (pos < rawEssay.length && depth > 0) {
+      const nextOpen = rawEssay.indexOf(`<${mode}>`, pos);
+      const nextClose = rawEssay.indexOf(`</${mode}>`, pos);
+      
+      if (nextClose === -1) break; // No matching close tag
+      
+      if (nextOpen !== -1 && nextOpen < nextClose) {
+        depth++;
+        pos = nextOpen + mode.length + 2;
+      } else {
+        depth--;
+        pos = nextClose + mode.length + 3;
       }
-      // Add newline after type sections
-      if (endChar !== '\n') {
-        chars.push('\n');
-      }
-      return {
-        mode: 'type',
-        text: chars
-      };
-    } else if (mode === 'listen') {
-      // For listen sections, keep word-level granularity.
-      // Split the content by whitespace, filtering out empty strings.
-      let words = content.split(/(\s+)/).filter(word => word !== '');
-      if (endChar === '\n' || endChar === ' ') {
-        // Push the trailing character as a separate element.
-        words.push(endChar);
-      }
-      return {
-        mode: 'listen',
-        text: words
-      };
-    } else { // mode === 'write'
-      // For write sections, treat the content as a whole but separate the end character.
-      let textArray = [content];
-      if (endChar === '\n' || endChar === ' ') {
-        textArray.push(endChar);
-      }
-      return {
-        mode: 'write',
-        text: textArray
-      };
     }
+    
+    if (depth === 0) {
+      const content = rawEssay.slice(contentStart, pos - mode.length - 3);
+      matches.push({
+        index: startPos,
+        groups: [rawEssay.slice(startPos, pos), mode, content]
+      });
+    }
+  }
+  
+  const formattedEssay = matches.map(match => {
+    const [fullMatch, mode, content] = match.groups;
+    // Get all characters between this match and the next tag or end of string
+    const endIndex = rawEssay.indexOf('<', match.index + fullMatch.length);
+    const endChars = endIndex === -1 
+      ? rawEssay.slice(match.index + fullMatch.length)
+      : rawEssay.slice(match.index + fullMatch.length, endIndex);
+
+    let text: string[];
+    
+    switch (mode) {
+      case 'type':
+        // For type sections, split into individual characters
+        text = Array.from(content);
+        if (endChars) text.push(...Array.from(endChars));
+        break;
+        
+      case 'listen':
+        // For listen sections, split by whitespace preserving spaces
+        text = content.split(/(\s+)/).filter(Boolean);
+        if (endChars) text.push(...endChars.split(/(\s+)/).filter(Boolean));
+        break;
+        
+      case 'write':
+      default:
+        // For write sections, keep as single chunk
+        text = [content];
+        if (endChars) text.push(...endChars.split(/(\s+)/).filter(Boolean));
+        break;
+    }
+
+    return { mode, text } as FormattedEssaySection;
   });
 
-  // Create the final essay string by joining all sections
+  // Join all sections to create final essay string
   const essay = formattedEssay.map(section => section.text.join('')).join('');
-  return { 
-    essay, 
-    formattedEssay: formattedEssay as FormattedEssaySection[] 
-  };
+  
+  return { essay, formattedEssay };
 }

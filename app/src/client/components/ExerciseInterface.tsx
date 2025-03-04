@@ -29,15 +29,29 @@ const ExerciseInterface: React.FC = () => {
 
   // Handle keyboard input
   useEffect(() => {
+    let isProcessing = false;
+
     const handleKeyDown = async (e: KeyboardEvent) => {
-      if (essayList.getNodes().length - 1 === essayList.getCursor()?.id) {
-        onSubmitExercise();
-      } else {
-        currentSpanRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        await essayList.handleKeyDown(e);
-        handleUpdate(); // Use the same update handler
+      if (isProcessing) return;
+      isProcessing = true;
+
+      try {
+        if (essayList.getNodes().length - 1 === essayList.getCursor()?.id) {
+          onSubmitExercise();
+        } else {
+          // Batch UI updates
+          requestAnimationFrame(() => {
+            currentSpanRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+          
+          await essayList.handleKeyDown(e);
+          handleUpdate();
+        }
+      } finally {
+        isProcessing = false;
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [essayList, currentSpanRef, handleUpdate]);
@@ -81,8 +95,8 @@ const ExerciseInterface: React.FC = () => {
                 }}
                 key={textNode.id}
               >
-                {textNode.value === '\n' ? '↵' : textNode.value}
-                {textNode.value === '\n' && <br />}
+                {textNode.value.startsWith('\n') ? '↵' : textNode.value}
+                {Array(textNode.value.split('\n').length - 1).fill(<br />)}
               </span>
             );
           })}
