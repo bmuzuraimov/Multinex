@@ -8,7 +8,9 @@ click==8.1.7
 distro==1.9.0
 elevenlabs==1.50.5
 et_xmlfile==2.0.0
+exceptiongroup==1.2.2
 fastapi==0.115.6
+git-filter-repo==2.47.0
 h11==0.14.0
 httpcore==1.0.7
 httpx==0.28.1
@@ -22,6 +24,7 @@ packaging==24.2
 pillow==11.0.0
 psycopg2-binary==2.9.10
 pydantic==2.10.3
+pydantic-settings==2.8.0
 pydantic_core==2.27.1
 PyMuPDF==1.25.1
 pytesseract==0.3.13
@@ -37,7 +40,7 @@ SQLAlchemy==2.0.37
 starlette==0.41.3
 tqdm==4.67.1
 typing_extensions==4.12.2
-urllib3>=1.25.4,<2.0
+urllib3==1.26.20
 uvicorn==0.34.0
 websockets==14.2
 XlsxWriter==3.2.0

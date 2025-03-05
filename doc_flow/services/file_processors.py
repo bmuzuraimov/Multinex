@@ -5,7 +5,7 @@ import pptx
 import openpyxl
 from PIL import Image
 
-from ocr_handler import perform_ocr, ocr_images_concurrently
+from services.ocr_handler import perform_ocr, ocr_images_concurrently
 
 logger = logging.getLogger(__name__)
 
