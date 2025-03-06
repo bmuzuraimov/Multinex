@@ -34,7 +34,6 @@ const HeroSection: React.FC = () => {
             <h1 className='text-3xl font-semibold tracking-tight text-gray-900 sm:text-6xl dark:text-gray-100'>
               <span className='text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-gray-900'>
                 Triathlon But For Brain
-                <span className='animate-pulse'>|</span>
               </span>
             </h1>
             <p className='mt-6 mx-auto max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-300'>

@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import HeroSection from '../components/LandingPage/HeroSection';
-import WhyTypit from '../components/LandingPage/WhyTypit';
+import WhyMultinex from '../components/LandingPage/WhyMultinex';
 import ExperienceSection from '../components/LandingPage/ExperienceSection';
 import FeaturesSection from '../components/LandingPage/FeatureSection';
 import FAQSection from '../components/LandingPage/FAQSection';
@@ -10,7 +10,7 @@ import FooterSection from '../components/LandingPage/FooterSection';
 const MainContent = memo(() => (
   <main className='bg-white dark:bg-gray-900'>
     <HeroSection />
-    <WhyTypit />
+    <WhyMultinex />
     <ExperienceSection />
     <FeaturesSection />
     <FAQSection />

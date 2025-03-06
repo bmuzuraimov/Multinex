@@ -120,7 +120,7 @@ const AboutPage: React.FC = () => {
       <section className='max-w-7xl mx-auto px-8 py-20 text-center'>
         <h1 className='font-satoshi text-title-xl font-bold text-primary-900 mb-6'>About Us</h1>
         <p className='font-montserrat text-lg text-primary-700 max-w-2xl mx-auto'>
-          Typit is dedicated to providing distilled and meaningful knowledge to help students retain information
+          Multinex is dedicated to providing distilled and meaningful knowledge to help students retain information
           effectively.
         </p>
       </section>
@@ -136,7 +136,7 @@ const AboutPage: React.FC = () => {
           information that doesn&apos;t sink into our long-term memory, unlike the pre-GenAI era. Yes, we need to reap
           the benefits of GenAI, but some knowledge we must retain for our own sake. In the end, we are studying our
           professions to become competent, not just to get good grades. There is so much redundant information that
-          professors carelessly put on their slides; we want clean and distilled knowledge. So Typit filters only useful
+          professors carelessly put on their slides; we want clean and distilled knowledge. So Multinex filters only useful
           information and lets you write down in your head slowly. It is like a workout exercise, one way to accomplish
           it.
         </p>

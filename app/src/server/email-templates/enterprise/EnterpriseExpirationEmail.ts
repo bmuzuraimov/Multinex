@@ -18,7 +18,7 @@ export class EnterpriseExpirationEmail extends BaseEmailTemplate {
   }
 
   protected generateSubject(): string {
-    return 'Your Enterprise Plan is Expiring Soon! - Typit';
+    return 'Your Enterprise Plan is Expiring Soon! - Multinex';
   }
 
   protected generateText(): string {
@@ -53,7 +53,7 @@ ${textUtils.generateSignature()}`;
       ${components.button('Renew Subscription', renewLink)}
       ${components.paragraph('If you need assistance or have any questions, feel free to contact us.')}
       ${components.paragraph('Thanks for your time, and have a great day!')}
-      ${components.paragraph('<strong>Typit</strong>')}
+      ${components.paragraph('<strong>Multinex</strong>')}
     `;
   }
 } 

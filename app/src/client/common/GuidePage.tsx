@@ -7,7 +7,7 @@ const GuidePage = () => {
         </h1>
 
         <p className="text-xl text-primary-900 leading-relaxed mb-12">
-          We're working hard to bring you a comprehensive guide to make the most of Typit.app. Stay tuned!
+          We're working hard to bring you a comprehensive guide to make the most of Multinex.app. Stay tuned!
         </p>
 
         <div className="mt-16 space-y-4">

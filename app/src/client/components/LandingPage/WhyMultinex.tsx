@@ -1,6 +1,6 @@
 import Depiction from './Depiction';
 
-const WhyTypit: React.FC = () => {
+const WhyMultinex: React.FC = () => {
   return (
     <div className='relative pt-14 w-full min-h-screen'>
       <Depiction />
@@ -8,4 +8,4 @@ const WhyTypit: React.FC = () => {
   );
 };
 
-export default WhyTypit;
+export default WhyMultinex;

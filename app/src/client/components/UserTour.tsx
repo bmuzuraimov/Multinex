@@ -28,7 +28,7 @@ const UserTour: React.FC<UserTourProps> = ({ userId }) => {
       target: 'body',
       content: (
         <div className='text-center font-montserrat'>
-          <h2 className='text-title-lg font-manrope font-bold mb-4 text-primary-900 dark:text-primary-100'>Welcome to Typit!</h2>
+          <h2 className='text-title-lg font-manrope font-bold mb-4 text-primary-900 dark:text-primary-100'>Welcome to Multinex!</h2>
           <p className='mb-4 text-gray-600 dark:text-gray-300'>This quick tour will guide you through the platform's key features.</p>
           <p className='text-secondary-600 dark:text-secondary-300 font-satoshi'>
             Click <strong>Next</strong> to proceed.

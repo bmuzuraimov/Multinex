@@ -16,7 +16,7 @@ export class TeamSeatLimitEmail extends BaseEmailTemplate {
   }
 
   protected generateSubject(): string {
-    return 'Your Team Has Reached Its Seat Limit - Typit';
+    return 'Your Team Has Reached Its Seat Limit - Multinex';
   }
 
   protected generateText(): string {
@@ -60,7 +60,7 @@ ${textUtils.generateSignature()}`;
       ${components.bulletList(bulletPoints)}
       ${components.button('Change Plan', changePlanLink)}
       ${components.paragraph('Thanks for your time, and have a great day!')}
-      ${components.paragraph('<strong>Typit</strong>')}
+      ${components.paragraph('<strong>Multinex</strong>')}
     `;
   }
 } 

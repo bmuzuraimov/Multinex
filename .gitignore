@@ -13,6 +13,6 @@
 *.pyo
 *.pyd
 *.venv
-document_parser/voices.json
+doc_flow/voices.json
 app/deploy_client.sh
 .venv

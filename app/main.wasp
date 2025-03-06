@@ -1,44 +1,40 @@
-app Typit {
+app Multinex {
   wasp: {
     version: "^0.15.2"
   },
 
-  title: "Typit",
+  title: "Multinex",
 
   head: [
       "<!-- General Meta Tags -->",
-      "<meta name='title' content='Typit - Interactive Typing Exercises from Your Notes' />",
-      "<meta name='description' content='Typit converts your PDF lecture notes into interactive exercises, helping you actively engage with material and improve memory retention.' />",
-      "<meta name='keywords' content='interactive typing exercises, PDF to exercises, active learning platform, Typit, study tools, memory retention, efficient studying, AI-powered learning' />",
-      "<meta name='author' content='Typit Team' />",
+      "<meta name='title' content='Multinex - Interactive Typing Exercises from Your Notes' />",
+      "<meta name='description' content='Multinex converts your PDF lecture notes into interactive exercises, helping you actively engage with material and improve memory retention.' />",
+      "<meta name='keywords' content='interactive typing exercises, PDF to exercises, active learning platform, Multinex, study tools, memory retention, efficient studying, AI-powered learning' />",
+      "<meta name='author' content='Multinex Team' />",
       "<meta name='viewport' content='width=device-width, initial-scale=1.0' />",
 
       "<!-- Open Graph Meta Tags for Social Sharing -->",
       "<meta property='og:type' content='website' />",
-      "<meta property='og:title' content='Typit - Interactive Typing Exercises from Your Notes' />",
-      "<meta property='og:url' content='https://www.typit.app' />",
-      "<meta property='og:description' content='Turn your PDF lecture notes into interactive typing exercises with Typit. Engage actively with your studies and improve learning retention.' />",
-      "<meta property='og:image' content='https://www.typit.app/public-banner.png' />",
-      "<meta property='og:image:alt' content='Typit - Convert PDFs into Interactive Exercises' />",
+      "<meta property='og:title' content='Multinex - Interactive Typing Exercises from Your Notes' />",
+      "<meta property='og:url' content='https://www.multinex.com' />",
+      "<meta property='og:description' content='Turn your PDF lecture notes into interactive typing exercises with Multinex. Engage actively with your studies and improve learning retention.' />",
+      "<meta property='og:image' content='https://www.multinex.com/public-banner.png' />",
+      "<meta property='og:image:alt' content='Multinex - Convert PDFs into Interactive Exercises' />",
       "<meta property='og:locale' content='en_US' />",
 
       "<!-- Twitter Meta Tags -->",
-      "<meta name='twitter:title' content='Typit - Interactive Typing Exercises from Your Notes' />",
-      "<meta name='twitter:description' content='Typit helps you actively engage with your lecture notes by converting PDFs into interactive typing exercises for better memory retention.' />",
-      "<meta name='twitter:image' content='https://www.typit.app/public-banner.png' />",
+      "<meta name='twitter:title' content='Multinex - Interactive Typing Exercises from Your Notes' />",
+      "<meta name='twitter:description' content='Multinex helps you actively engage with your lecture notes by converting PDFs into interactive typing exercises for better memory retention.' />",
+      "<meta name='twitter:image' content='https://www.multinex.com/public-banner.png' />",
       "<meta name='twitter:image:width' content='800' />",
       "<meta name='twitter:image:height' content='400' />",
       "<meta name='twitter:card' content='summary_large_image' />",
 
       "<!-- Canonical Link -->",
-      "<link rel='canonical' href='https://www.typit.app' />",
+      "<link rel='canonical' href='https://www.multinex.com' />",
 
       "<!-- Analytics -->",
-      "<script defer data-domain='typit.app' src='https://plausible.io/js/script.js'></script>",
-
-      "<!-- Rewardful -->",
-      "<script>(function(w,r){w._rwq=r;w[r]=w[r]||function(){(w[r].q=w[r].q||[]).push(arguments)}})(window,'rewardful');</script>",
-      "<script async src='https://r.wdfl.co/rw.js' data-rewardful='b3bc2d'></script>",
+      "<script defer data-domain='multinex.com' src='https://plausible.io/js/script.js'></script>",
   ],
 
   // 🔐 Auth out of the box! https://wasp-lang.dev/docs/auth/overview
@@ -48,8 +44,8 @@ app Typit {
       // Email-based authentication with verification and password reset
       email: {
         fromField: {
-          name: "Typit",
-          email: "onboard@typit.app"
+          name: "Multinex",
+          email: "onboard@multinex.com"
         },
         emailVerification: {
           clientRoute: EmailVerificationRoute,
@@ -82,8 +78,8 @@ app Typit {
   emailSender: {
     provider: Mailgun,
     defaultFrom: {
-      name: "Typit",
-      email: "auth@admin.typit.app"
+      name: "Multinex",
+      email: "auth@admin.multinex.com"
     },
   },
   // webSocket: {
@@ -173,7 +169,7 @@ page PortalPage {
 }
 
 
-route OnboardingPageRoute { path: "/portal/onboarding", to: OnboardingPage }
+route OnboardingPageRoute { path: "/onboarding", to: OnboardingPage }
 page OnboardingPage {
   authRequired: true,
   component: import OnboardingPage from "@src/client/app/OnboardingPage"

@@ -82,7 +82,7 @@ const ExperienceSection = () => {
           <div className='bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300'>
             <div className='inline-block mb-8'>
               <h3 className='font-manrope text-title-md font-bold text-primary-600'>
-                The Typit Learning System
+                The Multinex Learning System
               </h3>
             </div>
             <ul className='space-y-6'>{solutions.map(renderListItem)}</ul>

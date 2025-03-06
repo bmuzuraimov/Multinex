@@ -39,7 +39,7 @@ export const textUtils = {
   generateSignature: () => `
 Thanks for your time, and have a great day!
 
-Typit
+Multinex
 
 Type, write, listen. In one AI-powered workspace.`,
 

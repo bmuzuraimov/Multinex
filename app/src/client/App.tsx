@@ -19,7 +19,7 @@ export default function App() {
   // Redirect new users to onboarding if onBoardingCompleted is false/null
   useEffect(() => {
     if (user && user.onBoardingCompleted === false) { 
-      navigate('/portal/onboarding');
+      navigate('/onboarding');
     }
   }, [user, navigate]);
 

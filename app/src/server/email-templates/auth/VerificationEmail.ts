@@ -13,7 +13,7 @@ export class VerificationEmail extends BaseEmailTemplate {
   }
 
   protected generateSubject(): string {
-    return 'Verify Your Email Address - Typit';
+    return 'Verify Your Email Address - Multinex';
   }
 
   protected generateText(): string {
@@ -21,7 +21,7 @@ export class VerificationEmail extends BaseEmailTemplate {
     return `
 Hi ${userName},
 
-Thank you for signing up with Typit! To complete your registration, please verify your email address by clicking the link below:
+Thank you for signing up with Multinex! To complete your registration, please verify your email address by clicking the link below:
 
 ${verificationLink}
 
@@ -36,13 +36,13 @@ ${textUtils.generateSignature()}`;
       ${components.heading('Verify Your Email Address')}
       ${components.paragraph(`Hi ${userName},`)}
       ${components.paragraph(
-        'Thank you for signing up with <strong>Typit</strong>! To complete your registration, ' +
+        'Thank you for signing up with <strong>Multinex</strong>! To complete your registration, ' +
         'please verify your email address by clicking the link below:'
       )}
       ${components.button('Click to Verify', verificationLink)}
       ${components.paragraph("If you didn't create this account, you can ignore this email.")}
       ${components.paragraph('Thanks for your time, and have a great day!')}
-      ${components.paragraph('<strong>Typit</strong>')}
+      ${components.paragraph('<strong>Multinex</strong>')}
     `;
   }
 } 

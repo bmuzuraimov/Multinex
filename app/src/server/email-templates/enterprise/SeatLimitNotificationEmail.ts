@@ -18,7 +18,7 @@ export class SeatLimitNotificationEmail extends BaseEmailTemplate {
   }
 
   protected generateSubject(): string {
-    return 'Seat Limit Reached - Typit Enterprise';
+    return 'Seat Limit Reached - Multinex Enterprise';
   }
 
   protected generateText(): string {
@@ -62,7 +62,7 @@ ${textUtils.generateSignature()}`;
       ${components.bulletList(bulletPoints)}
       ${components.button('Check Account', accountLink)}
       ${components.paragraph('Thanks for your time, and have a great day!')}
-      ${components.paragraph('<strong>Typit</strong>')}
+      ${components.paragraph('<strong>Multinex</strong>')}
     `;
   }
 } 

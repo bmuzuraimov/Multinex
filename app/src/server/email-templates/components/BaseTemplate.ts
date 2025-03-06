@@ -192,8 +192,8 @@ export const baseLayout = (content: string, title: string) => `
                   <tr>
                     <td align="left" style="padding-bottom: ${spacing.lg};">
                       <img 
-                        src="https://typit.app/logo.png" 
-                        alt="Typit" 
+                        src="https://multinex.app/logo.png" 
+                        alt="Multinex" 
                         style="${styleToString(styles.logo)}" 
                         width="40"
                       />
@@ -210,7 +210,7 @@ export const baseLayout = (content: string, title: string) => `
               <td style="${styleToString(styles.footer)}">
                 <p style="margin: 0;">Type, write, listen. In one AI-powered workspace</p>
                 <p style="margin: ${spacing.xs} 0 0 0; color: ${colors.text.light};">
-                  © ${new Date().getFullYear()} Typit. All rights reserved.
+                  © ${new Date().getFullYear()} Multinex. All rights reserved.
                 </p>
               </td>
             </tr>

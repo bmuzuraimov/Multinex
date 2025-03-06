@@ -28,7 +28,7 @@ const FooterSection = () => {
                       className='text-2xl font-bold fill-primary-900'
                       style={{ fontFamily: 'Manrope' }}
                     >
-                      Typit
+                      Multinex
                     </text>
                   </svg>
                 </div>
@@ -41,16 +41,16 @@ const FooterSection = () => {
                   <a href="https://www.facebook.com/profile.php?id=61566443964554" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
                     <FaFacebook className='h-5 w-5' />
                   </a>
-                  <a href="https://x.com/typitapp" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
+                  <a href="https://x.com/multinex" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
                     <FaXTwitter className='h-5 w-5' />
                   </a>
-                  <a href="https://www.instagram.com/typitapp/" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
+                  <a href="https://www.instagram.com/multinex/" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
                     <FaInstagram className='h-5 w-5' />
                   </a>
-                  <a href="https://www.linkedin.com/company/typitapp/" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
+                  <a href="https://www.linkedin.com/company/multinex/" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
                     <FaLinkedin className='h-5 w-5' />
                   </a>
-                  <a href="https://www.tiktok.com/@typitapp" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
+                  <a href="https://www.tiktok.com/@multinex" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
                     <FaTiktok className='h-5 w-5' />
                   </a>
                 </div>
@@ -74,7 +74,7 @@ const FooterSection = () => {
                   ))}
                   <li>
                     <a
-                      href="https://typit.getrewardful.com/signup"
+                      href="https://multinex.getrewardful.com/signup"
                       target="_blank"
                       rel="noopener noreferrer" 
                       className='font-montserrat text-gray-500 hover:text-primary-600 transition-colors duration-200'
@@ -133,7 +133,7 @@ const FooterSection = () => {
           {/* Bottom bar */}
           <div className='mt-16 pt-8 border-t border-gray-100'>
             <p className='text-center font-satoshi text-sm text-gray-400'>
-              © {new Date().getFullYear()} Typit Tech. All rights reserved.
+              © {new Date().getFullYear()} Multinex Tech. All rights reserved.
             </p>
           </div>
         </div>

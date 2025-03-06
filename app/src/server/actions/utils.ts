@@ -33,7 +33,7 @@ export const truncateText = (text: any) => {
 export const reportToAdmin = async (message: string) => {
   await emailSender.send({
     to: process.env.ADMIN_EMAILS!,
-    subject: 'Typit.app Error',
+    subject: 'Multinex.app Error',
     text: message,
     html: message,
   });

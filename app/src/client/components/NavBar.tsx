@@ -4,10 +4,7 @@ import { AiFillCloseCircle } from 'react-icons/ai';
 import { HiBars3 } from 'react-icons/hi2';
 import { useAuth } from 'wasp/client/auth';
 import { Link } from 'wasp/client/router';
-import logo from '../static/logo.png';
 import { navigation } from '../common/contentSections';
-
-const NavLogo = memo(() => <img className='h-8' src={logo} alt='Typit' />);
 
 const NavigationLink = memo(({ item, onClick, isMobile = false }: { 
   item: { name: string; href: string; }; 
@@ -55,7 +52,7 @@ const NavBar: React.FC = () => {
             <div className='relative group'>
               <svg
                 className='h-8 w-auto transition-transform duration-300 ease-in-out transform group-hover:scale-110'
-                viewBox='0 0 120 40'
+                viewBox='0 0 160 40'
                 fill='none'
                 xmlns='http://www.w3.org/2000/svg'
               >
@@ -68,8 +65,9 @@ const NavBar: React.FC = () => {
                   y='28'
                   className='text-2xl font-bold fill-gray-800 dark:fill-white filter drop-shadow-md'
                   style={{ fontFamily: 'system-ui' }}
+                  textLength='100'
                 >
-                  Typit
+                  Multinex
                 </text>
                 <circle
                   cx='30'
@@ -114,8 +112,7 @@ const NavBar: React.FC = () => {
         <Dialog.Panel className='fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white dark:bg-gray-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-gray-100/10 transform transition-transform duration-300'>
           <div className='flex items-center justify-between'>
             <Link to='/' className='-m-1.5 p-1.5'>
-              <span className='sr-only'>Typit</span>
-              <NavLogo />
+              <span className='sr-only'>Multinex</span>
             </Link>
             <button
               type='button'

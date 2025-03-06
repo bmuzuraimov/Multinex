@@ -1,14 +1,3 @@
-import testimonial_1 from '../static/testimonial_1.jpg';
-import testimonial_2 from '../static/testimonial_2.jpg';
-import testimonial_3 from '../static/testimonial_3.jpg';
-import hku from '../static/hku.png';
-import cuhk from '../static/cuhk.png';
-import hkust from '../static/hkust.png';
-import cityu from '../static/cityu.jpg';
-import polyu from '../static/polyu.png';
-import hkbu from '../static/hkbu.png';
-import eduhk from '../static/eduhk.png';
-import lignan from '../static/lignan.png';
 import { FREE_CREDITS, ADMIN_EMAIL } from '../../shared/constants';
 import { routes } from 'wasp/client/router';
 
@@ -16,49 +5,6 @@ export const navigation = [
   { name: 'Courses', href: routes.PublicCoursesRoute.build() },
   { name: 'Pricing', href: routes.PricingPageRoute.build() },
   { name: 'About', href: routes.AboutPageRoute.build() },
-];
-
-export const universities = [
-  {
-    name: 'Hong Kong University of Science and Technology',
-    logoSrc: hkust,
-    href: '#',
-  },
-  {
-    name: 'University of Hong Kong',
-    logoSrc: hku,
-    href: '#',
-  },
-  {
-    name: 'Hong Kong Baptist University',
-    logoSrc: hkbu,
-    href: '#',
-  },
-  {
-    name: 'Hong Kong Polytechnic University',
-    logoSrc: polyu,
-    href: '#',
-  },
-  {
-    name: 'Chinese University of Hong Kong',
-    logoSrc: cuhk,
-    href: '#',
-  },
-  {
-    name: 'Education University of Hong Kong',
-    logoSrc: eduhk,
-    href: '#',
-  },
-  {
-    name: 'Lingnan University',
-    logoSrc: lignan,
-    href: '#',
-  },
-  {
-    name: 'City University of Hong Kong',
-    logoSrc: cityu,
-    href: '#',
-  }
 ];
 
 export const features = [
@@ -85,29 +31,6 @@ export const features = [
     description: 'Share your course with your friends and classmates.',
     icon: '📊',
     href: '#',
-  },
-];
-export const testimonials = [
-  {
-    name: 'Felipe K.',
-    role: 'Business Student',
-    avatarSrc: testimonial_1,
-    socialUrl: '',
-    quote: "Helps me to skip the boring part and get good grades.",
-  },
-  {
-    name: 'Eric J.',
-    role: 'Computer Science Student',
-    avatarSrc: testimonial_3,
-    socialUrl: '',
-    quote: 'I used spend too much time, now it takes me 10 minutes to cover a chapter.',
-  },
-  {
-    name: 'Destiny U.',
-    role: 'Computer Science Student',
-    avatarSrc: testimonial_2,
-    socialUrl: '#',
-    quote: 'This app helps to complement gaps in my understanding.',
   },
 ];
 

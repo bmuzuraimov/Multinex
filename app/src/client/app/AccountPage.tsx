@@ -21,7 +21,7 @@ export default function AccountPage({ user }: { user: User }) {
               Account Settings
             </h1>
             <p className='mt-2 text-base text-primary-600 font-satoshi'>
-              Manage your Typit account and security preferences
+              Manage your Multinex account and security preferences
             </p>
           </div>
           <button

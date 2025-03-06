@@ -13,19 +13,18 @@ export const onAfterSignup: OnAfterSignupHook = async ({ user, prisma }) => {
       post_prompt: DEFAULT_POST_PROMPT,
     },
   });
-  // Create a demo course for the user
-  // Create a demo course
+  
   if (user.email) {
     const { text, html } = welcomeEmail({
       userId: user.id,
       userName: user.username || user.email,
       userEmail: user.email,
-      loginLink: "https://typit.app/login" // Add your actual login URL here
+      loginLink: "https://multinex.app/login" // Add your actual login URL here
     });
     
     await emailSender.send({
       to: user.email,
-      subject: 'Welcome to Typit!',
+      subject: 'Welcome to Multinex!',
       text,
       html
     });
@@ -36,7 +35,7 @@ export const onAfterSignup: OnAfterSignupHook = async ({ user, prisma }) => {
       id: `welcome-course-${user.id}`,
       name: 'Productivity Hacks',
       image: 'https://picsum.photos/200',
-      description: 'Welcome to Typit! This is a demo course to help you get started.',
+      description: 'Welcome to Multinex! This is a demo course to help you get started.',
       userId: user.id,
       topics: {
         create: {

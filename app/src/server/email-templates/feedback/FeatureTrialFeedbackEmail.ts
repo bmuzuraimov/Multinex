@@ -31,7 +31,7 @@ Did it work as expected? Anything we can do better? Let us know by sharing your 
 
 Share your feedback here: ${feedbackLink}
 
-Thanks for being part of Typit!
+Thanks for being part of Multinex!
 
 ${textUtils.generateSignature()}`;
   }
@@ -49,9 +49,9 @@ ${textUtils.generateSignature()}`;
         'Did it work as expected? Anything we can do better? Let us know by sharing your feedback.'
       )}
       ${components.button('Send Feedback', feedbackLink)}
-      ${components.paragraph('Thanks for being part of <strong>Typit</strong>!')}
+      ${components.paragraph('Thanks for being part of <strong>Multinex</strong>!')}
       ${components.paragraph('Thanks for your time, and have a great day!')}
-      ${components.paragraph('<strong>Typit</strong>')}
+      ${components.paragraph('<strong>Multinex</strong>')}
     `;
   }
 }

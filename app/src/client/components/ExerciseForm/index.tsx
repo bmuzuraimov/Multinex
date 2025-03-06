@@ -323,7 +323,7 @@ const ExerciseForm: React.FC<{ topicId: string | null; demo: boolean }> = React.
       () => (
         <Link
           to={`/demo`}
-          className="w-full h-full flex flex-col items-center bg-white transition-all duration-300 ease-in-out"
+          className="w-full h-full flex flex-col items-center bg-white transition-all duration-300 ease-in-out pointer-events-auto"
         >
           <div className="flex h-full items-center justify-center w-full max-w-5xl mx-auto px-6 py-12">
             <div className="flex flex-col items-center p-8 justify-center w-full rounded-2xl cursor-pointer bg-gradient-to-br from-primary-50 to-white border border-primary-100 shadow-lg hover:shadow-xl transition-all duration-300">

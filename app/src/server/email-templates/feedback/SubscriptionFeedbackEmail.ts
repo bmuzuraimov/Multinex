@@ -16,7 +16,7 @@ export class SubscriptionFeedbackEmail extends BaseEmailTemplate {
   }
 
   protected generateSubject(): string {
-    return 'Tell Us About Your Experience with Typit';
+    return 'Tell Us About Your Experience with Multinex';
   }
 
   protected generateText(): string {
@@ -30,7 +30,7 @@ Did the plan meet your needs? Is there anything we can do better? Let us know by
 
 Share your feedback here: ${feedbackLink}
 
-Thanks for being part of Typit!
+Thanks for being part of Multinex!
 
 ${textUtils.generateSignature()}`;
   }
@@ -38,7 +38,7 @@ ${textUtils.generateSignature()}`;
   protected generateHtmlContent(): string {
     const { userName, enterprisePlanName, feedbackLink } = this.params;
     return `
-      ${components.heading('Tell Us About Your Experience with Typit')}
+      ${components.heading('Tell Us About Your Experience with Multinex')}
       ${components.paragraph(`Hi ${userName},`)}
       ${components.paragraph(
         `Your <strong>${enterprisePlanName}</strong> subscription has ended, and we'd love to listen ` +
@@ -50,9 +50,9 @@ ${textUtils.generateSignature()}`;
         'sharing your feedback—it only takes a minute!'
       )}
       ${components.button('Send Feedback', feedbackLink)}
-      ${components.paragraph('Thanks for being part of <strong>Typit</strong>!')}
+      ${components.paragraph('Thanks for being part of <strong>Multinex</strong>!')}
       ${components.paragraph('Thanks for your time, and have a great day!')}
-      ${components.paragraph('<strong>Typit</strong>')}
+      ${components.paragraph('<strong>Multinex</strong>')}
     `;
   }
 } 

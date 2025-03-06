@@ -1,4 +1,4 @@
-# Typit
+# Multinex
 
 A platform to fill gaps in the education by revising materials efficiently and typing through important parts of the documents.
 
@@ -21,8 +21,8 @@ curl -sSL https://get.wasp-lang.dev/installer.sh | sh -s -- --version 0.15.2
 ### 2. Clone the Repository
 
 ```bash
-git clone https://github.com/bmuzuraimov/Typit
-cd Typit
+git clone https://github.com/bmuzuraimov/Multinex
+cd Multinex
 ```
 
 ### 3. Set Up the Database
@@ -40,7 +40,7 @@ wasp db migrate-dev
 In a new terminal, run:
 
 ```bash
-cd document_parser
+cd doc_flow
 python3.9 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -90,4 +90,4 @@ Contributions are welcome! Please check out our [CONTRIBUTING.md](CONTRIBUTING.m
 
 ## Support
 
-For support, please [create an issue](https://github.com/bmuzuraimov/Typit/issues) or contact [bmuzuraimov@gmail.com](mailto:bmuzuraimov@gmail.com).
+For support, please [create an issue](https://github.com/bmuzuraimov/Multinex/issues) or contact [bmuzuraimov@gmail.com](mailto:bmuzuraimov@gmail.com).
