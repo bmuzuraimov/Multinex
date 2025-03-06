@@ -148,7 +148,10 @@ export class TextList {
   public async handleKeyDown(e: KeyboardEvent): Promise<void> {
     if (!this.currentNode) return;
 
-    switch (this.currentNode.mode) {
+    // Cache the current mode to avoid repeated property access
+    const currentMode = this.currentNode.mode;
+    
+    switch (currentMode) {
       case 'listen':
         await this.handleListenMode(e);
         break;
@@ -163,45 +166,73 @@ export class TextList {
 
   private async handleListenMode(e: KeyboardEvent) {
     if (e.key === 'Backspace') {
-      while (this.currentNode?.prev?.value === ' ') {
-        this.moveCursor(false);
+      // Optimize backspace handling by checking conditions first
+      if (this.currentNode?.prev?.value === ' ') {
+        do {
+          this.moveCursor(false);
+        } while (this.currentNode?.prev?.value === ' ');
       }
       this.moveCursor(false);
       return;
     }
 
+    // Find the start node more efficiently
     let startNode = this.currentNode;
-    while (startNode && startNode.wordIndex === undefined) {
-      if (!startNode.next) break;
-      startNode = startNode.next;
+    if (startNode && startNode.wordIndex === undefined) {
+      let nextNode = startNode.next;
+      while (nextNode && nextNode.wordIndex === undefined) {
+        nextNode = nextNode.next;
+      }
+      if (nextNode) startNode = nextNode;
     }
-    this.audioController?.setCurrentTime(startNode?.wordIndex);
+    
+    // Set audio time only if we have a valid wordIndex
+    if (startNode?.wordIndex !== undefined) {
+      this.audioController?.setCurrentTime(startNode.wordIndex);
+    }
 
+    // Find the last node and playEnd time more efficiently
     let lastNode = this.currentNode;
     let playEnd = 0;
+    
+    // Pre-calculate the end time to avoid doing this in the audio update loop
     while (lastNode && lastNode.mode === 'listen') {
       if (lastNode.wordIndex !== undefined) {
-        playEnd = this.audioController?.getTimeStamp(lastNode.wordIndex)?.end || 0;
+        const timestamp = this.audioController?.getTimeStamp(lastNode.wordIndex);
+        if (timestamp && timestamp.end > playEnd) {
+          playEnd = timestamp.end;
+        }
       }
       if (!lastNode.next) break;
       lastNode = lastNode.next;
     }
 
-    // Create an audio update callback
+    // Create an optimized audio update callback
     const onAudioUpdate = () => {
       const currentTime = this.audioController?.getCurrentTime() || 0;
       let node = this.currentNode;
+      
+      // Process nodes in batches to reduce UI updates
+      const nodesToUpdate: TextNode[] = [];
       
       while (node && node.mode === 'listen') {
         const timestamp = node.wordIndex !== undefined ? 
           this.audioController?.getTimeStamp(node.wordIndex) : undefined;
         
         if (timestamp && currentTime >= timestamp.start) {
-          node.highlightText();
-          this.moveCursor(true);
-          this.onUpdate?.();
+          nodesToUpdate.push(node);
         }
         node = node.next || null;
+      }
+      
+      // Batch process all nodes that need updating
+      if (nodesToUpdate.length > 0) {
+        for (const node of nodesToUpdate) {
+          node.highlightText();
+          this.moveCursor(true);
+        }
+        // Call onUpdate only once after processing all nodes
+        this.onUpdate?.();
       }
     };
 
@@ -215,8 +246,16 @@ export class TextList {
       this.audioController?.removeEventListener('timeupdate', onAudioUpdate);
       
       // Move cursor to first non-listen mode node if still in listen mode
-      while (this.currentNode?.mode === 'listen' && this.currentNode.next) {
-        this.moveCursor(true);
+      if (this.currentNode?.mode === 'listen') {
+        let nextNonListenNode = this.currentNode;
+        while (nextNonListenNode.mode === 'listen' && nextNonListenNode.next) {
+          nextNonListenNode = nextNonListenNode.next;
+        }
+        
+        // If we found a non-listen node, move to it directly instead of stepping through each node
+        if (nextNonListenNode !== this.currentNode && nextNonListenNode.mode !== 'listen') {
+          this.setCursor(nextNonListenNode);
+        }
       }
     }
   }
@@ -237,9 +276,21 @@ export class TextList {
         this.moveCursor(true);
         break;
       case 'Tab':
-        while (this.currentNode && this.currentNode.value !== ' ' && this.currentNode.value !== '\n') {
-          this.currentNode.highlightText();
-          if (!this.moveCursor(true)) break;
+        // Optimize tab handling by finding the end of the word directly
+        const startNode = this.currentNode;
+        let currentNode = startNode;
+        
+        while (currentNode && currentNode.value !== ' ' && currentNode.value !== '\n') {
+          currentNode.highlightText();
+          if (!currentNode.next) break;
+          currentNode = currentNode.next;
+        }
+        
+        // Set cursor directly to the end node instead of stepping through
+        if (currentNode !== startNode) {
+          this.setCursor(currentNode);
+        } else {
+          this.moveCursor(true);
         }
         break;
       default:

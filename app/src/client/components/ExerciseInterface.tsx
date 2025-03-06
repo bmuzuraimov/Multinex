@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BsPlayFill, BsStopFill, BsTextareaT, BsKeyboard, BsArrowRight } from 'react-icons/bs';
 import { TEXT_SIZES } from '../../shared/constants';
 import { useExerciseContext } from '../contexts/ExerciseContext';
@@ -10,6 +10,9 @@ const ExerciseInterface: React.FC = () => {
   const [showTextSizeMenu, setShowTextSizeMenu] = useState(false);
 
   const [currentSpanRef, setCurrentSpanRef] = useState<HTMLSpanElement | null>(null);
+  const isProcessingRef = useRef(false);
+  const lastKeyTimeRef = useRef(0);
+  const KEY_THROTTLE_MS = 50; // Throttle key events to 50ms
 
   // Create update callback
   const handleUpdate = useCallback(() => {
@@ -32,29 +35,43 @@ const ExerciseInterface: React.FC = () => {
     let isProcessing = false;
 
     const handleKeyDown = async (e: KeyboardEvent) => {
-      if (isProcessing) return;
-      isProcessing = true;
+      // Throttle key events to prevent excessive processing
+      const now = Date.now();
+      if (now - lastKeyTimeRef.current < KEY_THROTTLE_MS) {
+        return;
+      }
+      lastKeyTimeRef.current = now;
+
+      // Prevent multiple simultaneous executions
+      if (isProcessingRef.current) return;
+      isProcessingRef.current = true;
 
       try {
         if (essayList.getNodes().length - 1 === essayList.getCursor()?.id) {
           onSubmitExercise();
         } else {
-          // Batch UI updates
-          requestAnimationFrame(() => {
-            currentSpanRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          });
+          // Schedule UI updates separately from key processing
+          if (currentSpanRef) {
+            requestAnimationFrame(() => {
+              currentSpanRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+          }
           
           await essayList.handleKeyDown(e);
-          handleUpdate();
+          
+          // Schedule state updates in the next frame
+          requestAnimationFrame(() => {
+            handleUpdate();
+          });
         }
       } finally {
-        isProcessing = false;
+        isProcessingRef.current = false;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [essayList, currentSpanRef, handleUpdate]);
+  }, [essayList, currentSpanRef, handleUpdate, onSubmitExercise]);
 
   return (
     <div className='w-full h-[calc(100vh-64px)] flex flex-col relative'>
