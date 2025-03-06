@@ -15,6 +15,8 @@ import fetch from 'node-fetch';
 import FormData from 'form-data';
 import { ExerciseStatus } from '@prisma/client';
 import { DEFAULT_PRE_PROMPT, DEFAULT_POST_PROMPT } from '../../shared/constants';
+
+const openaiService = new OpenAIService();
 export const createExercise: CreateExercise<{ name: string; topicId: string | null }, Exercise> = async (
   { name, topicId },
   context
@@ -106,7 +108,7 @@ export const generateExercise: GenerateExercise<
           where: { userId: context.user.id },
         })
       : null;
-    const exerciseResponse = await OpenAIService.generateExercise(
+    const exerciseResponse = await openaiService.generateExercise(
       truncatedExerciseText,
       priorKnowledgeArray.join(','),
       length,
@@ -140,7 +142,7 @@ export const generateExercise: GenerateExercise<
   let complexityJson: any;
   let complexityUsage = 0;
   try {
-    const complexityResponse = await OpenAIService.generateComplexity(lectureContent, model, MAX_TOKENS, sensoryModes);
+    const complexityResponse = await openaiService.generateComplexity(lectureContent, model, MAX_TOKENS, sensoryModes);
     if (complexityResponse.success && complexityResponse.data?.taggedText) {
       complexityJson = complexityResponse.data;
       complexityUsage = complexityResponse.usage || 0;
@@ -182,7 +184,7 @@ export const generateExercise: GenerateExercise<
   let summaryJson = null;
   if (includeSummary) {
     try {
-      const summaryResponse = await OpenAIService.generateSummary(lectureContent, model, MAX_TOKENS);
+      const summaryResponse = await openaiService.generateSummary(lectureContent, model, MAX_TOKENS);
       if (summaryResponse.success && summaryResponse.data) {
         summaryJson = summaryResponse.data;
 
@@ -204,7 +206,7 @@ export const generateExercise: GenerateExercise<
   let questions = null;
   if (includeMCQuiz) {
     try {
-      const questionsResponse = await OpenAIService.generateQuestions(lectureContent, model, MAX_TOKENS);
+      const questionsResponse = await openaiService.generateQuestions(lectureContent, model, MAX_TOKENS);
       if (questionsResponse.success && questionsResponse.data) {
         questions = questionsResponse.data.questions;
 

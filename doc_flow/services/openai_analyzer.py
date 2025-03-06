@@ -12,10 +12,11 @@ logger = logging.getLogger(__name__)
 
 class OpenAIAPIError(Exception):
     """Custom exception for OpenAI API errors"""
-    def __init__(self, message, error_code=None, error_type=None):
+    def __init__(self, message, error_code=None, error_type=None, http_status=500):
         self.message = message
         self.error_code = error_code
         self.error_type = error_type
+        self.http_status = http_status
         super().__init__(self.message)
 
 class ContentAnalyzer:
@@ -52,19 +53,45 @@ class ContentAnalyzer:
             logger.error(f"OpenAI API error: {e}")
             
             if isinstance(e, openai.PermissionDeniedError):
-                error_code = "unsupported_country_region_territory"
-                error_type = "request_forbidden"
+                if getattr(e, 'code', None) == 'unsupported_country_region_territory':
+                    raise OpenAIAPIError(
+                        "Service is not available in your region. Please use a supported region or contact support for assistance.",
+                        error_code='unsupported_country_region_territory',
+                        error_type='permission_denied',
+                        http_status=403
+                    )
                 raise OpenAIAPIError(
-                    "Service is not available in your region. Please check your VPN settings or contact support.",
-                    error_code=error_code,
-                    error_type=error_type
+                    "Access denied. Please check your API key and permissions.",
+                    error_code=getattr(e, 'code', None),
+                    error_type='permission_denied',
+                    http_status=403
+                )
+            elif isinstance(e, openai.RateLimitError):
+                raise OpenAIAPIError(
+                    "Rate limit exceeded. Please try again later.",
+                    error_code='rate_limit_exceeded',
+                    error_type='rate_limit',
+                    http_status=429
+                )
+            elif isinstance(e, openai.APIConnectionError):
+                raise OpenAIAPIError(
+                    "Unable to connect to OpenAI services. Please check your internet connection.",
+                    error_code='api_connection_error',
+                    error_type='connection_error',
+                    http_status=503
+                )
+            elif isinstance(e, openai.InvalidRequestError):
+                raise OpenAIAPIError(
+                    "Invalid request parameters. Please check your input.",
+                    error_code=getattr(e, 'code', None),
+                    error_type='invalid_request',
+                    http_status=400
                 )
             
-            error_code = getattr(e, 'code', None)
-            error_type = type(e).__name__
-            
+            # Generic error handler
             raise OpenAIAPIError(
-                "Failed to analyze text content. Please try again later.",
-                error_code=error_code,
-                error_type=error_type
+                "An unexpected error occurred while processing your request. Please try again later.",
+                error_code=getattr(e, 'code', None),
+                error_type=type(e).__name__,
+                http_status=500
             ) 

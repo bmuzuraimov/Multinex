@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Form, Depends
 from fastapi.responses import JSONResponse
 import logging
-from typing import Dict
+from typing import Dict, Union
 import re
 
 from services.file_processor_service import FileProcessorService
@@ -14,6 +14,7 @@ from schemas.api import (
     ErrorResponse
 )
 from services.database_service import DatabaseService
+from services.openai_analyzer import OpenAIAPIError
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +42,11 @@ def validate_file_type(file_type: str) -> str:
         )
     return file_type.lower()
 
-@router.post("/get-exercise-topics", response_model=ExerciseTopicsResponse)
+@router.post("/get-exercise-topics", response_model=Union[ExerciseTopicsResponse, ErrorResponse])
 async def get_exercise_topics(
     fileId: str = Form(...),
     fileType: str = Form(...)
-) -> ExerciseTopicsResponse:
+) -> Union[ExerciseTopicsResponse, ErrorResponse]:
     """
     Extract topics from a document file.
     
@@ -54,7 +55,7 @@ async def get_exercise_topics(
         fileType: Type of the file (pdf, ppt, pptx, xls, xlsx)
         
     Returns:
-        List of extracted topics
+        List of extracted topics or error response
     """
     try:
         # Validate inputs
@@ -71,12 +72,31 @@ async def get_exercise_topics(
         return ExerciseTopicsResponse(**results)
     except FileNotFoundError as e:
         logger.error(f"File not found: {str(e)}")
-        raise HTTPException(status_code=404, detail=str(e))
-    except HTTPException:
-        raise
+        return JSONResponse(
+            status_code=404,
+            content=ErrorResponse(
+                success=False,
+                message=f"File not found: {str(e)}"
+            ).dict()
+        )
+    except OpenAIAPIError as e:
+        logger.error(f"OpenAI API error: {str(e)}")
+        return JSONResponse(
+            status_code=e.http_status,
+            content=ErrorResponse(
+                success=False,
+                message=e.message
+            ).dict()
+        )
     except Exception as e:
         logger.exception("Error processing file")
-        raise HTTPException(status_code=500, detail=str(e))
+        return JSONResponse(
+            status_code=500,
+            content=ErrorResponse(
+                success=False,
+                message="An unexpected error occurred while processing your request."
+            ).dict()
+        )
 
 @router.post("/generate-audio", response_model=AudioGenerationResponse)
 async def generate_audio(

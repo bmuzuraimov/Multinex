@@ -48,7 +48,7 @@ type DemoExerciseResult = {
 };
 
 const DemoPage: React.FC = React.memo(() => {
-  const [textSize, setTextSize] = useState('2xl');
+  const [textSize, setTextSize] = useState('xl');
   const [mode, setMode] = useState<'typing' | 'submitted' | 'test'>('typing');
   const [highlightedNodes, setHighlightedNodes] = useState<number[]>([0]);
 

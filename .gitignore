@@ -16,3 +16,4 @@
 doc_flow/voices.json
 app/deploy_client.sh
 .venv
+.cursor/rules/cursorrules.mdc

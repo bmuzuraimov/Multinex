@@ -17,7 +17,7 @@ model User {
 
   stripeId            String?
   checkoutSessionId   String?
-  sendEmail           Boolean   @default(false)
+  sendEmail           Boolean   @default(true)
   onBoardingCompleted Boolean   @default(false)
   tourCompleted       Boolean   @default(false)
   datePaid            DateTime?

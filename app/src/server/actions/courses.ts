@@ -4,6 +4,8 @@ import { type CreateCourse, type GenerateCourse, type UpdateCourse, type DeleteC
 import { OPENAI_MODEL, MAX_TOKENS } from '../../shared/constants';
 import { OpenAIService } from '../llm/models/openai';
 
+const openaiService = new OpenAIService();
+
 export const createCourse: CreateCourse<
   { name: string; description: string; image: string },
   { success: boolean; message: string }
@@ -131,7 +133,7 @@ export const generateCourse: GenerateCourse<
   }
 
   try {
-    const result = await OpenAIService.generateCourse(
+    const result = await openaiService.generateCourse(
       syllabusContent,
       OPENAI_MODEL,
       MAX_TOKENS

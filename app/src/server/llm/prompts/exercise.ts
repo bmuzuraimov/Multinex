@@ -1,10 +1,3 @@
-import fs from 'fs';
-
-interface Prompt {
-  role: 'system' | 'user';
-  content: string;
-}
-
 export const GENERATE_EXERCISE_PROMPT = ({
   priorKnowledge,
   level,
@@ -72,10 +65,6 @@ export const GENERATE_SUMMARY_PROMPT = ({
   ];
 };
 
-/**
- * Dynamically generate the "study method tags" prompt so it only includes
- * instructions for the modes that the user actually selected.
- */
 export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({
   content,
   sensoryModes,

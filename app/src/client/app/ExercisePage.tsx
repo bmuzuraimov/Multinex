@@ -10,7 +10,7 @@ import useExercise from '../hooks/useExercise';
 
 const ExercisePage: React.FC = React.memo(() => {
   const { exerciseId } = useParams();
-  const [textSize, setTextSize] = useState('2xl');
+  const [textSize, setTextSize] = useState('xl');
   const [mode, setMode] = useState<'typing' | 'submitted' | 'test'>('typing');
   const [highlightedNodes, setHighlightedNodes] = useState<number[]>([0]);
   const { data: exercise, isLoading } = useQuery(getExerciseById, {
