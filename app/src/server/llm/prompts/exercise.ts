@@ -1,3 +1,5 @@
+import { exerciseFormat, complexityFormat, summaryFormat } from '../response_formats';
+
 export const GENERATE_EXERCISE_PROMPT = ({
   priorKnowledge,
   level,
@@ -12,10 +14,7 @@ export const GENERATE_EXERCISE_PROMPT = ({
   content: string;
   pre_prompt: string;
   post_prompt: string;
-}): {
-  role: 'system' | 'user';
-  content: string;
-}[] => {
+}): { messages: { role: 'system' | 'user'; content: string }[]; response_format: any } => {
   const prompt = `${pre_prompt}
 
   Document content: ${content}
@@ -28,27 +27,27 @@ export const GENERATE_EXERCISE_PROMPT = ({
   
   ${post_prompt}`;
 
-  console.log('prompt', prompt);
-  return [
-    {
-      role: 'user',
-      content: prompt,
-    },
-  ];
+  return {
+    messages: [
+      {
+        role: 'user',
+        content: prompt,
+      },
+    ],
+    response_format: exerciseFormat,
+  };
 };
 
 export const GENERATE_SUMMARY_PROMPT = ({
   content,
 }: {
   content: string;
-}): {
-  role: 'system' | 'user';
-  content: string;
-}[] => {
-  return [
-    {
-      role: 'system',
-      content: `You are an AI assistant tasked with summarizing paragraphs from a text. You will receive a 'lectureText' that consists of multiple paragraphs separated by '\\n\\n'. For each paragraph, generate a concise name with 2-3 words. Combine these summaries into a single string, separating each summary with '|'.
+}): { messages: { role: 'system' | 'user'; content: string }[]; response_format: any } => {
+  return {
+    messages: [
+      {
+        role: 'system',
+        content: `You are an AI assistant tasked with summarizing paragraphs from a text. You will receive a 'lectureText' that consists of multiple paragraphs separated by '\\n\\n'. For each paragraph, generate a concise name with 2-3 words. Combine these summaries into a single string, separating each summary with '|'.
     The final output must be a valid JSON object in the following format:
     
     {
@@ -56,13 +55,15 @@ export const GENERATE_SUMMARY_PROMPT = ({
     }
     
     Do not include any additional text outside of the JSON object. Ensure that the JSON is properly formatted.`,
-    },
-    {
-      role: 'user',
-      content: `Please generate paragraph outline for the following lectureText:
+      },
+      {
+        role: 'user',
+        content: `Please generate paragraph outline for the following lectureText:
     ${content}`,
-    },
-  ];
+      },
+    ],
+    response_format: summaryFormat
+  };
 };
 
 export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({
@@ -71,7 +72,7 @@ export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({
 }: {
   content: string;
   sensoryModes: string[];
-}): { role: 'system' | 'user'; content: string }[] => {
+}): { messages: { role: 'system' | 'user'; content: string }[]; response_format: any } => {
   // Build instructions based on the selected modes.
   let instructions = '';
 
@@ -116,91 +117,23 @@ export const GENERATE_STUDY_METHOD_TAGS_PROMPT = ({
     instructions += '\n';
   });
 
-  return [
-    {
-      role: 'system',
-      content: `You are an AI assistant specialized in analyzing text complexity and learning methods. Your task is to analyze the given text and tag different segments based on their learning importance and recommended study method. IMPORTANT: You must not modify or rephrase any of the original text - only add a single tag around each segment.
+  return {
+    messages: [
+      {
+        role: 'system',
+        content: `You are an AI assistant specialized in analyzing text complexity and learning methods. Your task is to analyze the given text and tag different paragraphs based on their learning importance and recommended study method. IMPORTANT: You must not modify or rephrase any of the original text - only add a single tag around each paragraph.
 
       Tag each segment with exactly one of these tags, ensuring proper spacing between tags:
       
       ${instructions}
-      Return the exact same text with a single appropriate learning method tag around each segment. Add a newline between different tagged segments. Do not use nested tags. Do not change any words or formatting - only add tags with proper spacing between them.`,
-    },
-    {
-      role: 'user',
-      content: `Please analyze the following text and add a single appropriate learning method tag around each segment, ensuring proper spacing and newlines between different tagged segments:
+      Return the exact same text with a single appropriate learning method tag around each paragraph. Add a newline between different tagged paragraphs. Do not use nested tags. Do not change any words or formatting - only add tags with proper spacing between them.`,
+      },
+      {
+        role: 'user',
+        content: `Please analyze the following text and add a single appropriate learning method tag around each paragraph, ensuring proper spacing and newlines between different tagged paragraphs:
       ${content}`,
-    },
-  ];
-};
-
-export const GENERATE_EXAM_PROMPT = ({
-  content,
-}: {
-  content: string;
-}): {
-  role: 'system' | 'user';
-  content: string;
-}[] => {
-  // Define the system prompt for generating MC questions
-  const systemPrompt = `You are an AI assistant specialized in creating final exam-quality multiple-choice questions (MCQs). Your task is to design comprehensive and challenging MCQs based on the provided lecture text, emphasizing critical concepts, formulas, and key details. These questions should help students test their understanding and recall of essential material.
-
-  Please follow these guidelines:
-  
-  1. **Question Design**:
-     - Questions should cover all major topics and subtopics in the lecture text.
-     - Include a mix of conceptual, applied, and formula-based questions.
-     - Ensure questions test comprehension, application, and recall of important ideas and details.
-  
-  2. **Options**:
-     - Provide four options (A, B, C, and D) for each question.
-     - Ensure only **one correct answer** per question, with plausible distractors for incorrect options.
-  
-  3. **Formatting**:
-     - Structure the output as a valid JSON object in the following format:
-       {
-         "questions": [
-           {
-             "text": "Question text here...",
-             "options": [
-               { "text": "Option A text here...", "isCorrect": false },
-               { "text": "Option B text here...", "isCorrect": true },
-               { "text": "Option C text here...", "isCorrect": false },
-               { "text": "Option D text here...", "isCorrect": false }
-             ]
-           },
-           // additional questions
-         ]
-       }
-  
-  4. **Question Variety**:
-     - Include questions that require analysis, such as "Which statement best explains...?"
-     - Add computational questions when relevant, e.g., "What is the value of...?"
-     - Use "EXCEPT" questions to test nuanced understanding, e.g., "All of the following are true EXCEPT..."
-     - Ensure some questions focus on definitions, key concepts, and interpretations.
-  
-  5. **Avoid Extraneous Information**:
-     - Do not include any explanatory text outside the JSON structure.
-     - Avoid trivial or overly simple questions.
-  
-  **Important Notes**:
-  - Questions should challenge the user as if they were part of a final exam.
-  - Ensure all content is accurate and error-free.
-
-  ---
-  Lecture Text:
-  ${content}
-  `;
-
-  return [
-    {
-      role: 'system',
-      content: systemPrompt,
-    },
-    {
-      role: 'user',
-      content:
-        'Please generate a set of final exam-style multiple-choice questions based on the provided lecture text.',
-    },
-  ];
+      },
+    ],
+    response_format: complexityFormat
+  };
 };

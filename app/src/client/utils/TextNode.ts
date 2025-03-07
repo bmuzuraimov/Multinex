@@ -1,5 +1,4 @@
-// text-node.ts
-export type Mode = 'listen' | 'type' | 'write';
+import { SensoryMode } from '../../shared/types';
 
 export class TextNode {
   public id: number;
@@ -7,13 +6,13 @@ export class TextNode {
   public highlightClass = '';
   public currentClass = '';
   public value: string;
-  public mode: Mode;
+  public mode: SensoryMode;
   public baseCharClass: string;
   public wordIndex?: number;
   public prev?: TextNode;
   public next?: TextNode;
 
-  constructor(id: number, value: string, mode: Mode, baseCharClass: string, wordIndex?: number) {
+  constructor(id: number, value: string, mode: SensoryMode, baseCharClass: string, wordIndex?: number) {
     this.id = id;
     this.value = value;
     this.mode = mode;

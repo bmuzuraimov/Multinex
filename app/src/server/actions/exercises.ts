@@ -8,15 +8,18 @@ import {
 import { HttpError } from 'wasp/server';
 import { Exercise } from 'wasp/entities';
 import { getS3DownloadUrl, deleteS3Objects } from '../utils/s3Utils';
-import { OpenAIService } from '../llm/models/openai';
 import { truncateText, reportToAdmin, cleanMarkdown } from './utils';
 import { MAX_TOKENS } from '../../shared/constants';
+import { SensoryMode } from '../../shared/types';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
 import { ExerciseStatus } from '@prisma/client';
 import { DEFAULT_PRE_PROMPT, DEFAULT_POST_PROMPT } from '../../shared/constants';
+import { OpenAIService, DeepSeekService } from '../llm/models';
 
 const openaiService = new OpenAIService();
+const deepseekService = new DeepSeekService();
+
 export const createExercise: CreateExercise<{ name: string; topicId: string | null }, Exercise> = async (
   { name, topicId },
   context
@@ -52,7 +55,7 @@ export const generateExercise: GenerateExercise<
     model: string;
     includeSummary: boolean;
     includeMCQuiz: boolean;
-    sensoryModes: ('listen' | 'type' | 'write')[];
+    sensoryModes: SensoryMode[];
   },
   { success: boolean; message: string }
 > = async (
@@ -95,7 +98,7 @@ export const generateExercise: GenerateExercise<
 
   let generatedExerciseText: string;
   let generatedExerciseTokens: number;
-  let taggedExerciseText: string;
+  let taggedExerciseText: string = '';
   try {
     // Ensure priorKnowledge is an array
     const priorKnowledgeArray = Array.isArray(priorKnowledge)
@@ -139,12 +142,11 @@ export const generateExercise: GenerateExercise<
   const lectureContent = cleanMarkdown(generatedExerciseText);
 
   // 6. Generate complexity tags (where we REALLY use sensoryModes)
-  let complexityJson: any;
   let complexityUsage = 0;
   try {
     const complexityResponse = await openaiService.generateComplexity(lectureContent, model, MAX_TOKENS, sensoryModes);
-    if (complexityResponse.success && complexityResponse.data?.taggedText) {
-      complexityJson = complexityResponse.data;
+    if (complexityResponse.success && complexityResponse.data) {
+      taggedExerciseText = complexityResponse.data;
       complexityUsage = complexityResponse.usage || 0;
 
       // Update status
@@ -155,10 +157,7 @@ export const generateExercise: GenerateExercise<
     }
   } catch (error) {
     console.error('Failed to generate complexity tags:', error);
-    // Not necessarily fatal; continue
   }
-
-  taggedExerciseText = complexityJson?.taggedText ? complexityJson.taggedText : '';
 
   // 7. Optionally generate audio
   const documentParserUrl = process.env.DOCUMENT_PARSER_URL;
@@ -237,7 +236,7 @@ export const generateExercise: GenerateExercise<
           (generatedExerciseTokens || 0) +
           (summaryJson?.tokens || 0) +
           (questions?.tokens || 0) +
-          (complexityJson?.tokens || 0),
+          (complexityUsage || 0),
         model,
         no_words: lectureContent.split(' ').length || parseInt(length, 10),
         status: 'FINISHED',

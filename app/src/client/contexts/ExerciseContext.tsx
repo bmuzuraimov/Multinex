@@ -1,12 +1,14 @@
 import React, { createContext, useContext, Dispatch, SetStateAction } from 'react';
+import { SensoryMode } from '../../shared/types';
 import { TextList } from '../utils/TextList';
+
 interface ExerciseContextType {
   // Core essay content and metadata
   essay: string;
   essayWordCount: number;
   essayCharCount: number;
   essayList: TextList;
-  formattedEssay: { mode: 'listen' | 'type' | 'write'; text: string[] }[];
+  formattedEssay: { mode: SensoryMode; text: string[] }[];
   summary: string[];
   hasQuiz: boolean;
 

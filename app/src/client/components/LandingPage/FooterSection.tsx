@@ -14,7 +14,7 @@ const FooterSection = () => {
                 <div className='relative group'>
                   <svg
                     className='h-10 w-auto transition-transform duration-300 ease-in-out transform group-hover:scale-110'
-                    viewBox='0 0 120 40'
+                    viewBox='0 0 150 40'
                     fill='none'
                     xmlns='http://www.w3.org/2000/svg'
                   >

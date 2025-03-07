@@ -7,6 +7,7 @@
     "@aws-sdk/s3-request-presigner": "^3.735.0",
     "@faker-js/faker": "8.3.1",
     "@google-analytics/data": "4.1.0",
+    "@google/generative-ai": "^0.24.0",
     "@headlessui/react": "^1.7.17",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.7",

@@ -1,5 +1,7 @@
+import { SensoryMode } from '../../shared/types';
+
 type FormattedEssaySection = {
-  mode: 'listen' | 'type' | 'write';
+  mode: SensoryMode;
   text: string[];
 };
 

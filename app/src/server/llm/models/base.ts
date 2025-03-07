@@ -1,5 +1,9 @@
 import { reportToAdmin } from '../../actions/utils';
 import { RETRIES, DELAY_MS } from '../../../shared/constants';
+import { TiktokenModel, encoding_for_model } from 'tiktoken';
+import { OPENAI_MODEL } from '../../../shared/constants';
+import { SensoryMode } from '../../../shared/types';
+
 
 export interface LLMResponse {
   success: boolean;
@@ -8,7 +12,7 @@ export interface LLMResponse {
   usage?: number;
 }
 
-export type SensoryMode = 'listen' | 'type' | 'write';
+
 
 export abstract class BaseLLMService {
   protected abstract setupClient(): void;
@@ -65,5 +69,21 @@ export abstract class BaseLLMService {
     console.error(`Error in ${methodName}:`, error);
     reportToAdmin(`Error in ${methodName}: ${error.message}`);
     throw error;
+  }
+
+  static calculateRequiredTokens(content: string, model: TiktokenModel): number {
+    const encoding = encoding_for_model(OPENAI_MODEL);
+    return encoding.encode(content).length;
+  }
+
+  static async deductTokens(context: any, totalTokens: number): Promise<void> {
+    await context.entities.User.update({
+      where: { id: context.user.id },
+      data: {
+        tokens: {
+          decrement: totalTokens,
+        },
+      },
+    });
   }
 } 

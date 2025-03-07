@@ -1,0 +1,1 @@
+export const courseFormat = { type: 'json_object' };

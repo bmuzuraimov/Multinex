@@ -1,6 +1,6 @@
-import { TextNode, Mode } from './TextNode';
+import { TextNode } from './TextNode';
 import { AudioController, AudioTimestamp } from './AudioController';
-
+import { SensoryMode } from '../../shared/types';
 export interface FormattedEssaySection {
   mode: string;
   text: string[];
@@ -11,7 +11,7 @@ export class TextList {
   private isPlaying = false;
   private currentNode: TextNode | null = null;
   private nodes: TextNode[] = [];
-  private readonly baseCharClass: Record<Mode, string>;
+  private readonly baseCharClass: Record<SensoryMode, string>;
   private audioController: AudioController | null = null;
   private onUpdate?: () => void;
 
@@ -35,7 +35,7 @@ export class TextList {
     const nodes: TextNode[] = [];
 
     sections.forEach((section) => {
-      const mode = section.mode as Mode;
+      const mode = section.mode as SensoryMode;
       section.text.forEach((text) => {
         let wordIndex: number | undefined;
         if (mode === 'listen' && text.trim() && /[a-zA-Z0-9]/.test(text)) {

@@ -7,6 +7,7 @@ import {
 } from 'wasp/server/operations';
 import { getS3DownloadUrl } from '../utils/s3Utils';
 import { preprocessEssay } from '../utils/exerciseUtils';
+import { SensoryMode } from '../../shared/types';
 import { ExerciseStatus } from '@prisma/client';
 
 export const getExercisesWithNoTopic: GetExercisesWithNoTopic<void, Exercise[]> = async (_args, context) => {
@@ -72,7 +73,7 @@ type ExerciseResult = {
   audioTimestamps?: Array<{ word: string; start: number; end: number }> | string[];
   essay: string;
   formattedEssay: {
-    mode: 'listen' | 'type' | 'write';
+    mode: SensoryMode;
     text: string[];
   }[];
   [key: string]: any;

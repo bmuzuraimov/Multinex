@@ -31,7 +31,7 @@ const FormModal: React.FC<FormModalProps> = ({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const navigate = useNavigate();
 
-  const handleToggleMode = (mode: 'listen' | 'type' | 'write') => {
+  const handleToggleMode = (mode: SensoryMode) => {
     const alreadySelected = exerciseSettings.sensoryModes.includes(mode);
 
     if (alreadySelected && exerciseSettings.sensoryModes.length === 1) {

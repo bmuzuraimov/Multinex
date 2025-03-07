@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { BsFiletypeAi } from 'react-icons/bs';
 import { AVAILABLE_MODELS } from '../../../shared/constants';
+
 import {
   createExercise,
   generateExercise,
@@ -64,7 +65,7 @@ type DemoExerciseResult = {
     createdAt: Date;
   };
   essay: string;
-  formattedEssay: Array<{ mode: 'listen' | 'type' | 'write'; text: string[] }>;
+  formattedEssay: Array<{ mode: SensoryMode; text: string[] }>;
   audioUrl: string;
 };
 
