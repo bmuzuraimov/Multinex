@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { BsPlayFill, BsStopFill, BsTextareaT, BsKeyboard, BsArrowRight } from 'react-icons/bs';
+import { BsTextareaT, BsKeyboard, BsArrowRight, BsPalette } from 'react-icons/bs';
 import { TEXT_SIZES } from '../../shared/constants';
 import { useExerciseContext } from '../contexts/ExerciseContext';
+import useLocalStorage from '../hooks/useLocalStorage';
 import { cn } from '../../shared/utils';
 
 const ExerciseInterface: React.FC = () => {
   const { essayList, textSize, setTextSize, highlightedNodes, setHighlightedNodes, onSubmitExercise } =
     useExerciseContext();
   const [showTextSizeMenu, setShowTextSizeMenu] = useState(false);
-
+  const [showColorMenu, setShowColorMenu] = useState(false);
+  const [writeColor, setWriteColor] = useLocalStorage('writeColor', '#ffc9c9');
+  const [typeColor, setTypeColor] = useLocalStorage('typeColor', '#a2f8da');
+  const [listenColor, setListenColor] = useLocalStorage('listenColor', '#a8d3ff');
   const [currentSpanRef, setCurrentSpanRef] = useState<HTMLSpanElement | null>(null);
   const isProcessingRef = useRef(false);
   const lastKeyTimeRef = useRef(0);
@@ -56,9 +60,9 @@ const ExerciseInterface: React.FC = () => {
               currentSpanRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             });
           }
-          
+
           await essayList.handleKeyDown(e);
-          
+
           // Schedule state updates in the next frame
           requestAnimationFrame(() => {
             handleUpdate();
@@ -91,6 +95,7 @@ const ExerciseInterface: React.FC = () => {
           {essayList.getNodes().map((textNode) => {
             return (
               <span
+                key={textNode.id}
                 ref={(el) => {
                   if (textNode.id === essayList.getCursor()?.id) {
                     setCurrentSpanRef(el);
@@ -110,10 +115,11 @@ const ExerciseInterface: React.FC = () => {
                       .map((node) => node.id)
                   );
                 }}
-                key={textNode.id}
               >
                 {textNode.value.startsWith('\n') ? '↵' : textNode.value}
-                {Array(textNode.value.split('\n').length - 1).fill(<br />)}
+                {Array(textNode.value.split('\n').length - 1).fill(null).map((_, i) => (
+                  <br key={`br-${textNode.id}-${i}`}/>
+                ))}
               </span>
             );
           })}
@@ -151,13 +157,55 @@ const ExerciseInterface: React.FC = () => {
             </div>
           )}
         </div>
-        {/* Playback Button */}
-        <button
-          onClick={() => essayList.togglePlayback()}
-          className='absolute bottom-4 right-4 z-50 p-3 rounded-full bg-teal-500 hover:bg-teal-600 text-white transition-colors'
-        >
-          {false ? <BsStopFill className='w-5 h-5' /> : <BsPlayFill className='w-5 h-5' />}
-        </button>
+        {/* Color Controls */}
+        <div className='absolute bottom-4 right-4 z-50'>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowColorMenu(!showColorMenu);
+            }}
+            className='p-3 rounded-full bg-teal-500 hover:bg-teal-600 text-white transition-colors'
+          >
+            <BsPalette className='w-5 h-5' />
+          </button>
+
+          {showColorMenu && (
+            <div
+              className='absolute bottom-14 right-0 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg w-48'
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className='flex flex-col'>
+                <div>
+                  <label className='text-sm text-gray-600 dark:text-gray-300'>Write Color</label>
+                  <input
+                    type='color'
+                    value={writeColor}
+                    onChange={(e) => setWriteColor(e.target.value)}
+                    className='w-full h-8 rounded cursor-pointer'
+                  />
+                </div>
+                <div>
+                  <label className='text-sm text-gray-600 dark:text-gray-300'>Type Color</label>
+                  <input
+                    type='color'
+                    value={typeColor}
+                    onChange={(e) => setTypeColor(e.target.value)}
+                    className='w-full h-8 rounded cursor-pointer'
+                  />
+                </div>
+                <div>
+                  <label className='text-sm text-gray-600 dark:text-gray-300'>Listen Color</label>
+                  <input
+                    type='color'
+                    value={listenColor}
+                    onChange={(e) => setListenColor(e.target.value)}
+                    className='w-full h-8 rounded cursor-pointer'
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

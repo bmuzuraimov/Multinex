@@ -73,7 +73,7 @@ const ExerciseSidebar: React.FC = () => {
                   <span className="font-medium">Click Text:</span> Move cursor to clicked position
                 </li>
                 <li className="flex items-center gap-3">
-                  <span className="font-medium">Playback:</span> Read the text aloud
+                  <span className="font-medium">Color:</span> Change the color of the highlighted text
                 </li>
               </ul>
               <button

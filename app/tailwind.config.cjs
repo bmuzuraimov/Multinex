@@ -66,6 +66,10 @@ module.exports = {
         success: '#219653', // Positive actions/feedback
         danger: '#D34053',  // Errors/destructive actions
         warning: '#FFA70B', // Warnings/caution states
+        // Exercise mode colors
+        listen: '#a8d3ff',  // Listen mode highlight
+        type: '#a2f8da',    // Type mode highlight
+        write: '#ffc9c9',   // Write mode highlight
       },
       screens: {
         ...defaultTheme.screens, // Using Tailwind's default breakpoints

@@ -13,13 +13,7 @@ export class TextNode {
   public prev?: TextNode;
   public next?: TextNode;
 
-  constructor(
-    id: number,
-    value: string,
-    mode: Mode,
-    baseCharClass: string,
-    wordIndex?: number
-  ) {
+  constructor(id: number, value: string, mode: Mode, baseCharClass: string, wordIndex?: number) {
     this.id = id;
     this.value = value;
     this.mode = mode;
@@ -31,15 +25,13 @@ export class TextNode {
     this.highlight = true;
     switch (this.mode) {
       case 'listen':
-        this.highlightClass = 'bg-gray-200 dark:bg-gray-700';
+        this.highlightClass = 'bg-listen';
         break;
       case 'type':
-        this.highlightClass = correct 
-          ? 'bg-lime-200 dark:bg-lime-900/50' 
-          : 'bg-red-200 dark:bg-red-900/50';
+        this.highlightClass = correct ? 'bg-type' : 'bg-red-200';
         break;
       case 'write':
-        this.highlightClass = 'bg-red-200 dark:bg-red-900/50';
+        this.highlightClass = 'bg-write';
         break;
     }
   }
