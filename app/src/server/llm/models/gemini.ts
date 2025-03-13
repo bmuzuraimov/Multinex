@@ -1,13 +1,13 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import {
-  GENERATE_EXERCISE_PROMPT,
-  GENERATE_SUMMARY_PROMPT,
-  GENERATE_EXAM_PROMPT,
-  GENERATE_STUDY_METHOD_TAGS_PROMPT,
+  generateExercisePrompt,
+  generateSummaryPrompt,
+  generateExamPrompt,
+  generateStudyMethodTagsPrompt,
+  generateCoursePrompt,
 } from '../prompts';
-import { GENERATE_COURSE_PROMPT } from '../prompts/course';
 import { HttpError } from 'wasp/server';
-import { TEMPERATURE } from '../../../shared/constants';
+import { TEMPERATURE, MAX_TOKENS } from '../../../shared/constants';
 import { SensoryMode } from '../../../shared/types';
 import { BaseLLMService, LLMResponse } from './base';
 
@@ -32,7 +32,6 @@ export class GeminiService extends BaseLLMService {
     exerciseLength: string,
     difficultyLevel: string,
     modelName: string,
-    maxTokens: number,
     prePrompt: string,
     postPrompt: string
   ): Promise<LLMResponse> {
@@ -41,7 +40,7 @@ export class GeminiService extends BaseLLMService {
         model: modelName,
         generationConfig: {
           temperature: TEMPERATURE,
-          maxOutputTokens: maxTokens,
+          maxOutputTokens: MAX_TOKENS,
           topP: 0.95,
           topK: 40
         }
@@ -51,9 +50,9 @@ export class GeminiService extends BaseLLMService {
         history: [
           {
             role: "user",
-            parts: [{ text: GENERATE_EXERCISE_PROMPT({
+            parts: [{ text: generateExercisePrompt({
               content: exerciseRawContent,
-              priorKnowledge,
+              prior_knowledge: priorKnowledge,
               length: exerciseLength,
               level: difficultyLevel,
               pre_prompt: prePrompt,
@@ -74,13 +73,13 @@ export class GeminiService extends BaseLLMService {
     }, 'generateExercise');
   }
 
-  async generateSummary(lectureContent: string, modelName: string, maxTokens: number): Promise<LLMResponse> {
+  async generateSummary(lectureContent: string, modelName: string): Promise<LLMResponse> {
     return this.withRetry(async () => {
       const model = this.geminiClient.getGenerativeModel({ 
         model: modelName,
         generationConfig: {
           temperature: TEMPERATURE,
-          maxOutputTokens: maxTokens,
+          maxOutputTokens: MAX_TOKENS,
           topP: 0.95,
           topK: 40,
           responseMimeType: "application/json"
@@ -91,7 +90,7 @@ export class GeminiService extends BaseLLMService {
         history: [
           {
             role: "user",
-            parts: [{ text: GENERATE_SUMMARY_PROMPT({ content: lectureContent }).messages[0].content }]
+            parts: [{ text: generateSummaryPrompt({ content: lectureContent }).messages[0].content }]
           }
         ]
       });
@@ -108,13 +107,13 @@ export class GeminiService extends BaseLLMService {
     }, 'generateSummary');
   }
 
-  async generateQuestions(lectureContent: string, modelName: string, maxTokens: number): Promise<LLMResponse> {
+  async generateQuestions(lectureContent: string, modelName: string): Promise<LLMResponse> {
     return this.withRetry(async () => {
       const model = this.geminiClient.getGenerativeModel({ 
         model: modelName,
         generationConfig: {
           temperature: TEMPERATURE,
-          maxOutputTokens: maxTokens,
+          maxOutputTokens: MAX_TOKENS,
           topP: 0.95,
           topK: 40,
           responseMimeType: "application/json"
@@ -125,7 +124,7 @@ export class GeminiService extends BaseLLMService {
         history: [
           {
             role: "user",
-            parts: [{ text: GENERATE_EXAM_PROMPT({ content: lectureContent }).messages[0].content }]
+            parts: [{ text: generateExamPrompt({ content: lectureContent }).messages[0].content }]
           }
         ]
       });
@@ -142,13 +141,13 @@ export class GeminiService extends BaseLLMService {
     }, 'generateQuestions');
   }
 
-  async generateCourse(syllabusContent: string, modelName: string, maxTokens: number): Promise<LLMResponse> {
+  async generateCourse(syllabusContent: string, modelName: string): Promise<LLMResponse> {
     return this.withRetry(async () => {
       const model = this.geminiClient.getGenerativeModel({ 
         model: modelName,
         generationConfig: {
           temperature: 0.3,
-          maxOutputTokens: maxTokens,
+          maxOutputTokens: MAX_TOKENS,
           topP: 0.95,
           topK: 40,
           responseMimeType: "application/json"
@@ -159,7 +158,7 @@ export class GeminiService extends BaseLLMService {
         history: [
           {
             role: "user",
-            parts: [{ text: GENERATE_COURSE_PROMPT({ content: syllabusContent }).messages[0].content }]
+            parts: [{ text: generateCoursePrompt({ content: syllabusContent }).messages[0].content }]
           }
         ]
       });
@@ -185,7 +184,6 @@ export class GeminiService extends BaseLLMService {
   async generateComplexity(
     lectureContent: string,
     modelName: string,
-    maxTokens: number,
     sensoryModes: SensoryMode[]
   ): Promise<LLMResponse> {
     if (lectureContent.length === 0) {
@@ -196,7 +194,7 @@ export class GeminiService extends BaseLLMService {
         model: modelName,
         generationConfig: {
           temperature: TEMPERATURE,
-          maxOutputTokens: maxTokens,
+          maxOutputTokens: MAX_TOKENS,
           topP: 0.95,
           topK: 40,
           responseMimeType: "application/json"
@@ -207,9 +205,9 @@ export class GeminiService extends BaseLLMService {
         history: [
           {
             role: "user",
-            parts: [{ text: GENERATE_STUDY_METHOD_TAGS_PROMPT({
+            parts: [{ text: generateStudyMethodTagsPrompt({
               content: lectureContent,
-              sensoryModes: sensoryModes,
+              sensory_modes: sensoryModes,
             }).messages[0].content }]
           }
         ]

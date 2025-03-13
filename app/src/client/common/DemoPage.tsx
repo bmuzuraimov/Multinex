@@ -1,85 +1,54 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useQuery, getDemoExercise } from 'wasp/client/operations';
-import ExerciseResult from '../components/ExerciseResult';
-import ExerciseSidebar from '../components/ExerciseSidebar';
-import ExerciseTest from '../components/ExerciseTest';
+import ExerciseResult from '../components/ExerciseInterface/ExerciseResult';
+import ExerciseSidebar from '../components/ExerciseInterface/ExerciseSidebar';
+import ExerciseTest from '../components/ExerciseInterface/ExerciseTest';
 import ExerciseInterface from '../components/ExerciseInterface';
 import { ExerciseProvider } from '../contexts/ExerciseContext';
 import useExercise from '../hooks/useExercise';
-import { AudioTimestamp } from '../utils/AudioController';
-import { Option } from 'wasp/entities';
-
-type DemoExerciseResult = {
-  id: string;
-  createdAt: Date;
-  userAgent: string;
-  browserLanguage: string | null;
-  screenResolution: string | null;
-  timezone: string | null;
-  exerciseId: string;
-  exercise: {
-    id: string;
-    name: string;
-    paragraphSummary: string;
-    level: string;
-    truncated: boolean;
-    no_words: number;
-    completed: boolean;
-    completedAt: Date | null;
-    score: number;
-    model: string;
-    userEvaluation: number | null;
-    userId: string | null;
-    topicId: string | null;
-    questions: Array<{
-      id: string;
-      text: string;
-      exerciseId: string;
-      createdAt: Date;
-      options: Option[];
-    }>;
-    audioTimestamps: AudioTimestamp[];
-    lessonText: string;
-    cursor: number;
-  };
-  essay: string;
-  formattedEssay: Array<{ mode: "listen" | "type" | "write"; text: string[] }>;
-  audioUrl: string;
-};
 
 const DemoPage: React.FC = React.memo(() => {
-  const [textSize, setTextSize] = useState('xl');
-  const [mode, setMode] = useState<'typing' | 'submitted' | 'test'>('typing');
-  const [highlightedNodes, setHighlightedNodes] = useState<number[]>([0]);
+  const [text_size, setTextSize] = useState('xl');
+  const [mode, set_mode] = useState<'typing' | 'submitted' | 'test'>('typing');
+  const [highlighted_nodes, set_highlighted_nodes] = useState<number[]>([0]);
 
-  const queryParams = {
-    userAgent: window.navigator.userAgent,
-    browserLanguage: window.navigator.language,
-    screenResolution: `${window.screen.width}x${window.screen.height}`,
+  const query_params = {
+    user_agent: window.navigator.userAgent,
+    browser_language: window.navigator.language, 
+    screen_resolution: `${window.screen.width}x${window.screen.height}`,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
   };
 
-  const { data: demoExercise, isLoading } = useQuery(getDemoExercise, queryParams);
+  const { data: demo_exercise, isLoading } = useQuery(getDemoExercise, query_params);
 
-  const { essay, essayList, essayWordCount, essayCharCount, summary, hasQuiz } = useExercise(
-    demoExercise?.exercise?.id || '',
-    demoExercise?.exercise?.lessonText || '',
-    demoExercise?.formattedEssay || [],
-    demoExercise?.exercise?.paragraphSummary || '',
-    demoExercise?.exercise?.questions || [],
+  const { 
+    essay,
+    essay_list,
+    essay_word_count,
+    essay_char_count,
+    summary,
+    has_quiz
+  } = useExercise(
+    demo_exercise?.exercise?.id || '',
+    demo_exercise?.exercise?.lesson_text || '',
+    demo_exercise?.formatted_essay || [],
+    demo_exercise?.exercise?.paragraph_summary || '',
+    demo_exercise?.exercise?.questions.map(q => ({
+      ...q,
+      exercise_id: q.exercise_id,
+      created_at: q.created_at
+    })) || [],
     mode,
-    textSize,
-    demoExercise?.exercise?.cursor || 0
+    text_size,
+    demo_exercise?.exercise?.cursor || 0
   );
 
-  // Set audio URL when exercise data changes
   useEffect(() => {
-    if (demoExercise?.audioUrl && demoExercise?.exercise?.audioTimestamps) {
-      essayList.setAudio(demoExercise.audioUrl, demoExercise.exercise.audioTimestamps);
+    if (demo_exercise?.audio_url && demo_exercise?.exercise?.audio_timestamps) {
+      essay_list.setAudio(demo_exercise.audio_url, demo_exercise.exercise.audio_timestamps);
     }
-  }, [demoExercise, essayList]);
+  }, [demo_exercise, essay_list]);
 
-  // Prevent default keyboard behavior
   useEffect(() => {
     const preventDefaultKeys = (e: KeyboardEvent) => {
       if (['Tab', ' ', 'Enter'].includes(e.key)) {
@@ -92,31 +61,31 @@ const DemoPage: React.FC = React.memo(() => {
   }, []);
 
   const handleSubmitExercise = useCallback(async () => {
-    setMode('submitted');
-  }, [setMode]);
+    set_mode('submitted');
+  }, [set_mode]);
 
-  const contextValue = {
+  const context_value = {
     essay,
-    essayList,
-    formattedEssay: demoExercise?.formattedEssay || [],
-    essayWordCount,
-    essayCharCount,
+    essay_list,
+    formatted_essay: demo_exercise?.formatted_essay || [],
+    essay_word_count,
+    essay_char_count,
     mode,
-    setMode,
-    hasQuiz,
-    audioTimestamps: demoExercise?.exercise?.audioTimestamps || [],
-    highlightedNodes,
-    setHighlightedNodes,
-    textSize,
-    setTextSize,
-    onSubmitExercise: handleSubmitExercise,
+    set_mode,
+    has_quiz,
+    audio_timestamps: demo_exercise?.exercise?.audio_timestamps || [],
+    highlighted_nodes,
+    set_highlighted_nodes,
+    text_size,
+    set_text_size: setTextSize,
+    submit_exercise: handleSubmitExercise,
     summary,
   };
 
   if (isLoading) return <div>Loading...</div>;
 
   return (
-    <ExerciseProvider value={contextValue}>
+    <ExerciseProvider value={context_value}>
       <div className='relative'>
         {mode === 'typing' && (
           <div className='relative flex flex-row h-full'>
@@ -124,8 +93,8 @@ const DemoPage: React.FC = React.memo(() => {
             <ExerciseInterface />
           </div>
         )}
-        {mode === 'submitted' && <ExerciseResult exerciseId={demoExercise?.exercise?.id || ''} />}
-        {mode === 'test' && <ExerciseTest title={demoExercise?.exercise?.name || ''} questions={[]} />}
+        {mode === 'submitted' && <ExerciseResult exerciseId={demo_exercise?.exercise?.id || ''} />}
+        {mode === 'test' && <ExerciseTest title={demo_exercise?.exercise?.name || ''} questions={[]} />}
       </div>
     </ExerciseProvider>
   );

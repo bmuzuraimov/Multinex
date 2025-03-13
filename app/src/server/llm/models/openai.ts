@@ -1,11 +1,12 @@
 import OpenAI from 'openai';
 import {
-  GENERATE_EXERCISE_PROMPT,
-  GENERATE_SUMMARY_PROMPT,
-  GENERATE_EXAM_PROMPT,
-  GENERATE_STUDY_METHOD_TAGS_PROMPT,
-  GENERATE_COURSE_PROMPT,
+  generateExercisePrompt,
+  generateSummaryPrompt,
+  generateExamPrompt,
+  generateStudyMethodTagsPrompt,
+  generateCoursePrompt,
 } from '../prompts';
+import { MAX_TOKENS } from '../../../shared/constants';
 import { HttpError } from 'wasp/server';
 import { TEMPERATURE } from '../../../shared/constants';
 import { SensoryMode } from '../../../shared/types';
@@ -32,23 +33,22 @@ export class OpenAIService extends BaseLLMService {
     exerciseLength: string,
     difficultyLevel: string,
     modelName: string,
-    maxTokens: number,
     prePrompt: string,
     postPrompt: string
   ): Promise<LLMResponse> {
     return this.withRetry(async () => {
       const openaiResponse = await this.openaiClient.chat.completions.create({
         model: modelName,
-        ...GENERATE_EXERCISE_PROMPT({
+        ...generateExercisePrompt({
           content: exerciseRawContent,
-          priorKnowledge,
+          prior_knowledge: priorKnowledge,
           length: exerciseLength,
           level: difficultyLevel,
           pre_prompt: prePrompt,
           post_prompt: postPrompt,
         }),
         temperature: TEMPERATURE,
-        max_tokens: maxTokens,
+        max_tokens: MAX_TOKENS,
       });
 
       const exerciseContent = openaiResponse.choices[0]?.message?.content || '';
@@ -62,13 +62,13 @@ export class OpenAIService extends BaseLLMService {
     }, 'generateExercise');
   }
 
-  async generateSummary(lectureContent: string, modelName: string, maxTokens: number): Promise<LLMResponse> {
+  async generateSummary(lectureContent: string, modelName: string): Promise<LLMResponse> {
     return this.withRetry(async () => {
       const openaiResponse = await this.openaiClient.chat.completions.create({
         model: modelName,
-        ...GENERATE_SUMMARY_PROMPT({ content: lectureContent }),
+        ...generateSummaryPrompt({ content: lectureContent }),
         temperature: TEMPERATURE,
-        max_tokens: maxTokens,
+        max_tokens: MAX_TOKENS,
       });
 
       const summaryContent = openaiResponse.choices[0]?.message?.content || '';
@@ -83,13 +83,13 @@ export class OpenAIService extends BaseLLMService {
     }, 'generateSummary');
   }
 
-  async generateQuestions(lectureContent: string, modelName: string, maxTokens: number): Promise<LLMResponse> {
+  async generateQuestions(lectureContent: string, modelName: string): Promise<LLMResponse> {
     return this.withRetry(async () => {
       const openaiResponse = await this.openaiClient.chat.completions.create({
         model: modelName,
-        ...GENERATE_EXAM_PROMPT({ content: lectureContent }),
+        ...generateExamPrompt({ content: lectureContent }),
         temperature: TEMPERATURE,
-        max_tokens: maxTokens,
+        max_tokens: MAX_TOKENS,
       });
 
       const questionsContent = openaiResponse.choices[0]?.message?.content || '';
@@ -104,13 +104,13 @@ export class OpenAIService extends BaseLLMService {
     }, 'generateQuestions');
   }
 
-  async generateCourse(syllabusContent: string, modelName: string, maxTokens: number): Promise<LLMResponse> {
+  async generateCourse(syllabusContent: string, modelName: string): Promise<LLMResponse> {
     return this.withRetry(async () => {
       const openaiResponse = await this.openaiClient.chat.completions.create({
         model: modelName,
-        ...GENERATE_COURSE_PROMPT({ content: syllabusContent }),
+        ...generateCoursePrompt({ content: syllabusContent }),
         temperature: 0.3,
-        max_tokens: maxTokens,
+        max_tokens: MAX_TOKENS,
       });
 
       const courseContent = openaiResponse.choices[0]?.message?.content || '';
@@ -134,7 +134,6 @@ export class OpenAIService extends BaseLLMService {
   async generateComplexity(
     lectureContent: string,
     modelName: string,
-    maxTokens: number,
     sensoryModes: SensoryMode[]
   ): Promise<LLMResponse> {
     if (lectureContent.length === 0) {
@@ -143,12 +142,12 @@ export class OpenAIService extends BaseLLMService {
     return this.withRetry(async () => {
       const openaiResponse = await this.openaiClient.chat.completions.create({
         model: modelName,
-        ...GENERATE_STUDY_METHOD_TAGS_PROMPT({
+        ...generateStudyMethodTagsPrompt({
           content: lectureContent,
-          sensoryModes: sensoryModes,
+          sensory_modes: sensoryModes,
         }),
-        temperature: TEMPERATURE,
-        max_tokens: maxTokens,
+        temperature: 0.2,
+        max_tokens: MAX_TOKENS,
       });
 
       const complexityContent = openaiResponse.choices[0]?.message?.content || '';

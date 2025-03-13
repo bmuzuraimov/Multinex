@@ -30,9 +30,9 @@ module.exports = {
           500: '#05c49b', // Primary buttons, CTAs
           600: '#00a07f', // Hover states for primary
           700: '#008069', // Active states
-          800: '#006655', // Dark accents
-          900: '#015346', // Text on light backgrounds
-          950: '#002f28', // Deep backgrounds
+          800: '#006655', // Dark accents (dark mode background) *
+          900: '#015346', // Text on light backgrounds (dark mode text) *
+          950: '#002f28', // Deep backgrounds (dark mode deeper backgrounds) *
         },
         secondary: {
           // Blue - Supporting color for interactive elements
@@ -44,9 +44,9 @@ module.exports = {
           500: '#134fff', // Primary actions
           600: '#003aff', // Hover states
           700: '#003aff', // Active states
-          800: '#0034e4', // Dark accents
-          900: '#0022b0', // Deep accents
-          950: '#000b42', // Dark backgrounds
+          800: '#0034e4', // Dark accents (dark mode accents) *
+          900: '#0022b0', // Deep accents (dark mode deep accents) *
+          950: '#000b42', // Dark backgrounds (dark mode alternative backgrounds) *
         },
         tertiary: {
           // Orange - Used for warnings, highlights
@@ -57,19 +57,19 @@ module.exports = {
           400: '#e4801d', // Text
           500: '#c76905', // Primary actions
           600: '#a15500', // Hover states
-          700: '#804805', // Active states
-          800: '#653d0a', // Dark accents
-          900: '#53350e', // Deep accents
-          950: '#050300', // Dark backgrounds
+          700: '#804805', // Active states (dark mode accent) *
+          800: '#653d0a', // Dark accents (dark mode background accent) *
+          900: '#53350e', // Deep accents (dark mode deep accent) *
+          950: '#050300', // Dark backgrounds (dark mode deepest backgrounds) *
         },
         // Semantic colors for consistent messaging
         success: '#219653', // Positive actions/feedback
         danger: '#D34053',  // Errors/destructive actions
         warning: '#FFA70B', // Warnings/caution states
-        // Exercise mode colors
-        listen: '#a8d3ff',  // Listen mode highlight
-        type: '#a2f8da',    // Type mode highlight
-        write: '#ffc9c9',   // Write mode highlight
+        // Exercise mode colors (dark mode compatible)
+        listen: '#a8d3ff',  // Listen mode highlight *
+        type: '#a2f8da',    // Type mode highlight *
+        write: '#ffc9c9',   // Write mode highlight *
       },
       screens: {
         ...defaultTheme.screens, // Using Tailwind's default breakpoints

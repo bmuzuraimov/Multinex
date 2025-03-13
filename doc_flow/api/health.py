@@ -1,17 +1,14 @@
-from fastapi import APIRouter, HTTPException
-from services.database_service import DatabaseService
-from services.s3_service import S3Service
+from fastapi import APIRouter
+from services.db_service import db_service
+from services.s3_service import s3_service
 from core.config import settings
 import logging
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-db_service = DatabaseService()
-s3_service = S3Service()
-
 @router.get("/health")
-async def health_check():
+async def checkHealth():
     """
     Check the health of all service dependencies
     """
@@ -24,10 +21,15 @@ async def health_check():
     }
 
     # Check database health
-    if not db_service.health_check():
+    if not db_service.checkHealth():
         health_status["status"] = "unhealthy"
         health_status["services"]["database"] = "unhealthy"
-        raise HTTPException(status_code=503, detail="Database service is unhealthy")
+        return {
+            "success": False,
+            "code": 503,
+            "message": "Database service is unhealthy",
+            "data": health_status
+        }
 
     # Check S3 health
     try:
@@ -36,6 +38,16 @@ async def health_check():
         logger.error(f"S3 health check failed: {str(e)}")
         health_status["status"] = "unhealthy"
         health_status["services"]["s3"] = "unhealthy"
-        raise HTTPException(status_code=503, detail="S3 service is unhealthy")
+        return {
+            "success": False,
+            "code": 503,
+            "message": "S3 service is unhealthy",
+            "data": health_status
+        }
 
-    return health_status 
+    return {
+        "success": True,
+        "code": 200,
+        "message": "All services are healthy",
+        "data": health_status
+    }

@@ -4,129 +4,131 @@ import TextContent from './TextContent';
 import { createMeteors, animateMeteors } from './Meteors';
 import { createBrainSphere, animateBrainSphere } from './BrainSphere';
 import gsap from 'gsap';
+import { MOBILE_BREAKPOINT, SECTION_CHECK_INTERVAL, SECTION_THRESHOLD, SECTION_ROOT_MARGIN, OBSERVER_THRESHOLD } from '../../../../shared/constants/animation';
+// Register GSAP plugins
+gsap.registerPlugin();
+
+
 
 const Depiction: React.FC = () => {
-  const mountRef = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<number>();
-  const [activeIndex, setActiveIndex] = useState(0);
-  const sectionsRef = useRef<(HTMLElement | null)[]>([]);
-  const [sectionsReady, setSectionsReady] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const mount_ref = useRef<HTMLDivElement>(null);
+  const animation_ref = useRef<number>();
+  const [active_index, setActiveIndex] = useState(0);
+  const sections_ref = useRef<(HTMLElement | null)[]>([]);
+  const [sections_ready, setSectionsReady] = useState(false);
+  const [is_mobile, setIsMobile] = useState(false);
 
   // Store references to scene and meteors
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  const meteorsRef = useRef<{ meteors: { meteor: THREE.Mesh; config: any }[]; impactPoints: THREE.Vector3[] } | null>(
+  const scene_ref = useRef<THREE.Scene | null>(null);
+  const meteors_ref = useRef<{ meteors: { meteor: THREE.Mesh; config: any }[]; impact_points: THREE.Vector3[] } | null>(
     null
   );
-  const sphereRef = useRef<THREE.Mesh | null>(null);
+  const sphere_ref = useRef<THREE.Mesh | null>(null);
 
   // Check if mobile on mount and window resize
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // 768px is typical md breakpoint
+    const checkMobileStatus = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     };
     
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    checkMobileStatus();
+    window.addEventListener('resize', checkMobileStatus);
+    return () => window.removeEventListener('resize', checkMobileStatus);
   }, []);
 
-  // Update sectionsReady when sections are available
+  // Update sections_ready when sections are available
   useEffect(() => {
-    const checkSectionsReady = () => {
-      if (sectionsRef.current.length > 0 && sectionsRef.current.every((section) => section !== null)) {
+    const checkSectionsStatus = () => {
+      if (sections_ref.current.length > 0 && sections_ref.current.every((section) => section !== null)) {
         setSectionsReady(true);
       }
     };
 
-    // Check initially
-    checkSectionsReady();
+    checkSectionsStatus();
 
-    // Set up a small interval to check until sections are ready
-    const intervalId = setInterval(() => {
-      if (!sectionsReady) {
-        checkSectionsReady();
+    const interval_id = setInterval(() => {
+      if (!sections_ready) {
+        checkSectionsStatus();
       } else {
-        clearInterval(intervalId);
+        clearInterval(interval_id);
       }
-    }, 100);
+    }, SECTION_CHECK_INTERVAL);
 
-    return () => clearInterval(intervalId);
-  }, [sectionsReady]);
+    return () => clearInterval(interval_id);
+  }, [sections_ready]);
 
   useEffect(() => {
-    if (!mountRef.current) return;
+    if (!mount_ref.current) return;
 
     // Scene setup with fog for depth
     const scene = new THREE.Scene();
-    sceneRef.current = scene;
+    scene_ref.current = scene;
     scene.fog = new THREE.FogExp2(0x000000, 0.01);
 
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / (isMobile ? 1 : 2) / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / (is_mobile ? 1 : 2) / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
       powerPreference: 'high-performance',
     });
-    renderer.setSize(window.innerWidth / (isMobile ? 1 : 2), window.innerHeight);
+    renderer.setSize(window.innerWidth / (is_mobile ? 1 : 2), window.innerHeight);
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
-    mountRef.current.appendChild(renderer.domElement);
+    mount_ref.current.appendChild(renderer.domElement);
 
     // Create brain sphere
-    const { sphere, sphereMaterial, synapses } = createBrainSphere(scene);
-    sphereRef.current = sphere;
+    const { sphere, sphere_material, synapses } = createBrainSphere(scene);
+    sphere_ref.current = sphere;
 
     // Replace the meteors creation and animation code with:
-    createMeteors(scene).then((meteorsData) => {
-      // Store config on each meteor for later reference
-      meteorsData.meteors.forEach(({ meteor, config }) => {
+    createMeteors(scene).then((meteors_data) => {
+      meteors_data.meteors.forEach(({ meteor, config }) => {
         (meteor as any).config = config;
       });
 
-      meteorsRef.current = meteorsData;
-      animateMeteors(meteorsData.meteors, scene, sphere, meteorsData.impactPoints, activeIndex);
+      meteors_ref.current = meteors_data;
+      animateMeteors(meteors_data.meteors, scene, sphere, meteors_data.impact_points, active_index);
     });
 
     // Enhanced lighting setup
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
+    const ambient_light = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambient_light);
 
-    const pointLight = new THREE.PointLight(0xffffff, 2);
-    pointLight.position.set(10, 10, 10);
-    pointLight.castShadow = true;
-    scene.add(pointLight);
+    const point_light = new THREE.PointLight(0xffffff, 2);
+    point_light.position.set(10, 10, 10);
+    point_light.castShadow = true;
+    scene.add(point_light);
 
     // Add volumetric spotlight
-    const spotLight = new THREE.SpotLight(0x4a90e2, 2);
-    spotLight.position.set(-15, 15, 15);
-    spotLight.angle = Math.PI / 4;
-    spotLight.penumbra = 0.1;
-    spotLight.decay = 2;
-    spotLight.distance = 200;
-    spotLight.castShadow = true;
-    scene.add(spotLight);
+    const spot_light = new THREE.SpotLight(0x4a90e2, 2);
+    spot_light.position.set(-15, 15, 15);
+    spot_light.angle = Math.PI / 4;
+    spot_light.penumbra = 0.1;
+    spot_light.decay = 2;
+    spot_light.distance = 200;
+    spot_light.castShadow = true;
+    scene.add(spot_light);
 
     camera.position.z = 15;
 
     // Enhanced animation loop with neural network effects
-    const animate = () => {
-      animationRef.current = requestAnimationFrame(animate);
+    const animateScene = () => {
+      animation_ref.current = requestAnimationFrame(animateScene);
 
       // Animate brain sphere
-      animateBrainSphere(sphere, sphereMaterial, synapses);
+      animateBrainSphere(sphere, sphere_material, synapses);
 
       // Update meteor animations if needed
-      if (meteorsRef.current) {
+      if (meteors_ref.current) {
         // We don't need to call animateMeteors here as it's already set up with GSAP
         // Just update any per-frame logic if needed
       }
 
       // Dynamic light movement
       const time = Date.now() * 0.001;
-      pointLight.position.x = Math.sin(time) * 15;
-      pointLight.position.z = Math.cos(time) * 15;
+      point_light.position.x = Math.sin(time) * 15;
+      point_light.position.z = Math.cos(time) * 15;
 
       renderer.render(scene, camera);
     };
@@ -136,102 +138,98 @@ const Depiction: React.FC = () => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            animate();
-          } else if (animationRef.current) {
-            cancelAnimationFrame(animationRef.current);
+            animateScene();
+          } else if (animation_ref.current) {
+            cancelAnimationFrame(animation_ref.current);
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: OBSERVER_THRESHOLD }
     );
 
-    if (mountRef.current) {
-      observer.observe(mountRef.current);
+    if (mount_ref.current) {
+      observer.observe(mount_ref.current);
     }
 
     // Enhanced resize handler
     const handleResize = () => {
-      camera.aspect = window.innerWidth / (isMobile ? 1 : 2) / window.innerHeight;
+      camera.aspect = window.innerWidth / (is_mobile ? 1 : 2) / window.innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth / (isMobile ? 1 : 2), window.innerHeight);
+      renderer.setSize(window.innerWidth / (is_mobile ? 1 : 2), window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     };
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+      if (animation_ref.current) {
+        cancelAnimationFrame(animation_ref.current);
       }
       observer.disconnect();
-      mountRef.current?.removeChild(renderer.domElement);
+      mount_ref.current?.removeChild(renderer.domElement);
     };
-  }, [isMobile]);
+  }, [is_mobile]);
 
-  // Effect to update meteor animations when activeIndex changes
+  // Effect to update meteor animations when active_index changes
   useEffect(() => {
-    console.log(`Active index changed to: ${activeIndex}`);
-
-    if (sceneRef.current && meteorsRef.current && sphereRef.current) {
-      console.log(`Updating meteor animations for index ${activeIndex}`);
-
+    if (scene_ref.current && meteors_ref.current && sphere_ref.current) {
       // Clear any existing animations first
-      meteorsRef.current.meteors.forEach(({ meteor }) => {
+      meteors_ref.current.meteors.forEach(({ meteor }) => {
         gsap.killTweensOf(meteor.position);
         gsap.killTweensOf(meteor.rotation);
       });
 
-      // Apply new animations based on activeIndex
+      // Apply new animations based on active_index
       animateMeteors(
-        meteorsRef.current.meteors,
-        sceneRef.current,
-        sphereRef.current,
-        meteorsRef.current.impactPoints,
-        activeIndex
+        meteors_ref.current.meteors,
+        scene_ref.current,
+        sphere_ref.current,
+        meteors_ref.current.impact_points,
+        active_index
       );
     }
-  }, [activeIndex]);
+  }, [active_index]);
 
   // Set up intersection observer for sections
   useEffect(() => {
     // Wait for sections to be ready
-    if (!sectionsReady) return;
+    if (!sections_ready) return;
+    
     // Create an observer for each section
-    const sectionObserver = new IntersectionObserver(
+    const section_observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const index = parseInt(entry.target.getAttribute('data-index') || '0');
-            console.log('Section', index, 'is now visible');
             setActiveIndex(index);
           }
         });
       },
       {
-        threshold: 0.6, // Trigger when 60% of the section is visible
-        rootMargin: '-10% 0px', // Adjust this to fine-tune when sections become active
+        threshold: SECTION_THRESHOLD,
+        rootMargin: SECTION_ROOT_MARGIN,
       }
     );
 
     // Observe each section
-    sectionsRef.current.forEach((section, index) => {
+    sections_ref.current.forEach((section) => {
       if (section) {
-        sectionObserver.observe(section);
+        section_observer.observe(section);
       }
     });
 
     return () => {
-      sectionObserver.disconnect();
+      section_observer.disconnect();
     };
-  }, [sectionsReady]);
+  }, [sections_ready]);
 
   return (
     <div className='relative w-full h-full flex flex-col md:flex-row items-stretch'>
       <div className='w-full md:w-1/2 h-full min-h-[300px] md:min-h-full'>
-        <TextContent activeIndex={activeIndex} setSectionsRef={sectionsRef} />
+        <TextContent activeIndex={active_index} setSectionsRef={sections_ref} />
       </div>
       <div
-        ref={mountRef}
+        ref={mount_ref}
         className='w-full md:w-1/2 h-full min-h-[300px] md:min-h-full sticky top-0'
       ></div>
     </div>

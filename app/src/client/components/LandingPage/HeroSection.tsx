@@ -41,7 +41,7 @@ const HeroSection: React.FC = () => {
               <span className='font-semibold text-red-600 dark:text-red-400'>Handwrite connections</span> →{' '}
               <span className='font-semibold text-blue-600 dark:text-blue-400'>Listen explanations</span>.
             </p>
-            <ExerciseForm topicId={null} demo={demoMode} />
+            <ExerciseForm topic_id={null} demo={demoMode} />
             {!user && !isLoading && (
               <div className='mt-10 flex items-center justify-center gap-x-6'>
                 <Link

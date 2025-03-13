@@ -1,13 +1,12 @@
 import logging
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from api.routes import router
 from api.health import router as health_router
 from core.config import settings
-from core.rate_limit import RateLimiter
-from services.database_service import DatabaseService
+from services.db_service import db_service
 
 # Configure logging
 logging.basicConfig(
@@ -19,12 +18,8 @@ logging.basicConfig(
     ]
 )
 
-# Initialize services
-db_service = DatabaseService()
-rate_limiter = RateLimiter(requests_per_minute=60)
-
 app = FastAPI(
-    title="File Text Extraction API",
+    title="File Text Extraction API", 
     description="A service to extract text from PDF, PPTX, and XLSX files, including OCR on images.",
     version="1.0.0",
     docs_url=None,
@@ -39,27 +34,44 @@ app.add_middleware(
     allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )
-app.add_middleware(GZipMiddleware, minimum_size=1000)
-app.middleware("http")(rate_limiter)
 
-# Include routers
-app.include_router(router)
-app.include_router(health_router, prefix="/api")
 
 @app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    """Global exception handler for unhandled exceptions"""
-    logging.exception("Unhandled exception occurred")
+async def general_exception_handler(request: Request, exc: Exception):
+    logging.error(f"Unhandled exception: {str(exc)}")
     return JSONResponse(
-        status_code=500,
+        status_code=getattr(exc, 'http_status', 500),
         content={
-            "error": "Internal Server Error",
-            "message": "An unexpected error occurred"
+            "success": False,
+            "code": getattr(exc, 'http_status', 500),
+            "message": getattr(exc, 'message', str(exc))
         }
     )
 
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    logging.error(f"Validation error: {str(exc)}")
+    error_details = []
+    for error in exc.errors():
+        field = error['loc'][-1] if len(error['loc']) > 1 else error['loc'][0]
+        error_details.append(f"{field}: {error['msg']}")
+    return JSONResponse(
+        status_code=422,
+        content={
+            "success": False,
+            "code": 422,
+            "message": ", ".join(error_details)
+        }
+    )
+
+# Include routers
+app.include_router(router, prefix="/api")
+app.include_router(health_router, prefix="/api")
+
+
 @app.on_event("shutdown")
-async def shutdown_event():
+async def handleShutdown():
     """Cleanup on application shutdown"""
-    db_service.close()
+    db_service.closeConnections()
     logging.info("Application shutdown complete")

@@ -12,16 +12,16 @@ export const getPrompt: GetPrompt<void, ExerciseGeneratePrompt> = async (_args, 
 
   // Fetch the user's existing record
   const prompt = await context.entities.ExerciseGeneratePrompt.findFirst({
-    where: { userId },
+    where: { user_id: userId },
   })
 
   // Return if found, or a default "empty" row
   return prompt || {
     id: 0,
-    userId,
+    user_id: userId,
     pre_prompt: '',
     post_prompt: '',
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    created_at: new Date(),
+    updated_at: new Date(),
   }
 }

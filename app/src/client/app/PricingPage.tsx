@@ -6,43 +6,44 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../../shared/utils';
 import { z } from 'zod';
+import { toast } from 'sonner';
 
 const PricingPage = () => {
-  const [isStripePaymentLoading, setIsStripePaymentLoading] = useState<boolean | string>(false);
-  const { data: user, isLoading: isUserLoading } = useAuth();
+  const [is_stripe_payment_loading, setIsStripePaymentLoading] = useState<boolean | string>(false);
+  const { data: user, isLoading: is_user_loading } = useAuth();
   const navigate = useNavigate();
 
-  async function handleBuyNowClick(tierId: string) {
+  async function handlePaymentClick(tier_id: string) {
     if (!user) {
       navigate('/login');
       return;
     }
     try {
-      setIsStripePaymentLoading(tierId);
-      let stripeResults = await stripePayment(tierId);
-      if (stripeResults?.sessionUrl) {
-        window.open(stripeResults.sessionUrl, '_self');
+      setIsStripePaymentLoading(tier_id);
+      const stripe_results = await stripePayment(tier_id);
+      if (stripe_results?.session_url) {
+        window.open(stripe_results.session_url, '_self');
       }
     } catch (error: any) {
-      console.error(error?.message ?? 'Something went wrong.');
+      toast.error(error?.message ?? 'Something went wrong.');
     } finally {
       setIsStripePaymentLoading(false);
     }
   }
 
-  const handleCustomerPortalClick = () => {
+  function handleCustomerPortalClick() {
     if (!user) {
       navigate('/login');
       return;
     }
     try {
-      const schema = z.string().url();
-      const customerPortalUrl = schema.parse(import.meta.env.REACT_APP_STRIPE_CUSTOMER_PORTAL);
-      window.open(customerPortalUrl, '_blank');
+      const url_schema = z.string().url();
+      const customer_portal_url = url_schema.parse(import.meta.env.REACT_APP_STRIPE_CUSTOMER_PORTAL);
+      window.open(customer_portal_url, '_blank');
     } catch (err) {
-      console.error(err);
+      toast.error(err as string);
     }
-  };
+  }
 
   return (
     <div className='min-h-screen bg-white'>
@@ -91,14 +92,14 @@ const PricingPage = () => {
               </div>
 
               <button
-                onClick={() => handleBuyNowClick(tier.id)}
-                disabled={isStripePaymentLoading === tier.id}
+                onClick={() => handlePaymentClick(tier.id)}
+                disabled={is_stripe_payment_loading === tier.id}
                 className={cn(
                   'mt-auto w-full py-4 rounded-xl font-satoshi text-base transition-all duration-200',
                   tier.bestDeal
                     ? 'bg-primary-500 text-white hover:bg-primary-600'
                     : 'bg-primary-50 text-primary-700 hover:bg-primary-100',
-                  isStripePaymentLoading === tier.id && 'opacity-50 cursor-not-allowed'
+                  is_stripe_payment_loading === tier.id && 'opacity-50 cursor-not-allowed'
                 )}
               >
                 {!!user ? 'Get Started' : 'Sign in to Purchase'}

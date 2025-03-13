@@ -1,13 +1,12 @@
-import { BaseEmailTemplate } from '../components/EmailTemplateFactory';
+import { BaseEmailTemplate, TEXT_UTILS } from '../components/EmailTemplateFactory';
 import { components } from '../components/BaseTemplate';
-import { textUtils } from '../components/EmailTemplateFactory';
 
 interface SubscriptionFeedbackParams {
-  userId: string;
-  userName: string;
-  userEmail: string;
-  enterprisePlanName: string;
-  feedbackLink: string;
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  enterprise_plan_name: string;
+  feedback_link: string;
 }
 
 export class SubscriptionFeedbackEmail extends BaseEmailTemplate {
@@ -20,28 +19,28 @@ export class SubscriptionFeedbackEmail extends BaseEmailTemplate {
   }
 
   protected generateText(): string {
-    const { userName, enterprisePlanName, feedbackLink } = this.params;
+    const { user_name, enterprise_plan_name, feedback_link } = this.params;
     return `
-Hi ${userName},
+Hi ${user_name},
 
-Your ${enterprisePlanName} subscription has ended, and we'd love to listen your thoughts! Your feedback helps us improve and create a better experience for you and your team.
+Your ${enterprise_plan_name} subscription has ended, and we'd love to listen your thoughts! Your feedback helps us improve and create a better experience for you and your team.
 
 Did the plan meet your needs? Is there anything we can do better? Let us know by sharing your feedback—it only takes a minute!
 
-Share your feedback here: ${feedbackLink}
+Share your feedback here: ${feedback_link}
 
 Thanks for being part of Multinex!
 
-${textUtils.generateSignature()}`;
+${TEXT_UTILS.generateSignature()}`;
   }
 
   protected generateHtmlContent(): string {
-    const { userName, enterprisePlanName, feedbackLink } = this.params;
+    const { user_name, enterprise_plan_name, feedback_link } = this.params;
     return `
       ${components.heading('Tell Us About Your Experience with Multinex')}
-      ${components.paragraph(`Hi ${userName},`)}
+      ${components.paragraph(`Hi ${user_name},`)}
       ${components.paragraph(
-        `Your <strong>${enterprisePlanName}</strong> subscription has ended, and we'd love to listen ` +
+        `Your <strong>${enterprise_plan_name}</strong> subscription has ended, and we'd love to listen ` +
         'your thoughts! Your feedback helps us improve and create a better experience for you ' +
         'and your team.'
       )}
@@ -49,10 +48,10 @@ ${textUtils.generateSignature()}`;
         'Did the plan meet your needs? Is there anything we can do better? Let us know by ' +
         'sharing your feedback—it only takes a minute!'
       )}
-      ${components.button('Send Feedback', feedbackLink)}
+      ${components.button('Send Feedback', feedback_link)}
       ${components.paragraph('Thanks for being part of <strong>Multinex</strong>!')}
       ${components.paragraph('Thanks for your time, and have a great day!')}
       ${components.paragraph('<strong>Multinex</strong>')}
     `;
   }
-} 
+}

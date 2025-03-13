@@ -1,35 +1,36 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Question } from 'wasp/entities';
-import { TextList } from '../utils/TextList';
+import { TextList } from '../components/ExerciseInterface/TextList';
 import { updateExercise } from 'wasp/client/operations';
 
 const useExercise = (
-  exerciseId: string,
-  essay: string,
-  formattedEssay: { mode: string; text: string[] }[],
-  paragraphSummary: string,
+  exercise_id: string,
+  essay: string, 
+  formatted_essay: { mode: string; text: string[] }[],
+  paragraph_summary: string,
   questions: Question[],
-  defaultMode: 'typing' | 'submitted' | 'test',
-  textSize: string,
-  progressCursor: number
+  default_mode: 'typing' | 'submitted' | 'test',
+  text_size: string,
+  progress_cursor: number
 ) => {
-  const essayList = useMemo(
-    () => new TextList(formattedEssay, textSize, progressCursor),
-    [formattedEssay, textSize, progressCursor]
+  const essay_list = useMemo(
+    () => new TextList(formatted_essay, text_size, progress_cursor),
+    [formatted_essay, text_size, progress_cursor]
   );
-  const [mode, setMode] = useState<'typing' | 'submitted' | 'test'>(defaultMode || 'typing');
-  const essayCharCount = useMemo(() => essay.length, [essay]);
-  const essayWordCount = useMemo(() => essay.split(' ').length, [essay]);
-  const summary = useMemo(() => paragraphSummary?.split('|') || [], [paragraphSummary]);
-  const hasQuiz = useMemo(() => Boolean(questions?.length), [questions]);
+
+  const [mode, set_mode] = useState<'typing' | 'submitted' | 'test'>(default_mode || 'typing');
+  const essay_char_count = useMemo(() => essay.length, [essay]);
+  const essay_word_count = useMemo(() => essay.split(' ').length, [essay]);
+  const summary = useMemo(() => paragraph_summary?.split('|') || [], [paragraph_summary]);
+  const has_quiz = useMemo(() => Boolean(questions?.length), [questions]);
 
   useEffect(() => {
     const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
       if (mode === 'typing') {
         await updateExercise({
-          id: exerciseId!,
+          id: exercise_id!,
           updated_data: {
-            cursor: essayList.getCursor()?.id,
+            cursor: essay_list.getCursor()?.id,
           },
         });
         e.preventDefault();
@@ -38,17 +39,17 @@ const useExercise = (
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [mode, exerciseId, essayList]);
+  }, [mode, exercise_id, essay_list]);
 
   return {
     essay,
-    essayList,
+    essay_list,
     mode,
-    setMode,
+    set_mode,
     summary,
-    hasQuiz,
-    essayWordCount,
-    essayCharCount,
+    has_quiz,
+    essay_word_count,
+    essay_char_count,
   };
 };
 

@@ -1,10 +1,10 @@
 import { BaseEmailTemplate } from '../components/EmailTemplateFactory';
 import { components } from '../components/BaseTemplate';
-import { textUtils } from '../components/EmailTemplateFactory';
+import { TEXT_UTILS } from '../components/EmailTemplateFactory';
 
 interface VerificationEmailParams {
-  verificationLink: string;
-  userName: string;
+  verification_link: string;
+  user_name: string;
 }
 
 export class VerificationEmail extends BaseEmailTemplate {
@@ -17,32 +17,34 @@ export class VerificationEmail extends BaseEmailTemplate {
   }
 
   protected generateText(): string {
-    const { userName, verificationLink } = this.params;
+    const { user_name, verification_link } = this.params;
     return `
-Hi ${userName},
+Hi ${user_name},
 
 Thank you for signing up with Multinex! To complete your registration, please verify your email address by clicking the link below:
 
-${verificationLink}
+${verification_link}
 
 If you didn't create this account, you can ignore this email.
 
-${textUtils.generateSignature()}`;
+${TEXT_UTILS.generateSignature()}`;
   }
 
   protected generateHtmlContent(): string {
-    const { userName, verificationLink } = this.params;
+    const { user_name, verification_link } = this.params;
     return `
-      ${components.heading('Verify Your Email Address')}
-      ${components.paragraph(`Hi ${userName},`)}
-      ${components.paragraph(
-        'Thank you for signing up with <strong>Multinex</strong>! To complete your registration, ' +
-        'please verify your email address by clicking the link below:'
-      )}
-      ${components.button('Click to Verify', verificationLink)}
-      ${components.paragraph("If you didn't create this account, you can ignore this email.")}
-      ${components.paragraph('Thanks for your time, and have a great day!')}
-      ${components.paragraph('<strong>Multinex</strong>')}
+      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+        <tr>${components.heading('Verify Your Email Address')}</tr>
+        <tr>${components.paragraph(`Hi ${user_name},`)}</tr>
+        <tr>${components.paragraph(
+          'Thank you for signing up with <strong>Multinex</strong>! To complete your registration, ' +
+          'please verify your email address by clicking the link below:'
+        )}</tr>
+        <tr>${components.button('Click to Verify', verification_link)}</tr>
+        <tr>${components.paragraph("If you didn't create this account, you can ignore this email.")}</tr>
+        <tr>${components.paragraph('Thanks for your time, and have a great day!')}</tr>
+        <tr>${components.paragraph('<strong>Multinex</strong>')}</tr>
+      </table>
     `;
   }
-} 
+}

@@ -16,25 +16,25 @@ app Multinex {
       "<!-- Open Graph Meta Tags for Social Sharing -->",
       "<meta property='og:type' content='website' />",
       "<meta property='og:title' content='Multinex - Interactive Typing Exercises from Your Notes' />",
-      "<meta property='og:url' content='https://www.multinex.com' />",
+      "<meta property='og:url' content='https://www.multinex.app' />",
       "<meta property='og:description' content='Turn your PDF lecture notes into interactive typing exercises with Multinex. Engage actively with your studies and improve learning retention.' />",
-      "<meta property='og:image' content='https://www.multinex.com/public-banner.png' />",
+      "<meta property='og:image' content='https://www.multinex.app/public-banner.png' />",
       "<meta property='og:image:alt' content='Multinex - Convert PDFs into Interactive Exercises' />",
       "<meta property='og:locale' content='en_US' />",
 
       "<!-- Twitter Meta Tags -->",
       "<meta name='twitter:title' content='Multinex - Interactive Typing Exercises from Your Notes' />",
       "<meta name='twitter:description' content='Multinex helps you actively engage with your lecture notes by converting PDFs into interactive typing exercises for better memory retention.' />",
-      "<meta name='twitter:image' content='https://www.multinex.com/public-banner.png' />",
+      "<meta name='twitter:image' content='https://www.multinex.app/public-banner.png' />",
       "<meta name='twitter:image:width' content='800' />",
       "<meta name='twitter:image:height' content='400' />",
       "<meta name='twitter:card' content='summary_large_image' />",
 
       "<!-- Canonical Link -->",
-      "<link rel='canonical' href='https://www.multinex.com' />",
+      "<link rel='canonical' href='https://www.multinex.app' />",
 
       "<!-- Analytics -->",
-      "<script defer data-domain='multinex.com' src='https://plausible.io/js/script.js'></script>",
+      "<script defer data-domain='multinex.app' src='https://plausible.io/js/script.js'></script>",
   ],
 
   // 🔐 Auth out of the box! https://wasp-lang.dev/docs/auth/overview
@@ -45,7 +45,7 @@ app Multinex {
       email: {
         fromField: {
           name: "Multinex",
-          email: "onboard@multinex.com"
+          email: "onboard@multinex.app"
         },
         emailVerification: {
           clientRoute: EmailVerificationRoute,
@@ -79,7 +79,7 @@ app Multinex {
     provider: Mailgun,
     defaultFrom: {
       name: "Multinex",
-      email: "auth@admin.multinex.com"
+      email: "auth@admin.multinex.app"
     },
   },
   // webSocket: {
@@ -218,6 +218,11 @@ page CheckoutPage {
  */
 
 // 📝 Actions
+action createNewsletter {
+  fn: import { createNewsletter } from "@src/server/actions/newsletter.js",
+  entities: [Newsletter]
+}
+
 action createFeedback {
   fn: import { createFeedback } from "@src/server/actions/feedback.js",
   entities: [Feedback]
@@ -321,11 +326,6 @@ action updateCurrentUser {
 action createDemoExercise {
   fn: import { createDemoExercise } from "@src/server/actions/demoExercise.js",
   entities: [DemoExercise, Exercise]
-}
-
-action updateUserLang {
-  fn: import { updateUserLang } from "@src/server/actions/users.js",
-  entities: [User]
 }
 
 

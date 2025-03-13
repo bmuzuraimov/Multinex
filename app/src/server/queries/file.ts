@@ -2,16 +2,16 @@ import { HttpError } from 'wasp/server';
 import { type GetUploadURL, type GetDownloadURL } from 'wasp/server/operations';
 import { getS3DownloadUrl, getS3UploadUrl } from '../utils/s3Utils';
 
-export const getUploadURL: GetUploadURL<{ key: string, fileType: string }, { uploadUrl: string, key: string }> = async (
-  { key, fileType },
+export const getUploadURL: GetUploadURL<{ key: string, file_type: string }, { upload_url: string, key: string }> = async (
+  { key, file_type },
   context
 ) => {
-  if (!key || !fileType) {
+  if (!key || !file_type) {
     throw new HttpError(400, 'File key and type are required.');
   }
 
   try {
-    return await getS3UploadUrl({ key, fileType });
+    return await getS3UploadUrl({ key, file_type });
   } catch (error) {
     console.error('Error generating upload URL:', error);
     throw new HttpError(500, 'Failed to generate upload URL. Please try again later.');

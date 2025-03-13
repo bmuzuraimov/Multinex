@@ -26,7 +26,7 @@ export const questionsFormat: {
                         type: string;
                         description: string;
                       };
-                      isCorrect: {
+                      is_correct: {
                         type: string;
                         description: string;
                       };
@@ -73,12 +73,12 @@ export const questionsFormat: {
                         type: 'string',
                         description: 'The text of the option.',
                       },
-                      isCorrect: {
+                      is_correct: {
                         type: 'boolean',
                         description: 'Indicates whether this option is the correct answer.',
                       },
                     },
-                    required: ['text', 'isCorrect'],
+                    required: ['text', 'is_correct'],
                     additionalProperties: false,
                   },
                 },

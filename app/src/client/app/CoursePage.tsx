@@ -16,44 +16,45 @@ import UserTour from '../components/UserTour';
 import { useAuth } from 'wasp/client/auth';
 import ExerciseCard from '../components/ExerciseCard';
 import ExerciseForm from '../components/ExerciseForm';
+import { toast } from 'sonner';
 
 export default function CoursePage() {
-  const { id: courseId } = useParams<{ id: string }>();
-  if (!courseId) return null;
+  const { id: course_id } = useParams<{ id: string }>();
+  if (!course_id) return null;
 
-  const { data: topics, refetch: refetchTopics } = useQuery(getTopicsByCourse, { courseId });
-  const { data: course, refetch: refetchCourse } = useQuery(getCourseById, { courseId });
-  const [courseName, setCourseName] = useState('');
+  const { data: topics, refetch: refetch_topics } = useQuery(getTopicsByCourse, { course_id });
+  const { data: course, refetch: refetch_course } = useQuery(getCourseById, { course_id });
+  const [course_name, setCourseNameState] = useState('');
 
   useEffect(() => {
     if (course?.name) {
-      setCourseName(course.name);
+      setCourseNameState(course.name);
     }
   }, [course]);
 
   const handleUpdateCourse = useCallback(() => {
-    if (courseId && courseName !== course?.name) {
+    if (course_id && course_name !== course?.name) {
       updateCourse({
-        id: courseId,
+        id: course_id,
         data: {
-          name: courseName,
+          name: course_name,
         },
       });
-      refetchCourse();
+      refetch_course();
     }
-  }, [courseId, courseName, course?.name]);
+  }, [course_id, course_name, course?.name]);
 
   const handlePublishCourse = useCallback(() => {
-    if (courseId) {
+    if (course_id) {
       updateCourse({
-        id: courseId,
+        id: course_id,
         data: {
-          isPublic: !course?.isPublic,
+          is_public: !course?.is_public,
         },
       });
-      refetchCourse();
+      refetch_course();
     }
-  }, [courseId, course?.isPublic]);
+  }, [course_id, course?.is_public]);
 
   return (
     <div className='min-h-screen bg-white font-montserrat'>
@@ -62,8 +63,8 @@ export default function CoursePage() {
           <div className='relative flex justify-center'>
             <input
               type='text'
-              value={courseName}
-              onChange={(e) => setCourseName(e.target.value)}
+              value={course_name}
+              onChange={(e) => setCourseNameState(e.target.value)}
               onBlur={handleUpdateCourse}
               className='px-8 bg-white text-title-xl font-manrope font-bold text-primary-900 text-center border-0 focus:ring-2 focus:ring-primary-200 rounded-xl transition-all duration-300'
               placeholder='Course Name'
@@ -76,7 +77,7 @@ export default function CoursePage() {
             onClick={handlePublishCourse}
             className='flex items-center gap-3 px-6 py-3 rounded-xl border transition-all duration-300 hover:shadow-md'
           >
-            {course?.isPublic ? (
+            {course?.is_public ? (
               <>
                 <HiGlobeAlt className='h-5 w-5 text-tertiary-500 transition-transform duration-300' />
                 <span className='text-sm font-medium text-tertiary-600'>Public Course</span>
@@ -89,7 +90,7 @@ export default function CoursePage() {
             )}
           </button>
           <button
-            onClick={() => createTopic({ name: 'New Section', courseId })}
+            onClick={() => createTopic({ name: 'New Section', course_id })}
             className='tour-step-2 group inline-flex items-center px-8 py-3 text-sm font-medium rounded-xl text-white bg-primary-500 hover:bg-primary-600 shadow-md hover:shadow-lg transition-all duration-300'
           >
             <IoAddOutline className='mr-2 h-5 w-5 transition-transform duration-300 group-hover:rotate-90' />
@@ -114,55 +115,66 @@ const TaskSection: React.FC<{
       status: string;
       name: string;
       level: string;
-      lessonText: string;
+      lesson_text: string;
       truncated: boolean;
-      no_words: number;
+      word_count: number;
       completed: boolean;
-      completedAt: Date | null;
+      completed_at: Date | null;
       score: number;
     }[];
   };
 }> = React.memo(({ topic }) => {
-  const [topicName, setTopicName] = useState(topic.name);
-  const [topicLength, setTopicLength] = useState(topic.length);
-  const [topicLevel, setTopicLevel] = useState(topic.level);
+  const [topic_name, setTopicNameState] = useState(topic.name);
+  const [topic_length, setTopicLengthState] = useState(topic.length);
+  const [topic_level, setTopicLevelState] = useState(topic.level);
   const { data: user } = useAuth();
 
   const handleUpdateTopic = useCallback(() => {
     updateTopic({
       id: topic.id,
       data: {
-        name: topicName,
-        length: topicLength,
-        level: topicLevel,
+        name: topic_name,
+        length: topic_length,
+        level: topic_level,
       },
     });
-  }, [topic.id, topicName, topicLength, topicLevel]);
+  }, [topic.id, topic_name, topic_length, topic_level]);
+
+  const handleDeleteTopic = useCallback(() => {
+    toast('Are you sure you want to delete this section?', {
+      action: {
+        label: 'Delete',
+        onClick: () => {
+          toast.promise(deleteTopic({ id: topic.id }), {
+            loading: 'Deleting section...',
+            success: 'Section deleted successfully', 
+            error: 'Failed to delete section'
+          });
+        },
+      },
+    });
+  }, [topic.id]);
 
   useEffect(() => {
-    setTopicName(topic.name);
-    setTopicLength(topic.length);
-    setTopicLevel(topic.level);
+    setTopicNameState(topic.name);
+    setTopicLengthState(topic.length);
+    setTopicLevelState(topic.level);
   }, [topic]);
 
   return (
     <div className='tour-step-3 bg-white rounded-2xl shadow-lg hover:shadow-xl p-12 transition-all duration-300 border border-primary-100'>
-      {user && <UserTour userId={user.id} />}
+      {user && <UserTour user_id={user.id} />}
       <div className='flex items-center mb-12 group relative'>
         <input
           type='text'
-          value={topicName}
-          onChange={(e) => setTopicName(e.target.value)}
+          value={topic_name}
+          onChange={(e) => setTopicNameState(e.target.value)}
           onBlur={handleUpdateTopic}
           className='w-full text-title-lg font-manrope font-semibold bg-transparent border-0 border-b-2 border-primary-100 focus:border-primary-500 focus:ring-0 px-4 py-3 text-primary-900'
           placeholder='Section Name'
         />
         <button
-          onClick={() => {
-            if (window.confirm('Are you sure you want to delete this section?')) {
-              deleteTopic({ id: topic.id });
-            }
-          }}
+          onClick={handleDeleteTopic}
           className='absolute right-4 p-3 text-primary-400 hover:text-danger transition-all duration-300 rounded-xl hover:bg-danger/5'
         >
           <RiDeleteBin4Line className='h-5 w-5' />
@@ -170,9 +182,9 @@ const TaskSection: React.FC<{
       </div>
 
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8'>
-        <ExerciseForm topicId={topic.id} demo={false} />
+        <ExerciseForm topic_id={topic.id} demo={false} />
         {topic.exercises?.map((exercise, idx) => (
-          <ExerciseCard key={exercise.id} index={idx} exercise={exercise} />
+          <ExerciseCard key={exercise.id} index={idx} exercise={exercise as any} />
         ))}
       </div>
     </div>

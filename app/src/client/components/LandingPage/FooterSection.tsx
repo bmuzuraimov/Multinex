@@ -1,7 +1,37 @@
-import { footerNavigation } from '../../common/contentSections';
+import { createNewsletter } from 'wasp/client/operations';
+import { FOOTER_NAVIGATION } from '../../../shared/constants';
 import { FaFacebook, FaXTwitter, FaInstagram, FaLinkedin, FaTiktok } from 'react-icons/fa6';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 const FooterSection = () => {
+  const [email, setEmail] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!email) {
+      toast.error('Please enter your email address');
+      return;
+    }
+
+    try {
+      const response = await createNewsletter({ 
+        email,
+        userAgent: window.navigator.userAgent,
+        source: 'website_footer'
+      });
+      if (response.success) {
+        toast.success('Successfully subscribed to newsletter!');
+        setEmail('');
+      } else {
+        toast.error(response.message || 'Failed to subscribe');
+      }
+    } catch (error) {
+      toast.error('An error occurred while subscribing');
+    }
+  };
+
   return (
     <div className='relative mt-32 w-full bg-white'>
       <footer className='relative w-full py-16'>
@@ -38,19 +68,44 @@ const FooterSection = () => {
                 </p>
 
                 <div className='flex space-x-5'>
-                  <a href="https://www.facebook.com/profile.php?id=61566443964554" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
+                  <a
+                    href='https://www.facebook.com/profile.php?id=61566443964554'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-gray-400 hover:text-primary-500 transition-colors duration-200'
+                  >
                     <FaFacebook className='h-5 w-5' />
                   </a>
-                  <a href="https://x.com/multinex" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
+                  <a
+                    href='https://x.com/multinex'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-gray-400 hover:text-primary-500 transition-colors duration-200'
+                  >
                     <FaXTwitter className='h-5 w-5' />
                   </a>
-                  <a href="https://www.instagram.com/multinex/" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
+                  <a
+                    href='https://www.instagram.com/multinex/'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-gray-400 hover:text-primary-500 transition-colors duration-200'
+                  >
                     <FaInstagram className='h-5 w-5' />
                   </a>
-                  <a href="https://www.linkedin.com/company/multinex/" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
+                  <a
+                    href='https://www.linkedin.com/company/multinex/'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-gray-400 hover:text-primary-500 transition-colors duration-200'
+                  >
                     <FaLinkedin className='h-5 w-5' />
                   </a>
-                  <a href="https://www.tiktok.com/@multinex" target="_blank" rel="noopener noreferrer" className='text-gray-400 hover:text-primary-500 transition-colors duration-200'>
+                  <a
+                    href='https://www.tiktok.com/@multinex'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-gray-400 hover:text-primary-500 transition-colors duration-200'
+                  >
                     <FaTiktok className='h-5 w-5' />
                   </a>
                 </div>
@@ -62,7 +117,7 @@ const FooterSection = () => {
               <div>
                 <h3 className='font-manrope text-title-sm font-semibold text-primary-900 mb-4'>Quick Links</h3>
                 <ul className='space-y-3'>
-                  {footerNavigation.app.map((item) => (
+                  {FOOTER_NAVIGATION.app.map((item) => (
                     <li key={item.name}>
                       <a
                         href={item.href}
@@ -74,9 +129,9 @@ const FooterSection = () => {
                   ))}
                   <li>
                     <a
-                      href="https://multinex.getrewardful.com/signup"
-                      target="_blank"
-                      rel="noopener noreferrer" 
+                      href='https://multinex.getrewardful.com/signup'
+                      target='_blank'
+                      rel='noopener noreferrer'
                       className='font-montserrat text-gray-500 hover:text-primary-600 transition-colors duration-200'
                     >
                       Affiliate Program
@@ -84,7 +139,7 @@ const FooterSection = () => {
                   </li>
                   <li>
                     <a
-                      href="/guide"
+                      href='/guide'
                       className='font-montserrat text-gray-500 hover:text-primary-600 transition-colors duration-200'
                     >
                       Guide
@@ -96,7 +151,7 @@ const FooterSection = () => {
               <div>
                 <h3 className='font-manrope text-title-sm font-semibold text-primary-900 mb-4'>About Us</h3>
                 <ul className='space-y-3'>
-                  {footerNavigation.company.map((item) => (
+                  {FOOTER_NAVIGATION.company.map((item) => (
                     <li key={item.name}>
                       <a
                         href={item.href}
@@ -112,10 +167,12 @@ const FooterSection = () => {
 
             <div className='lg:col-span-1'>
               <h3 className='font-manrope text-title-sm font-semibold text-primary-900 mb-4'>Stay Updated</h3>
-              <form className='mt-4'>
+              <form onSubmit={handleSubmit} className='mt-4'>
                 <div className='flex flex-col space-y-3'>
                   <input
                     type='email'
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder='Your email address'
                     className='w-full px-4 py-2.5 rounded-lg bg-white border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200 font-satoshi'
                   />

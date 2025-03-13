@@ -2,32 +2,33 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function CheckoutPage() {
-  const [paymentStatus, setPaymentStatus] = useState('loading');
+  const [payment_status, setPaymentStatus] = useState('loading');
 
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    function delayedRedirect() {
+    function handleDelayedRedirect() {
       return setTimeout(() => {
         navigate('/account');
       }, 4000);
     }
 
-    const queryParams = new URLSearchParams(location.search);
-    const isSuccess = queryParams.get('success');
-    const isCanceled = queryParams.get('canceled');
+    const query_params = new URLSearchParams(location.search);
+    const is_success = query_params.get('success');
+    const is_canceled = query_params.get('canceled');
 
-    if (isCanceled) {
+    if (is_canceled) {
       setPaymentStatus('canceled');
-    } else if (isSuccess) {
+    } else if (is_success) {
       setPaymentStatus('paid');
     } else {
       navigate('/account');
     }
-    delayedRedirect();
+    
+    const timeout_id = handleDelayedRedirect();
     return () => {
-      clearTimeout(delayedRedirect());
+      clearTimeout(timeout_id);
     };
   }, [location]);
 
@@ -36,7 +37,7 @@ export default function CheckoutPage() {
       <div className='w-full max-w-xl'>
         <div className='bg-white rounded-2xl p-8 shadow-lg border border-primary-100'>
           <div className='text-center space-y-6'>
-            {paymentStatus === 'paid' && (
+            {payment_status === 'paid' && (
               <>
                 <div className='w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto'>
                   <span className='text-4xl'>🎉</span>
@@ -50,7 +51,7 @@ export default function CheckoutPage() {
               </>
             )}
             
-            {paymentStatus === 'canceled' && (
+            {payment_status === 'canceled' && (
               <>
                 <div className='w-20 h-20 bg-danger/10 rounded-full flex items-center justify-center mx-auto'>
                   <span className='text-4xl'>😔</span>
@@ -64,7 +65,7 @@ export default function CheckoutPage() {
               </>
             )}
 
-            {paymentStatus === 'error' && (
+            {payment_status === 'error' && (
               <>
                 <div className='w-20 h-20 bg-warning/10 rounded-full flex items-center justify-center mx-auto'>
                   <span className='text-4xl'>⚠️</span>
@@ -78,7 +79,7 @@ export default function CheckoutPage() {
               </>
             )}
 
-            {paymentStatus !== 'loading' && (
+            {payment_status !== 'loading' && (
               <div className='mt-8 text-sm text-primary-500 font-satoshi'>
                 Redirecting you to your account page...
                 <div className='mt-4 h-1 bg-primary-100 rounded-full overflow-hidden'>

@@ -1,36 +1,43 @@
 import * as THREE from 'three';
+import {
+  SPHERE_GEOMETRY,
+  SYNAPSE_GEOMETRY,
+  SYNAPSE_MATERIAL,
+  NOISE_FACTOR,
+  SPHERE_RADIUS,
+  SYNAPSE_COUNT,
+  SYNAPSE_BRANCH_OFFSET,
+  WAVE_FACTOR,
+  ROTATION_SPEED_X,
+  ROTATION_SPEED_Y,
+  SYNAPSE_SPEED_Y,
+  SYNAPSE_SPEED_Z,
+  BREATHE_AMPLITUDE,
+  BREATHE_FREQUENCY,
+  EMISSIVE_BASE,
+  OPACITY_BASE,
+  OPACITY_AMPLITUDE,
+  EMISSIVE_AMPLITUDE,
+  TEMP_VERTEX,
+  TEMP_COLOR
+} from '../../../../shared/constants/animation';
 
-// Reusable geometries and materials
-const SPHERE_GEOMETRY = new THREE.IcosahedronGeometry(5, 4); // Reduced detail level
-const SYNAPSE_GEOMETRY = new THREE.BufferGeometry();
-const SYNAPSE_MATERIAL = new THREE.LineBasicMaterial({
-  vertexColors: true,
-  transparent: true,
-  opacity: 0.4,
-  blending: THREE.AdditiveBlending,
-  linewidth: 1
-});
-
-// Reusable vectors for calculations
-const tempVertex = new THREE.Vector3();
-const tempColor = new THREE.Color();
 
 export const createBrainSphere = (scene: THREE.Scene) => {
-  // Modify geometry once during creation
-  const positionAttribute = SPHERE_GEOMETRY.getAttribute('position');
-  const positions = positionAttribute.array;
+  const position_attribute = SPHERE_GEOMETRY.getAttribute('position');
+  const positions = position_attribute.array;
   for (let i = 0; i < positions.length; i += 3) {
-    tempVertex.set(positions[i], positions[i + 1], positions[i + 2]);
-    const noise = (Math.random() - 0.5) * 0.4;
-    const wave = Math.sin(tempVertex.x * 2) * Math.cos(tempVertex.y * 2) * 0.2;
-    tempVertex.normalize().multiplyScalar(5 + noise + wave);
-    positions[i] = tempVertex.x;
-    positions[i + 1] = tempVertex.y;
-    positions[i + 2] = tempVertex.z;
+    TEMP_VERTEX.set(positions[i], positions[i + 1], positions[i + 2]);
+    const noise = (Math.random() - 0.5) * NOISE_FACTOR;
+    const wave = Math.sin(TEMP_VERTEX.x * 2) * Math.cos(TEMP_VERTEX.y * 2) * WAVE_FACTOR;
+    TEMP_VERTEX.normalize().multiplyScalar(SPHERE_RADIUS + noise + wave);
+    positions[i] = TEMP_VERTEX.x;
+    positions[i + 1] = TEMP_VERTEX.y;
+    positions[i + 2] = TEMP_VERTEX.z;
   }
-  positionAttribute.needsUpdate = true;
+  position_attribute.needsUpdate = true;
 
-  const sphereMaterial = new THREE.MeshPhysicalMaterial({
+  const sphere_material = new THREE.MeshPhysicalMaterial({
     color: 0xff69b4,
     wireframe: true,
     emissive: 0xff1493,
@@ -42,84 +49,77 @@ export const createBrainSphere = (scene: THREE.Scene) => {
     clearcoat: 1.0,
     clearcoatRoughness: 0.05,
     wireframeLinewidth: 1.5,
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
   });
-  
-  const sphere = new THREE.Mesh(SPHERE_GEOMETRY, sphereMaterial);
+
+  const sphere = new THREE.Mesh(SPHERE_GEOMETRY, sphere_material);
   sphere.castShadow = true;
   sphere.receiveShadow = true;
   scene.add(sphere);
 
   // Optimize synapse creation
-  const synapseCount = 100; // Reduced count
-  const synapseVertices = new Float32Array(synapseCount * 6); // Pre-allocate arrays
-  const synapseColors = new Float32Array(synapseCount * 6);
-  
-  for (let i = 0, offset = 0; i < synapseCount; i++) {
+  const synapse_vertices = new Float32Array(SYNAPSE_COUNT * 6); // Pre-allocate arrays
+  const synapse_colors = new Float32Array(SYNAPSE_COUNT * 6);
+
+  for (let i = 0, offset = 0; i < SYNAPSE_COUNT; i++) {
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.acos(Math.random() * 2 - 1);
-    const radius = 5 + (Math.random() - 0.5) * 0.5;
-    
+    const radius = SPHERE_RADIUS + (Math.random() - 0.5) * 0.5;
+
     const x = radius * Math.sin(phi) * Math.cos(theta);
     const y = radius * Math.sin(phi) * Math.sin(theta);
     const z = radius * Math.cos(phi);
 
     // Single branch per synapse
     const offset2 = new THREE.Vector3(
-      (Math.random() - 0.5) * 3,
-      (Math.random() - 0.5) * 3,
-      (Math.random() - 0.5) * 3
+      (Math.random() - 0.5) * SYNAPSE_BRANCH_OFFSET,
+      (Math.random() - 0.5) * SYNAPSE_BRANCH_OFFSET,
+      (Math.random() - 0.5) * SYNAPSE_BRANCH_OFFSET
     );
 
-    synapseVertices[offset] = x;
-    synapseVertices[offset + 1] = y;
-    synapseVertices[offset + 2] = z;
-    synapseVertices[offset + 3] = x + offset2.x;
-    synapseVertices[offset + 4] = y + offset2.y;
-    synapseVertices[offset + 5] = z + offset2.z;
+    synapse_vertices[offset] = x;
+    synapse_vertices[offset + 1] = y;
+    synapse_vertices[offset + 2] = z;
+    synapse_vertices[offset + 3] = x + offset2.x;
+    synapse_vertices[offset + 4] = y + offset2.y;
+    synapse_vertices[offset + 5] = z + offset2.z;
 
-    tempColor.setHSL(0.9, 0.8, 0.6);
-    synapseColors[offset] = tempColor.r;
-    synapseColors[offset + 1] = tempColor.g;
-    synapseColors[offset + 2] = tempColor.b;
-    synapseColors[offset + 3] = tempColor.r;
-    synapseColors[offset + 4] = tempColor.g;
-    synapseColors[offset + 5] = tempColor.b;
+    TEMP_COLOR.setHSL(0.9, 0.8, 0.6);
+    synapse_colors[offset] = TEMP_COLOR.r;
+    synapse_colors[offset + 1] = TEMP_COLOR.g;
+    synapse_colors[offset + 2] = TEMP_COLOR.b;
+    synapse_colors[offset + 3] = TEMP_COLOR.r;
+    synapse_colors[offset + 4] = TEMP_COLOR.g;
+    synapse_colors[offset + 5] = TEMP_COLOR.b;
 
     offset += 6;
   }
-  
-  SYNAPSE_GEOMETRY.setAttribute('position', new THREE.BufferAttribute(synapseVertices, 3));
-  SYNAPSE_GEOMETRY.setAttribute('color', new THREE.BufferAttribute(synapseColors, 3));
-  
+
+  SYNAPSE_GEOMETRY.setAttribute('position', new THREE.BufferAttribute(synapse_vertices, 3));
+  SYNAPSE_GEOMETRY.setAttribute('color', new THREE.BufferAttribute(synapse_colors, 3));
+
   const synapses = new THREE.LineSegments(SYNAPSE_GEOMETRY, SYNAPSE_MATERIAL);
   sphere.add(synapses);
 
-  return { sphere, sphereMaterial, synapses };
+  return { sphere, sphere_material, synapses };
 };
-
-// Cache time multipliers
-const ROTATION_X = 0.0008;
-const ROTATION_Y = 0.0012;
-const SYNAPSE_Y = 0.0003;
-const SYNAPSE_Z = 0.0002;
 
 export const animateBrainSphere = (
   sphere: THREE.Mesh,
-  sphereMaterial: THREE.MeshPhysicalMaterial,
+  sphere_material: THREE.MeshPhysicalMaterial,
   synapses: THREE.LineSegments
 ) => {
   const time = Date.now() * 0.001;
-  
-  sphere.rotation.x += ROTATION_X;
-  sphere.rotation.y += ROTATION_Y;
-  
-  const breathe = 1 + Math.sin(time * 1.5) * 0.03;
+
+  sphere.rotation.x += ROTATION_SPEED_X;
+  sphere.rotation.y += ROTATION_SPEED_Y;
+
+  const breathe = 1 + Math.sin(time * BREATHE_FREQUENCY) * BREATHE_AMPLITUDE;
   sphere.scale.setScalar(breathe);
-  
-  synapses.rotation.y += SYNAPSE_Y * Math.sin(time * 0.5);
-  synapses.rotation.z += SYNAPSE_Z * Math.cos(time * 0.3);
-  
-  sphereMaterial.emissiveIntensity = 0.7 + Math.sin(time * 2.5) * 0.3;
-  sphereMaterial.opacity = 0.95 + Math.sin(time * 2) * 0.05;
+
+  synapses.rotation.y += SYNAPSE_SPEED_Y * Math.sin(time * 0.5);
+  synapses.rotation.z += SYNAPSE_SPEED_Z * Math.cos(time * 0.3);
+
+  sphere_material.emissiveIntensity = EMISSIVE_BASE + Math.sin(time * 2.5) * EMISSIVE_AMPLITUDE;
+  sphere_material.opacity = OPACITY_BASE + Math.sin(time * 2) * OPACITY_AMPLITUDE;
 };

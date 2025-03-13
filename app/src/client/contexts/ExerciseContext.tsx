@@ -1,40 +1,41 @@
 import React, { createContext, useContext, Dispatch, SetStateAction } from 'react';
 import { SensoryMode } from '../../shared/types';
-import { TextList } from '../utils/TextList';
+import { TextList } from '../components/ExerciseInterface/TextList';
+import { toast } from 'sonner';
 
 interface ExerciseContextType {
   // Core essay content and metadata
   essay: string;
-  essayWordCount: number;
-  essayCharCount: number;
-  essayList: TextList;
-  formattedEssay: { mode: SensoryMode; text: string[] }[];
+  essay_word_count: number;
+  essay_char_count: number;
+  essay_list: TextList;
+  formatted_essay: { mode: SensoryMode; text: string[] }[];
   summary: string[];
-  hasQuiz: boolean;
+  has_quiz: boolean;
 
   // Exercise state and mode
   mode: 'typing' | 'submitted' | 'test';
-  highlightedNodes: number[];
-  setMode: React.Dispatch<React.SetStateAction<'typing' | 'submitted' | 'test'>>;
-  setHighlightedNodes: React.Dispatch<React.SetStateAction<number[]>>;
+  highlighted_nodes: number[];
+  set_mode: React.Dispatch<React.SetStateAction<'typing' | 'submitted' | 'test'>>;
+  set_highlighted_nodes: React.Dispatch<React.SetStateAction<number[]>>;
 
   // Audio playback controls
-  audioTimestamps: Array<{word: string, start: number, end: number}> | string[];
+  audio_timestamps: Array<{word: string, start: number, end: number}> | string[];
 
   // UI references and settings
-  textSize: string;
-  setTextSize: Dispatch<SetStateAction<string>>;
+  text_size: string;
+  set_text_size: Dispatch<SetStateAction<string>>;
 
   // Exercise completion
-  onSubmitExercise: () => Promise<void>;
+  submit_exercise: () => Promise<void>;
 }
 
-const ExerciseContext = createContext<ExerciseContextType | undefined>(undefined);
+const EXERCISE_CONTEXT = createContext<ExerciseContextType | undefined>(undefined);
 
 export const useExerciseContext = () => {
-  const context = useContext(ExerciseContext);
+  const context = useContext(EXERCISE_CONTEXT);
   if (!context) {
-    throw new Error('useExerciseContext must be used within an ExerciseProvider');
+    toast.error('useExerciseContext must be used within an ExerciseProvider');
   }
   return context;
 };
@@ -44,8 +45,8 @@ export const ExerciseProvider: React.FC<{
   value: ExerciseContextType;
 }> = ({ children, value }) => {
   return (
-    <ExerciseContext.Provider value={value}>
+    <EXERCISE_CONTEXT.Provider value={value}>
       {children}
-    </ExerciseContext.Provider>
+    </EXERCISE_CONTEXT.Provider>
   );
-}; 
+};

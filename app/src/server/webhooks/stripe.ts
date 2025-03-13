@@ -1,8 +1,7 @@
-import { emailSender } from 'wasp/server/email';
 import { type MiddlewareConfigFn } from 'wasp/server';
 import { type StripeWebhook } from 'wasp/server/api';
 import express from 'express';
-import { TIERS } from '../../shared/constants.js';
+import { TIERS } from '../../shared/constants'
 
 import Stripe from 'stripe';
 
@@ -46,39 +45,39 @@ export const stripeWebhook: StripeWebhook = async (request, response, context) =
         console.log('Basic package purchased');
         await context.entities.User.updateMany({
           where: {
-            stripeId: userStripeId,
+            stripe_id: userStripeId,
           },
           data: {
             credits: {
               increment: TIERS.find(tier => tier.id === 'BASIC')?.credits
             },
-            datePaid: new Date(),
+            date_paid: new Date(),
           },
         });
       } else if (line_items?.data[0]?.price?.id === process.env.PRO_PRICE_ID) {
         console.log('Pro package purchased');
         await context.entities.User.updateMany({
           where: {
-            stripeId: userStripeId,
+            stripe_id: userStripeId,
           },
           data: {
             credits: {
               increment: TIERS.find(tier => tier.id === 'PRO')?.credits
             },
-            datePaid: new Date(),
+            date_paid: new Date(),
           },
         });
       } else if (line_items?.data[0]?.price?.id === process.env.ENTERPRISE_PRICE_ID) {
         console.log('Enterprise package purchased');
         await context.entities.User.updateMany({
           where: {
-            stripeId: userStripeId,
+            stripe_id: userStripeId,
           },
           data: {
             credits: {
               increment: TIERS.find(tier => tier.id === 'ENTERPRISE')?.credits
             },
-            datePaid: new Date(),
+            date_paid: new Date(),
           },
         });
       } else {

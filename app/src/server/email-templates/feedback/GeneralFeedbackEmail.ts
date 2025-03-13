@@ -1,5 +1,5 @@
 import { BaseEmailTemplate } from '../components/EmailTemplateFactory';
-import { components, styles, styleToString } from '../components/BaseTemplate';
+import { components, styles, convertStyleToString } from '../components/BaseTemplate';
 
 interface GeneralFeedbackParams {
   message: string;
@@ -79,62 +79,88 @@ ${browserInfo}`;
     const ratingStars = '★'.repeat(rating) + '☆'.repeat(5-rating);
 
     const overviewCard = components.card(`
-      ${components.subheading('Feedback Overview')}
-      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%" style="border-collapse: separate; border-spacing: 0;">
-        <tr>
-          <td style="${styleToString({ ...styles.text, width: '40%', fontWeight: '600' })}">Category</td>
-          <td style="${styleToString(styles.text)}">${category}</td>
-        </tr>
-        <tr>
-          <td style="${styleToString({ ...styles.text, width: '40%', fontWeight: '600' })}">Rating</td>
-          <td style="${styleToString({ ...styles.text, color: '#F6B100' })}">${ratingStars} (${rating}/5)</td>
-        </tr>
-        <tr>
-          <td style="${styleToString({ ...styles.text, width: '40%', fontWeight: '600' })}">Would Recommend</td>
-          <td style="${styleToString(styles.text)}">${wouldRecommend ? 'Yes' : 'No'}</td>
-        </tr>
-        <tr>
-          <td style="${styleToString({ ...styles.text, width: '40%', fontWeight: '600' })}">Experience Level</td>
-          <td style="${styleToString(styles.text)}">${experienceLevel || 'Not specified'}</td>
-        </tr>
-      </table>
+      <tr>${components.subheading('Feedback Overview')}</tr>
+      <tr>
+        <td>
+          <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%" style="border-collapse: separate; border-spacing: 0;">
+            <tr>
+              <td style="${convertStyleToString({ ...styles.text, width: '40%', fontWeight: '600' })}">Category</td>
+              <td style="${convertStyleToString(styles.text)}">${category}</td>
+            </tr>
+            <tr>
+              <td style="${convertStyleToString({ ...styles.text, width: '40%', fontWeight: '600' })}">Rating</td>
+              <td style="${convertStyleToString({ ...styles.text, color: '#F6B100' })}">${ratingStars} (${rating}/5)</td>
+            </tr>
+            <tr>
+              <td style="${convertStyleToString({ ...styles.text, width: '40%', fontWeight: '600' })}">Would Recommend</td>
+              <td style="${convertStyleToString(styles.text)}">${wouldRecommend ? 'Yes' : 'No'}</td>
+            </tr>
+            <tr>
+              <td style="${convertStyleToString({ ...styles.text, width: '40%', fontWeight: '600' })}">Experience Level</td>
+              <td style="${convertStyleToString(styles.text)}">${experienceLevel || 'Not specified'}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
     `);
 
     const messageCard = components.card(`
-      ${components.subheading('Message')}
-      <div style="white-space: pre-wrap;">${message}</div>
+      <tr>${components.subheading('Message')}</tr>
+      <tr>
+        <td>
+          <div style="white-space: pre-wrap;">${message}</div>
+        </td>
+      </tr>
     `);
 
     const usabilityCard = usability ? components.card(`
-      ${components.subheading('Usability Feedback')}
-      <div style="white-space: pre-wrap;">${usability}</div>
+      <tr>${components.subheading('Usability Feedback')}</tr>
+      <tr>
+        <td>
+          <div style="white-space: pre-wrap;">${usability}</div>
+        </td>
+      </tr>
     `) : '';
 
     const featuresCard = features ? components.card(`
-      ${components.subheading('Features Feedback')}
-      <div style="white-space: pre-wrap;">${features}</div>
+      <tr>${components.subheading('Features Feedback')}</tr>
+      <tr>
+        <td>
+          <div style="white-space: pre-wrap;">${features}</div>
+        </td>
+      </tr>
     `) : '';
 
     const improvementsCard = improvements ? components.card(`
-      ${components.subheading('Suggested Improvements')}
-      <div style="white-space: pre-wrap;">${improvements}</div>
+      <tr>${components.subheading('Suggested Improvements')}</tr>
+      <tr>
+        <td>
+          <div style="white-space: pre-wrap;">${improvements}</div>
+        </td>
+      </tr>
     `) : '';
 
     const browserCard = components.card(`
-      ${components.subheading('Browser Information')}
-      <pre style="margin: 0; padding: ${styles.text.padding}; background-color: #1a202c; color: #e2e8f0; border-radius: 4px; overflow-x: auto; font-family: monospace; font-size: 14px; line-height: 1.4;">${browserInfo}</pre>
+      <tr>${components.subheading('Browser Information')}</tr>
+      <tr>
+        <td>
+          <pre style="margin: 0; padding: ${styles.text.padding}; background-color: #1a202c; color: #e2e8f0; border-radius: 4px; overflow-x: auto; font-family: monospace; font-size: 14px; line-height: 1.4;">${browserInfo}</pre>
+        </td>
+      </tr>
     `);
 
     return `
-      ${components.heading('New Feedback Received')}
-      ${components.paragraph(`From: <strong>${email}</strong>`)}
-      ${components.divider()}
-      ${overviewCard}
-      ${messageCard}
-      ${usabilityCard}
-      ${featuresCard}
-      ${improvementsCard}
-      ${browserCard}
+      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+        <tr>${components.heading('New Feedback Received')}</tr>
+        <tr>${components.paragraph(`From: <strong>${email}</strong>`)}</tr>
+        <tr>${components.divider()}</tr>
+        <tr>${overviewCard}</tr>
+        <tr>${messageCard}</tr>
+        ${usabilityCard ? `<tr>${usabilityCard}</tr>` : ''}
+        ${featuresCard ? `<tr>${featuresCard}</tr>` : ''}
+        ${improvementsCard ? `<tr>${improvementsCard}</tr>` : ''}
+        <tr>${browserCard}</tr>
+      </table>
     `;
   }
 } 

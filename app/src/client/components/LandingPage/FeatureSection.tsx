@@ -1,4 +1,4 @@
-import { features } from '../../common/contentSections';
+import { FEATURES } from '../../../shared/constants';
 
 const FeaturesSection: React.FC = () => {
   return (
@@ -11,7 +11,7 @@ const FeaturesSection: React.FC = () => {
 
       <div className='relative mx-auto mt-16 max-w-6xl sm:mt-20'>
         <dl className='grid max-w-xl grid-cols-1 gap-8 sm:gap-12 md:max-w-none md:grid-cols-2'>
-          {features.map((feature) => (
+          {FEATURES.map((feature) => (
             <div 
               key={feature.name} 
               className='group relative p-8 rounded-2xl bg-white hover:bg-primary-50 transition-all duration-300 shadow-md hover:shadow-lg border border-primary-100'

@@ -2,10 +2,11 @@ import { type Feature } from 'wasp/entities';
 import { HttpError } from 'wasp/server';
 import { type CreateFeature } from 'wasp/server/operations';
 import { ADMIN_EMAIL } from '../../shared/constants';
+import { ApiResponse } from './types';
 
 export const createFeature: CreateFeature<
   { name: string; bounty: number; date: Date; completed: boolean },
-  Feature
+  ApiResponse<Feature>
 > = async (
   {
     name,
@@ -21,10 +22,12 @@ export const createFeature: CreateFeature<
   context: any
 ) => {
   try {
-    if (!context.user || context.user.email !== ADMIN_EMAIL) {
+    const user_is_admin = context.user && context.user.email === ADMIN_EMAIL;
+    if (!user_is_admin) {
       throw new HttpError(401);
     }
-    return await context.entities.Feature.create({
+
+    const created_feature = await context.entities.Feature.create({
       data: {
         name,
         bounty,
@@ -32,6 +35,13 @@ export const createFeature: CreateFeature<
         completed,
       },
     });
+
+    return {
+      success: true,
+      code: 200,
+      message: 'Feature created successfully',
+      data: created_feature,
+    };
   } catch (error) {
     console.error('Error creating feature:', error);
     if (error instanceof HttpError) {

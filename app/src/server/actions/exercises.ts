@@ -5,370 +5,390 @@ import {
   type DeleteExercise,
   type GenerateExercise,
 } from 'wasp/server/operations';
-import { HttpError } from 'wasp/server';
 import { Exercise } from 'wasp/entities';
 import { getS3DownloadUrl, deleteS3Objects } from '../utils/s3Utils';
-import { truncateText, reportToAdmin, cleanMarkdown } from './utils';
-import { MAX_TOKENS } from '../../shared/constants';
+import { truncateText, cleanMarkdown, handleError, validateUserAccess } from './utils';
 import { SensoryMode } from '../../shared/types';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
 import { ExerciseStatus } from '@prisma/client';
 import { DEFAULT_PRE_PROMPT, DEFAULT_POST_PROMPT } from '../../shared/constants';
 import { OpenAIService, DeepSeekService } from '../llm/models';
+import { ApiResponse } from './types';
+import {
+  exerciseCreateSchema,
+  exerciseGenerateSchema,
+  exerciseShareSchema,
+  exerciseUpdateSchema,
+  exerciseDeleteSchema,
+} from './validations';
 
-const openaiService = new OpenAIService();
-const deepseekService = new DeepSeekService();
+const openai_service = new OpenAIService();
+const deepseek_service = new DeepSeekService();
 
-export const createExercise: CreateExercise<{ name: string; topicId: string | null }, Exercise> = async (
-  { name, topicId },
+export const createExercise: CreateExercise<{ name: string; topic_id: string | null }, ApiResponse<Exercise>> = async (
+  input,
   context
 ) => {
   try {
-    return await context.entities.Exercise.create({
+    const validatedInput = exerciseCreateSchema.parse(input);
+
+    const exercise = await context.entities.Exercise.create({
       data: {
-        name,
+        name: validatedInput.name,
         user: context.user ? { connect: { id: context.user.id } } : undefined,
-        lessonText: '',
-        paragraphSummary: '',
+        lesson_text: '',
+        paragraph_summary: '',
         level: '',
         truncated: false,
         tokens: 0,
         model: '',
-        no_words: 0,
-        topic: topicId ? { connect: { id: topicId } } : undefined,
+        word_count: 0,
+        topic: validatedInput.topic_id ? { connect: { id: validatedInput.topic_id } } : undefined,
       },
     });
-  } catch (error: any) {
-    await reportToAdmin(`Failed to create exercise: ${error.message}`);
-    console.error('Database Error:', error);
-    throw new HttpError(500, 'Failed to create exercise. Please try again later.');
+
+    return {
+      success: true,
+      code: 200,
+      message: 'Exercise created successfully',
+      data: exercise,
+    };
+  } catch (error) {
+    return handleError(error, 'createExercise');
   }
 };
 
 export const generateExercise: GenerateExercise<
   {
-    exerciseId: string;
-    priorKnowledge: string[];
+    exercise_id: string;
+    prior_knowledge: string[];
     length: string;
     level: string;
     model: string;
-    includeSummary: boolean;
-    includeMCQuiz: boolean;
-    sensoryModes: SensoryMode[];
+    include_summary: boolean;
+    include_mc_quiz: boolean;
+    sensory_modes: SensoryMode[];
   },
-  { success: boolean; message: string }
-> = async (
-  { exerciseId, priorKnowledge, length, level, model, includeSummary, includeMCQuiz, sensoryModes },
-  context
-) => {
-  // Ensure the exercise exists
-  const exercise = await context.entities.Exercise.findUnique({
-    where: { id: exerciseId },
-  });
-  if (!exercise) {
-    return { success: false, message: 'Exercise not found' };
-  }
-
-  // 2. Download the raw content from S3
-  let exerciseContentUrl;
+  ApiResponse<Exercise>
+> = async (input, context) => {
   try {
-    exerciseContentUrl = await getS3DownloadUrl({ key: exerciseId + '.txt' });
-  } catch (error) {
-    console.error('Error getting S3 download URL:', error);
-    return { success: false, message: 'Failed to retrieve exercise content URL' };
-  }
+    const validatedInput = exerciseGenerateSchema.parse(input);
 
-  const response = await fetch(exerciseContentUrl);
-  if (!response.ok) {
-    return { success: false, message: 'Failed to download exercise content' };
-  }
-
-  // 3. Possibly truncate if too long
-  const rawExerciseText = await response.text();
-  const { text: truncatedExerciseText, truncated } = truncateText(rawExerciseText);
-
-  // Check if the user has enough tokens only if there is a user context
-  if (context.user && context.user.credits < 1) {
-    return {
-      success: false,
-      message: "You don't have enough credits. Please top up your credits to continue.",
-    };
-  }
-
-  let generatedExerciseText: string;
-  let generatedExerciseTokens: number;
-  let taggedExerciseText: string = '';
-  try {
-    // Ensure priorKnowledge is an array
-    const priorKnowledgeArray = Array.isArray(priorKnowledge)
-      ? priorKnowledge
-      : typeof priorKnowledge === 'string'
-        ? [priorKnowledge]
-        : []; // Default to empty array if not a string or array
-    const exercisePrompt = context.user
-      ? await context.entities.ExerciseGeneratePrompt.findFirst({
-          where: { userId: context.user.id },
-        })
-      : null;
-    const exerciseResponse = await openaiService.generateExercise(
-      truncatedExerciseText,
-      priorKnowledgeArray.join(','),
-      length,
-      level,
-      model,
-      MAX_TOKENS,
-      exercisePrompt?.pre_prompt || DEFAULT_PRE_PROMPT,
-      exercisePrompt?.post_prompt || DEFAULT_POST_PROMPT
-    );
-
-    if (!exerciseResponse.success || !exerciseResponse.data) {
-      return { success: false, message: `Error generating exercise content: ${exerciseResponse.message}` };
+    if (!context.user || context.user.credits < 1) {
+      throw new Error('Insufficient credits. Please top up your credits to continue.');
     }
-    generatedExerciseText = exerciseResponse.data;
-    generatedExerciseTokens = exerciseResponse.usage || 0;
 
-    // Mark status
-    await context.entities.Exercise.update({
-      where: { id: exerciseId },
-      data: { status: ExerciseStatus.EXERCISE_GENERATED },
+    const exercise = await context.entities.Exercise.findUnique({
+      where: { id: validatedInput.exercise_id },
     });
-  } catch (error) {
-    console.error('Failed to generate exercise:', error);
-    return { success: false, message: 'Failed to generate exercise.' };
-  }
-
-  // Clean the main lecture content
-  const lectureContent = cleanMarkdown(generatedExerciseText);
-
-  // 6. Generate complexity tags (where we REALLY use sensoryModes)
-  let complexityUsage = 0;
-  try {
-    const complexityResponse = await openaiService.generateComplexity(lectureContent, model, MAX_TOKENS, sensoryModes);
-    if (complexityResponse.success && complexityResponse.data) {
-      taggedExerciseText = complexityResponse.data;
-      complexityUsage = complexityResponse.usage || 0;
-
-      // Update status
-      await context.entities.Exercise.update({
-        where: { id: exerciseId },
-        data: { status: ExerciseStatus.EXERCISE_TAGGED },
-      });
+    if (!exercise) {
+      throw new Error('Exercise not found');
     }
-  } catch (error) {
-    console.error('Failed to generate complexity tags:', error);
-  }
 
-  // 7. Optionally generate audio
-  const documentParserUrl = process.env.DOCUMENT_PARSER_URL;
-  if (documentParserUrl) {
+    let exercise_content_url;
     try {
-      const formData = new FormData();
-      formData.append('exerciseId', exerciseId);
-      formData.append('generate_text', taggedExerciseText || '');
-      const audioResponse = await fetch(`${documentParserUrl}/generate-audio`, {
-        method: 'POST',
-        body: formData,
-      });
-      if (!audioResponse.ok) {
-        await reportToAdmin('Failed to generate audio (non-200 response).');
-      }
-    } catch (err) {
-      await reportToAdmin(`Failed to generate audio: ${String(err)}`);
-      console.error('Audio generation error:', err);
+      exercise_content_url = await getS3DownloadUrl({ key: validatedInput.exercise_id + '.txt' });
+    } catch (error) {
+      console.error('Error getting S3 download URL:', error);
+      throw new Error('Failed to retrieve exercise content URL');
     }
-  }
 
-  // 8. Optionally generate summary
-  let summaryJson = null;
-  if (includeSummary) {
-    try {
-      const summaryResponse = await openaiService.generateSummary(lectureContent, model, MAX_TOKENS);
-      if (summaryResponse.success && summaryResponse.data) {
-        summaryJson = summaryResponse.data;
-
-        // Mark status
-        await context.entities.Exercise.update({
-          where: { id: exerciseId },
-          data: { status: ExerciseStatus.SUMMARY_GENERATED },
-        });
-      } else {
-        await reportToAdmin('Failed to generate summary (no success).');
-      }
-    } catch (err) {
-      console.error('Failed to generate summary:', err);
-      await reportToAdmin('Failed to generate summary after multiple attempts.');
+    const response = await fetch(exercise_content_url);
+    if (!response.ok) {
+      throw new Error('Failed to download exercise content');
     }
-  }
 
-  // 9. Optionally generate MC Quiz
-  let questions = null;
-  if (includeMCQuiz) {
+    const raw_exercise_text = await response.text();
+    const { text: truncated_exercise_text, truncated } = truncateText(raw_exercise_text);
+
+    let generated_exercise_text: string;
+    let generated_exercise_tokens: number;
+    let tagged_exercise_text: string = '';
+    let pre_prompt = DEFAULT_PRE_PROMPT;
+    let post_prompt = DEFAULT_POST_PROMPT;
     try {
-      const questionsResponse = await openaiService.generateQuestions(lectureContent, model, MAX_TOKENS);
-      if (questionsResponse.success && questionsResponse.data) {
-        questions = questionsResponse.data.questions;
-
-        // Mark status
-        await context.entities.Exercise.update({
-          where: { id: exerciseId },
-          data: { status: ExerciseStatus.QUESTIONS_GENERATED },
-        });
-      } else {
-        await reportToAdmin('Failed to generate questions (no success).');
-      }
-    } catch (err) {
-      console.error('Failed to generate questions:', err);
-      await reportToAdmin('Failed to generate questions after multiple attempts.');
-    }
-  }
-
-  // 10. Update the exercise record
-  try {
-    await context.entities.Exercise.update({
-      where: { id: exerciseId },
-      data: {
-        lessonText: taggedExerciseText || '',
-        paragraphSummary: summaryJson?.paragraphSummary || '',
-        level,
-        truncated,
-        tokens:
-          (generatedExerciseTokens || 0) +
-          (summaryJson?.tokens || 0) +
-          (questions?.tokens || 0) +
-          (complexityUsage || 0),
-        model,
-        no_words: lectureContent.split(' ').length || parseInt(length, 10),
-        status: 'FINISHED',
-      },
-    });
-  } catch (error: any) {
-    await reportToAdmin(`Failed to update exercise in DB: ${error.message}`);
-    console.error('Database Error updating exercise:', error);
-    return { success: false, message: 'Failed to update exercise. Please try again later.' };
-  }
-
-  // 12. Create the MC Questions if we generated them
-  if (questions && Array.isArray(questions)) {
-    try {
-      await Promise.all(
-        questions.map(async (question: { text: string; options: Array<{ text: string; isCorrect: boolean }> }) => {
-          await context.entities.Question.create({
-            data: {
-              text: question.text,
-              exercise: { connect: { id: exerciseId } },
-              options: {
-                create: question.options.map((opt) => ({
-                  text: opt.text,
-                  isCorrect: opt.isCorrect,
-                })),
-              },
-            },
-          });
-        })
+      const prior_knowledge_array = Array.isArray(validatedInput.prior_knowledge)
+        ? validatedInput.prior_knowledge
+        : typeof validatedInput.prior_knowledge === 'string'
+          ? [validatedInput.prior_knowledge]
+          : [];
+      const prompt_settings = context.user
+        ? await context.entities.ExerciseGeneratePrompt.findFirst({
+            where: { user_id: context.user.id },
+          })
+        : null;
+      pre_prompt = prompt_settings?.pre_prompt || DEFAULT_PRE_PROMPT;
+      post_prompt = prompt_settings?.post_prompt || DEFAULT_POST_PROMPT;
+      const exercise_response = await openai_service.generateExercise(
+        truncated_exercise_text,
+        prior_knowledge_array.join(','),
+        validatedInput.length,
+        validatedInput.level,
+        validatedInput.model,
+        pre_prompt,
+        post_prompt
       );
-    } catch (err) {
-      await reportToAdmin(`Failed to create MC questions: ${String(err)}`);
-      console.error('Error creating questions:', err);
-    }
-  }
 
-  // 12. Deduct exactly 1 credit from the user if they exist
-  if (context.user) {
-    try {
-      await context.entities.User.update({
-        where: { id: context.user.id },
-        data: { credits: { decrement: 1 } },
+      if (!exercise_response.success || !exercise_response.data) {
+        throw new Error(`Error generating exercise content: ${exercise_response.message}`);
+      }
+      generated_exercise_text = exercise_response.data;
+      generated_exercise_tokens = exercise_response.usage || 0;
+
+      await context.entities.Exercise.update({
+        where: { id: validatedInput.exercise_id },
+        data: { status: ExerciseStatus.EXERCISE_GENERATED },
       });
-    } catch (err) {
-      await reportToAdmin(`Failed to deduct 1 credit from user: ${String(err)}`);
-      console.error('Credit deduction error:', err);
+    } catch (error) {
+      throw new Error('Failed to generate exercise.');
     }
-  }
 
-  return { success: true, message: 'Exercise updated successfully' };
+    const lecture_content = cleanMarkdown(generated_exercise_text);
+
+    let complexity_usage = 0;
+    try {
+      const complexity_response = await openai_service.generateComplexity(
+        lecture_content,
+        validatedInput.model,
+        validatedInput.sensory_modes
+      );
+      if (complexity_response.success && complexity_response.data) {
+        tagged_exercise_text = complexity_response.data;
+        complexity_usage = complexity_response.usage || 0;
+
+        await context.entities.Exercise.update({
+          where: { id: validatedInput.exercise_id },
+          data: { status: ExerciseStatus.EXERCISE_TAGGED },
+        });
+      }
+    } catch (error) {
+      await handleError(error, 'generateComplexity');
+    }
+
+    const document_parser_url = process.env.DOCUMENT_PARSER_URL;
+    if (!document_parser_url) {
+      throw new Error('DOCUMENT_PARSER_URL is not set');
+    }
+    try {
+      // Skip audio generation if no listen tags present
+      if (tagged_exercise_text?.includes('<listen>')) {
+        const form_data = new FormData();
+        form_data.append('exercise_id', validatedInput.exercise_id);
+        form_data.append('generate_text', tagged_exercise_text || '');
+        const audio_response = await fetch(`${document_parser_url}/generate-audio`, {
+          method: 'POST',
+          body: form_data,
+        });
+        if (!audio_response.ok) {
+          await handleError(audio_response, 'generateAudio');
+        }
+      }
+    } catch (err) {
+      await handleError(err, 'generateAudio');
+    }
+
+    let summary_json = null;
+    if (validatedInput.include_summary) {
+      try {
+        const summary_response = await openai_service.generateSummary(
+          lecture_content,
+          validatedInput.model,
+        );
+        if (summary_response.success && summary_response.data) {
+          summary_json = summary_response.data;
+
+          await context.entities.Exercise.update({
+            where: { id: validatedInput.exercise_id },
+            data: { status: ExerciseStatus.SUMMARY_GENERATED },
+          });
+        } else {
+          await handleError(new Error('Failed to generate summary (no success)'), 'generateSummary');
+        }
+      } catch (err) {
+        await handleError(err, 'generateSummary');
+      }
+    }
+
+    let questions = null;
+    if (validatedInput.include_mc_quiz) {
+      try {
+        const questions_response = await openai_service.generateQuestions(
+          lecture_content,
+          validatedInput.model,
+        );
+        if (questions_response.success && questions_response.data) {
+          questions = questions_response.data.questions;
+
+          await context.entities.Exercise.update({
+            where: { id: validatedInput.exercise_id },
+            data: { status: ExerciseStatus.QUESTIONS_GENERATED },
+          });
+        } else {
+          await handleError(new Error('Failed to generate questions (no success)'), 'generateQuestions');
+        }
+      } catch (err) {
+        await handleError(err, 'generateQuestions');
+      }
+    }
+
+    try {
+      await context.entities.Exercise.update({
+        where: { id: validatedInput.exercise_id },
+        data: {
+          raw_text: lecture_content || '',
+          lesson_text: tagged_exercise_text || '',
+          paragraph_summary: summary_json?.paragraph_summary || '',
+          level: validatedInput.level,
+          truncated,
+          tokens:
+            (generated_exercise_tokens || 0) +
+            (summary_json?.tokens || 0) +
+            (questions?.tokens || 0) +
+            (complexity_usage || 0),
+          model: validatedInput.model,
+          pre_prompt: pre_prompt,
+          post_prompt: post_prompt,
+          word_count: lecture_content.split(' ').length || parseInt(validatedInput.length, 10),
+          status: 'FINISHED',
+        },
+      });
+    } catch (error: any) {
+      await handleError(error, 'updateExercise');
+    }
+
+    if (questions && Array.isArray(questions)) {
+      try {
+        await Promise.all(
+          questions.map(async (question: { text: string; options: Array<{ text: string; isCorrect: boolean }> }) => {
+            await context.entities.Question.create({
+              data: {
+                text: question.text,
+                exercise: { connect: { id: validatedInput.exercise_id } },
+                options: {
+                  create: question.options.map((opt) => ({
+                    text: opt.text,
+                    isCorrect: opt.isCorrect,
+                  })),
+                },
+              },
+            });
+          })
+        );
+      } catch (err) {
+        await handleError(err, 'createQuestions');
+      }
+    }
+
+    if (context.user) {
+      try {
+        await context.entities.User.update({
+          where: { id: context.user.id },
+          data: { credits: { decrement: 1 } },
+        });
+      } catch (err) {
+        await handleError(err, 'deductCredit');
+      }
+    }
+
+    return { success: true, code: 200, message: 'Exercise generated successfully' };
+  } catch (error) {
+    return handleError(error, 'generateExercise');
+  }
 };
 
-export const shareExercise: ShareExercise<{ exerciseId: string; emails: Array<string> }, string> = async (
-  { exerciseId, emails },
-  context
-) => {
-  if (!context.user) {
-    throw new HttpError(401, 'Unauthorized');
-  }
-
-  const exercise = await context.entities.Exercise.findUnique({
-    where: { id: exerciseId },
-  });
-
-  if (!exercise) {
-    throw new HttpError(404, 'Exercise not found');
-  }
-
+export const shareExercise: ShareExercise<
+  { exercise_id: string; emails: Array<string> },
+  ApiResponse<Exercise>
+> = async (input, context) => {
   try {
+    const validatedInput = exerciseShareSchema.parse(input);
+
+    const user = validateUserAccess(context);
+
+    const exercise = await context.entities.Exercise.findUnique({
+      where: { id: validatedInput.exercise_id, user_id: user.id },
+    });
+
+    if (!exercise) {
+      throw new Error('Exercise not found');
+    }
+
     await Promise.all(
-      emails.map(async (email) => {
+      validatedInput.emails.map(async (email) => {
         await context.entities.Exercise.create({
           data: {
             name: exercise.name,
-            lessonText: exercise.lessonText,
-            paragraphSummary: exercise.paragraphSummary,
+            lesson_text: exercise.lesson_text,
+            paragraph_summary: exercise.paragraph_summary,
             level: exercise.level,
             truncated: exercise.truncated,
             tokens: exercise.tokens,
             model: exercise.model,
-            no_words: exercise.no_words,
+            word_count: exercise.word_count,
             user: { connect: { email } },
-            topic: exercise.topicId ? { connect: { id: exercise.topicId } } : undefined,
+            topic: exercise.topic_id ? { connect: { id: exercise.topic_id } } : undefined,
           },
         });
       })
     );
-    return 'Exercise shared successfully';
-  } catch (error: any) {
-    await reportToAdmin(`Failed to share exercise: ${error.message}`);
-    console.error('Share Exercise Error:', error);
-    throw new HttpError(500, 'Failed to share exercise. Please try again later.');
+    return { success: true, code: 200, message: 'Exercise shared successfully' };
+  } catch (error) {
+    return handleError(error, 'shareExercise');
   }
 };
 
-export const updateExercise: UpdateExercise<{ id: string; updated_data: Partial<Exercise> }, Exercise> = async (
-  { id, updated_data },
-  context
-) => {
-  if (!context.user) {
-    throw new HttpError(401);
+export const updateExercise: UpdateExercise<
+  { id: string; updated_data: Partial<Exercise> },
+  ApiResponse<Exercise>
+> = async (input, context) => {
+  try {
+    const validatedInput = exerciseUpdateSchema.parse(input);
+
+    const user = validateUserAccess(context);
+
+    if (validatedInput.updated_data.lesson_text && validatedInput.updated_data.lesson_text.length > 0) {
+      validatedInput.updated_data.word_count = validatedInput.updated_data.lesson_text.split(' ').length;
+      validatedInput.updated_data.paragraph_summary = '';
+    }
+
+    if (validatedInput.updated_data.cursor !== undefined) {
+      validatedInput.updated_data.cursor = Math.max(0, validatedInput.updated_data.cursor);
+    }
+
+    const updated_exercise = await context.entities.Exercise.update({
+      where: { id: validatedInput.id, user_id: user.id },
+      data: validatedInput.updated_data,
+    });
+
+    return {
+      success: true,
+      code: 200,
+      message: 'Exercise updated successfully',
+      data: updated_exercise,
+    };
+  } catch (error) {
+    return handleError(error, 'updateExercise');
   }
-
-  if (updated_data.lessonText && updated_data.lessonText.length > 0) {
-    updated_data.no_words = updated_data.lessonText.split(' ').length;
-    updated_data.paragraphSummary = '';
-  }
-
-  // Ensure cursor updates are included in database updates
-  if (updated_data.cursor !== undefined) {
-    updated_data.cursor = Math.max(0, updated_data.cursor); // Prevent negative values
-  }
-
-  const updatedExercise = await context.entities.Exercise.update({
-    where: { id },
-    data: updated_data,
-  });
-
-  return updatedExercise;
 };
 
-export const deleteExercise: DeleteExercise<{ id: string }, Exercise> = async ({ id }, context) => {
-  if (!context.user) {
-    throw new HttpError(401);
+export const deleteExercise: DeleteExercise<{ id: string }, ApiResponse<Exercise>> = async (input, context) => {
+  try {
+    const validatedInput = exerciseDeleteSchema.parse(input);
+
+    const user = validateUserAccess(context);
+
+    await deleteS3Objects({ key: validatedInput.id });
+
+    await context.entities.Exercise.delete({
+      where: {
+        id: validatedInput.id,
+        user_id: user.id,
+      },
+    });
+
+    return { success: true, code: 200, message: 'Exercise deleted successfully' };
+  } catch (error) {
+    return handleError(error, 'deleteExercise');
   }
-
-  await deleteS3Objects({ key: id });
-
-  return context.entities.Exercise.delete({
-    where: {
-      id,
-      userId: context.user.id,
-    },
-  });
 };

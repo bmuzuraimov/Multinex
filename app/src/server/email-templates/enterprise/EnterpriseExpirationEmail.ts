@@ -1,14 +1,14 @@
 import { BaseEmailTemplate } from '../components/EmailTemplateFactory';
 import { components } from '../components/BaseTemplate';
-import { textUtils } from '../components/EmailTemplateFactory';
+import { TEXT_UTILS } from '../components/EmailTemplateFactory';
 
 interface EnterpriseExpirationParams {
-  userId: string;
-  userName: string;
-  userEmail: string;
-  enterprisePlanName: string;
-  expirationDate: string;
-  renewLink: string;
+  user_id: string;
+  user_name: string; 
+  user_email: string;
+  enterprise_plan_name: string;
+  expiration_date: string;
+  renew_link: string;
   features: string[];
 }
 
@@ -22,38 +22,40 @@ export class EnterpriseExpirationEmail extends BaseEmailTemplate {
   }
 
   protected generateText(): string {
-    const { userName, enterprisePlanName, expirationDate, renewLink, features } = this.params;
+    const { user_name, enterprise_plan_name, expiration_date, renew_link, features } = this.params;
     return `
-Hi ${userName},
+Hi ${user_name},
 
-Your ${enterprisePlanName} is set to expire on ${expirationDate}. 
+Your ${enterprise_plan_name} is set to expire on ${expiration_date}. 
 To ensure uninterrupted access to all features, please renew your subscription before this date.
 
 Renew now to continue enjoying:
-${textUtils.generateBulletPoints(features)}
+${TEXT_UTILS.generateBulletPoints(features)}
 
-Renew your subscription here: ${renewLink}
+Renew your subscription here: ${renew_link}
 
 If you need assistance or have any questions, feel free to contact us.
 
-${textUtils.generateSignature()}`;
+${TEXT_UTILS.generateSignature()}`;
   }
 
   protected generateHtmlContent(): string {
-    const { userName, enterprisePlanName, expirationDate, renewLink, features } = this.params;
+    const { user_name, enterprise_plan_name, expiration_date, renew_link, features } = this.params;
     return `
-      ${components.heading('Your Enterprise Plan is Expiring Soon!')}
-      ${components.paragraph(`Hi ${userName},`)}
-      ${components.paragraph(
-        `Your <strong>${enterprisePlanName}</strong> is set to expire on <strong>${expirationDate}</strong>. ` +
-        'To ensure uninterrupted access to all features, please renew your subscription before this date.'
-      )}
-      ${components.paragraph('Renew now to continue enjoying:')}
-      ${components.bulletList(features)}
-      ${components.button('Renew Subscription', renewLink)}
-      ${components.paragraph('If you need assistance or have any questions, feel free to contact us.')}
-      ${components.paragraph('Thanks for your time, and have a great day!')}
-      ${components.paragraph('<strong>Multinex</strong>')}
+      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+        <tr>${components.heading('Your Enterprise Plan is Expiring Soon!')}</tr>
+        <tr>${components.paragraph(`Hi ${user_name},`)}</tr>
+        <tr>${components.paragraph(
+          `Your <strong>${enterprise_plan_name}</strong> is set to expire on <strong>${expiration_date}</strong>. ` +
+          'To ensure uninterrupted access to all features, please renew your subscription before this date.'
+        )}</tr>
+        <tr>${components.paragraph('Renew now to continue enjoying:')}</tr>
+        <tr>${components.bullet_list(features)}</tr>
+        <tr>${components.button('Renew Subscription', renew_link)}</tr>
+        <tr>${components.paragraph('If you need assistance or have any questions, feel free to contact us.')}</tr>
+        <tr>${components.paragraph('Thanks for your time, and have a great day!')}</tr>
+        <tr>${components.paragraph('<strong>Multinex</strong>')}</tr>
+      </table>
     `;
   }
-} 
+}

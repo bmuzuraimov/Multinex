@@ -1,114 +1,102 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { updateCurrentUser, createOnboarding } from 'wasp/client/operations';
+import { cn } from '../../shared/utils';
+import { toast } from 'sonner';
+import { USER_TYPES, STEP_MESSAGES, PROGRESS_WIDTHS, LEARNING_STYLES } from '../../shared/constants/onboarding';
 
 const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [selectedUserType, setSelectedUserType] = useState<string | null>(null);
-  const [learningStyle, setLearningStyle] = useState<string>('');
-  const [subjects, setSubjects] = useState({
-    scienceMedicine: false,
-    technologyEngineering: false,
-    businessEconomics: false,
-    humanitiesArts: false,
-    languageLearning: false,
-    testPrep: false,
+  const [current_step, setCurrentStep] = useState(1);
+  const [selected_user_type, setSelectedUserType] = useState<string | null>(null);
+  const [learning_style, setLearningStyle] = useState<string>('');
+  const [subject_interests, setSubjectInterests] = useState({
+    science_medicine: false,
+    technology_engineering: false, 
+    business_economics: false,
+    humanities_arts: false,
+    language_learning: false,
+    test_prep: false
   });
-  const [motivations, setMotivations] = useState({
-    motivationProgress: false,
-    motivationGamification: false,
-    motivationReminders: false,
-    motivationCommunity: false,
-    motivationToolOnly: false,
+  const [motivation_factors, setMotivationFactors] = useState({
+    progress: false,
+    gamification: false,
+    reminders: false,
+    community: false,
+    tool_only: false
   });
-  const [sources, setSources] = useState({
-    sourceTwitter: false,
-    sourceInstagram: false,
-    sourceTikTok: false,
-    sourceFacebook: false,
-    sourceYoutube: false,
-    sourceGoogle: false,
-    sourceWordOfMouth: false,
+  const [source_channels, setSourceChannels] = useState({
+    twitter: false,
+    instagram: false,
+    tiktok: false,
+    facebook: false,
+    youtube: false,
+    google: false,
+    word_of_mouth: false
   });
 
   const handleOnboardingSubmit = async () => {
-    if (!selectedUserType) {
-      alert('Please complete all required fields');
+    if (!selected_user_type) {
+      toast.error('Please complete all required fields');
       return;
     }
+
     try {
       await createOnboarding({
-        userType: selectedUserType,
-        learningStyle,
-        scienceMedicine: subjects.scienceMedicine,
-        technologyEngineering: subjects.technologyEngineering,
-        businessEconomics: subjects.businessEconomics,
-        humanitiesArts: subjects.humanitiesArts,
-        languageLearning: subjects.languageLearning,
-        testPrep: subjects.testPrep,
-        motivationProgress: motivations.motivationProgress,
-        motivationGamification: motivations.motivationGamification,
-        motivationReminders: motivations.motivationReminders,
-        motivationCommunity: motivations.motivationCommunity,
-        motivationToolOnly: motivations.motivationToolOnly,
-        sourceTwitter: sources.sourceTwitter,
-        sourceInstagram: sources.sourceInstagram,
-        sourceTikTok: sources.sourceTikTok,
-        sourceFacebook: sources.sourceFacebook,
-        sourceYoutube: sources.sourceYoutube,
-        sourceGoogle: sources.sourceGoogle,
-        sourceWordOfMouth: sources.sourceWordOfMouth,
-        featureRequest: "",
+        user_type: selected_user_type,
+        learning_style: learning_style,
+        science_medicine: subject_interests.science_medicine,
+        technology_engineering: subject_interests.technology_engineering,
+        business_economics: subject_interests.business_economics,
+        humanities_arts: subject_interests.humanities_arts,
+        language_learning: subject_interests.language_learning,
+        test_prep: subject_interests.test_prep,
+        motivation_progress: motivation_factors.progress,
+        motivation_gamification: motivation_factors.gamification,
+        motivation_reminders: motivation_factors.reminders,
+        motivation_community: motivation_factors.community,
+        motivation_tool_only: motivation_factors.tool_only,
+        source_twitter: source_channels.twitter,
+        source_instagram: source_channels.instagram,
+        source_tiktok: source_channels.tiktok,
+        source_facebook: source_channels.facebook,
+        source_youtube: source_channels.youtube,
+        source_google: source_channels.google,
+        source_word_of_mouth: source_channels.word_of_mouth,
+        feature_request: ""
       });
-      await updateCurrentUser({ onBoardingCompleted: true });
+      await updateCurrentUser({ onboarding_complete: true });
       navigate('/portal');
     } catch (error) {
-      console.error('Error saving onboarding info:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to save onboarding info');
     }
   };
 
   const handleSkip = async () => {
     try {
-      await updateCurrentUser({ onBoardingCompleted: true });
+      await updateCurrentUser({ onboarding_complete: true });
       navigate('/portal');
     } catch (error) {
-      console.error('Error skipping onboarding:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to skip onboarding');
     }
   };
 
-  const userTypes = [
-    { name: 'I am a Student', icon: '👨‍🎓' },
-    { name: 'I am a Teacher', icon: '👩‍🏫' },
-    { name: 'I am a Parent', icon: '👨‍👩‍👧‍👦' },
-    { name: 'I am a Professor', icon: '🎓' },
-  ];
 
-  const messages = [
-    '',
-    'Tell us about your role!',
-    "What's your preferred learning style?",
-    'What subjects interest you most?',
-    'What motivates you to learn?',
-    'How did you find us?',
-    "Any features you'd like to see?",
-  ];
-
-  const progressWidths = ['w-1/6', 'w-2/6', 'w-3/6', 'w-4/6', 'w-5/6', 'w-full'];
-
-  const learningStyles = ['👁️ Visual', '👂 Auditory', '🤸 Kinesthetic', '🔄 Mixed'];
 
   return (
     <div className='flex flex-col items-center min-h-screen bg-white font-montserrat'>
       {/* Progress Bar */}
       <div className='w-full max-w-8xl bg-primary-100 h-1.5 rounded-full relative mt-8'>
-        <div className={`bg-primary-500 h-1.5 rounded-full transition-all duration-500 ${progressWidths[step - 1]}`}></div>
+        <div className={cn(
+          'bg-primary-500 h-1.5 rounded-full transition-all duration-500',
+          PROGRESS_WIDTHS[current_step - 1]
+        )}></div>
       </div>
 
       {/* Back and Skip Buttons */}
       <div className='w-full max-w-4xl mt-4 flex justify-between items-center px-8'>
-        {step > 1 && (
-          <button className='text-primary-600 font-semibold hover:text-primary-700 transition-colors' onClick={() => setStep(step - 1)}>
+        {current_step > 1 && (
+          <button className='text-primary-600 font-semibold hover:text-primary-700 transition-colors' onClick={() => setCurrentStep(current_step - 1)}>
             &lt; Back
           </button>
         )}
@@ -119,21 +107,22 @@ const OnboardingPage: React.FC = () => {
 
       {/* Chat Bot Message */}
       <div className='flex items-center justify-center mt-12'>
-        <div className='font-manrope text-title-lg text-primary-900 font-medium tracking-wide'>{messages[step]}</div>
+        <div className='font-manrope text-title-lg text-primary-900 font-medium tracking-wide'>{STEP_MESSAGES[current_step]}</div>
       </div>
 
       {/* Steps */}
-      {step === 1 && (
+      {current_step === 1 && (
         <>
           <div className='grid grid-cols-1 gap-4 mt-10 max-w-md mx-auto w-full px-6'>
-            {userTypes.map((type) => (
+            {USER_TYPES.map((type) => (
               <button
                 key={type.name}
-                className={`flex items-center px-8 py-4 rounded-xl text-lg transition-all duration-300 w-full shadow-sm ${
-                  selectedUserType === type.name 
+                className={cn(
+                  'flex items-center px-8 py-4 rounded-xl text-lg transition-all duration-300 w-full shadow-sm',
+                  selected_user_type === type.name 
                     ? 'bg-primary-500 text-white shadow-md hover:bg-primary-600' 
                     : 'bg-white border border-primary-100 text-primary-900 hover:border-primary-300'
-                }`}
+                )}
                 onClick={() => setSelectedUserType(type.name)}
               >
                 <span className='mr-3 text-xl'>{type.icon}</span> 
@@ -142,30 +131,32 @@ const OnboardingPage: React.FC = () => {
             ))}
           </div>
           <button
-            onClick={() => setStep(2)}
-            disabled={!selectedUserType}
-            className={`mt-8 px-12 py-4 rounded-xl font-satoshi text-lg transition-all duration-300 ${
-              selectedUserType 
+            onClick={() => setCurrentStep(2)}
+            disabled={!selected_user_type}
+            className={cn(
+              'mt-8 px-12 py-4 rounded-xl font-satoshi text-lg transition-all duration-300',
+              selected_user_type 
                 ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-md' 
                 : 'bg-primary-100 text-primary-300 cursor-not-allowed'
-            }`}
+            )}
           >
             Continue
           </button>
         </>
       )}
 
-      {step === 2 && (
+      {current_step === 2 && (
         <div className='mt-10 w-full max-w-md px-6'>
           <div className='grid grid-cols-2 gap-4'>
-            {learningStyles.map((style) => (
+            {LEARNING_STYLES.map((style) => (
               <button
                 key={style}
-                className={`p-6 rounded-xl transition-all duration-300 font-satoshi text-lg shadow-sm ${
-                  learningStyle === style 
+                className={cn(
+                  'p-6 rounded-xl transition-all duration-300 font-satoshi text-lg shadow-sm',
+                  learning_style === style 
                     ? 'bg-primary-500 text-white shadow-md' 
                     : 'bg-white border border-primary-100 text-primary-900 hover:border-primary-300'
-                }`}
+                )}
                 onClick={() => setLearningStyle(style)}
               >
                 {style}
@@ -173,87 +164,97 @@ const OnboardingPage: React.FC = () => {
             ))}
           </div>
           <button
-            onClick={() => setStep(3)}
-            disabled={!learningStyle}
-            className={`mt-8 w-full py-4 rounded-xl font-satoshi text-lg transition-all duration-300 ${
-              learningStyle 
+            onClick={() => setCurrentStep(3)}
+            disabled={!learning_style}
+            className={cn(
+              'mt-8 w-full py-4 rounded-xl font-satoshi text-lg transition-all duration-300',
+              learning_style 
                 ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-md'
                 : 'bg-primary-100 text-primary-300 cursor-not-allowed'
-            }`}
+            )}
           >
             Continue
           </button>
         </div>
       )}
 
-      {step === 3 && (
+      {current_step === 3 && (
         <div className='mt-10 w-full max-w-md px-6'>
           <div className='grid grid-cols-2 gap-4'>
-            {Object.entries(subjects).map(([key, value]) => (
+            {Object.entries(subject_interests).map(([key, value]) => (
               <label key={key} className='flex items-center p-4 bg-white rounded-xl border border-primary-100 hover:border-primary-300 transition-all duration-300 cursor-pointer shadow-sm'>
                 <input
                   type='checkbox'
                   checked={value}
-                  onChange={(e) => setSubjects({ ...subjects, [key]: e.target.checked })}
+                  onChange={(e) => setSubjectInterests({ ...subject_interests, [key]: e.target.checked })}
                   className='hidden'
                 />
-                <div className={`flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors ${value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'}`}>
+                <div className={cn(
+                  'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
+                  value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
+                )}>
                   {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
                 </div>
                 <span className='text-primary-900 font-satoshi'>
-                  {key.split(/(?=[A-Z])/).map((word, i) => i === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : `(${word})`).join(' ')}
+                  {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                 </span>
               </label>
             ))}
           </div>
-          <button onClick={() => setStep(4)} className='mt-8 w-full py-4 bg-primary-600 text-white rounded-xl font-satoshi text-lg hover:bg-primary-700 transition-colors shadow-md'>
+          <button onClick={() => setCurrentStep(4)} className='mt-8 w-full py-4 bg-primary-600 text-white rounded-xl font-satoshi text-lg hover:bg-primary-700 transition-colors shadow-md'>
             Continue
           </button>
         </div>
       )}
 
-      {step === 4 && (
+      {current_step === 4 && (
         <div className='mt-10 w-full max-w-md px-6'>
           <div className='grid grid-cols-1 gap-4'>
-            {Object.entries(motivations).map(([key, value]) => (
+            {Object.entries(motivation_factors).map(([key, value]) => (
               <label key={key} className='flex items-center p-4 bg-white rounded-xl border border-primary-100 hover:border-primary-300 transition-all duration-300 cursor-pointer shadow-sm'>
                 <input
                   type='checkbox'
                   checked={value}
-                  onChange={(e) => setMotivations({ ...motivations, [key]: e.target.checked })}
+                  onChange={(e) => setMotivationFactors({ ...motivation_factors, [key]: e.target.checked })}
                   className='hidden'
                 />
-                <div className={`flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors ${value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'}`}>
+                <div className={cn(
+                  'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
+                  value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
+                )}>
                   {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
                 </div>
                 <span className='text-primary-900 font-satoshi'>
-                  {key.replace('motivation', '').charAt(0).toUpperCase() + key.replace('motivation', '').slice(1)}
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
                 </span>
               </label>
             ))}
           </div>
-          <button onClick={() => setStep(5)} className='mt-8 w-full py-4 bg-primary-600 text-white rounded-xl font-satoshi text-lg hover:bg-primary-700 transition-colors shadow-md'>
+          <button onClick={() => setCurrentStep(5)} className='mt-8 w-full py-4 bg-primary-600 text-white rounded-xl font-satoshi text-lg hover:bg-primary-700 transition-colors shadow-md'>
             Continue
           </button>
         </div>
       )}
 
-      {step === 5 && (
+      {current_step === 5 && (
         <div className='mt-10 w-full max-w-md px-6'>
           <div className='grid grid-cols-2 gap-4'>
-            {Object.entries(sources).map(([key, value]) => (
+            {Object.entries(source_channels).map(([key, value]) => (
               <label key={key} className='flex items-center p-4 bg-white rounded-xl border border-primary-100 hover:border-primary-300 transition-all duration-300 cursor-pointer shadow-sm'>
                 <input
                   type='checkbox'
                   checked={value}
-                  onChange={(e) => setSources({ ...sources, [key]: e.target.checked })}
+                  onChange={(e) => setSourceChannels({ ...source_channels, [key]: e.target.checked })}
                   className='hidden'
                 />
-                <div className={`flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors ${value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'}`}>
+                <div className={cn(
+                  'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
+                  value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
+                )}>
                   {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
                 </div>
                 <span className='text-primary-900 font-satoshi'>
-                  {key.replace('source', '').charAt(0).toUpperCase() + key.replace('source', '').slice(1)}
+                  {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                 </span>
               </label>
             ))}

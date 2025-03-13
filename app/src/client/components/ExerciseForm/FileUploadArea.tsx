@@ -1,47 +1,56 @@
 import React from 'react';
 import { useDropzone } from 'react-dropzone';
 import { BsFiletypeAi } from 'react-icons/bs';
+import { cn } from '../../../shared/utils';
 
 type FileUploadAreaProps = {
-  onDrop: (acceptedFiles: File[]) => void;
-  isUploading: boolean;
-  isDragActive: boolean;
-  loadingStatus: string;
-  setIsDragActive: (active: boolean) => void;
+  on_drop: (accepted_files: File[]) => void;
+  is_uploading: boolean; 
+  is_drag_active: boolean;
+  loading_status: string;
+  set_is_drag_active: (active: boolean) => void;
 };
 
-const FileUploadArea: React.FC<FileUploadAreaProps> = ({ onDrop, isUploading, isDragActive, loadingStatus, setIsDragActive }) => {
+const FileUploadArea: React.FC<FileUploadAreaProps> = ({ 
+  on_drop,
+  is_uploading,
+  is_drag_active,
+  loading_status,
+  set_is_drag_active
+}) => {
   const {
     getRootProps,
     getInputProps,
-    isDragActive: dropzoneIsDragActive,
+    isDragActive: dropzone_is_drag_active,
   } = useDropzone({
-    onDrop,
+    onDrop: on_drop,
     accept: {
       'application/pdf': ['.pdf'],
       'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'], 
       'text/plain': ['.txt'],
     },
     multiple: false,
-    disabled: isUploading,
-    onDragEnter: () => setIsDragActive(true),
-    onDragLeave: () => setIsDragActive(false),
+    disabled: is_uploading,
+    onDragEnter: () => set_is_drag_active(true),
+    onDragLeave: () => set_is_drag_active(false),
   });
 
   return (
     <div className='flex h-full items-center justify-center w-full max-w-4xl mx-auto'>
       <div
         {...getRootProps()}
-        className={`flex flex-col h-full items-center p-6 justify-center w-full rounded-xl cursor-pointer bg-white border-2 border-primary-100 transition-all duration-300 ${
-          isUploading
+        className={cn(
+          'flex flex-col h-full items-center p-6 justify-center w-full rounded-xl cursor-pointer bg-white border-2 border-primary-100 transition-all duration-300',
+          is_uploading
             ? 'opacity-50 cursor-not-allowed bg-primary-50'
-            : 'hover:border-primary-300 hover:bg-primary-50'
-        } ${isDragActive || dropzoneIsDragActive ? 'border-primary-400 bg-primary-50' : ''}`}
+            : 'hover:border-primary-300 hover:bg-primary-50',
+          is_drag_active || dropzone_is_drag_active ? 'border-primary-400 bg-primary-50' : ''
+        )}
       >
         <input {...getInputProps()} />
         <div className='flex flex-col items-center justify-center py-4'>
-          {isUploading ? (
+          {is_uploading ? (
             <div className='flex flex-col items-center space-y-4'>
               <div className='relative'>
                 <BsFiletypeAi className='w-12 h-12 text-primary-500 animate-pulse' />
@@ -49,7 +58,7 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ onDrop, isUploading, is
                 <div className='absolute -inset-1 animate-spin-reverse-slower rounded-full border-r-2 border-b-2 border-primary-200'></div>
               </div>
               <p className='text-lg text-center font-montserrat font-medium text-primary-900 animate-pulse'>
-                {loadingStatus || 'Processing...'}
+                {loading_status || 'Processing...'}
               </p>
               <div className='flex space-x-2 mt-2'>
                 <div className='w-2 h-2 rounded-full bg-primary-400 animate-bounce [animation-delay:-0.3s]'></div>

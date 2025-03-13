@@ -11,9 +11,9 @@ type GetAllCoursesResponse = {
     id: string;
     name: string;
     description: string | null;
-    createdAt: Date;
-    totalExercises: number;
-    completedExercises: number;
+    created_at: Date;
+    total_exercises: number;
+    completed_exercises: number;
   }[];
 }
 
@@ -24,7 +24,7 @@ export const getAllCourses: GetAllCourses<void, GetAllCoursesResponse> = async (
 
   const courses = await context.entities.Course.findMany({
     where: {
-      userId: context.user.id,
+      user_id: context.user.id,
     },
     include: {
       topics: {
@@ -34,41 +34,41 @@ export const getAllCourses: GetAllCourses<void, GetAllCoursesResponse> = async (
       }
     },
     orderBy: {
-      createdAt: 'asc',
+      created_at: 'asc',
     }
   });
 
-  const coursesWithStats = courses.map(course => {
-    let totalExercises = 0;
-    let completedExercises = 0;
+  const courses_with_stats = courses.map(course => {
+    let total_exercises = 0;
+    let completed_exercises = 0;
 
     course.topics.forEach(topic => {
-      totalExercises += topic.exercises.length;
-      completedExercises += topic.exercises.filter(exercise => exercise.completed).length;
+      total_exercises += topic.exercises.length;
+      completed_exercises += topic.exercises.filter(exercise => exercise.completed).length;
     });
 
     return {
       ...course,
-      totalExercises,
-      completedExercises
+      total_exercises,
+      completed_exercises
     };
   });
 
   return {
-    courses: coursesWithStats
+    courses: courses_with_stats
   };
 }
 
 type GetPublicCoursesResponse = {
   courses: (Course & {
-    totalTopics: number;
-    totalExercises: number;
+    total_topics: number;
+    total_exercises: number;
   })[];
 }
 
 export const getPublicCourses: GetPublicCourses<void, GetPublicCoursesResponse> = async (_args, context) => {
   const courses = await context.entities.Course.findMany({
-    where: { isPublic: true },
+    where: { is_public: true },
     include: {
       topics: {
         include: {
@@ -82,35 +82,35 @@ export const getPublicCourses: GetPublicCourses<void, GetPublicCoursesResponse> 
       }
     },
     orderBy: {
-      createdAt: 'asc',
+      created_at: 'asc',
     }
   });
 
-  const coursesWithStats = courses.map(course => {
-    const totalTopics = course.topics.length;
-    const totalExercises = course.topics.reduce((sum, topic) => sum + topic.exercises.length, 0);
+  const courses_with_stats = courses.map(course => {
+    const total_topics = course.topics.length;
+    const total_exercises = course.topics.reduce((sum, topic) => sum + topic.exercises.length, 0);
 
     return {
       ...course,
-      totalTopics,
-      totalExercises
+      total_topics,
+      total_exercises
     };
   });
 
   return {
-    courses: coursesWithStats
+    courses: courses_with_stats
   };
 };
 
-export const getCourseById: GetCourseById<{ courseId: string }, Course | null> = async (args, context) => {
+export const getCourseById: GetCourseById<{ course_id: string }, Course | null> = async (args, context) => {
   if (!context.user) {
     throw new HttpError(401);
   }
-  const { courseId } = args;
+  const { course_id } = args;
   return context.entities.Course.findFirst({
     where: {
-      userId: context.user.id,
-      id: courseId,
+      user_id: context.user.id,
+      id: course_id,
     },
   });
 }

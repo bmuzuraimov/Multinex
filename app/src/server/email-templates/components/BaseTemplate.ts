@@ -8,62 +8,62 @@ export interface EmailTemplate {
 }
 
 // Modern color palette
-const colors = {
-  primary: '#0CC0DF',
-  primaryGradient: 'linear-gradient(135deg, #0CC0DF 0%, #04D3BC 100%)',
-  secondary: '#1A365D',
-  accent: '#04D3BC',
-  background: '#F9FAFB',
-  surface: '#FFFFFF',
-  text: {
-    primary: '#1A202C',
-    secondary: '#4A5568',
-    muted: '#718096',
-    light: '#A0AEC0'
+const COLORS = {
+  PRIMARY: '#0CC0DF',
+  PRIMARY_GRADIENT: 'linear-gradient(135deg, #0CC0DF 0%, #04D3BC 100%)',
+  SECONDARY: '#1A365D', 
+  ACCENT: '#04D3BC',
+  BACKGROUND: '#F9FAFB',
+  SURFACE: '#FFFFFF',
+  TEXT: {
+    PRIMARY: '#1A202C',
+    SECONDARY: '#4A5568',
+    MUTED: '#718096',
+    LIGHT: '#A0AEC0'
   },
-  border: '#E2E8F0',
-  success: '#48BB78',
-  warning: '#ECC94B',
-  error: '#F56565'
+  BORDER: '#E2E8F0',
+  SUCCESS: '#48BB78',
+  WARNING: '#ECC94B',
+  ERROR: '#F56565'
 };
 
 // Typography scale
-const typography = {
+const TYPOGRAPHY = {
   h1: {
-    fontSize: '28px',
-    lineHeight: '34px',
-    fontWeight: '700'
+    font_size: '28px',
+    line_height: '34px',
+    font_weight: '700'
   },
   h2: {
-    fontSize: '24px',
-    lineHeight: '30px',
-    fontWeight: '600'
+    font_size: '24px',
+    line_height: '30px',
+    font_weight: '600'
   },
   h3: {
-    fontSize: '20px',
-    lineHeight: '28px',
-    fontWeight: '600'
+    font_size: '20px',
+    line_height: '28px',
+    font_weight: '600'
   },
   body: {
-    fontSize: '16px',
-    lineHeight: '24px',
-    fontWeight: 'normal'
+    font_size: '16px',
+    line_height: '24px',
+    font_weight: 'normal'
   },
   small: {
-    fontSize: '14px',
-    lineHeight: '20px',
-    fontWeight: 'normal'
+    font_size: '14px',
+    line_height: '20px',
+    font_weight: 'normal'
   }
 };
 
 // Spacing scale
-const spacing = {
-  xs: '8px',
-  sm: '12px',
-  md: '16px',
-  lg: '24px',
-  xl: '32px',
-  xxl: '48px'
+const SPACING = {
+  XS: '8px',
+  SM: '12px',
+  MD: '16px',
+  LG: '24px',
+  XL: '32px',
+  XXL: '48px'
 };
 
 // Common styles that can be reused across templates
@@ -71,22 +71,22 @@ export const styles = {
   container: {
     margin: '0',
     padding: '0',
-    backgroundColor: colors.background,
+    backgroundColor: COLORS.BACKGROUND,
     width: '100%',
     height: '100%',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     msTextSizeAdjust: '100%',
     webkitTextSizeAdjust: '100%'
   } as CSSProperties,
-  mainTable: {
-    backgroundColor: colors.background,
+  main_table: {
+    backgroundColor: COLORS.BACKGROUND,
     width: '100%',
     borderSpacing: '0',
     borderCollapse: 'separate'
   } as CSSProperties,
-  contentTable: {
-    backgroundColor: colors.surface,
-    padding: spacing.xl,
+  content_table: {
+    backgroundColor: COLORS.SURFACE,
+    padding: SPACING.XL,
     borderRadius: '12px',
     width: '600px',
     maxWidth: '100%',
@@ -103,69 +103,69 @@ export const styles = {
     display: 'block'
   } as CSSProperties,
   heading: {
-    ...typography.h2,
-    color: colors.text.primary,
-    margin: `0 0 ${spacing.md} 0`,
+    ...TYPOGRAPHY.h2,
+    color: COLORS.TEXT.PRIMARY,
+    margin: `0 0 ${SPACING.MD} 0`,
     padding: '0'
   } as CSSProperties,
   subheading: {
-    ...typography.h3,
-    color: colors.text.secondary,
-    margin: `0 0 ${spacing.sm} 0`,
+    ...TYPOGRAPHY.h3,
+    color: COLORS.TEXT.SECONDARY,
+    margin: `0 0 ${SPACING.SM} 0`,
     padding: '0'
   } as CSSProperties,
   text: {
-    ...typography.body,
-    color: colors.text.secondary,
-    margin: `0 0 ${spacing.md} 0`,
+    ...TYPOGRAPHY.body,
+    color: COLORS.TEXT.SECONDARY,
+    margin: `0 0 ${SPACING.MD} 0`,
     padding: '0'
   } as CSSProperties,
   button: {
     display: 'inline-block',
     textDecoration: 'none',
     fontWeight: '600',
-    fontSize: typography.body.fontSize,
-    color: colors.surface,
-    padding: `${spacing.sm} ${spacing.xl}`,
+    fontSize: TYPOGRAPHY.body.font_size,
+    color: COLORS.SURFACE,
+    padding: `${SPACING.SM} ${SPACING.XL}`,
     borderRadius: '8px',
-    background: colors.primaryGradient,
+    background: COLORS.PRIMARY_GRADIENT,
     textAlign: 'center',
     msoPaddingAlt: '0',
-    msoBackgroundAlt: colors.primary
+    msoBackgroundAlt: COLORS.PRIMARY
   } as CSSProperties,
-  secondaryButton: {
+  secondary_button: {
     display: 'inline-block',
     textDecoration: 'none',
     fontWeight: '600',
-    fontSize: typography.body.fontSize,
-    color: colors.primary,
-    padding: `${spacing.sm} ${spacing.xl}`,
+    fontSize: TYPOGRAPHY.body.font_size,
+    color: COLORS.PRIMARY,
+    padding: `${SPACING.SM} ${SPACING.XL}`,
     borderRadius: '8px',
-    border: `2px solid ${colors.primary}`,
-    background: colors.surface,
+    border: `2px solid ${COLORS.PRIMARY}`,
+    background: COLORS.SURFACE,
     textAlign: 'center'
   } as CSSProperties,
   card: {
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
+    backgroundColor: COLORS.SURFACE,
+    padding: SPACING.LG,
     borderRadius: '8px',
-    border: `1px solid ${colors.border}`,
-    marginBottom: spacing.lg
+    border: `1px solid ${COLORS.BORDER}`,
+    marginBottom: SPACING.LG
   } as CSSProperties,
   footer: {
-    ...typography.small,
-    color: colors.text.muted,
+    ...TYPOGRAPHY.small,
+    color: COLORS.TEXT.MUTED,
     textAlign: 'center',
-    padding: `${spacing.lg} ${spacing.md}`
+    padding: `${SPACING.LG} ${SPACING.MD}`
   } as CSSProperties,
   divider: {
-    borderTop: `1px solid ${colors.border}`,
-    margin: `${spacing.lg} 0`
+    borderTop: `1px solid ${COLORS.BORDER}`,
+    margin: `${SPACING.LG} 0`
   } as CSSProperties
 };
 
 // Base layout component that will be used by all email templates
-export const baseLayout = (content: string, title: string) => `
+export const generateBaseLayout = (content: string, title: string) => `
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -176,25 +176,25 @@ export const baseLayout = (content: string, title: string) => `
     <meta name="color-scheme" content="light" />
     <meta name="supported-color-schemes" content="light" />
   </head>
-  <body style="${styleToString(styles.container)}">
+  <body style="${convertStyleToString(styles.container)}">
     <!--[if mso]>
     <table role="presentation" width="100%">
     <tr>
     <td>
     <![endif]-->
-    <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="${styleToString(styles.mainTable)}">
+    <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="${convertStyleToString(styles.main_table)}">
       <tr>
-        <td align="center" style="padding: ${spacing.xl} ${spacing.md};">
-          <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="${styleToString(styles.contentTable)}">
+        <td align="center" style="padding: ${SPACING.XL} ${SPACING.MD};">
+          <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="${convertStyleToString(styles.content_table)}">
             <tr>
               <td>
                 <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
                   <tr>
-                    <td align="left" style="padding-bottom: ${spacing.lg};">
+                    <td align="left" style="padding-bottom: ${SPACING.LG};">
                       <img 
                         src="https://multinex.app/logo.png" 
                         alt="Multinex" 
-                        style="${styleToString(styles.logo)}" 
+                        style="${convertStyleToString(styles.logo)}" 
                         width="40"
                       />
                     </td>
@@ -207,9 +207,9 @@ export const baseLayout = (content: string, title: string) => `
           
           <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="600" style="max-width: 100%;">
             <tr>
-              <td style="${styleToString(styles.footer)}">
+              <td style="${convertStyleToString(styles.footer)}">
                 <p style="margin: 0;">Type, write, listen. In one AI-powered workspace</p>
-                <p style="margin: ${spacing.xs} 0 0 0; color: ${colors.text.light};">
+                <p style="margin: ${SPACING.XS} 0 0 0; color: ${COLORS.TEXT.LIGHT};">
                   © ${new Date().getFullYear()} Multinex. All rights reserved.
                 </p>
               </td>
@@ -228,64 +228,52 @@ export const baseLayout = (content: string, title: string) => `
 `;
 
 // Helper function to convert style object to string
-export const styleToString = (style: CSSProperties): string => {
+export const convertStyleToString = (style: CSSProperties): string => {
   return Object.entries(style)
-    .map(([key, value]) => `${kebabCase(key)}: ${value}`)
+    .map(([key, value]) => `${convertToKebabCase(key)}: ${value}`)
     .join('; ');
 };
 
 // Helper function to convert camelCase to kebab-case
-const kebabCase = (str: string): string => {
+const convertToKebabCase = (str: string): string => {
   return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 };
 
 // Common components that can be reused across templates
 export const components = {
   button: (text: string, link: string, variant: 'primary' | 'secondary' = 'primary') => text && link ? `
-    <tr>
-      <td align="center" style="padding: ${spacing.md} 0;">
-        <!--[if mso]>
-        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${link}" style="height:40px;v-text-anchor:middle;width:200px;" arcsize="10%" stroke="f" fillcolor="${variant === 'primary' ? colors.primary : colors.surface}">
-          <w:anchorlock/>
-          <center style="color:${variant === 'primary' ? colors.surface : colors.primary};font-family:sans-serif;font-size:16px;font-weight:bold;">${text}</center>
-        </v:roundrect>
-        <![endif]-->
-        <a href="${link}" style="${styleToString(variant === 'primary' ? styles.button : styles.secondaryButton)}">${text}</a>
-      </td>
-    </tr>
+    <td align="center" style="padding: ${SPACING.MD} 0;">
+      <!--[if mso]>
+      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${link}" style="height:40px;v-text-anchor:middle;width:200px;" arcsize="10%" stroke="f" fillcolor="${variant === 'primary' ? COLORS.PRIMARY : COLORS.SURFACE}">
+        <w:anchorlock/>
+        <center style="color:${variant === 'primary' ? COLORS.SURFACE : COLORS.PRIMARY};font-family:sans-serif;font-size:16px;font-weight:bold;">${text}</center>
+      </v:roundrect>
+      <![endif]-->
+      <a href="${link}" style="${convertStyleToString(variant === 'primary' ? styles.button : styles.secondary_button)}">${text}</a>
+    </td>
   ` : '',
   heading: (text: string) => text ? `
-    <tr>
-      <td style="${styleToString(styles.heading)}">${text}</td>
-    </tr>
+    <td style="${convertStyleToString(styles.heading)}">${text}</td>
   ` : '',
   subheading: (text: string) => text ? `
-    <tr>
-      <td style="${styleToString(styles.subheading)}">${text}</td>
-    </tr>
+    <td style="${convertStyleToString(styles.subheading)}">${text}</td>
   ` : '',
   paragraph: (text: string) => text ? `
-    <tr>
-      <td style="${styleToString(styles.text)}">${text}</td>
-    </tr>
+    <td style="${convertStyleToString(styles.text)}">${text}</td>
   ` : '',
-  bulletList: (items: string[]) => items && items.length > 0 ? `
-    <tr>
-      <td style="${styleToString({ ...styles.text, paddingLeft: spacing.md })}">
-        ${items.map(item => `<div style="margin-bottom: ${spacing.xs};">• ${item}</div>`).join('')}
-      </td>
-    </tr>
+  bullet_list: (items: string[]) => items && items.length > 0 ? `
+    <td style="${convertStyleToString({ ...styles.text, paddingLeft: SPACING.MD })}">
+      ${items.map(item => `<div style="margin-bottom: ${SPACING.XS};">• ${item}</div>`).join('')}
+    </td>
   ` : '',
   card: (content: string) => content ? `
-    <tr>
-      <td style="${styleToString(styles.card)}">
+    <td style="${convertStyleToString(styles.card)}">
+      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
         ${content}
-      </td>
-    </tr>
+      </table>
+    </td>
   ` : '',
   divider: () => `
-    <tr>
-      <td style="${styleToString(styles.divider)}"></td>
-    </tr>
+    <td style="${convertStyleToString(styles.divider)}"></td>
   `
 };

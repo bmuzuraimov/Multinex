@@ -22,11 +22,11 @@ export const getExercisesWithNoTopic: GetExercisesWithNoTopic<void, Exercise[]> 
 
   return context.entities.Exercise.findMany({
     where: {
-      userId: context.user.id,
-      topicId: null,
+      user_id: context.user.id,
+      topic_id: null,
     },
     orderBy: {
-      createdAt: 'asc',
+      created_at: 'asc',
     },
   });
 };
@@ -38,7 +38,7 @@ export const hasCompletedExercises: HasCompletedExercises<void, boolean> = async
 
   const exercise = await context.entities.Exercise.findFirst({
     where: {
-      userId: context.user.id,
+      user_id: context.user.id,
       completed: true,
     },
   });
@@ -50,37 +50,37 @@ type ExerciseResult = {
   id: string;
   status: ExerciseStatus;
   name: string;
-  paragraphSummary: string;
+  paragraph_summary: string;
   level: string;
   truncated: boolean;
-  no_words: number;
+  word_count: number;
   completed: boolean;
-  completedAt: Date | null;
+  completed_at: Date | null;
   score: number;
   model: string;
-  userEvaluation: number | null;
-  userId: string | null;
-  topicId: string | null;
-  createdAt: Date;
+  user_evaluation: number | null;
+  user_id: string | null;
+  topic_id: string | null;
+  created_at: Date;
   questions: Array<{
     id: string;
     text: string;
-    exerciseId: string;
-    createdAt: Date;
+    exercise_id: string;
+    created_at: Date;
     options: Option[];
   }>;
-  audioUrl?: string;
-  audioTimestamps?: Array<{ word: string; start: number; end: number }> | string[];
+  audio_url?: string;
+  audio_timestamps?: Array<{ word: string; start: number; end: number }> | string[];
   essay: string;
-  formattedEssay: {
+  formatted_essay: {
     mode: SensoryMode;
     text: string[];
   }[];
   [key: string]: any;
 };
 
-export const getExerciseById: GetExerciseById<{ exerciseId: string }, ExerciseResult> = async (
-  { exerciseId },
+export const getExerciseById: GetExerciseById<{ exercise_id: string }, ExerciseResult> = async (
+  { exercise_id },
   context
 ) => {
   if (!context.user) {
@@ -89,13 +89,13 @@ export const getExerciseById: GetExerciseById<{ exerciseId: string }, ExerciseRe
 
   const exercise = await context.entities.Exercise.findFirstOrThrow({
     where: {
-      userId: context.user.id,
-      id: exerciseId,
+      user_id: context.user.id,
+      id: exercise_id,
     },
     include: {
       questions: {
         orderBy: {
-          createdAt: 'asc',
+          created_at: 'asc',
         },
         include: {
           options: true,
@@ -106,17 +106,17 @@ export const getExerciseById: GetExerciseById<{ exerciseId: string }, ExerciseRe
     },
   });
 
-  if (exercise.audioTimestamps && typeof exercise.audioTimestamps[0] === 'string') {
-    exercise.audioTimestamps = exercise.audioTimestamps.map((timestamp: string) => JSON.parse(timestamp));
+  if (exercise.audio_timestamps && typeof exercise.audio_timestamps[0] === 'string') {
+    exercise.audio_timestamps = exercise.audio_timestamps.map((timestamp: string) => JSON.parse(timestamp));
   }
 
   const audioUrl = await getS3DownloadUrl({ key: exercise.id + '.mp3' });
-  const { essay, formattedEssay } = preprocessEssay(exercise.lessonText);
+  const { essay, formattedEssay } = preprocessEssay(exercise.lesson_text);
 
   return {
     ...exercise,
     essay,
-    formattedEssay,
-    audioUrl,
+    formatted_essay: formattedEssay,
+    audio_url: audioUrl,
   };
 };

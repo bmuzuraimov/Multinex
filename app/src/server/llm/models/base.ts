@@ -1,4 +1,4 @@
-import { reportToAdmin } from '../../actions/utils';
+import { sendErrorToAdmin } from '../../actions/utils';
 import { RETRIES, DELAY_MS } from '../../../shared/constants';
 import { TiktokenModel, encoding_for_model } from 'tiktoken';
 import { OPENAI_MODEL } from '../../../shared/constants';
@@ -13,61 +13,62 @@ export interface LLMResponse {
 }
 
 
-
 export abstract class BaseLLMService {
   protected abstract setupClient(): void;
 
-  protected async withRetry<T>(operation: () => Promise<T>, methodName: string, retries: number = RETRIES, delayMs: number = DELAY_MS): Promise<T> {
+  protected async withRetry<T>(operation: () => Promise<T>, method_name: string, retries: number = RETRIES, delay_ms: number = DELAY_MS): Promise<T> {
     try {
       return await operation();
     } catch (error) {
       if (retries > 0) {
-        await new Promise((resolve) => setTimeout(resolve, delayMs));
-        return this.withRetry(operation, methodName, retries - 1, delayMs * 2);
+        await new Promise((resolve) => setTimeout(resolve, delay_ms));
+        return this.withRetry(operation, method_name, retries - 1, delay_ms * 2);
       }
-      return this.handleError(error, methodName);
+      return this.handleError(error, method_name);
     }
   }
 
   abstract generateExercise(
     content: string,
-    priorKnowledge: string,
+    prior_knowledge: string,
     length: string,
     level: string,
     model: string,
-    maxTokens: number,
     pre_prompt: string,
     post_prompt: string
   ): Promise<LLMResponse>;
 
   abstract generateSummary(
-    lectureContent: string,
+    lecture_content: string,
     model: string,
-    maxTokens: number
   ): Promise<LLMResponse>;
 
   abstract generateQuestions(
-    lectureContent: string,
+    lecture_content: string,
     model: string,
-    maxTokens: number
   ): Promise<LLMResponse>;
 
   abstract generateCourse(
-    syllabusContent: string,
+    syllabus_content: string,
     model: string,
-    maxTokens: number
   ): Promise<LLMResponse>;
 
   abstract generateComplexity(
-    lectureContent: string,
+    lecture_content: string,
     model: string,
-    maxTokens: number,
-    sensoryModes: SensoryMode[]
+    sensory_modes: SensoryMode[]
   ): Promise<LLMResponse>;
 
-  protected handleError(error: any, methodName: string): never {
-    console.error(`Error in ${methodName}:`, error);
-    reportToAdmin(`Error in ${methodName}: ${error.message}`);
+  protected handleError(error: any, method_name: string): never {
+    console.error(`Error in ${method_name}:`, error);
+    sendErrorToAdmin({
+      id: 'llm_error',
+      severity: 'error',
+      email: process.env.ADMIN_EMAILS!,
+      description: `Error in ${method_name}: ${error.message}`,
+      steps: [],
+      stack_trace: error.stack,
+    });
     throw error;
   }
 
@@ -76,14 +77,14 @@ export abstract class BaseLLMService {
     return encoding.encode(content).length;
   }
 
-  static async deductTokens(context: any, totalTokens: number): Promise<void> {
+  static async deductTokens(context: any, total_tokens: number): Promise<void> {
     await context.entities.User.update({
       where: { id: context.user.id },
       data: {
         tokens: {
-          decrement: totalTokens,
+          decrement: total_tokens,
         },
       },
     });
   }
-} 
+}

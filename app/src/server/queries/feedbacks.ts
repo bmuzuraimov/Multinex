@@ -1,8 +1,8 @@
 import { Feedback } from 'wasp/entities';
 import { type GetFeedbackByUserId } from 'wasp/server/operations';
 
-export const getFeedbackByUserId: GetFeedbackByUserId<{ userId: string }, Feedback | null> = async (
-  { userId },
+export const getFeedbackByUserId: GetFeedbackByUserId<void, Feedback | null> = async (
+  _args,
   context
 ) => {
   if (!context.user) {
@@ -11,8 +11,8 @@ export const getFeedbackByUserId: GetFeedbackByUserId<{ userId: string }, Feedba
 
   return await context.entities.Feedback.findFirst({
     where: {
-      userId: context.user.id,
+      user_id: context.user.id,
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { created_at: 'desc' },
   });
 };

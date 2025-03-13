@@ -1,4 +1,4 @@
-import { EmailTemplate, baseLayout, components } from './BaseTemplate';
+import { EmailTemplate, generateBaseLayout } from './BaseTemplate';
 
 // Base class for all email templates
 export abstract class BaseEmailTemplate implements EmailTemplate {
@@ -11,31 +11,31 @@ export abstract class BaseEmailTemplate implements EmailTemplate {
   }
 
   get text(): string {
-    return this.generateText();
+    return this.generateText(); 
   }
 
   get html(): string {
-    return baseLayout(this.generateHtmlContent(), this.subject);
+    return generateBaseLayout(this.generateHtmlContent(), this.subject);
   }
 }
 
 // Factory for creating email templates
 export class EmailTemplateFactory {
   static createTemplate<T extends BaseEmailTemplate>(
-    templateClass: new (...args: any[]) => T,
+    template_class: new (...args: any[]) => T,
     ...args: any[]
   ): EmailTemplate {
-    const template = new templateClass(...args);
+    const template_instance = new template_class(...args);
     return {
-      subject: template.subject,
-      text: template.text,
-      html: template.html
+      subject: template_instance.subject,
+      text: template_instance.text,
+      html: template_instance.html
     };
   }
 }
 
 // Common text generation utilities
-export const textUtils = {
+export const TEXT_UTILS = {
   generateSignature: () => `
 Thanks for your time, and have a great day!
 
@@ -45,4 +45,4 @@ Type, write, listen. In one AI-powered workspace.`,
 
   generateBulletPoints: (items: string[]): string => 
     items.map(item => `• ${item}`).join('\n'),
-}; 
+};

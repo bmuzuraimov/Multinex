@@ -13,65 +13,65 @@ type AudioTimestamp = {
 
 type DemoExerciseResult = {
   id: string;
-  createdAt: Date;
-  userAgent: string;
-  browserLanguage: string | null;
-  screenResolution: string | null;
+  created_at: Date;
+  user_agent: string;
+  browser_language: string | null;
+  screen_resolution: string | null;
   timezone: string | null;
-  exerciseId: string;
+  exercise_id: string;
   exercise: {
     id: string;
     name: string;
-    paragraphSummary: string;
+    paragraph_summary: string;
     level: string;
     truncated: boolean;
-    no_words: number;
+    word_count: number;
     completed: boolean;
-    completedAt: Date | null;
+    completed_at: Date | null;
     score: number;
     model: string;
-    userEvaluation: number | null;
-    userId: string | null;
-    topicId: string | null;
+    user_evaluation: number | null;
+    user_id: string | null;
+    topic_id: string | null;
     questions: Array<{
       id: string;
       text: string;
-      exerciseId: string;
-      createdAt: Date;
+      exercise_id: string;
+      created_at: Date;
       options: Array<{
         id: string;
         text: string;
-        isCorrect: boolean;
-        questionId: string;
-        createdAt: Date;
+        is_correct: boolean;
+        question_id: string;
+        created_at: Date;
       }>;
     }>;
-    audioTimestamps: AudioTimestamp[];
-    lessonText: string;
+    audio_timestamps: AudioTimestamp[];
+    lesson_text: string;
     cursor: number;
-    tokens: any; // Adding missing property
+    tokens: any;
     status: ExerciseStatus;
-    createdAt: Date;
+    created_at: Date;
   };
   essay: string;
-  formattedEssay: Array<{ mode: "listen" | "type" | "write"; text: string[] }>;
-  audioUrl: string;
+  formatted_essay: Array<{ mode: "listen" | "type" | "write"; text: string[] }>;
+  audio_url: string;
 };
 
 export const getDemoExercise: GetDemoExercise<
   {
-    userAgent: string;
-    browserLanguage: string;
-    screenResolution: string;
+    user_agent: string;
+    browser_language: string;
+    screen_resolution: string;
     timezone: string;
   },
   DemoExerciseResult | null
 > = async (args, context) => {
-  const result = await context.entities.DemoExercise.findFirst({
+  const demo_exercise = await context.entities.DemoExercise.findFirst({
     where: {
-      userAgent: args.userAgent,
-      browserLanguage: args.browserLanguage,
-      screenResolution: args.screenResolution,
+      user_agent: args.user_agent,
+      browser_language: args.browser_language,
+      screen_resolution: args.screen_resolution,
       timezone: args.timezone
     },
     include: {
@@ -87,26 +87,26 @@ export const getDemoExercise: GetDemoExercise<
     }
   });
 
-  if (!result) return null;
+  if (!demo_exercise) return null;
 
-  const audioTimestamps = result.exercise.audioTimestamps?.map((timestamp: string) => {
+  const audio_timestamps = demo_exercise.exercise.audio_timestamps?.map((timestamp: string) => {
     if (typeof timestamp === 'string') {
       return JSON.parse(timestamp) as AudioTimestamp;
     }
     return timestamp as AudioTimestamp;
   }) || [];
 
-  const { essay, formattedEssay } = preprocessEssay(result.exercise.lessonText);
-  const audioUrl = await getS3DownloadUrl({ key: result.exercise.id + '.mp3' });
+  const { essay, formattedEssay } = preprocessEssay(demo_exercise.exercise.lesson_text);
+  const audio_url = await getS3DownloadUrl({ key: demo_exercise.exercise.id + '.mp3' });
   
   return {
-    ...result,
+    ...demo_exercise,
     essay,
-    formattedEssay,
-    audioUrl,
+    formatted_essay: formattedEssay,
+    audio_url: audio_url,
     exercise: {
-      ...result.exercise,
-      audioTimestamps
+      ...demo_exercise.exercise,
+      audio_timestamps: audio_timestamps
     }
   };
 }

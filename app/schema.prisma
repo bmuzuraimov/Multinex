@@ -8,146 +8,144 @@ generator client {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-
-  email               String?  @unique
-  username            String?  @unique
-  lastActiveTimestamp DateTime @default(now())
-
-  stripeId            String?
-  checkoutSessionId   String?
-  sendEmail           Boolean   @default(true)
-  onBoardingCompleted Boolean   @default(false)
-  tourCompleted       Boolean   @default(false)
-  datePaid            DateTime?
-  lang                String    @default("en")
-  credits              Int       @default(10)
+  id                   String     @id @default(uuid())
+  created_at           DateTime   @default(now())
+  email                String?    @unique
+  username             String?    @unique
+  last_active          DateTime   @default(now())
+  stripe_id            String?
+  checkout_session_id  String?
+  send_email           Boolean    @default(true)
+  onboarding_complete  Boolean    @default(false)
+  tour_complete        Boolean    @default(false)
+  date_paid            DateTime?
+  language             String     @default("en")
+  credits              Int        @default(10)
 
   // Relations
-  courses        Course[]
-  topics         Topic[]
-  exercises      Exercise[]
-  feedbacks      Feedback[]
-  organization   Organization?   @relation(fields: [organizationId], references: [id])
-  organizationId String?
-  deletedAt      DateTime?
-  onboarding     Onboarding?
+  courses              Course[]
+  topics              Topic[]
+  exercises           Exercise[]
+  feedback            Feedback[]
+  organization        Organization? @relation(fields: [organization_id], references: [id])
+  organization_id     String?
+  deleted_at          DateTime?
+  onboarding          Onboarding?
 
   @@index([email])
   @@index([username])
-  @@index([organizationId])
-  @@index([lastActiveTimestamp])
+  @@index([organization_id])
+  @@index([last_active])
 }
 
 model Onboarding {
-  id            String  @id @default(uuid())
-  userType      String // Student, Teacher, Parent, Professor, Other
-  userTypeOther String? // If userType is Other
-  learningStyle String? // Visual, Auditory, Kinesthetic, Mixed
+  id                        String   @id @default(uuid())
+  user_type                 String   // Student, Teacher, Parent, Professor, Other
+  user_type_other          String?  // If user_type is Other
+  learning_style           String?  // Visual, Auditory, Kinesthetic, Mixed
 
   // Subjects (multiple can be true)
-  scienceMedicine       Boolean @default(false)
-  technologyEngineering Boolean @default(false)
-  businessEconomics     Boolean @default(false)
-  humanitiesArts        Boolean @default(false)
-  languageLearning      Boolean @default(false)
-  testPrep              Boolean @default(false)
-  subjectOther          String? // If other subject selected
+  science_medicine         Boolean  @default(false)
+  technology_engineering   Boolean  @default(false)
+  business_economics      Boolean  @default(false)
+  humanities_arts         Boolean  @default(false)
+  language_learning       Boolean  @default(false)
+  test_prep              Boolean  @default(false)
+  subject_other          String?  // If other subject selected
 
   // Motivation factors (multiple can be true)
-  motivationProgress     Boolean @default(false)
-  motivationGamification Boolean @default(false)
-  motivationReminders    Boolean @default(false)
-  motivationCommunity    Boolean @default(false)
-  motivationToolOnly     Boolean @default(false)
+  motivation_progress     Boolean  @default(false)
+  motivation_gamification Boolean  @default(false)
+  motivation_reminders    Boolean  @default(false)
+  motivation_community    Boolean  @default(false)
+  motivation_tool_only    Boolean  @default(false)
 
   // Marketing sources (multiple can be true)
-  sourceTwitter     Boolean @default(false)
-  sourceInstagram   Boolean @default(false)
-  sourceTikTok      Boolean @default(false)
-  sourceFacebook    Boolean @default(false)
-  sourceYoutube     Boolean @default(false)
-  sourceGoogle      Boolean @default(false)
-  sourceWordOfMouth Boolean @default(false)
-  sourceOther       String? // If other source selected
+  source_twitter         Boolean  @default(false)
+  source_instagram       Boolean  @default(false)
+  source_tiktok         Boolean  @default(false)
+  source_facebook       Boolean  @default(false)
+  source_youtube        Boolean  @default(false)
+  source_google         Boolean  @default(false)
+  source_word_of_mouth  Boolean  @default(false)
+  source_other          String?  // If other source selected
 
-  featureRequest String? // Optional feature request text
+  feature_request       String?  // Optional feature request text
 
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user_id              String   @unique
+  user                 User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@index([userId])
+  @@index([user_id])
 }
 
 model Organization {
-  id                 String   @id @default(uuid())
-  createdAt          DateTime @default(now())
-  name               String
-  emailDomain        String   @unique
-  stripeCustomerId   String?
-  subscriptionStatus String   @default("inactive")
-  subscriptionPlan   String?
-  seats              Int      @default(0)
-  users              User[]
+  id                    String    @id @default(uuid())
+  created_at            DateTime  @default(now())
+  name                  String
+  email_domain          String    @unique
+  stripe_customer_id    String?
+  subscription_status   String    @default("inactive")
+  subscription_plan     String?
+  seats                 Int       @default(0)
+  users                 User[]
 
-  @@index([emailDomain])
-  @@index([subscriptionStatus])
+  @@index([email_domain])
+  @@index([subscription_status])
 }
 
 model Feature {
-  id             String    @id @default(uuid())
-  name           String
-  bounty         Int
-  date           DateTime
-  approved       Boolean   @default(false)
-  completed      Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  description    String?
-  priority       Int       @default(1)
-  assignedTo     String?
-  estimatedHours Float?
-  actualHours    Float?
-  status         String    @default("pending")
-  tags           String[]
-  githubIssueUrl String?
-  completedAt    DateTime?
+  id                String    @id @default(uuid())
+  name              String
+  bounty            Int
+  date              DateTime
+  approved          Boolean   @default(false)
+  completed         Boolean   @default(false)
+  created_at        DateTime  @default(now())
+  description       String?
+  priority          Int       @default(1)
+  assigned_to       String?
+  estimated_hours   Float?
+  actual_hours      Float?
+  status            String    @default("pending")
+  tags              String[]
+  github_issue_url  String?
+  completed_at      DateTime?
 
   @@index([status])
-  @@index([assignedTo])
+  @@index([assigned_to])
   @@index([completed])
 }
 
 model Course {
-  id          String   @id @default(uuid())
-  duplicateId String?
-  name        String
-  image       String
-  description String
-  isPublic    Boolean  @default(false)
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  topics      Topic[]
-  createdAt   DateTime @default(now())
+  id            String    @id @default(uuid())
+  duplicate_id  String?
+  name          String
+  image         String
+  description   String
+  is_public     Boolean   @default(false)
+  user_id       String
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  topics        Topic[]
+  created_at    DateTime  @default(now())
 
-  @@index([userId])
-  @@index([isPublic])
+  @@index([user_id])
+  @@index([is_public])
 }
 
 model Topic {
-  id        String     @id @default(uuid())
-  name      String
-  courseId  String
-  userId    String
-  length    Int        @default(500)
-  level     String     @default("Like I am a university student")
-  course    Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercises Exercise[]
-  createdAt DateTime   @default(now())
+  id          String     @id @default(uuid())
+  name        String
+  course_id   String
+  user_id     String
+  length      Int        @default(500)
+  level       String     @default("Like I am a university student")
+  course      Course     @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  exercises   Exercise[]
+  created_at  DateTime   @default(now())
 
-  @@index([courseId])
-  @@index([userId])
+  @@index([course_id])
+  @@index([user_id])
 }
 
 enum ExerciseStatus {
@@ -162,113 +160,135 @@ enum ExerciseStatus {
 }
 
 model Exercise {
-  id               String         @id @default(uuid())
-  status           ExerciseStatus @default(CREATED)
-  name             String
-  lessonText       String
-  audioTimestamps  String[]       @default([])
-  paragraphSummary String         @default("")
-  level            String         @default("")
-  cursor           Int            @default(0)
-  no_words         Int            @default(0)
-  completed        Boolean        @default(false)
-  completedAt      DateTime?
-  truncated        Boolean        @default(false)
-  score            Int            @default(0)
-  tokens           Int            @default(0)
-  model            String         @default("gpt-4o-mini")
-  userEvaluation   Int?           @default(0)
-  questions        Question[]     @relation("ExerciseQuestions")
-  userId           String? // Made optional since landing page tries won't have a user
-  topicId          String?
-  topic            Topic?         @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  user             User?          @relation(fields: [userId], references: [id], onDelete: Cascade) // Made optional
-  createdAt        DateTime       @default(now())
-  demoExercise     DemoExercise?
+  id                 String         @id @default(uuid())
+  status             ExerciseStatus @default(CREATED)
+  name               String
+  raw_text           String         @default("")
+  lesson_text        String         @default("")
+  audio_timestamps   String[]       @default([])
+  paragraph_summary  String         @default("")
+  level              String         @default("")
+  cursor             Int            @default(0)
+  word_count         Int            @default(0)
+  completed          Boolean        @default(false)
+  completed_at       DateTime?
+  truncated          Boolean        @default(false)
+  score              Int            @default(0)
+  tokens             Int            @default(0)
+  model              String         @default("gpt-4o-mini")
+  pre_prompt         String         @default("")
+  post_prompt        String         @default("")
+  user_evaluation    Int?           @default(0)
+  questions          Question[]     @relation("ExerciseQuestions")
+  user_id            String?        // Made optional since landing page tries won't have a user
+  topic_id           String?
+  topic              Topic?         @relation(fields: [topic_id], references: [id], onDelete: Cascade)
+  user               User?          @relation(fields: [user_id], references: [id], onDelete: Cascade) // Made optional
+  created_at         DateTime       @default(now())
+  demo_exercise      DemoExercise?
 
-  @@index([userId])
-  @@index([topicId])
+  @@index([user_id])
+  @@index([topic_id])
   @@index([status])
   @@index([completed])
 }
 
 model DemoExercise {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
+  id                String    @id @default(uuid())
+  created_at        DateTime  @default(now())
 
   // Visitor identification
-  userAgent        String // Browser and OS info
-  browserLanguage  String?
-  screenResolution String?
-  timezone         String?
+  user_agent        String    // Browser and OS info
+  browser_language  String?
+  screen_resolution String?
+  timezone          String?
 
   // Exercise details
-  exerciseId String   @unique
-  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  exercise_id       String    @unique
+  exercise          Exercise  @relation(fields: [exercise_id], references: [id], onDelete: Cascade)
 
-  @@index([userAgent])
-  @@index([browserLanguage])
-  @@index([screenResolution]) 
+  @@index([user_agent])
+  @@index([browser_language])
+  @@index([screen_resolution]) 
   @@index([timezone])
-  @@index([exerciseId])
+  @@index([exercise_id])
 }
 
 model Question {
-  id         String   @id @default(uuid())
-  text       String
-  exerciseId String
-  exercise   Exercise @relation("ExerciseQuestions", fields: [exerciseId], references: [id], onDelete: Cascade)
-  options    Option[] @relation("QuestionOptions")
-  createdAt  DateTime @default(now())
+  id           String    @id @default(uuid())
+  text         String
+  exercise_id  String
+  exercise     Exercise  @relation("ExerciseQuestions", fields: [exercise_id], references: [id], onDelete: Cascade)
+  options      Option[]  @relation("QuestionOptions")
+  created_at   DateTime  @default(now())
 
-  @@index([exerciseId])
+  @@index([exercise_id])
 }
 
 model Option {
-  id         String   @id @default(uuid())
-  text       String
-  isCorrect  Boolean  @default(false)
-  questionId String
-  question   Question @relation("QuestionOptions", fields: [questionId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
+  id           String    @id @default(uuid())
+  text         String
+  is_correct   Boolean   @default(false)
+  question_id  String
+  question     Question  @relation("QuestionOptions", fields: [question_id], references: [id], onDelete: Cascade)
+  created_at   DateTime  @default(now())
 
-  @@index([questionId])
-  @@index([isCorrect])
+  @@index([question_id])
+  @@index([is_correct])
 }
 
 model Feedback {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-
-  message String
-  email   String
-  userId  String
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               Int       @id @default(autoincrement())
+  created_at       DateTime  @default(now())
+  message          String
+  email            String
+  user_id          String
+  user             User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   // Additional feedback fields
-  rating          Int     @default(0) // Overall rating out of 5
-  usability       String? // Feedback about app usability
-  features        String? // Feedback about specific features
-  improvements    String? // Suggestions for improvements
-  wouldRecommend  Boolean @default(false)
-  experienceLevel String? // User's typing/learning experience level
-  browserInfo     String? // Technical context
-  category        String  @default("GENERAL") // Category of feedback (BUG, FEATURE, GENERAL etc)
+  rating           Int       @default(0) // Overall rating out of 5
+  usability        String?   // Feedback about app usability
+  features         String?   // Feedback about specific features
+  improvements     String?   // Suggestions for improvements
+  would_recommend  Boolean   @default(false)
+  experience_level String?   // User's typing/learning experience level
+  browser_info     String?   // Technical context
+  category         String    @default("GENERAL") // Category of feedback (BUG, FEATURE, GENERAL etc)
+}
+
+model Newsletter {
+  id          String    @id @default(uuid())
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  email       String    @unique
+  subscribed  Boolean   @default(true)
+  source      String?   // Where the subscription came from
+  ip_address  String?   // IP address at time of subscription
+  user_agent  String?   // Browser/device info
+  
+  // Track engagement
+  last_sent_at    DateTime?
+  last_opened_at  DateTime?
+  open_count      Int       @default(0)
+  bounce_count    Int       @default(0)
+
+  @@index([email])
+  @@index([subscribed])
+  @@index([last_sent_at]) 
 }
 
 model Logs {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-
-  message String
-  level   String
+  id          Int       @id @default(autoincrement())
+  created_at  DateTime  @default(now())
+  message     String
+  level       String
 }
 
 model ExerciseGeneratePrompt {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  pre_prompt    String
-  post_prompt    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int       @id @default(autoincrement())
+  user_id     String
+  pre_prompt  String
+  post_prompt String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
 }

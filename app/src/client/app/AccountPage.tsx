@@ -5,91 +5,94 @@ import { FiLogOut, FiUser, FiMail, FiShoppingBag, FiBell, FiEdit, FiFile } from 
 import { Switch } from '@headlessui/react';
 import { useState, useEffect } from 'react';
 import { useQuery, updatePrompt, getPrompt, updateCurrentUser } from 'wasp/client/operations';
+import { toast } from 'sonner'
+import { cn } from '../../shared/utils';
 
-// ------------------------------------------------------------------
-// MAIN ACCOUNT PAGE
-// ------------------------------------------------------------------
 export default function AccountPage({ user }: { user: User }) {
   return (
-    <div className='mx-auto max-w-7xl px-6 py-12 font-montserrat'>
-      <div className='space-y-10'>
-        {/* Account Header */}
-        <div className='flex items-center justify-between pb-8 border-b border-primary-100'>
-          <div>
-            <h1 className='text-title-xl font-manrope font-bold text-primary-900'>Account Settings</h1>
-            <p className='mt-2 text-base text-primary-600 font-satoshi'>
-              Manage your Multinex account and security preferences
-            </p>
-          </div>
-          <button
-            onClick={logout}
-            className='flex items-center gap-2 px-6 py-3 text-sm font-medium text-danger bg-white hover:bg-danger/5 rounded-xl transition-all duration-200 shadow-sm border border-danger/20'
-          >
-            <FiLogOut className='w-5 h-5' />
-            Sign Out
-          </button>
-        </div>
-
-        {/* MAIN WRAPPER: 2-column grid for top sections */}
-        <div className='grid gap-8 lg:grid-cols-3'>
-          {/* LEFT: Profile Information */}
-          <div className='lg:col-span-2 space-y-8'>
-            <section className='bg-white rounded-2xl p-8 shadow-lg border border-primary-100'>
-              <div className='flex items-center gap-4 mb-8'>
-                <div className='p-3 bg-primary-50 rounded-xl'>
-                  <FiUser className='w-6 h-6 text-primary-600' />
-                </div>
-                <h2 className='text-title-md font-manrope font-semibold text-primary-900'>Profile Information</h2>
-              </div>
-              <dl className='space-y-6 divide-y divide-primary-100'>
-                <InfoRow label='Email' value={user.email} icon={<FiMail />} />
-                <InfoRow label='Username' value={user.username} icon={<FiUser />} />
-                <TokenBalance credits={user.credits} />
-              </dl>
-            </section>
+    <>
+      <div className='mx-auto max-w-7xl px-6 py-12 font-montserrat'>
+        <div className='space-y-10'>
+          {/* Account Header */}
+          <div className='flex items-center justify-between pb-8 border-b border-primary-100'>
+            <div>
+              <h1 className='text-title-xl font-manrope font-bold text-primary-900'>Account Settings</h1>
+              <p className='mt-2 text-base text-primary-600 font-satoshi'>
+                Manage your Multinex account and security preferences
+              </p>
+            </div>
+            <button
+              onClick={logout}
+              className='flex items-center gap-2 px-6 py-3 text-sm font-medium text-danger bg-white hover:bg-danger/5 rounded-xl transition-all duration-200 shadow-sm border border-danger/20'
+            >
+              <FiLogOut className='w-5 h-5' />
+              Sign Out
+            </button>
           </div>
 
-          {/* RIGHT: Preferences & Security */}
-          <div className='space-y-8'>
-            {/* Preferences */}
-            <section className='bg-white rounded-2xl p-8 shadow-lg border border-primary-100'>
-              <div className='flex items-center gap-4 mb-8'>
-                <div className='p-3 bg-primary-50 rounded-xl'>
-                  <FiBell className='w-6 h-6 text-primary-600' />
-                </div>
-                <h2 className='text-title-md font-manrope font-semibold text-primary-900'>Preferences</h2>
-              </div>
-              <div className='space-y-6'>
-                <div className='flex items-center justify-between'>
-                  <div>
-                    <h3 className='text-sm font-medium text-primary-900'>Email Notifications</h3>
-                    <p className='mt-1 text-sm text-primary-600'>Product updates and newsletters</p>
+          {/* MAIN WRAPPER: 2-column grid for top sections */}
+          <div className='grid gap-8 lg:grid-cols-3'>
+            {/* LEFT: Profile Information */}
+            <div className='lg:col-span-2 space-y-8'>
+              <section className='bg-white rounded-2xl p-8 shadow-lg border border-primary-100'>
+                <div className='flex items-center gap-4 mb-8'>
+                  <div className='p-3 bg-primary-50 rounded-xl'>
+                    <FiUser className='w-6 h-6 text-primary-600' />
                   </div>
-                  <Switch
-                    checked={user.sendEmail}
-                    onChange={() => updateCurrentUser({ sendEmail: !user.sendEmail })}
-                    className={`${
-                      user.sendEmail ? 'bg-primary-500' : 'bg-gray-200'
-                    } relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out`}
-                  >
-                    <span
-                      className={`${
-                        user.sendEmail ? 'translate-x-6' : 'translate-x-1'
-                      } inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out`}
-                    />
-                  </Switch>
+                  <h2 className='text-title-md font-manrope font-semibold text-primary-900'>Profile Information</h2>
                 </div>
-              </div>
-            </section>
-          </div>
-        </div>
+                <dl className='space-y-6 divide-y divide-primary-100'>
+                  <InfoRow label='Email' value={user.email} icon={<FiMail />} />
+                  <InfoRow label='Username' value={user.username} icon={<FiUser />} />
+                  <TokenBalance credits={user.credits} />
+                </dl>
+              </section>
+            </div>
 
-        {/* BOTTOM FULL-WIDTH ROW: Prompt Customization */}
-        <div className='space-y-8'>
-          <PromptCustomizationCard user={user} />
+            {/* RIGHT: Preferences & Security */}
+            <div className='space-y-8'>
+              {/* Preferences */}
+              <section className='bg-white rounded-2xl p-8 shadow-lg border border-primary-100'>
+                <div className='flex items-center gap-4 mb-8'>
+                  <div className='p-3 bg-primary-50 rounded-xl'>
+                    <FiBell className='w-6 h-6 text-primary-600' />
+                  </div>
+                  <h2 className='text-title-md font-manrope font-semibold text-primary-900'>Preferences</h2>
+                </div>
+                <div className='space-y-6'>
+                  <div className='flex items-center justify-between'>
+                    <div>
+                      <h3 className='text-sm font-medium text-primary-900'>Email Notifications</h3>
+                      <p className='mt-1 text-sm text-primary-600'>Product updates and newsletters</p>
+                    </div>
+                    <Switch
+                      checked={user.send_email}
+                      onChange={() => updateCurrentUser({ send_email: !user.send_email })}
+                      className={cn(
+                        'relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out',
+                        user.send_email ? 'bg-primary-500' : 'bg-gray-200'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          user.send_email ? 'translate-x-6' : 'translate-x-1',
+                          'inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out'
+                        )}
+                      />
+                    </Switch>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          {/* BOTTOM FULL-WIDTH ROW: Prompt Customization */}
+          <div className='space-y-8'>
+            <PromptCustomizationCard user={user} />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -113,15 +116,14 @@ function PromptCustomizationCard({ user }: { user: User }) {
       await updatePrompt({
         id: Number(user.id),
         data: {
-          userId: String(user.id),
+          user_id: String(user.id),
           pre_prompt: prePrompt,
           post_prompt: postPrompt,
         },
       });
-      alert('Prompt settings saved!');
+      toast.success('Prompt settings saved!');
     } catch (err) {
-      alert('Failed to save prompt settings. See console for more info.');
-      console.error(err);
+      toast.error(err as string);
     }
   };
 

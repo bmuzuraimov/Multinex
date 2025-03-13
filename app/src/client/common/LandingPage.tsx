@@ -3,7 +3,7 @@ import HeroSection from '../components/LandingPage/HeroSection';
 import WhyMultinex from '../components/LandingPage/WhyMultinex';
 import ExperienceSection from '../components/LandingPage/ExperienceSection';
 import FeaturesSection from '../components/LandingPage/FeatureSection';
-import FAQSection from '../components/LandingPage/FAQSection';
+import FAQSection from '../components/LandingPage/FaqSection';
 import FooterSection from '../components/LandingPage/FooterSection';
 
 // Memoize the main content since it's static and doesn't depend on props
@@ -20,7 +20,7 @@ const MainContent = memo(() => (
 MainContent.displayName = 'MainContent';
 
 // Memoize the entire LandingPage component since it's static
-const LandingPage = memo(() => {
+const renderLandingPage = memo(() => {
   return (
     <div className='mx-auto max-w-7xl sm:px-6 lg:px-8 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'>
       <MainContent />
@@ -29,6 +29,6 @@ const LandingPage = memo(() => {
   );
 });
 
-LandingPage.displayName = 'LandingPage';
+renderLandingPage.displayName = 'RenderLandingPage';
 
-export default LandingPage;
+export default renderLandingPage;

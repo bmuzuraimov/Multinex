@@ -1,34 +1,32 @@
 import { type User } from 'wasp/entities';
 import { HttpError } from 'wasp/server';
-import {
-  type UpdateCurrentUser,
-  type UpdateUserLang,
-} from 'wasp/server/operations';
+import { type UpdateCurrentUser } from 'wasp/server/operations';
+import { ApiResponse } from './types';
+import { updateUserSchema } from './validations';
+import { handleError } from './utils';
 
-export const updateCurrentUser: UpdateCurrentUser<Partial<User>, User> = async (user, context) => {
-  if (!context.user) {
-    throw new HttpError(401);
+export const updateCurrentUser: UpdateCurrentUser<Partial<User>, ApiResponse<User>> = async (user_data, context) => {
+  try {
+    if (!context.user) {
+      throw new HttpError(401, 'Unauthorized access');
+    }
+
+    const validatedData = updateUserSchema.parse(user_data);
+
+    const updated_user = await context.entities.User.update({
+      where: {
+        id: context.user.id,
+      },
+      data: validatedData,
+    });
+
+    return {
+      success: true,
+      code: 200,
+      message: 'User updated successfully',
+      data: updated_user,
+    };
+  } catch (error) {
+    return handleError(error, 'update user');
   }
-
-  return context.entities.User.update({
-    where: {
-      id: context.user.id,
-    },
-    data: user,
-  });
-};
-
-export const updateUserLang: UpdateUserLang<{ lang: string }, User> = async ({ lang }, context) => {
-  if (!context.user) {
-    throw new HttpError(401);
-  }
-
-  return context.entities.User.update({
-    where: {
-      id: context.user.id,
-    },
-    data: {
-      lang,
-    },
-  });
 };

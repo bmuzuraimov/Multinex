@@ -8,8 +8,8 @@ interface Report {
   environment: string;
   description: string;
   steps: string;
-  stackTrace: string;
-  createdAt: Date;
+  stack_trace: string;
+  created_at: Date;
 }
 
 export const reportBugTemplate = (report: Report) => 

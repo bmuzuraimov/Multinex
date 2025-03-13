@@ -10,10 +10,10 @@ export const passwordResetEmailContent = ({ passwordResetLink }: { passwordReset
   EmailTemplateFactory.createTemplate(PasswordResetEmail, { passwordResetLink });
 
 interface WelcomeEmailParams {
-  userId: string;
-  userName: string;
-  userEmail: string;
-  loginLink: string;
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  login_link: string;
 }
 
 export const welcomeEmail = (params: WelcomeEmailParams) =>

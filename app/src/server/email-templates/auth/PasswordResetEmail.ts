@@ -1,10 +1,10 @@
 import { BaseEmailTemplate } from '../components/EmailTemplateFactory';
 import { components } from '../components/BaseTemplate';
-import { textUtils } from '../components/EmailTemplateFactory';
+import { TEXT_UTILS } from '../components/EmailTemplateFactory';
 
 interface PasswordResetEmailParams {
-  passwordResetLink: string;
-  userName: string;
+  password_reset_link: string;
+  user_name: string; 
 }
 
 export class PasswordResetEmail extends BaseEmailTemplate {
@@ -17,30 +17,32 @@ export class PasswordResetEmail extends BaseEmailTemplate {
   }
 
   protected generateText(): string {
-    const { userName, passwordResetLink } = this.params;
+    const { user_name, password_reset_link } = this.params;
     return `
-Hi ${userName},
+Hi ${user_name},
 
 We received a request to reset your password for your Multinex account. If this was you, please verify your password by clicking the link below. If you didn't request a password reset, you can ignore this email.
 
-${passwordResetLink}
+${password_reset_link}
 
-${textUtils.generateSignature()}`;
+${TEXT_UTILS.generateSignature()}`;
   }
 
   protected generateHtmlContent(): string {
-    const { userName, passwordResetLink } = this.params;
+    const { user_name, password_reset_link } = this.params;
     return `
-      ${components.heading('Reset Your Password')}
-      ${components.paragraph(`Hi ${userName},`)}
-      ${components.paragraph(
-        'We received a request to reset your password for your <strong>Multinex</strong> account. ' +
-        'If this was you, please verify your password by clicking the button below. ' +
-        'If you didn\'t request a password reset, you can ignore this email.'
-      )}
-      ${components.button('Reset Password', passwordResetLink)}
-      ${components.paragraph('Thanks for your time, and have a great day!')}
-      ${components.paragraph('<strong>Multinex</strong>')}
+      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+        <tr>${components.heading('Reset Your Password')}</tr>
+        <tr>${components.paragraph(`Hi ${user_name},`)}</tr>
+        <tr>${components.paragraph(
+          'We received a request to reset your password for your <strong>Multinex</strong> account. ' +
+          'If this was you, please verify your password by clicking the button below. ' +
+          'If you didn\'t request a password reset, you can ignore this email.'
+        )}</tr>
+        <tr>${components.button('Reset Password', password_reset_link)}</tr>
+        <tr>${components.paragraph('Thanks for your time, and have a great day!')}</tr>
+        <tr>${components.paragraph('<strong>Multinex</strong>')}</tr>
+      </table>
     `;
   }
-} 
+}

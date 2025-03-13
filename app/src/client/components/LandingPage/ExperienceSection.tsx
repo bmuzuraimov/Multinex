@@ -1,3 +1,5 @@
+import { cn } from '../../../shared/utils';
+
 const ExperienceSection = () => {
   const challenges = [
     {
@@ -44,8 +46,14 @@ const ExperienceSection = () => {
   ];
 
   const renderListItem = (item: (typeof challenges)[0] | (typeof solutions)[0]) => (
-    <li key={item.title} className='group flex gap-6 items-start p-4 rounded-xl hover:bg-primary-50 transition-all duration-300'>
-      <span className={`flex-shrink-0 p-4 ${item.bgColor} rounded-xl shadow-sm group-hover:scale-105 transition-transform`}>
+    <li key={item.title} className={cn(
+      'group flex gap-6 items-start p-4 rounded-xl hover:bg-primary-50 transition-all duration-300',
+      item.bgColor
+    )}>
+      <span className={cn(
+        'flex-shrink-0 p-4 rounded-xl shadow-sm group-hover:scale-105 transition-transform',
+        item.bgColor
+      )}>
         {item.icon}
       </span>
       <div>

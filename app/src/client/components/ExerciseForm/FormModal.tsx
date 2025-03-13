@@ -7,42 +7,43 @@ import { EXERCISE_LENGTHS, EXERCISE_LEVELS, AVAILABLE_MODELS } from '../../../sh
 import { ExerciseFormContentSettings, ExerciseFormGenerationSettings, SensoryMode } from '../../../shared/types';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { cn } from '../../../shared/utils';
 
 type FormModalProps = {
-  onGenerate: () => void;
-  onDiscard: () => void;
-  loadingStatus: string;
-  isUploading: boolean;
-  exerciseSettings: ExerciseFormContentSettings;
-  advancedSettings: ExerciseFormGenerationSettings;
+  on_generate: () => void;
+  on_discard: () => void;
+  loading_status: string;
+  is_uploading: boolean;
+  exercise_settings: ExerciseFormContentSettings;
+  advanced_settings: ExerciseFormGenerationSettings;
 };
 
 const FormModal: React.FC<FormModalProps> = ({
-  onGenerate,
-  onDiscard,
-  loadingStatus,
-  isUploading,
-  exerciseSettings,
-  advancedSettings,
+  on_generate,
+  on_discard,
+  loading_status,
+  is_uploading,
+  exercise_settings,
+  advanced_settings,
 }) => {
-  const modalRoot = document.getElementById('modal-root');
-  if (!modalRoot) return null;
+  const modal_root = document.getElementById('modal-root');
+  if (!modal_root) return null;
 
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [show_advanced, setShowAdvanced] = useState(false);
   const navigate = useNavigate();
 
   const handleToggleMode = (mode: SensoryMode) => {
-    const alreadySelected = exerciseSettings.sensoryModes.includes(mode);
+    const already_selected = exercise_settings.sensory_modes.includes(mode);
 
-    if (alreadySelected && exerciseSettings.sensoryModes.length === 1) {
+    if (already_selected && exercise_settings.sensory_modes.length === 1) {
       return;
     }
 
-    const updatedModes = alreadySelected
-      ? exerciseSettings.sensoryModes.filter((m) => m !== mode)
-      : ([...exerciseSettings.sensoryModes, mode] as SensoryMode[]);
+    const updated_modes = already_selected
+      ? exercise_settings.sensory_modes.filter((m: SensoryMode) => m !== mode)
+      : ([...exercise_settings.sensory_modes, mode] as SensoryMode[]);
 
-    exerciseSettings.setSensoryMods(updatedModes);
+    exercise_settings.set_sensory_modes(updated_modes);
   };
 
   return ReactDOM.createPortal(
@@ -53,7 +54,7 @@ const FormModal: React.FC<FormModalProps> = ({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onDiscard();
+              on_discard();
             }}
             className='absolute top-0 right-0 p-1.5 text-gray-400 hover:text-primary-600 transition-colors duration-200'
           >
@@ -62,10 +63,7 @@ const FormModal: React.FC<FormModalProps> = ({
 
           {/* Modify Prompt Link */}
           <div className='absolute top-0 left-0'>
-            <button
-              onClick={() => navigate('/account')}
-              className='text-sm text-primary-600 hover:text-primary-700'
-            >
+            <button onClick={() => navigate('/account')} className='text-sm text-primary-600 hover:text-primary-700'>
               Customize Prompt
             </button>
           </div>
@@ -74,7 +72,7 @@ const FormModal: React.FC<FormModalProps> = ({
           <div className='relative p-3 bg-primary-50 rounded-full mt-6'>
             <BsFiletypeAi className='w-8 h-8 text-primary-600' />
           </div>
-          <h2 className='text-title-sm font-manrope font-semibold text-gray-900'>{exerciseSettings.exerciseName}</h2>
+          <h2 className='text-title-sm font-manrope font-semibold text-gray-900'>{exercise_settings.exercise_name}</h2>
 
           {/* Form Content */}
           <div className='w-full space-y-4'>
@@ -83,10 +81,10 @@ const FormModal: React.FC<FormModalProps> = ({
               <HiOutlineInformationCircle
                 className='absolute -top-2 right-0 w-5 h-5 text-gray-400'
                 data-multiline
-                data-tooltip-id={`my-tooltip-${exerciseSettings.exerciseName || 'all'}`}
+                data-tooltip-id={`my-tooltip-${exercise_settings.exercise_name || 'all'}`}
               />
               <Tooltip
-                id={`my-tooltip-${exerciseSettings.exerciseName || 'all'}`}
+                id={`my-tooltip-${exercise_settings.exercise_name || 'all'}`}
                 place='top'
                 className='z-tooltip'
                 content='Exercise length varies by level; higher levels require more words.'
@@ -97,11 +95,13 @@ const FormModal: React.FC<FormModalProps> = ({
                 <label className='block text-sm font-medium text-gray-700'>Length of the Exercise</label>
                 <select
                   className='w-full p-2 text-sm border border-gray-200 rounded-lg shadow-sm focus:ring-1 focus:ring-primary-200 focus:border-primary-500 bg-white text-gray-900 hover:border-primary-400 transition-colors'
-                  value={exerciseSettings.exerciseLength}
-                  onChange={(e) => exerciseSettings.setExerciseLength(e.target.value)}
+                  value={exercise_settings.exercise_length}
+                  onChange={(e) => exercise_settings.set_exercise_length(e.target.value)}
                 >
                   {Object.entries(EXERCISE_LENGTHS).map(([key, value]) => (
-                    <option key={key} value={key}>{value}</option>
+                    <option key={key} value={key}>
+                      {value}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -111,11 +111,13 @@ const FormModal: React.FC<FormModalProps> = ({
                 <label className='block text-sm font-medium text-gray-700'>Exercise Level</label>
                 <select
                   className='w-full p-2 text-sm border border-gray-200 rounded-lg shadow-sm focus:ring-1 focus:ring-primary-200 focus:border-primary-500 bg-white text-gray-900 hover:border-primary-400 transition-colors'
-                  value={exerciseSettings.exerciseLevel}
-                  onChange={(e) => exerciseSettings.setExerciseLevel(e.target.value)}
+                  value={exercise_settings.exercise_level}
+                  onChange={(e) => exercise_settings.set_exercise_level(e.target.value)}
                 >
                   {Object.entries(EXERCISE_LEVELS).map(([key, value]) => (
-                    <option key={key} value={key}>{value}</option>
+                    <option key={key} value={key}>
+                      {value}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -127,27 +129,28 @@ const FormModal: React.FC<FormModalProps> = ({
             <div className='space-y-2'>
               <label className='block text-sm font-medium text-gray-700'>Prior Knowledge (Optional)</label>
               <div className='flex flex-wrap gap-2'>
-                {exerciseSettings.topics.map((topic) => (
+                {exercise_settings.topics.map((topic) => (
                   <div key={topic} className='inline-block'>
                     <input
                       type='checkbox'
                       id={`topic-${topic}`}
-                      checked={exerciseSettings.priorKnowledge.includes(topic)}
+                      checked={exercise_settings.prior_knowledge.includes(topic)}
                       onChange={(e) => {
-                        const updatedKnowledge = e.target.checked
-                          ? [...exerciseSettings.priorKnowledge, topic]
-                          : exerciseSettings.priorKnowledge.filter((k) => k !== topic);
-                        exerciseSettings.setPriorKnowledge(updatedKnowledge);
+                        const updated_knowledge = e.target.checked
+                          ? [...exercise_settings.prior_knowledge, topic]
+                          : exercise_settings.prior_knowledge.filter((k: string) => k !== topic);
+                        exercise_settings.set_prior_knowledge(updated_knowledge);
                       }}
                       className='sr-only'
                     />
                     <label
                       htmlFor={`topic-${topic}`}
-                      className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200
-                        ${exerciseSettings.priorKnowledge.includes(topic)
+                      className={cn(
+                        'inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200',
+                        exercise_settings.prior_knowledge.includes(topic)
                           ? 'bg-primary-500 text-white shadow-sm hover:bg-primary-600'
                           : 'bg-white text-gray-700 border border-gray-200 hover:border-primary-300 hover:bg-primary-50'
-                        }`}
+                      )}
                     >
                       {topic}
                     </label>
@@ -167,17 +170,18 @@ const FormModal: React.FC<FormModalProps> = ({
                   <input
                     type='checkbox'
                     id='mode-listen'
-                    checked={exerciseSettings.sensoryModes.includes('listen')}
+                    checked={exercise_settings.sensory_modes.includes('listen')}
                     onChange={() => handleToggleMode('listen')}
                     className='sr-only'
                   />
                   <label
                     htmlFor='mode-listen'
-                    className={`block text-center py-2 px-3 rounded-lg cursor-pointer transition-all duration-200
-                      ${exerciseSettings.sensoryModes.includes('listen')
+                    className={cn(
+                      'block text-center py-2 px-3 rounded-lg cursor-pointer transition-all duration-200',
+                      exercise_settings.sensory_modes.includes('listen')
                         ? 'bg-primary-500 text-white shadow-sm'
                         : 'bg-white text-gray-700 border border-primary-200 hover:bg-primary-50'
-                      }`}
+                    )}
                   >
                     <span className='text-sm font-medium'>👂 Listening</span>
                   </label>
@@ -188,17 +192,18 @@ const FormModal: React.FC<FormModalProps> = ({
                   <input
                     type='checkbox'
                     id='mode-type'
-                    checked={exerciseSettings.sensoryModes.includes('type')}
+                    checked={exercise_settings.sensory_modes.includes('type')}
                     onChange={() => handleToggleMode('type')}
                     className='sr-only'
                   />
                   <label
                     htmlFor='mode-type'
-                    className={`block text-center py-2 px-3 rounded-lg cursor-pointer transition-all duration-200
-                      ${exerciseSettings.sensoryModes.includes('type')
+                    className={cn(
+                      'block text-center py-2 px-3 rounded-lg cursor-pointer transition-all duration-200',
+                      exercise_settings.sensory_modes.includes('type')
                         ? 'bg-secondary-500 text-white shadow-sm'
                         : 'bg-white text-gray-700 border border-secondary-200 hover:bg-secondary-50'
-                      }`}
+                    )}
                   >
                     <span className='text-sm font-medium'>⌨️ Typing</span>
                   </label>
@@ -209,17 +214,18 @@ const FormModal: React.FC<FormModalProps> = ({
                   <input
                     type='checkbox'
                     id='mode-write'
-                    checked={exerciseSettings.sensoryModes.includes('write')}
+                    checked={exercise_settings.sensory_modes.includes('write')}
                     onChange={() => handleToggleMode('write')}
                     className='sr-only'
                   />
                   <label
                     htmlFor='mode-write'
-                    className={`block text-center py-2 px-3 rounded-lg cursor-pointer transition-all duration-200
-                      ${exerciseSettings.sensoryModes.includes('write')
+                    className={cn(
+                      'block text-center py-2 px-3 rounded-lg cursor-pointer transition-all duration-200',
+                      exercise_settings.sensory_modes.includes('write')
                         ? 'bg-tertiary-500 text-white shadow-sm'
                         : 'bg-white text-gray-700 border border-tertiary-200 hover:bg-tertiary-50'
-                      }`}
+                    )}
                   >
                     <span className='text-sm font-medium'>✍️ Writing</span>
                   </label>
@@ -232,23 +238,25 @@ const FormModal: React.FC<FormModalProps> = ({
             {/* INCLUDE SUMMARY / MC QUIZ */}
             <div className='flex gap-3'>
               <button
-                onClick={() => advancedSettings.setIncludeSummary(!advancedSettings.includeSummary)}
-                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200
-                  ${advancedSettings.includeSummary
+                onClick={() => advanced_settings.set_include_summary(!advanced_settings.include_summary)}
+                className={cn(
+                  'flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200',
+                  advanced_settings.include_summary
                     ? 'bg-primary-500 text-white shadow-sm hover:bg-primary-600'
                     : 'bg-white text-gray-700 border border-gray-200 hover:border-primary-300 hover:bg-primary-50'
-                  }`}
+                )}
               >
                 Include Summary
               </button>
 
               <button
-                onClick={() => advancedSettings.setIncludeMCQuiz(!advancedSettings.includeMCQuiz)}
-                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200
-                  ${advancedSettings.includeMCQuiz
+                onClick={() => advanced_settings.set_include_mc_quiz(!advanced_settings.include_mc_quiz)}
+                className={cn(
+                  'flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200',
+                  advanced_settings.include_mc_quiz
                     ? 'bg-primary-500 text-white shadow-sm hover:bg-primary-600'
                     : 'bg-white text-gray-700 border border-gray-200 hover:border-primary-300 hover:bg-primary-50'
-                  }`}
+                )}
               >
                 Include MC Quiz
               </button>
@@ -257,26 +265,33 @@ const FormModal: React.FC<FormModalProps> = ({
             {/* ADVANCED OPTIONS */}
             <div className='w-full'>
               <button
-                onClick={() => setShowAdvanced(!showAdvanced)}
+                onClick={() => setShowAdvanced(!show_advanced)}
                 className='w-full flex items-center justify-center text-sm text-gray-500 hover:text-primary-600 py-1.5 transition-colors duration-200'
               >
                 <span className='border-b border-gray-100 w-12 mx-2'></span>
                 <span className='font-medium'>Advanced Options</span>
                 <span className='border-b border-gray-100 w-12 mx-2'></span>
-                <BsChevronDown className={`w-4 h-4 transform transition-transform duration-200 ${showAdvanced ? 'rotate-180' : ''}`} />
+                <BsChevronDown
+                  className={cn(
+                    'w-4 h-4 transform transition-transform duration-200',
+                    show_advanced ? 'rotate-180' : ''
+                  )}
+                />
               </button>
 
-              {showAdvanced && (
+              {show_advanced && (
                 <div className='mt-3 p-4 bg-gray-50 rounded-lg space-y-3'>
                   <div className='space-y-1.5'>
                     <label className='block text-sm font-medium text-gray-700'>Model Selection</label>
                     <select
                       className='w-full p-2 text-sm border border-gray-200 rounded-lg shadow-sm focus:ring-1 focus:ring-primary-200 focus:border-primary-500 bg-white text-gray-700'
-                      value={advancedSettings.selectedModel}
-                      onChange={(e) => advancedSettings.setSelectedModel(e.target.value)}
+                      value={advanced_settings.selected_model}
+                      onChange={(e) => advanced_settings.set_selected_model(e.target.value)}
                     >
                       {AVAILABLE_MODELS.map((model) => (
-                        <option key={model} value={model}>{model}</option>
+                        <option key={model} value={model}>
+                          {model}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -288,18 +303,18 @@ const FormModal: React.FC<FormModalProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onGenerate();
+                on_generate();
               }}
-              disabled={isUploading}
+              disabled={is_uploading}
               className='w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium text-base'
             >
-              {isUploading ? loadingStatus : 'Generate Exercise'}
+              {is_uploading ? loading_status : 'Generate Exercise'}
             </button>
           </div>
         </div>
       </div>
     </div>,
-    modalRoot
+    modal_root
   );
 };
 

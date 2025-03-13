@@ -32,10 +32,10 @@ interface GeneralFeedbackParams {
   usability?: string;
   features?: string;
   improvements?: string;
-  wouldRecommend: boolean;
-  experienceLevel?: string;
+  would_recommend: boolean;
+  experience_level?: string;
   category: string;
-  browserInfo: string;
+  browser_info: string;
 }
 
 export const feedbackTemplate = (params: GeneralFeedbackParams) =>

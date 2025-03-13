@@ -1,17 +1,17 @@
 import OpenAI from 'openai';
 import {
-  GENERATE_EXERCISE_PROMPT,
-  GENERATE_SUMMARY_PROMPT,
-  GENERATE_EXAM_PROMPT,
-  GENERATE_STUDY_METHOD_TAGS_PROMPT,
-  GENERATE_COURSE_PROMPT,
+  generateExercisePrompt,
+  generateSummaryPrompt, 
+  generateStudyMethodTagsPrompt,
+  generateCoursePrompt,
+  generateExamPrompt,
 } from '../prompts';
 import { HttpError } from 'wasp/server';
 import { SensoryMode } from '../../../shared/types';
 import { BaseLLMService, LLMResponse } from './base';
 
 export class DeepSeekService extends BaseLLMService {
-  private deepseekClient!: OpenAI;
+  private deepseek_client!: OpenAI;
 
   constructor() {
     super();
@@ -22,141 +22,139 @@ export class DeepSeekService extends BaseLLMService {
     if (!process.env.DEEPSEEK_API_KEY) {
       throw new HttpError(500, 'DeepSeek API key is not set');
     }
-    this.deepseekClient = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' });
+    this.deepseek_client = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' });
   }
 
   async generateExercise(
-    exerciseRawContent: string,
-    priorKnowledge: string,
-    exerciseLength: string,
-    difficultyLevel: string,
-    modelName: string,
-    maxTokens: number,
-    prePrompt: string,
-    postPrompt: string
+    exercise_raw_content: string,
+    prior_knowledge: string, 
+    exercise_length: string,
+    difficulty_level: string,
+    model_name: string,
+    pre_prompt: string,
+    post_prompt: string
   ): Promise<LLMResponse> {
     return this.withRetry(async () => {
-      const deepseekResponse = await this.deepseekClient.chat.completions.create({
+      const deepseek_response = await this.deepseek_client.chat.completions.create({
         model: 'deepseek-chat',
-        ...GENERATE_EXERCISE_PROMPT({
-          content: exerciseRawContent,
-          priorKnowledge,
-          length: exerciseLength,
-          level: difficultyLevel,
-          pre_prompt: prePrompt,
-          post_prompt: postPrompt,
+        ...generateExercisePrompt({
+          content: exercise_raw_content,
+          prior_knowledge,
+          length: exercise_length,
+          level: difficulty_level,
+          pre_prompt,
+          post_prompt,
         }),
         temperature: 1.3,
         max_tokens: 8192,
       });
 
-      const exerciseContent = deepseekResponse.choices[0]?.message?.content || '';
+      const exercise_content = deepseek_response.choices[0]?.message?.content || '';
 
-      if (!exerciseContent) {
+      if (!exercise_content) {
         throw new Error('Exercise content missing from response.');
       }
 
-      const tokenUsage = deepseekResponse.usage?.total_tokens || 0;
-      return { success: true, data: exerciseContent, usage: tokenUsage };
+      const token_usage = deepseek_response.usage?.total_tokens || 0;
+      return { success: true, data: exercise_content, usage: token_usage };
     }, 'generateExercise');
   }
 
-  async generateSummary(lectureContent: string, modelName: string, maxTokens: number): Promise<LLMResponse> {
+  async generateSummary(lecture_content: string, model_name: string): Promise<LLMResponse> {
     return this.withRetry(async () => {
-      const deepseekResponse = await this.deepseekClient.chat.completions.create({
+      const deepseek_response = await this.deepseek_client.chat.completions.create({
         model: 'deepseek-chat',
-        ...GENERATE_SUMMARY_PROMPT({ content: lectureContent }),
+        ...generateSummaryPrompt({ content: lecture_content }),
         temperature: 1.3,
         max_tokens: 8192,
       });
 
-      const summaryContent = deepseekResponse.choices[0]?.message?.content || '';
-      const summaryData = JSON.parse(summaryContent);
+      const summary_content = deepseek_response.choices[0]?.message?.content || '';
+      const summary_data = JSON.parse(summary_content);
 
-      if (!summaryData?.paragraphSummary) {
+      if (!summary_data?.paragraphSummary) {
         throw new Error('Paragraph summary missing from response JSON.');
       }
 
-      const tokenUsage = deepseekResponse.usage?.total_tokens || 0;
-      return { success: true, data: summaryData, usage: tokenUsage };
+      const token_usage = deepseek_response.usage?.total_tokens || 0;
+      return { success: true, data: summary_data, usage: token_usage };
     }, 'generateSummary');
   }
 
-  async generateQuestions(lectureContent: string, modelName: string, maxTokens: number): Promise<LLMResponse> {
+  async generateQuestions(lecture_content: string, model_name: string): Promise<LLMResponse> {
     return this.withRetry(async () => {
-      const deepseekResponse = await this.deepseekClient.chat.completions.create({
+      const deepseek_response = await this.deepseek_client.chat.completions.create({
         model: 'deepseek-chat',
-        ...GENERATE_EXAM_PROMPT({ content: lectureContent }),
+        ...generateExamPrompt({ content: lecture_content }),
         temperature: 1.3,
         max_tokens: 8192,
       });
 
-      const questionsContent = deepseekResponse.choices[0]?.message?.content || '';
-      const questionsData = JSON.parse(questionsContent);
+      const questions_content = deepseek_response.choices[0]?.message?.content || '';
+      const questions_data = JSON.parse(questions_content);
 
-      if (!questionsData?.questions || !Array.isArray(questionsData.questions)) {
+      if (!questions_data?.questions || !Array.isArray(questions_data.questions)) {
         throw new Error('Invalid questions data. Missing "questions" array.');
       }
 
-      const tokenUsage = deepseekResponse.usage?.total_tokens || 0;
-      return { success: true, data: questionsData, usage: tokenUsage };
+      const token_usage = deepseek_response.usage?.total_tokens || 0;
+      return { success: true, data: questions_data, usage: token_usage };
     }, 'generateQuestions');
   }
 
-  async generateCourse(syllabusContent: string, modelName: string, maxTokens: number): Promise<LLMResponse> {
+  async generateCourse(syllabus_content: string, model_name: string): Promise<LLMResponse> {
     return this.withRetry(async () => {
-      const deepseekResponse = await this.deepseekClient.chat.completions.create({
+      const deepseek_response = await this.deepseek_client.chat.completions.create({
         model: 'deepseek-chat',
-        ...GENERATE_COURSE_PROMPT({ content: syllabusContent }),
+        ...generateCoursePrompt({ content: syllabus_content }),
         temperature: 0.3,
         max_tokens: 8192,
       });
 
-      const courseContent = deepseekResponse.choices[0]?.message?.content || '';
-      const courseData = JSON.parse(courseContent);
+      const course_content = deepseek_response.choices[0]?.message?.content || '';
+      const course_data = JSON.parse(course_content);
 
-      if (!courseData?.courseName) {
+      if (!course_data?.courseName) {
         throw new Error('Course name missing from response.');
       }
-      if (!courseData?.courseDescription) {
+      if (!course_data?.courseDescription) {
         throw new Error('Course description missing from response.');
       }
-      if (!Array.isArray(courseData.topics)) {
+      if (!Array.isArray(course_data.topics)) {
         throw new Error('Course topics missing from response.');
       }
 
-      const tokenUsage = deepseekResponse.usage?.total_tokens || 0;
-      return { success: true, data: courseData, usage: tokenUsage };
+      const token_usage = deepseek_response.usage?.total_tokens || 0;
+      return { success: true, data: course_data, usage: token_usage };
     }, 'generateCourse');
   }
 
   async generateComplexity(
-    lectureContent: string,
-    modelName: string,
-    maxTokens: number,
-    sensoryModes: SensoryMode[]
+    lecture_content: string,
+    model_name: string,
+    sensory_modes: SensoryMode[]
   ): Promise<LLMResponse> {
-    if (lectureContent.length === 0) {
-      return { success: true, data: { taggedText: '' }, usage: 0 };
+    if (lecture_content.length === 0) {
+      return { success: true, data: { tagged_text: '' }, usage: 0 };
     }
     return this.withRetry(async () => {
-      const deepseekResponse = await this.deepseekClient.chat.completions.create({
+      const deepseek_response = await this.deepseek_client.chat.completions.create({
         model: 'deepseek-chat',
-        ...GENERATE_STUDY_METHOD_TAGS_PROMPT({
-          content: lectureContent,
-          sensoryModes: sensoryModes,
+        ...generateStudyMethodTagsPrompt({
+          content: lecture_content,
+          sensory_modes: sensory_modes,
         }),
         temperature: 1.3,
         max_tokens: 8192,
       });
 
-      const complexityContent = deepseekResponse.choices[0]?.message?.content || '';
-      if (!complexityContent) {
+      const complexity_content = deepseek_response.choices[0]?.message?.content || '';
+      if (!complexity_content) {
         throw new Error('Tagged text missing from complexity data.');
       }
 
-      const tokenUsage = deepseekResponse.usage?.total_tokens || 0;
-      return { success: true, data: complexityContent, usage: tokenUsage };
+      const token_usage = deepseek_response.usage?.total_tokens || 0;
+      return { success: true, data: complexity_content, usage: token_usage };
     }, 'generateComplexity');
   }
 }
