@@ -4,7 +4,7 @@ import { FcCableRelease } from 'react-icons/fc';
 import { MdOutlineLineWeight } from 'react-icons/md';
 import { FaEnvelope } from 'react-icons/fa';
 import BAIEL_IMG from '../static/founder.jpeg';
-import SARAR_IMG from '../static/co-founder.jpg';
+import CURIE_IMG from '../static/curie.jpg';
 import { useAuth } from 'wasp/client/auth';
 import { type Feature } from 'wasp/entities';
 import { ADMIN_EMAIL } from '../../shared/constants';
@@ -32,11 +32,18 @@ const AboutPage: React.FC = () => {
 
   const FUNDING_SOURCES: FundingSource[] = [
     {
-      source: 'Leadership Qualities Centre',
+      source: 'Leadership Qualities Centre (HKBU)',
       amount: 15000,
       date: 'November 1, 2024',
       status: 'Approved',
     },
+    {
+      source: 'Private Investment',
+      amount: 500000,
+      date: 'Feb 15, 2025',
+      status: 'Approved',
+    },
+
   ];
 
   const CHANGELOG_ITEMS: Changelog[] = [
@@ -57,15 +64,9 @@ const AboutPage: React.FC = () => {
   const TEAM_MEMBERS = [
     {
       name: 'Baiel Muzuraimov',
-      role: 'Year 4 AI + Finance Student, Founder',
+      role: 'Serial Entrepreneur, Founder of Multinex',
       email: ADMIN_EMAIL,
       photo_url: BAIEL_IMG,
-    },
-    {
-      name: 'Sarar Win',
-      role: 'Year 4 Information System Administration, Co-founder',
-      email: '',
-      photo_url: SARAR_IMG,
     },
   ];
 
@@ -115,15 +116,6 @@ const AboutPage: React.FC = () => {
 
   return (
     <div className='bg-white font-manrope'>
-      {/* Hero Section */}
-      <section className='max-w-7xl mx-auto px-8 py-20 text-center'>
-        <h1 className='font-satoshi text-title-xl font-bold text-primary-900 mb-6'>About Us</h1>
-        <p className='font-montserrat text-lg text-primary-700 max-w-2xl mx-auto'>
-          Multinex is dedicated to providing distilled and meaningful knowledge to help students retain information
-          effectively.
-        </p>
-      </section>
-
       {/* Quick Story */}
       <section className='max-w-7xl mx-auto px-8 py-16 bg-primary-50 rounded-3xl mb-20'>
         <div className='flex items-center mb-8'>
@@ -131,46 +123,32 @@ const AboutPage: React.FC = () => {
           <h2 className='font-satoshi text-title-lg font-semibold text-primary-900'>Our Story</h2>
         </div>
         <p className='font-montserrat text-lg leading-relaxed text-primary-800'>
-          Let&apos;s be honest—we&apos;re all students, including me. Nowadays, we quickly generate and paste
-          information that doesn&apos;t sink into our long-term memory, unlike the pre-GenAI era. Yes, we need to reap
-          the benefits of GenAI, but some knowledge we must retain for our own sake. In the end, we are studying our
-          professions to become competent, not just to get good grades. There is so much redundant information that
-          professors carelessly put on their slides; we want clean and distilled knowledge. So Multinex filters only
-          useful information and lets you write down in your head slowly. It is like a workout exercise, one way to
-          accomplish it.
+          Multinex didn&apos;t start as a grand plan - it emerged from a personal struggle that many students face daily. My name is Baiel, and I&apos;m the founder of Multinex.app. Like many of you, I found myself overwhelmed by the flood of information in today&apos;s educational landscape. I wasn&apos;t sure if it was ADHD or simply information overload, but traditional study methods never seemed to work well enough for me.
         </p>
-      </section>
-
-      {/* Team Information */}
-      <section className='max-w-7xl mx-auto px-8 py-16 mb-20'>
-        <div className='flex items-center mb-12'>
-          <TbSteam className='text-primary-500 mr-3' size={32} />
-          <h2 className='font-satoshi text-title-lg font-semibold text-primary-900'>Our Team</h2>
+        <p className='font-montserrat text-lg leading-relaxed text-primary-800 mt-4'>
+          Then something fascinating happened: the rise of Large Language Models (LLMs) like GPT transformed my learning experience. Initially, GPT&apos;s explanations felt like magic - complex problems became crystal clear, almost as if explained to a five-year-old. However, I quickly realized that this understanding was superficial and temporary. The knowledge wasn&apos;t sticking, and within days, it would vanish.
+        </p>
+        <p className='font-montserrat text-lg leading-relaxed text-primary-800 mt-4'>
+          One memory stood out, though: I still vividly remembered that Marie Curie won Nobel prizes in both Physics and Chemistry - not because of a textbook, but because I&apos;d typed this fact repeatedly while mastering blind typing skills on <a href="https://www.typingclub.com/" target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:text-primary-600">TypingClub</a> before moving to Hong Kong. This realization sparked an insight: I needed kinesthetic learning - engaging my sense of touch and movement - to retain information effectively.
+        </p>
+        <div className='flex items-center justify-center mt-4'>
+          <img src={CURIE_IMG} alt='Marie Curie' className='w-1/2 rounded-lg' />
         </div>
-        <div className='grid md:grid-cols-2 gap-8'>
-          {TEAM_MEMBERS.map((member, index) => (
-            <div
-              key={index}
-              className='bg-white rounded-2xl p-8 shadow-lg border border-primary-100 hover:border-primary-300 transition-all duration-300'
-            >
-              <img
-                src={member.photo_url}
-                alt={member.name}
-                className='w-32 h-32 rounded-full mx-auto mb-6 object-cover border-4 border-primary-100'
-              />
-              <h3 className='font-satoshi text-title-sm font-bold text-primary-900 text-center mb-2'>{member.name}</h3>
-              <p className='font-montserrat text-primary-700 mb-4 text-center'>{member.role}</p>
-              {member.email && (
-                <a
-                  href={`mailto:${member.email}`}
-                  className='flex items-center justify-center text-primary-500 hover:text-primary-600 transition-colors duration-200'
-                >
-                  <FaEnvelope className='mr-2' /> {member.email}
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
+        <p className='font-montserrat text-lg leading-relaxed text-primary-800 mt-4'>
+          Inspired by this discovery, I developed my first educational app, <a href="https://typit.app" target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:text-primary-600">typit.app</a>, which converted dense PDF lecture notes into interactive typing exercises. With generous support from Hong Kong Baptist University (HKBU), which provided a fund of 15,000 HKD, I launched <a href="https://typit.app" target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:text-primary-600">typit.app</a> and tested it within my university community. The response was insightful - many Chinese students preferred handwriting notes, reinforcing the importance of integrating multiple learning styles.
+        </p>
+        <p className='font-montserrat text-lg leading-relaxed text-primary-800 mt-4'>
+          Understanding that time was precious and handwritten notes weren&apos;t always practical, I decided to expand the project. Multinex was born - a platform designed to combine typing, writing, and audio learning, empowering users to choose the methods that work best for them. By curating and distilling complex information into concise, impactful content, Multinex helps students transform fleeting knowledge into lasting understanding.
+        </p>
+        <p className='font-montserrat text-lg leading-relaxed text-primary-800 mt-4'>
+          As a passionate programmer and entrepreneur, my university years have been a safe sandbox to experiment, innovate, and create meaningful projects like Multinex. Although this is my first venture aimed at monetization, I approach it with deep commitment, driven by the belief that continuous learning is essential in today&apos;s rapidly changing world.
+        </p>
+        <p className='font-montserrat text-lg leading-relaxed text-primary-800 mt-4'>
+          Regardless of commercial success, Multinex will always remain my lifetime tool, ensuring I - and countless others - stay ahead in an increasingly competitive landscape.
+        </p>
+        <p className='font-montserrat text-lg leading-relaxed text-primary-800 mt-4'>
+          Join us at Multinex - where knowledge isn&apos;t just consumed, but truly absorbed.
+        </p>
       </section>
 
       {/* Funding Information */}
@@ -191,36 +169,6 @@ const AboutPage: React.FC = () => {
               </li>
             ))}
           </ul>
-
-          <h3 className='font-satoshi text-title-sm font-semibold mb-6 text-primary-900'>Expenditures</h3>
-          {expenditure_items.length > 0 ? (
-            <ul className='space-y-4 mb-8'>
-              {expenditure_items.map((expense, index) => (
-                <li key={index} className='font-montserrat text-primary-800'>
-                  <span className='font-bold'>{expense.item}</span> - {expense.amount.toLocaleString()} HKD
-                  <span className='ml-2 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm'>
-                    Spent on {expense.date}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className='font-montserrat text-primary-700 mb-8'>We have not spent any funds yet.</p>
-          )}
-
-          <h3 className='font-satoshi text-title-sm font-semibold mb-6 text-primary-900'>Funding Overview</h3>
-          <div className='mb-6'>
-            <div className='w-full bg-primary-100 rounded-full h-6'>
-              <div
-                className='bg-primary-500 h-6 rounded-full transition-all duration-500'
-                style={{ width: `${spending_percentage}%` }}
-              ></div>
-            </div>
-            <div className='flex justify-between mt-4 font-montserrat text-primary-700'>
-              <span>Spent: {total_spent.toLocaleString()} HKD</span>
-              <span>Remaining: {total_remaining.toLocaleString()} HKD</span>
-            </div>
-          </div>
           <p className='font-montserrat text-primary-900'>
             Total Funding: <span className='font-bold'>{total_funding.toLocaleString()} HKD</span>
           </p>

@@ -10,7 +10,7 @@ export function preprocessEssay(rawEssay: string) {
   // Use a regex that properly matches nested tags by counting opening/closing tags
   const matches = [];
   let pos = 0;
-  
+
   while (pos < rawEssay.length) {
     const tagMatch = rawEssay.slice(pos).match(/<(listen|write|type)>/);
     if (!tagMatch) break;
@@ -56,7 +56,6 @@ export function preprocessEssay(rawEssay: string) {
       : rawEssay.slice(match.index + fullMatch.length, endIndex);
 
     let text: string[];
-    
     switch (mode) {
       case 'type':
         // For type sections, split into individual characters
@@ -71,18 +70,18 @@ export function preprocessEssay(rawEssay: string) {
         break;
         
       case 'write':
-      default:
-        // For write sections, keep as single chunk
+        // For write sections, keep as single chunk of content
         text = [content];
         if (endChars) text.push(...endChars.split(/(\s+)/).filter(Boolean));
         break;
+      default:
+        text = [content];
+        break;
     }
-
+    
     return { mode, text } as FormattedEssaySection;
   });
-
   // Join all sections to create final essay string
   const essay = formattedEssay.map(section => section.text.join('')).join('');
-  
   return { essay, formattedEssay };
 }

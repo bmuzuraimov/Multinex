@@ -102,24 +102,24 @@ export const sendErrorToAdmin = async (error_message: {
   });
 };
 
-export const cleanMarkdown = (input_text: string): string => {
-  if (!input_text) {
-    return '';
+export const cleanMarkdown=(input_text:string):string=>{
+  if(!input_text){
+    return'';
   }
-  return (
+  return(
     input_text
-      // Remove bold markdown
-      .replace(/\*\*([^*]+)\*\*/g, '$1')
-      // Remove code blocks
-      .replace(/```[\s\S]*?```/g, '')
-      // Replace em dashes
-      .replace(/—/g, '-')
-      // Replace en dashes
-      .replace(/–/g, '-')
-      // Remove headers
-      .replace(/#{1,6}\s/g, '')
-      // Remove spaces after new line before alphanumeric characters
-      .replace(/\n\s*([a-zA-Z0-9])/g, '$1')
+      //Remove bold markdown
+      .replace(/\*\*([^*]+)\*\*/g,'$1')
+      //Remove code blocks
+      .replace(/```[\s\S]*?```/g,'')
+      //Replace em dashes
+      .replace(/—/g,'-')
+      //Replace en dashes
+      .replace(/–/g,'-')
+      //Remove headers
+      .replace(/#{1,6}\s/g,'')
+      //Remove spaces after new line before alphanumeric characters
+      .replace(/\n\s*([a-zA-Z0-9])/g,'$1')
   );
 };
 

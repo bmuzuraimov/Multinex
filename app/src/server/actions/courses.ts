@@ -257,7 +257,6 @@ export const updateCourse: UpdateCourse<{ id: string; data: Partial<Course> }, A
 ) => {
   try {
     const user = validateUserAccess(context);
-    console.log(input);
     const validatedData = courseUpdateSchema.parse(input);
 
     const updated_course = await context.entities.Course.update({

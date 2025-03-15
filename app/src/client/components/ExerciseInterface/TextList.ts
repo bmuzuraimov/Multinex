@@ -58,7 +58,7 @@ export class TextList {
         previous = node;
       });
     });
-
+    console.log(nodes);
     return nodes;
   }
 

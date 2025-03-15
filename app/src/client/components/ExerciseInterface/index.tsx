@@ -4,10 +4,11 @@ import { TEXT_SIZES } from '../../../shared/constants';
 import { useExerciseContext } from '../../contexts/ExerciseContext';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import { cn } from '../../../shared/utils';
+import { TextNode } from './TextNode';
 
 const ExerciseInterface: React.FC = () => {
   const { essay_list, text_size, set_text_size, highlighted_nodes, set_highlighted_nodes, submit_exercise } =
-    useExerciseContext();
+    useExerciseContext() || {};
   const [showTextSizeMenu, setShowTextSizeMenu] = useState(false);
   const [showColorMenu, setShowColorMenu] = useState(false);
   const [writeColor, setWriteColor] = useLocalStorage('writeColor', '#ffc9c9');
@@ -20,22 +21,28 @@ const ExerciseInterface: React.FC = () => {
 
   // Create update callback
   const handleUpdate = useCallback(() => {
+    if (!essay_list || !set_highlighted_nodes) return;
+    
     set_highlighted_nodes(
       essay_list
         .getNodes()
-        .filter((node) => node.highlight)
-        .map((node) => node.id)
+        .filter((node: TextNode) => node.highlight)
+        .map((node: TextNode) => node.id)
     );
   }, [essay_list, set_highlighted_nodes]);
 
   // Set up the update callback when essayList is created
   useEffect(() => {
+    if (!essay_list) return;
+    
     // @ts-ignore - Add onUpdate to TextList instance
     essay_list.onUpdate = handleUpdate;
   }, [essay_list, handleUpdate]);
 
   // Handle keyboard input
   useEffect(() => {
+    if (!essay_list || !submit_exercise) return;
+    
     let isProcessing = false;
 
     const handleKeyDown = async (e: KeyboardEvent) => {
@@ -77,6 +84,10 @@ const ExerciseInterface: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [essay_list, currentSpanRef, handleUpdate, submit_exercise]);
 
+  if (!essay_list || !set_highlighted_nodes || !text_size || !set_text_size || !highlighted_nodes) {
+    return <div>Loading exercise interface...</div>;
+  }
+
   return (
     <div className='w-full h-[calc(100vh-64px)] flex flex-col relative'>
       <div
@@ -92,7 +103,7 @@ const ExerciseInterface: React.FC = () => {
           </div>
         )}
         <div className='h-full overflow-y-auto mb-16 scrollbar-hide'>
-          {essay_list.getNodes().map((textNode) => {
+          {essay_list.getNodes().map((textNode: TextNode) => {
             return (
               <span
                 key={textNode.id}
@@ -107,19 +118,30 @@ const ExerciseInterface: React.FC = () => {
                   highlighted_nodes.includes(textNode.id) ? textNode.highlightClass : ''
                 )}
                 onClick={() => {
-                  essay_list.setCursor(textNode);
+                  essay_list.setCursor(textNode as any);
                   set_highlighted_nodes(
                     essay_list
                       .getNodes()
-                      .filter((node) => node.highlight)
-                      .map((node) => node.id)
+                      .filter((node: TextNode) => node.highlight)
+                      .map((node: TextNode) => node.id)
                   );
                 }}
               >
-                {textNode.value.startsWith('\n') ? '↵' : textNode.value}
-                {Array(textNode.value.match(/\n+$/)?.[0]?.length || 0).fill(null).map((_, i) => (
-                  <br key={`br-${textNode.id}-${i}`}/>
-                ))}
+                {textNode.mode === 'write' ? (
+                  textNode.value.split('\n').map((line: string, i: number, arr: string[]) => (
+                    <React.Fragment key={`line-${textNode.id}-${i}`}>
+                      {i === 0 && line === '' ? '↵' : line}
+                      {i < arr.length - 1 && <br key={`br-${textNode.id}-${i}`} />}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <>
+                    {textNode.value == '\n' ? '↵' : textNode.value}
+                    {Array(textNode.value.match(/\n+$/)?.[0]?.length || 0).fill(null).map((_, i) => (
+                      <br key={`br-${textNode.id}-${i}`}/>
+                    ))}
+                  </>
+                )}
               </span>
             );
           })}

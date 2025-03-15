@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import { useExerciseContext } from '../../contexts/ExerciseContext';
 
 const ExerciseSidebar: React.FC = () => {
-  const { has_quiz, summary, essay_word_count, set_mode } = useExerciseContext();
+  const { has_quiz, summary, essay_word_count, set_mode } = useExerciseContext() || {};
   const [showHintsModal, setShowHintsModal] = useState(false);
   
   return (
     <div className='z-fixed min-w-xs max-w-sm h-[calc(100vh-64px)] p-6 bg-white border-r border-primary-100 flex flex-col font-montserrat'>
       <div className='flex-1 overflow-hidden flex flex-col'>
         <h2 className='font-manrope text-title-sm font-semibold text-primary-900 mb-6'>Summary</h2>
-        {summary.length > 0 ? (
+        {summary && summary.length > 0 ? (
           <ul className='space-y-3 overflow-y-auto flex-1'>
-            {summary.map((s, index) => (
+            {summary?.map((s: string, index: number) => (
               <li
                 key={index}
                 className='rounded-lg p-4 transition-all duration-200 ease-in-out shadow-sm bg-primary-50 text-primary-800 hover:bg-primary-100 hover:shadow-md'
@@ -89,7 +89,7 @@ const ExerciseSidebar: React.FC = () => {
         <div className='flex flex-col gap-y-3 items-center justify-between w-full'>
           {has_quiz && (
             <button
-              onClick={() => set_mode('test')}
+              onClick={() => set_mode?.('test')}
               className='w-full px-6 py-2.5 bg-primary-500 text-white rounded-lg text-sm font-medium hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 transition-all duration-200 shadow-sm hover:shadow-md'
             >
               Take Test

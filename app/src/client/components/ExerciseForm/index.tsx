@@ -282,7 +282,6 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
 
         if (!upload_response.ok) {
           toast.error(`Upload failed: ${upload_response.statusText}`);
-          console.log(upload_response);
           return;
         }
 
@@ -293,7 +292,7 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
         }
 
         setLoadingStatus('Scanning file...');
-        const document_parser_url = import.meta.env.REACT_APP_DOCUMENT_PARSER_URL + '/get-exercise-topics';
+        const document_parser_url = import.meta.env.REACT_APP_DOCUMENT_PARSER_URL + '/api/get-exercise-topics';
         const form_data = new FormData();
         form_data.append('file_id', exercise_result.data?.id || '');
         form_data.append('file_type', file.name.split('.').pop() || '');

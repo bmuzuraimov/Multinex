@@ -176,7 +176,7 @@ export const generateExercise: GenerateExercise<
         const form_data = new FormData();
         form_data.append('exercise_id', validatedInput.exercise_id);
         form_data.append('generate_text', tagged_exercise_text || '');
-        const audio_response = await fetch(`${document_parser_url}/generate-audio`, {
+        const audio_response = await fetch(`${document_parser_url}/api/generate-audio`, {
           method: 'POST',
           body: form_data,
         });

@@ -9,30 +9,10 @@ interface ExerciseResultProps {
   exerciseId: string;
 }
 
-const ExerciseResult: React.FC<ExerciseResultProps> = ({
-  exerciseId,
-}) => {
-  const { set_mode } = useExerciseContext();
-  const [display_score, setDisplay_score] = useState(0);
+const ExerciseResult: React.FC<ExerciseResultProps> = ({ exerciseId }) => {
+  const { set_mode, has_quiz } = useExerciseContext() || {};
   const [selected_rating, setSelected_rating] = useState(0);
   const [hover_rating, setHover_rating] = useState(0);
-  const actual_score = 100;
-
-  useEffect(() => {
-    const score_interval = setInterval(() => {
-      setDisplay_score((prev_score: number) => {
-        if (prev_score < actual_score) {
-          return prev_score + 1;
-        }
-        clearInterval(score_interval);
-        return prev_score;
-      });
-    }, 20);
-
-    return () => {
-      clearInterval(score_interval);
-    };
-  }, [actual_score]);
 
   const handleRating = async (rating: number) => {
     setSelected_rating(rating);
@@ -54,32 +34,23 @@ const ExerciseResult: React.FC<ExerciseResultProps> = ({
           className='z-tooltip font-satoshi'
           content='By rating the exercise, you help us improve the quality of our prompts'
         />
-        
+
         <div className='space-y-8 text-center'>
           <div className='space-y-2'>
-            <h1 className='font-manrope text-title-lg font-semibold text-primary-900'>
-              Congratulations!
-            </h1>
-            <p className='font-montserrat text-title-sm text-primary-600'>
-              Thank you for submitting your exercise
-            </p>
-          </div>
-
-          <div className='py-8'>
-            <div className='text-title-xl font-manrope font-bold text-primary-500'>
-              {display_score}
-              <span className='text-primary-300'>/100</span>
-            </div>
+            <h1 className='font-manrope text-title-lg font-semibold text-primary-900'>Congratulations!</h1>
+            <p className='font-montserrat text-title-sm text-primary-600'>Thank you for submitting your exercise</p>
           </div>
 
           <div className='space-y-6'>
             <div className='flex justify-center gap-4'>
-              <button
-                onClick={() => set_mode('test')}
-                className='px-8 py-3 bg-primary-500 text-white rounded-xl font-satoshi font-medium shadow-md hover:bg-primary-600 active:bg-primary-700 transform active:scale-[0.98] transition-all duration-200'
-              >
-                Test Your Knowledge
-              </button>
+              {has_quiz && (
+                <button
+                  onClick={() => set_mode?.('test')}
+                  className='px-8 py-3 bg-primary-500 text-white rounded-xl font-satoshi font-medium shadow-md hover:bg-primary-600 active:bg-primary-700 transform active:scale-[0.98] transition-all duration-200'
+                >
+                  Test Your Knowledge
+                </button>
+              )}
               <a href='/portal'>
                 <button className='px-8 py-3 bg-white text-primary-500 border-2 border-primary-500 rounded-xl font-satoshi font-medium hover:bg-primary-50 active:bg-primary-100 transform active:scale-[0.98] transition-all duration-200'>
                   Portal

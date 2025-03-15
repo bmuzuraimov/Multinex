@@ -67,7 +67,7 @@ export const exerciseShareSchema = z.object({
 });
 
 export const exerciseUpdateSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   updated_data: z.object({
     name: z.string().min(1).max(100).trim().optional(),
     lesson_text: z.string().optional(),

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, getExerciseById, updateExercise } from 'wasp/client/operations';
 import ExerciseResult from '../components/ExerciseInterface/ExerciseResult';
@@ -7,13 +7,14 @@ import ExerciseTest from '../components/ExerciseInterface/ExerciseTest';
 import ExerciseInterface from '../components/ExerciseInterface';
 import { ExerciseProvider } from '../contexts/ExerciseContext';
 import useExercise from '../hooks/useExercise';
+import CardSkeleton from '../components/CardSkeleton';
 
 const ExercisePage: React.FC = React.memo(() => {
   const { exerciseId } = useParams();
   const [text_size, setTextSize] = useState('xl');
   const [exercise_mode, setExerciseMode] = useState<'typing' | 'submitted' | 'test'>('typing');
   const [highlighted_nodes, setHighlightedNodes] = useState<number[]>([0]);
-  const { data: exercise, isLoading } = useQuery(getExerciseById, {
+  const { data: exercise, isLoading: is_exercise_loading, refetch: refetch_exercise } = useQuery(getExerciseById, {
     exercise_id: exerciseId!,
   });
   const { 
@@ -38,11 +39,15 @@ const ExercisePage: React.FC = React.memo(() => {
     exercise?.cursor || 0
   );
 
+  // Only set up audio once when it becomes available
   useEffect(() => {
-    if (exercise?.audio_url && exercise?.audio_timestamps) {
-      essay_list.setAudio(exercise.audio_url, exercise.audio_timestamps as { word: string; start: number; end: number }[]);
+    const audioUrl = exercise?.audio_url;
+    const audioTimestamps = exercise?.audio_timestamps;
+    
+    if (audioUrl && audioTimestamps && essay_list) {
+      essay_list.setAudio(audioUrl, audioTimestamps as { word: string; start: number; end: number }[]);
     }
-  }, [exercise]);
+  }, [exercise?.audio_url, exercise?.audio_timestamps, essay_list]);
 
   useEffect(() => {
     const preventDefaultKeyboardBehavior = (event: KeyboardEvent) => {
@@ -68,9 +73,10 @@ const ExercisePage: React.FC = React.memo(() => {
     });
 
     setExerciseMode('submitted');
-  }, [essay.length, exerciseId]);
+  }, [exerciseId]);
 
-  const context_value = {
+  // Memoize the context value to prevent unnecessary recreations
+  const context_value = useMemo(() => ({
     essay,
     essay_list,
     formatted_essay: exercise?.formatted_essay || [],
@@ -86,9 +92,20 @@ const ExercisePage: React.FC = React.memo(() => {
     set_text_size: setTextSize,
     submit_exercise: handleExerciseSubmission,
     summary,
-  };
-
-  if (isLoading) return <div>Loading...</div>;
+  }), [
+    essay,
+    essay_list,
+    exercise?.formatted_essay,
+    essay_word_count,
+    essay_char_count,
+    exercise_mode,
+    has_quiz,
+    exercise?.audio_timestamps,
+    highlighted_nodes,
+    text_size,
+    handleExerciseSubmission,
+    summary
+  ]);
 
   return (
     <ExerciseProvider value={context_value}>
@@ -96,7 +113,7 @@ const ExercisePage: React.FC = React.memo(() => {
         {exercise_mode === 'typing' && (
           <div className='relative flex flex-row h-full'>
             <ExerciseSidebar />
-            <ExerciseInterface />
+            {is_exercise_loading ? <CardSkeleton /> : <ExerciseInterface />}
           </div>
         )}
         {exercise_mode === 'submitted' && <ExerciseResult exerciseId={exerciseId!} />}

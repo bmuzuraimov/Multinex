@@ -15,11 +15,6 @@ export const getExercisesWithNoTopic: GetExercisesWithNoTopic<void, Exercise[]> 
     throw new HttpError(401);
   }
 
-  const documentParserUrl = process.env.DOCUMENT_PARSER_URL;
-  if (!documentParserUrl) {
-    throw new HttpError(500, 'DOCUMENT_PARSER_URL is not set');
-  }
-
   return context.entities.Exercise.findMany({
     where: {
       user_id: context.user.id,
