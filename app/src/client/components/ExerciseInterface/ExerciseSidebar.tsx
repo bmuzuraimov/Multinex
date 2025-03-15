@@ -4,9 +4,32 @@ import { useExerciseContext } from '../../contexts/ExerciseContext';
 const ExerciseSidebar: React.FC = () => {
   const { has_quiz, summary, essay_word_count, set_mode } = useExerciseContext() || {};
   const [showHintsModal, setShowHintsModal] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   
+  if (!isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed z-fixed left-0 top-1/2 -translate-y-1/2 bg-white p-3 rounded-r-lg shadow-md border border-l-0 border-primary-100 hover:bg-primary-50 transition-colors"
+      >
+        <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    );
+  }
+
   return (
-    <div className='z-fixed min-w-xs max-w-sm h-[calc(100vh-64px)] p-6 bg-white border-r border-primary-100 flex flex-col font-montserrat'>
+    <div className={`z-fixed min-w-xs max-w-sm h-[calc(100vh-64px)] p-6 bg-white border-r border-primary-100 flex flex-col font-montserrat relative transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <button
+        onClick={() => setIsOpen(false)}
+        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-primary-600 hover:text-primary-700 transition-colors"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
       <div className='flex-1 overflow-hidden flex flex-col'>
         <h2 className='font-manrope text-title-sm font-semibold text-primary-900 mb-6'>Summary</h2>
         {summary && summary.length > 0 ? (

@@ -17,6 +17,7 @@ const ExercisePage: React.FC = React.memo(() => {
   const { data: exercise, isLoading: is_exercise_loading, refetch: refetch_exercise } = useQuery(getExerciseById, {
     exercise_id: exerciseId!,
   });
+
   const { 
     essay, 
     essay_list, 
@@ -113,7 +114,7 @@ const ExercisePage: React.FC = React.memo(() => {
         {exercise_mode === 'typing' && (
           <div className='relative flex flex-row h-full'>
             <ExerciseSidebar />
-            {is_exercise_loading ? <CardSkeleton /> : <ExerciseInterface />}
+            {is_exercise_loading ? <CardSkeleton rows={40} blocksPerRow={1} /> : <ExerciseInterface />}
           </div>
         )}
         {exercise_mode === 'submitted' && <ExerciseResult exerciseId={exerciseId!} />}

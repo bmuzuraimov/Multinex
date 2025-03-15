@@ -5,3 +5,4 @@ export * from './content';
 export * from './exercises';
 export * from './pricing';
 export * from './ui'; 
+export * from './demo';

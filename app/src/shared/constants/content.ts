@@ -18,16 +18,28 @@ Accordingly, Additionally, Arguably, Certainly, Consequently, Hence, However, In
 export const DEFAULT_POST_PROMPT = '';
 
 export const WELCOME_EXERCISE_CONTENT = `<write>Key Concepts</write>
-
 <listen>1. Daily Structure</listen>
 <type>- What it is: A systematic approach to organizing tasks and time throughout the day.</type>
 <type>- How it works: By establishing a routine, individuals allocate specific blocks of time to different types of work (e.g., focused tasks in the morning, meetings in the afternoon).</type>
 <type>- Why it matters: A structured day promotes efficiency, reduces stress, and increases productivity by ensuring that time is used effectively.</type>
+<mermaid>
+flowchart TD
+    A[Start of Day] --> B[Morning: Focused Tasks]
+    B --> C[Midday: Meetings/Break]
+    C --> D[Afternoon: Focused Tasks]
+    D --> E[Evening: Review & Self-Care]
+</mermaid>
 
 <listen>2. Prioritization of Tasks</listen>
 <type>- What it is: The process of determining the most important tasks to focus on within a given timeframe.</type>
 <type>- How it works: Individuals maintain a backlog of tasks and select top priorities at the beginning of each day, completing high-priority tasks before moving on to less critical ones.</type>
 <type>- Why it matters: Prioritization helps in managing time effectively, ensuring that critical tasks that contribute to long-term goals are achieved first.</type>
+<mermaid>
+flowchart TD
+    A[List all tasks] --> B[Rate tasks \`Impact & Effort\`]
+    B --> C[Identify top priorities]
+    C --> D[Complete high-priority tasks]
+</mermaid>
  
 <listen>3. Self-Care</listen>
 <type>- What it is: The practice of taking time for oneself to maintain mental and physical health.</type>
@@ -38,8 +50,15 @@ export const WELCOME_EXERCISE_CONTENT = `<write>Key Concepts</write>
 <type>- What it is: A strategic approach to task management where one assesses the potential impact of tasks relative to the effort required to complete them.</type>
 <type>- How it works: By identifying tasks that yield significant results with minimal effort, individuals can achieve quick wins that boost motivation and progress.</type>
 <type>- Why it matters: This approach helps in maximizing productivity by focusing on tasks that deliver the best return on investment in terms of time and effort.</type>
+<mermaid>
+flowchart LR
+    A[High Impact, Low Effort] --- B[Quick Wins]
+    C[High Impact, High Effort] --- D[Strategic Tasks]
+    E[Low Impact, Low Effort] --- F[Optional Tasks]
+    G[Low Impact, High Effort] --- H[Avoid or Delegate]
+</mermaid>
 
-<listen>5. Key Goals</listen>a
+<listen>5. Key Goals</listen>
 <type>- What it is: A defined, singular objective to achieve each day.</type>
 <type>- How it works: Each morning, individuals write down one primary goal that must be accomplished by the end of the day.</type>
 <type>- Why it matters: This focus simplifies decision-making and helps in prioritizing tasks, reducing the likelihood of distractions.</type>
@@ -48,11 +67,25 @@ export const WELCOME_EXERCISE_CONTENT = `<write>Key Concepts</write>
 <type>- What it is: The practice of sharing goals and progress with others to maintain motivation.</type>
 <type>- How it works: Joining or creating accountability groups, such as study groups or professional networks, allows individuals to report on their tasks and receive support.</type>
 <type>- Why it matters: Accountability enhances commitment to goals and often leads to higher levels of achievement through external motivation.</type>
+<mermaid>
+flowchart TD
+    A[Set Daily Goal] --> B[Join Accountability Group]
+    B --> C[Share Progress]
+    C --> D[Receive Feedback & Support]
+    D --> E[Adjust Goals as Needed]
+</mermaid>
 
 <listen>7. Workspace Optimization</listen>
 <type>- What it is: The arrangement and design of one's work environment to enhance productivity.</type>
 <type>- How it works: By creating distinct zones for different activities (e.g., a quiet area for focused work and a creative space for brainstorming), individuals can tailor their environments to suit their tasks.</type>
-<type>- Why it matters: An optimized workspace reduces distractions and supports concentration, leading to improved work performance.</type>  
+<type>- Why it matters: An optimized workspace reduces distractions and supports concentration, leading to improved work performance.</type>
+<mermaid>
+flowchart TD
+    A[Workspace] --> B[Quiet Area: Focused Work]
+    A --> C[Creative Space: Brainstorming]
+    A --> D[Collaborative Zone: Meetings/Discussions]
+</mermaid>
+
 <write>Formulas/Equations</write>  
 <type>- Task Prioritization Formula:</type>
 <write>- *Priority Score = (Impact Score * Weight) / Effort Score*</write>
@@ -96,8 +129,7 @@ export const WELCOME_EXERCISE_CONTENT = `<write>Key Concepts</write>
 <type>- Step-by-step:</type>
 <type>- Step 1: Identify different tasks that require different environments.</type>
 <type>- Step 2: Create designated areas for each type of activity.</type>
-<type>- Step 3: Personalize each zone to enhance comfort and productivity.</type>  
-`;
+<type>- Step 3: Personalize each zone to enhance comfort and productivity.</type>`;
 
 export const WELCOME_EXERCISE_AUDIO_TIMESTAMPS = [
   '{"word": "1", "start": 0.023, "end": 0.128}',

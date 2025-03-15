@@ -18,10 +18,10 @@ export const createCourse: CreateCourse<
   { name: string; description: string; image: string },
   ApiResponse<Course>
 > = async (input, context) => {
-  try {
-    const user = validateUserAccess(context);
-    const validatedData = courseCreateSchema.parse(input);
+  const user = validateUserAccess(context);
+  const validatedData = courseCreateSchema.parse(input);
 
+  try {
     const created_course = await context.entities.Course.create({
       data: {
         name: validatedData.name,
@@ -42,15 +42,14 @@ export const createCourse: CreateCourse<
       data: created_course,
     };
   } catch (error) {
-    return handleError(error, 'createCourse');
+    return handleError(user.email, error, 'createCourse');
   }
 };
 
 export const duplicateCourse: DuplicateCourse<{ id: string }, ApiResponse<Course>> = async (input, context) => {
+  const user = validateUserAccess(context);
+  const { id } = courseIdSchema.parse(input);
   try {
-    const user = validateUserAccess(context);
-    const { id } = courseIdSchema.parse(input);
-
     const original_course = await context.entities.Course.findFirst({
       where: {
         id,
@@ -172,7 +171,7 @@ export const duplicateCourse: DuplicateCourse<{ id: string }, ApiResponse<Course
       data: new_course,
     };
   } catch (error) {
-    return handleError(error, 'duplicateCourse');
+    return handleError(user.email, error, 'duplicateCourse');
   }
 };
 
@@ -180,10 +179,9 @@ export const generateCourse: GenerateCourse<{ syllabus_content: string; image: s
   input,
   context
 ) => {
+  const user = validateUserAccess(context);
+  const validatedData = courseGenerateSchema.parse(input);
   try {
-    const user = validateUserAccess(context);
-    const validatedData = courseGenerateSchema.parse(input);
-
     if (!user.credits || user.credits <= 0) {
       return { success: false, code: 403, message: 'Insufficient credits' };
     }
@@ -247,7 +245,7 @@ export const generateCourse: GenerateCourse<{ syllabus_content: string; image: s
 
     return { success: true, code: 200, message: 'Course and topics created successfully' };
   } catch (error) {
-    return handleError(error, 'generateCourse');
+    return handleError(user.email, error, 'generateCourse');
   }
 };
 
@@ -255,10 +253,9 @@ export const updateCourse: UpdateCourse<{ id: string; data: Partial<Course> }, A
   input,
   context
 ) => {
+  const user = validateUserAccess(context);
+  const validatedData = courseUpdateSchema.parse(input);
   try {
-    const user = validateUserAccess(context);
-    const validatedData = courseUpdateSchema.parse(input);
-
     const updated_course = await context.entities.Course.update({
       where: {
         id: validatedData.id,
@@ -274,14 +271,14 @@ export const updateCourse: UpdateCourse<{ id: string; data: Partial<Course> }, A
       data: updated_course,
     };
   } catch (error) {
-    return handleError(error, 'updateCourse');
+    return handleError(user.email, error, 'updateCourse');
   }
 };
 
 export const deleteCourse: DeleteCourse<{ id: string }, ApiResponse> = async (input, context) => {
+  const user = validateUserAccess(context);
+  const { id } = courseIdSchema.parse(input);
   try {
-    const user = validateUserAccess(context);
-    const { id } = courseIdSchema.parse(input);
 
     const course = await context.entities.Course.findUnique({
       where: { id, user_id: user.id },
@@ -298,6 +295,6 @@ export const deleteCourse: DeleteCourse<{ id: string }, ApiResponse> = async (in
 
     return { success: true, code: 200, message: 'Course deleted successfully' };
   } catch (error) {
-    return handleError(error, 'deleteCourse');
+    return handleError(user.email, error, 'deleteCourse');
   }
 };

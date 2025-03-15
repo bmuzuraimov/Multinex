@@ -54,7 +54,7 @@ type DemoExerciseResult = {
     created_at: Date;
   };
   essay: string;
-  formatted_essay: Array<{ mode: "listen" | "type" | "write"; text: string[] }>;
+  formatted_essay: Array<{ mode: "listen" | "type" | "write" | "mermaid"; text: string[] }>;
   audio_url: string;
 };
 

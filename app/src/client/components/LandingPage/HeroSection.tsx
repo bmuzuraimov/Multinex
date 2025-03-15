@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 const HeroSection: React.FC = () => {
   const { data: user, isLoading } = useAuth();
   const [demoMode, setDemoMode] = useState(true);
-  
+
   useEffect(() => {
     if (user && !isLoading) {
       setDemoMode(false);
@@ -36,7 +36,7 @@ const HeroSection: React.FC = () => {
                 Triathlon But For Brain
               </span>
             </h1>
-            <p className='mt-6 mx-auto max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-300'>
+            <p className='my-6 mx-auto max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-300'>
               <span className='font-semibold text-teal-600 dark:text-teal-400'>Type key concepts</span> →{' '}
               <span className='font-semibold text-red-600 dark:text-red-400'>Handwrite connections</span> →{' '}
               <span className='font-semibold text-blue-600 dark:text-blue-400'>Listen explanations</span>.
@@ -46,9 +46,15 @@ const HeroSection: React.FC = () => {
               <div className='mt-10 flex items-center justify-center gap-x-6'>
                 <Link
                   to='/signup'
-                  className='rounded-md bg-teal-500 px-5 py-3 text-sm font-medium text-white hover:bg-teal-600 transition-colors duration-200 pointer-events-auto'
+                  className='rounded-full bg-gradient-to-r from-teal-500 to-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:from-teal-600 hover:to-teal-700 transition-all duration-200 pointer-events-auto hover:shadow-teal-500/25'
                 >
-                  Sign up for more free credits <span aria-hidden='true'>→</span>
+                  Sign up for more free credits
+                </Link>
+                <Link
+                  to='/demo'
+                  className='rounded-full bg-gradient-to-r from-tertiary-500 to-tertiary-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:from-tertiary-600 hover:to-tertiary-700 transition-all duration-200 pointer-events-auto hover:shadow-tertiary-500/25'
+                >
+                  Try demo <span aria-hidden='true' className='transition-transform group-hover:translate-x-1'>→</span>
                 </Link>
               </div>
             )}

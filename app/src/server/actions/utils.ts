@@ -120,6 +120,10 @@ export const cleanMarkdown=(input_text:string):string=>{
       .replace(/#{1,6}\s/g,'')
       //Remove spaces after new line before alphanumeric characters
       .replace(/\n\s*([a-zA-Z0-9])/g,'$1')
+      //Remove --- pattern
+      .replace(/^---.*$/gm,'')
+      //Remove extra newlines after removing ---
+      .replace(/\n{3,}/g,'\n\n')
   );
 };
 
@@ -199,7 +203,7 @@ const getErrorStack = (error: unknown): string => {
   return '';
 };
 
-export const handleError = async (error: unknown, operation: string): Promise<ErrorResponse> => {
+export const handleError = async (email: string, error: unknown, operation: string): Promise<ErrorResponse> => {
   const error_id = uuidv4();
   const { category, severity, code } = categorizeError(error);
   const formatted_message = formatErrorMessage(error);

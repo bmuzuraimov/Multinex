@@ -27,6 +27,6 @@ export const updateCurrentUser: UpdateCurrentUser<Partial<User>, ApiResponse<Use
       data: updated_user,
     };
   } catch (error) {
-    return handleError(error, 'update user');
+    return handleError(context.user?.email || 'demo', error, 'updateUser');
   }
 };

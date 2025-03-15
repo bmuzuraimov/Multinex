@@ -32,7 +32,7 @@ export const createExercise: CreateExercise<{ name: string; topic_id: string | n
 ) => {
   try {
     const validatedInput = exerciseCreateSchema.parse(input);
-
+    
     const exercise = await context.entities.Exercise.create({
       data: {
         name: validatedInput.name,
@@ -55,7 +55,7 @@ export const createExercise: CreateExercise<{ name: string; topic_id: string | n
       data: exercise,
     };
   } catch (error) {
-    return handleError(error, 'createExercise');
+    return handleError(context.user?.email || 'demo', error, 'createExercise');
   }
 };
 
@@ -75,7 +75,7 @@ export const generateExercise: GenerateExercise<
   try {
     const validatedInput = exerciseGenerateSchema.parse(input);
 
-    if (!context.user || context.user.credits < 1) {
+    if (context.user && context.user.credits < 1) {
       throw new Error('Insufficient credits. Please top up your credits to continue.');
     }
 
@@ -163,7 +163,7 @@ export const generateExercise: GenerateExercise<
         });
       }
     } catch (error) {
-      await handleError(error, 'generateComplexity');
+      await handleError(context.user?.email || 'demo', error, 'generateComplexity');
     }
 
     const document_parser_url = process.env.DOCUMENT_PARSER_URL;
@@ -181,11 +181,11 @@ export const generateExercise: GenerateExercise<
           body: form_data,
         });
         if (!audio_response.ok) {
-          await handleError(audio_response, 'generateAudio');
+          await handleError(context.user?.email || 'demo', audio_response, 'generateAudio');
         }
       }
     } catch (err) {
-      await handleError(err, 'generateAudio');
+      await handleError(context.user?.email || 'demo', err, 'generateAudio');
     }
 
     let summary_json = null;
@@ -203,10 +203,10 @@ export const generateExercise: GenerateExercise<
             data: { status: ExerciseStatus.SUMMARY_GENERATED },
           });
         } else {
-          await handleError(new Error('Failed to generate summary (no success)'), 'generateSummary');
+          await handleError(context.user?.email || 'demo', new Error('Failed to generate summary (no success)'), 'generateSummary');
         }
       } catch (err) {
-        await handleError(err, 'generateSummary');
+        await handleError(context.user?.email || 'demo', err, 'generateSummary');
       }
     }
 
@@ -225,10 +225,10 @@ export const generateExercise: GenerateExercise<
             data: { status: ExerciseStatus.QUESTIONS_GENERATED },
           });
         } else {
-          await handleError(new Error('Failed to generate questions (no success)'), 'generateQuestions');
+          await handleError(context.user?.email || 'demo', new Error('Failed to generate questions (no success)'), 'generateQuestions');
         }
       } catch (err) {
-        await handleError(err, 'generateQuestions');
+        await handleError(context.user?.email || 'demo', err, 'generateQuestions');
       }
     }
 
@@ -254,7 +254,7 @@ export const generateExercise: GenerateExercise<
         },
       });
     } catch (error: any) {
-      await handleError(error, 'updateExercise');
+      await handleError(context.user?.email || 'demo', error, 'updateExercise');
     }
 
     if (questions && Array.isArray(questions)) {
@@ -276,7 +276,7 @@ export const generateExercise: GenerateExercise<
           })
         );
       } catch (err) {
-        await handleError(err, 'createQuestions');
+        await handleError(context.user?.email || 'demo', err, 'createQuestions');
       }
     }
 
@@ -287,13 +287,13 @@ export const generateExercise: GenerateExercise<
           data: { credits: { decrement: 1 } },
         });
       } catch (err) {
-        await handleError(err, 'deductCredit');
+        await handleError(context.user?.email || 'demo', err, 'deductCredit');
       }
     }
 
     return { success: true, code: 200, message: 'Exercise generated successfully' };
   } catch (error) {
-    return handleError(error, 'generateExercise');
+    return handleError(context.user?.email || 'demo', error, 'generateExercise');
   }
 };
 
@@ -334,7 +334,7 @@ export const shareExercise: ShareExercise<
     );
     return { success: true, code: 200, message: 'Exercise shared successfully' };
   } catch (error) {
-    return handleError(error, 'shareExercise');
+    return handleError(context.user?.email || 'demo', error, 'shareExercise');
   }
 };
 
@@ -368,7 +368,7 @@ export const updateExercise: UpdateExercise<
       data: updated_exercise,
     };
   } catch (error) {
-    return handleError(error, 'updateExercise');
+    return handleError(context.user?.email || 'demo', error, 'updateExercise');
   }
 };
 
@@ -389,6 +389,6 @@ export const deleteExercise: DeleteExercise<{ id: string }, ApiResponse<Exercise
 
     return { success: true, code: 200, message: 'Exercise deleted successfully' };
   } catch (error) {
-    return handleError(error, 'deleteExercise');
+    return handleError(context.user?.email || 'demo', error, 'deleteExercise');
   }
 };

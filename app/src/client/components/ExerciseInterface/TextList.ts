@@ -22,6 +22,7 @@ export class TextList {
       listen: `text-${textSize} cursor-pointer tracking-wider font-montserrat text-blue-900 dark:text-gray-300`,
       type: `text-${textSize} cursor-pointer tracking-wider font-manrope text-green-900 dark:text-gray-300`,
       write: `text-${textSize} cursor-pointer tracking-wider font-courgette text-red-900 dark:text-gray-300`,
+      mermaid: `text-${textSize} cursor-pointer tracking-wider font-manrope text-gray-900 dark:text-gray-300`,
     };
     this.onUpdate = onUpdate;
     this.nodes = this.buildNodes(formattedEssay);
@@ -58,7 +59,6 @@ export class TextList {
         previous = node;
       });
     });
-    console.log(nodes);
     return nodes;
   }
 
@@ -89,7 +89,12 @@ export class TextList {
     }
 
     // Get next node in sequence
-    const newNode = next ? this.currentNode.next : this.currentNode.prev;
+    let newNode = next ? this.currentNode.next : this.currentNode.prev;
+    
+    // Skip over mermaid nodes
+    while (newNode?.mode === 'mermaid') {
+      newNode = next ? newNode.next : newNode.prev;
+    }
     
     // Handle reaching start/end of list
     if (!newNode) {
@@ -125,31 +130,15 @@ export class TextList {
   // Audio integration
   public async setAudio(audioUrl: string, audioTimestamps: AudioTimestamp[]): Promise<void> {
     if (!audioUrl) return;
-    
-    // Check if URL returns XML error response
-    try {
-      const response = await fetch(audioUrl);
-      const contentType = response.headers.get('content-type');
-      
-      if (contentType?.includes('application/xml')) {
-        const text = await response.text();
-        if (text.includes('<Error>')) {
-          return;
-        }
-      }
-    } catch (error) {
-      return;
-    }
-    
+
     if (!this.audioController) {
       this.audioController = new AudioController();
     }
-    
+
     try {
       await this.audioController.setAudioUrl(audioUrl);
       this.audioController.setAudioTimestamps(audioTimestamps);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to load audio');
       throw error;
     }
   }
@@ -179,6 +168,9 @@ export class TextList {
         break;
       case 'write':
         this.handleWriteMode(e);
+        break;
+      case 'mermaid':
+        this.handleMermaidMode(e);
         break;
     }
   }
@@ -271,6 +263,11 @@ export class TextList {
           nextNonListenNode = nextNonListenNode.next;
         }
         
+        // Skip over any mermaid nodes
+        while (nextNonListenNode.next && nextNonListenNode.next.mode === 'mermaid') {
+          nextNonListenNode = nextNonListenNode.next;
+        }
+        
         // If we found a non-listen node, move to it directly instead of stepping through each node
         if (nextNonListenNode !== this.currentNode && nextNonListenNode.mode !== 'listen') {
           this.setCursor(nextNonListenNode);
@@ -305,6 +302,11 @@ export class TextList {
           currentNode = currentNode.next;
         }
         
+        // Skip over any mermaid nodes
+        while (currentNode.next?.mode === 'mermaid') {
+          currentNode = currentNode.next;
+        }
+        
         // Set cursor directly to the end node instead of stepping through
         if (currentNode !== startNode) {
           this.setCursor(currentNode);
@@ -327,6 +329,14 @@ export class TextList {
       this.moveCursor(false);
     } else {
       this.currentNode.highlightText();
+      this.moveCursor(true);
+    }
+  }
+
+  private handleMermaidMode(e: KeyboardEvent): void {
+    if (e.key === 'Backspace') {
+      this.moveCursor(false);
+    } else {
       this.moveCursor(true);
     }
   }

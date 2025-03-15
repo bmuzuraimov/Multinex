@@ -8,6 +8,7 @@ export interface AudioTimestamp {
 
 export class AudioController {
   private audio: HTMLAudioElement | null = null;
+  private audioUrl: string | null = null;
   private audioTimestamps: AudioTimestamp[] = [];
   private isPlaying = false;
   private isLoaded = false;
@@ -15,7 +16,7 @@ export class AudioController {
   private activeListeners: Map<string, Set<() => void>> = new Map();
 
   public setAudioUrl(audioUrl: string): Promise<void> {
-    if (this.isLoaded && this.audio?.src === audioUrl) {
+    if (this.isLoaded && this.audioUrl === audioUrl) {
       return Promise.resolve();
     }
 
@@ -33,7 +34,6 @@ export class AudioController {
         resolve();
       }, { once: true });
       audio.addEventListener('error', (e) => {
-        toast.error(e.message || 'Error loading audio');
         this.isLoaded = false;
         reject(e);
       }, { once: true });
@@ -41,6 +41,7 @@ export class AudioController {
       audio.preload = 'auto';
       audio.src = audioUrl;
       this.audio = audio;
+      this.audioUrl = audioUrl;
     });
   }
 

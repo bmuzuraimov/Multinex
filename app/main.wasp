@@ -130,7 +130,12 @@ page TermsPage {
   component: import TermsPage from "@src/client/common/TermsPage"
 }
 
-route DemoPageRoute { path: "/demo", to: DemoPage }
+route CreateDemoRoute { path: "/create-demo", to: CreateDemoPage }
+page CreateDemoPage {
+  component: import CreateDemoPage from "@src/client/common/CreateDemoPage"
+}
+
+route DemoRoute { path: "/demo", to: DemoPage }
 page DemoPage {
   component: import DemoPage from "@src/client/common/DemoPage"
 }

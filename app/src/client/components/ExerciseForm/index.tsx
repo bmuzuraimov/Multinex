@@ -10,7 +10,6 @@ import {
   getUploadURL,
   createDemoExercise,
   useQuery,
-  deleteExercise,
 } from 'wasp/client/operations';
 import { useAuth } from 'wasp/client/auth';
 import FormModal from './FormModal';
@@ -104,6 +103,7 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
   const [loading_status, setLoadingStatus] = useState('');
   const [processing_file, setProcessingFile] = useState(false);
   const { data: user } = useAuth();
+  
   // Memoized query params
   const query_params = useMemo(
     () => ({
@@ -114,6 +114,7 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
     }),
     []
   );
+
 
   const { data: demo_exercise_data } = useQuery(
     getDemoExercise,
@@ -244,28 +245,36 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
       }
 
       try {
+        // Create the exercise first
         const exercise_result = await createExercise({ name: file.name, topic_id: topic_id });
-        if (demo) {
-          await createDemoExercise({
-            exercise_id: exercise_result.data?.id || '',
-            user_agent: query_params.user_agent,
-            browser_language: query_params.browser_language,
-            screen_resolution: query_params.screen_resolution,
-            timezone: query_params.timezone,
-          });
-        }
-
-        setExercise(exercise_result.data || null);
-
+        
         if (!exercise_result.data?.id) {
           toast.error('Failed to create exercise - no ID returned');
           return;
         }
 
+        setExercise(exercise_result.data || null);
+
+        // If demo is true, create demo exercise
+        if (demo) {
+          const demo_result = await createDemoExercise({
+            exercise_id: exercise_result.data.id,
+            user_agent: query_params.user_agent,
+            browser_language: query_params.browser_language,
+            screen_resolution: query_params.screen_resolution,
+            timezone: query_params.timezone,
+          });
+
+          if (!demo_result.success) {
+            toast.error('Failed to create demo exercise');
+            return;
+          }
+        }
+
         // Upload file
         setLoadingStatus('Uploading file...');
         const upload_url_result = await getUploadURL({
-          key: exercise_result.data?.id || '',
+          key: exercise_result.data.id,
           file_type: file.type,
         });
 
@@ -294,7 +303,7 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
         setLoadingStatus('Scanning file...');
         const document_parser_url = import.meta.env.REACT_APP_DOCUMENT_PARSER_URL + '/api/get-exercise-topics';
         const form_data = new FormData();
-        form_data.append('file_id', exercise_result.data?.id || '');
+        form_data.append('file_id', exercise_result.data.id);
         form_data.append('file_type', file.name.split('.').pop() || '');
 
         const response = await fetch(document_parser_url, {
@@ -311,9 +320,6 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
         setExerciseSettings((prev) => ({ ...prev, topics: response_json.data }));
         setLoadingStatus('Select topics to generate exercise');
       } catch (error: any) {
-        if (exercise) {
-          await deleteExercise({ id: exercise.id });
-        }
         if (error instanceof TypeError && error.message === 'Failed to fetch') {
           toast.error('Document service is currently unavailable. Please try again later.');
         } else {
@@ -326,13 +332,13 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
         setIsUploading(false);
       }
     },
-    [demo, query_params, topic_id]
+    [demo, query_params, topic_id, resetAllStates, user]
   );
 
   const renderDemoLink = useMemo(
     () => (
       <Link
-        to={`/demo`}
+        to={`/create-demo`}
         className='w-full h-full flex flex-col items-center bg-white transition-all duration-300 ease-in-out pointer-events-auto'
       >
         <div className='flex h-full items-center justify-center w-full max-w-5xl mx-auto px-6 py-12'>

@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { Question } from 'wasp/entities';
 import { TextList } from '../components/ExerciseInterface/TextList';
 import { updateExercise } from 'wasp/client/operations';
+import { useAuth } from 'wasp/client/auth';
 
 // Create a wrapper to store metadata alongside TextList
 interface TextListWrapper {
@@ -20,6 +21,7 @@ const useExercise = (
   text_size: string,
   progress_cursor: number
 ) => {
+  const { data: user } = useAuth();
   // Use a ref to store the TextList wrapper
   const textListWrapperRef = useRef<TextListWrapper | null>(null);
   
@@ -66,7 +68,7 @@ const useExercise = (
 
   useEffect(() => {
     const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
-      if (mode === 'typing') {
+      if (mode === 'typing' && user?.id) {
         await updateExercise({
           id: exercise_id!,
           updated_data: {

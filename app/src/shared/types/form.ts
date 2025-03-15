@@ -1,4 +1,4 @@
-export type SensoryMode = 'listen' | 'type' | 'write';
+export type SensoryMode = 'listen' | 'type' | 'write' | 'mermaid';
 
 export interface ExerciseFormContentSettings {
   sensory_modes: SensoryMode[];

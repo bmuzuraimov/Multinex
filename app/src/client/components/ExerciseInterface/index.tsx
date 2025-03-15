@@ -5,6 +5,7 @@ import { useExerciseContext } from '../../contexts/ExerciseContext';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import { cn } from '../../../shared/utils';
 import { TextNode } from './TextNode';
+import Mermaid from 'react-mermaid2';
 
 const ExerciseInterface: React.FC = () => {
   const { essay_list, text_size, set_text_size, highlighted_nodes, set_highlighted_nodes, submit_exercise } =
@@ -17,12 +18,12 @@ const ExerciseInterface: React.FC = () => {
   const [currentSpanRef, setCurrentSpanRef] = useState<HTMLSpanElement | null>(null);
   const isProcessingRef = useRef(false);
   const lastKeyTimeRef = useRef(0);
-  const KEY_THROTTLE_MS = 50; // Throttle key events to 50ms
+  const KEY_THROTTLE_MS = 20; // Throttle key events to 50ms
 
   // Create update callback
   const handleUpdate = useCallback(() => {
     if (!essay_list || !set_highlighted_nodes) return;
-    
+
     set_highlighted_nodes(
       essay_list
         .getNodes()
@@ -34,7 +35,7 @@ const ExerciseInterface: React.FC = () => {
   // Set up the update callback when essayList is created
   useEffect(() => {
     if (!essay_list) return;
-    
+
     // @ts-ignore - Add onUpdate to TextList instance
     essay_list.onUpdate = handleUpdate;
   }, [essay_list, handleUpdate]);
@@ -42,8 +43,6 @@ const ExerciseInterface: React.FC = () => {
   // Handle keyboard input
   useEffect(() => {
     if (!essay_list || !submit_exercise) return;
-    
-    let isProcessing = false;
 
     const handleKeyDown = async (e: KeyboardEvent) => {
       // Throttle key events to prevent excessive processing
@@ -134,12 +133,22 @@ const ExerciseInterface: React.FC = () => {
                       {i < arr.length - 1 && <br key={`br-${textNode.id}-${i}`} />}
                     </React.Fragment>
                   ))
+                ) : textNode.mode === 'mermaid' && textNode.value.trim().length > 1 ? (
+                  <div className='w-full flex justify-center items-center'>
+                    <Mermaid
+                      config={{ securityLevel: 'loose', theme: 'base' }}
+                      chart={textNode.value}
+                      key={`mermaid-${textNode.id}`}
+                    />
+                  </div>
                 ) : (
                   <>
                     {textNode.value == '\n' ? '↵' : textNode.value}
-                    {Array(textNode.value.match(/\n+$/)?.[0]?.length || 0).fill(null).map((_, i) => (
-                      <br key={`br-${textNode.id}-${i}`}/>
-                    ))}
+                    {Array(textNode.value.match(/\n+$/)?.[0]?.length || 0)
+                      .fill(null)
+                      .map((_, i) => (
+                        <br key={`br-${textNode.id}-${i}`} />
+                      ))}
                   </>
                 )}
               </span>

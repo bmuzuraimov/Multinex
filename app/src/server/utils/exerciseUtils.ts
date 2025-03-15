@@ -12,7 +12,7 @@ export function preprocessEssay(rawEssay: string) {
   let pos = 0;
 
   while (pos < rawEssay.length) {
-    const tagMatch = rawEssay.slice(pos).match(/<(listen|write|type)>/);
+    const tagMatch = rawEssay.slice(pos).match(/<(listen|write|type|mermaid)>/);
     if (!tagMatch) break;
     
     const mode = tagMatch[1];
@@ -70,8 +70,12 @@ export function preprocessEssay(rawEssay: string) {
         break;
         
       case 'write':
-        // For write sections, keep as single chunk of content
+        // For write and mermaid sections, keep as single chunk of content
         text = [content];
+        if (endChars) text.push(...endChars.split(/(\s+)/).filter(Boolean));
+        break;
+      case 'mermaid':
+        text = [content.trim()];
         if (endChars) text.push(...endChars.split(/(\s+)/).filter(Boolean));
         break;
       default:

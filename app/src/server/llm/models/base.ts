@@ -3,7 +3,7 @@ import { RETRIES, DELAY_MS } from '../../../shared/constants';
 import { TiktokenModel, encoding_for_model } from 'tiktoken';
 import { OPENAI_MODEL } from '../../../shared/constants';
 import { SensoryMode } from '../../../shared/types';
-
+import { handleError } from '../../actions/utils';
 
 export interface LLMResponse {
   success: boolean;
@@ -24,7 +24,8 @@ export abstract class BaseLLMService {
         await new Promise((resolve) => setTimeout(resolve, delay_ms));
         return this.withRetry(operation, method_name, retries - 1, delay_ms * 2);
       }
-      return this.handleError(error, method_name);
+      handleError('LLM Base', error, method_name);
+      throw error;
     }
   }
 
@@ -58,19 +59,6 @@ export abstract class BaseLLMService {
     model: string,
     sensory_modes: SensoryMode[]
   ): Promise<LLMResponse>;
-
-  protected handleError(error: any, method_name: string): never {
-    console.error(`Error in ${method_name}:`, error);
-    sendErrorToAdmin({
-      id: 'llm_error',
-      severity: 'error',
-      email: process.env.ADMIN_EMAILS!,
-      description: `Error in ${method_name}: ${error.message}`,
-      steps: [],
-      stack_trace: error.stack,
-    });
-    throw error;
-  }
 
   static calculateRequiredTokens(content: string, model: TiktokenModel): number {
     const encoding = encoding_for_model(OPENAI_MODEL);

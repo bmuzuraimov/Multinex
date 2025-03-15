@@ -37,7 +37,6 @@ export const createDemoExercise: CreateDemoExercise<
     const exercise = await context.entities.Exercise.findUnique({
       where: {
         id: validatedInput.exercise_id,
-        status: 'FINISHED',
       },
     });
 
@@ -71,6 +70,6 @@ export const createDemoExercise: CreateDemoExercise<
       data: demo_exercise,
     };
   } catch (error) {
-    return handleError(error, 'create demo exercise');
+    return handleError(context.user?.email || 'demo', error, 'createDemoExercise');
   }
 };
