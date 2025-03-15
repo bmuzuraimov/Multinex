@@ -25,4 +25,7 @@ class Settings:
     # API Keys
     ELEVENLABS_API_KEY: str = os.environ.get("ELEVENLABS_API_KEY")
 
+    # Tika Settings
+    TIKA_SERVER_ENDPOINT: str = os.environ.get("TIKA_SERVER_ENDPOINT")
+
 settings = Settings()

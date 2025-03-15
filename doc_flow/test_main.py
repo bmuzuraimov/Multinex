@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from fastapi import status
 
 from main import app
-from core.document_processing_orchestrator import FileProcessorService
+from doc_flow.services.doc_service import FileProcessorService
 from services.db_service import db_service
 from services.s3_service import s3_service
 from services.openai_service import openai_service
@@ -47,7 +47,7 @@ def mock_elevenlabs_service():
 
 @pytest.fixture
 def mock_file_processor():
-    with patch("core.document_processing_orchestrator.FileProcessor") as mock:
+    with patch("core.doc_processing.FileProcessor") as mock:
         processor_instance = mock.return_value
         processor_instance.extractTextFromPdf = AsyncMock(return_value="PDF text content")
         processor_instance.extractTextFromPptx = AsyncMock(return_value="PPTX text content")
@@ -355,4 +355,4 @@ def test_security_cors():
 
 # Conftest setup for running tests
 if __name__ == "__main__":
-    pytest.main(["-v", "test_main.py"]) 
+    pytest.main(["-v", "test_main.py"])
