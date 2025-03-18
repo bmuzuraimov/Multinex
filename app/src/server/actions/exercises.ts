@@ -13,7 +13,7 @@ import fetch from 'node-fetch';
 import FormData from 'form-data';
 import { ExerciseStatus } from '@prisma/client';
 import { DEFAULT_PRE_PROMPT, DEFAULT_POST_PROMPT } from '../../shared/constants';
-import { OpenAIService, DeepSeekService } from '../llm/models';
+import { LLMFactory } from '../llm/models';
 import { ApiResponse } from './types';
 import {
   exerciseCreateSchema,
@@ -22,9 +22,6 @@ import {
   exerciseUpdateSchema,
   exerciseDeleteSchema,
 } from './validations';
-
-const openai_service = new OpenAIService();
-const deepseek_service = new DeepSeekService();
 
 export const createExercise: CreateExercise<{ name: string; topic_id: string | null }, ApiResponse<Exercise>> = async (
   input,
@@ -120,7 +117,7 @@ export const generateExercise: GenerateExercise<
         : null;
       pre_prompt = prompt_settings?.pre_prompt || DEFAULT_PRE_PROMPT;
       post_prompt = prompt_settings?.post_prompt || DEFAULT_POST_PROMPT;
-      const exercise_response = await openai_service.generateExercise(
+      const exercise_response = await LLMFactory.generateExercise(
         truncated_exercise_text,
         prior_knowledge_array.join(','),
         validatedInput.length,
@@ -148,7 +145,7 @@ export const generateExercise: GenerateExercise<
 
     let complexity_usage = 0;
     try {
-      const complexity_response = await openai_service.generateComplexity(
+      const complexity_response = await LLMFactory.generateComplexity(
         lecture_content,
         validatedInput.model,
         validatedInput.sensory_modes
@@ -191,7 +188,7 @@ export const generateExercise: GenerateExercise<
     let summary_json = null;
     if (validatedInput.include_summary) {
       try {
-        const summary_response = await openai_service.generateSummary(
+        const summary_response = await LLMFactory.generateSummary(
           lecture_content,
           validatedInput.model,
         );
@@ -213,7 +210,7 @@ export const generateExercise: GenerateExercise<
     let questions = null;
     if (validatedInput.include_mc_quiz) {
       try {
-        const questions_response = await openai_service.generateQuestions(
+        const questions_response = await LLMFactory.generateQuestions(
           lecture_content,
           validatedInput.model,
         );

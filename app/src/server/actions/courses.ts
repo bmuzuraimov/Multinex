@@ -6,13 +6,11 @@ import {
   type DeleteCourse,
   DuplicateCourse,
 } from 'wasp/server/operations';
-import { OPENAI_MODEL, MAX_TOKENS } from '../../shared/constants';
-import { OpenAIService } from '../llm/models/openai';
+import { OPENAI_MODEL } from '../../shared/constants';
+import { LLMFactory } from '../llm/models';
 import { handleError, validateUserAccess, truncateText } from './utils';
 import { courseCreateSchema, courseUpdateSchema, courseGenerateSchema, courseIdSchema } from './validations';
 import { ApiResponse } from './types';
-
-const openai_service = new OpenAIService();
 
 export const createCourse: CreateCourse<
   { name: string; description: string; image: string },
@@ -189,7 +187,7 @@ export const generateCourse: GenerateCourse<{ syllabus_content: string; image: s
     // Truncate syllabus content to prevent token limit issues
     const { text: truncated_content } = truncateText(validatedData.syllabus_content);
 
-    const generation_result = await openai_service.generateCourse(truncated_content, OPENAI_MODEL);
+    const generation_result = await LLMFactory.generateCourse(truncated_content, OPENAI_MODEL);
 
     if (!generation_result.success) {
       return {
@@ -279,7 +277,6 @@ export const deleteCourse: DeleteCourse<{ id: string }, ApiResponse> = async (in
   const user = validateUserAccess(context);
   const { id } = courseIdSchema.parse(input);
   try {
-
     const course = await context.entities.Course.findUnique({
       where: { id, user_id: user.id },
       include: { topics: true },
