@@ -44,16 +44,26 @@ class ElevenLabsService:
             raise HTTPException(
                 status_code=400, detail="Input text cannot be empty")
 
-        filtered_text = re.findall(r'<listen>(.*?)</listen>', text)
+        # Use re.DOTALL to make the dot match newlines as well
+        filtered_text = re.findall(r'<listen>(.*?)</listen>', text, re.DOTALL)
         if not filtered_text:
             raise HTTPException(
                 status_code=400, detail="No valid <listen> tags found in text")
 
-        filtered_text = [re.sub(r'[^a-zA-Z0-9\s]', '', text).strip()
-                         for text in filtered_text]
-        filtered_text = '.\n'.join(filtered_text)
-        filtered_text = re.sub(r'\n{2,}', '', filtered_text.strip())
-        return re.sub(r' +', ' ', filtered_text)
+        # Process each extracted text block
+        processed_texts = []
+        for text_block in filtered_text:
+            # Clean up the text while preserving meaningful content
+            cleaned_text = text_block.strip()
+            # Replace multiple spaces with a single space
+            cleaned_text = re.sub(r' +', ' ', cleaned_text)
+            # Replace multiple newlines with a single space
+            cleaned_text = re.sub(r'\n+', ' ', cleaned_text)
+            processed_texts.append(cleaned_text)
+        
+        # Join the processed text blocks with periods
+        result = '. '.join(processed_texts)
+        return result
 
     def extractTimestamps(self, response: Dict) -> List[Dict]:
         chars = response.normalized_alignment.characters
@@ -90,7 +100,9 @@ class ElevenLabsService:
         return timestamps
 
     async def generateAudio(self, exercise_id: str, text: str) -> Dict:
+        print('text', text)
         filtered_text = self.filterText(text)
+        print('filtered_text', filtered_text)
         try:
             response = self.elevenlabs_client.text_to_speech.convert_with_timestamps(
                 voice_id="JBFqnCBsd6RMkjVDRZzb",
@@ -130,7 +142,7 @@ class ElevenLabsService:
         s3_key = f"{exercise_id}.mp3"
         audio_data = base64.b64decode(response.audio_base_64)
 
-        s3_service.uploadFile(s3_key, audio_data, "audio/mpeg")
+        await s3_service.uploadFile(s3_key, audio_data, "audio/mpeg")
 
 
 elevenlabs_service = ElevenLabsService()
