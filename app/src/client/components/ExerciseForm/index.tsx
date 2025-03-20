@@ -239,7 +239,7 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
       setExerciseSettings((prev) => ({ ...prev, exercise_name: file.name }));
 
       if (user && user.credits <= 0) {
-        toast.error('You do not have any credits left. Please purchase more credits to generate exercises.');
+        toast.info('You do not have any credits left. Please purchase more credits to generate exercises.');
         resetAllStates();
         return;
       }
