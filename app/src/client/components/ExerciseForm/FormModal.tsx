@@ -165,6 +165,27 @@ const FormModal: React.FC<FormModalProps> = ({
             <div className='space-y-2'>
               <label className='block text-sm font-medium text-gray-700'>Learning Modes</label>
               <div className='flex justify-between items-center gap-3'>
+                {/* Mermaid Mode */}
+                <div className='flex-1'>
+                  <input
+                    type='checkbox'
+                    id='mode-mermaid'
+                    checked={exercise_settings.sensory_modes.includes('mermaid')}
+                    onChange={() => handleToggleMode('mermaid')}
+                    className='sr-only'
+                  />
+                  <label
+                    htmlFor='mode-mermaid'
+                    className={cn(
+                      'block text-center py-2 px-3 rounded-lg cursor-pointer transition-all duration-200',
+                      exercise_settings.sensory_modes.includes('mermaid')
+                        ? 'bg-primary-500 text-white shadow-sm'
+                        : 'bg-white text-gray-700 border border-primary-200 hover:bg-primary-50'
+                    )}
+                  >
+                    <span className='text-sm font-medium'>Mermaid</span>
+                  </label>
+                </div>
                 {/* Listening Mode */}
                 <div className='flex-1'>
                   <input

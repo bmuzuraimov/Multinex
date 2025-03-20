@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import {
   generateExercisePrompt,
-  generateSummaryPrompt, 
+  generateSummaryPrompt,
   generateStudyMethodTagsPrompt,
   generateCoursePrompt,
   generateExamPrompt,
@@ -27,7 +27,7 @@ export class DeepSeekService extends BaseLLMService {
 
   async generateExercise(
     exercise_raw_content: string,
-    prior_knowledge: string, 
+    prior_knowledge: string,
     exercise_length: string,
     difficulty_level: string,
     model_name: string,
@@ -137,24 +137,44 @@ export class DeepSeekService extends BaseLLMService {
     if (lecture_content.length === 0) {
       return { success: true, data: { tagged_text: '' }, usage: 0 };
     }
+    const prompt = generateStudyMethodTagsPrompt({
+      content: lecture_content,
+      sensory_modes: sensory_modes,
+    });
+    prompt.messages.push({
+      role: 'user',
+      content: `EXAMPLE JSON OUTPUT:
+{
+  "paragraphs": [
+    {
+      "content": "This is a sample paragraph",
+      "type": "write"
+    }
+  ]
+}`,
+    });
     return this.withRetry(async () => {
       const deepseek_response = await this.deepseek_client.chat.completions.create({
         model: 'deepseek-chat',
-        ...generateStudyMethodTagsPrompt({
-          content: lecture_content,
-          sensory_modes: sensory_modes,
-        }),
+        messages: prompt.messages,
+        response_format: {
+          type: 'json_object',
+        },
         temperature: 1.3,
         max_tokens: 8192,
       });
 
       const complexity_content = deepseek_response.choices[0]?.message?.content || '';
-      if (!complexity_content) {
+      const parsed_content = JSON.parse(complexity_content);
+      if (!parsed_content?.paragraphs) {
         throw new Error('Tagged text missing from complexity data.');
       }
+      let tagged_text = parsed_content.paragraphs
+        .map((p: { content?: string; type: string }) => (p.content ? `<${p.type}>${p.content}</${p.type}>` : ''))
+        .join('\n\n');
 
       const token_usage = deepseek_response.usage?.total_tokens || 0;
-      return { success: true, data: complexity_content, usage: token_usage };
+      return { success: true, data: tagged_text, usage: token_usage };
     }, 'generateComplexity');
   }
 }

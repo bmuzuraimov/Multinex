@@ -10,6 +10,63 @@ The final output must be a valid JSON object in the following format:
 
 Do not include any additional text outside of the JSON object. Ensure that the JSON is properly formatted.`;
 
+
+const SYSTEM_PROMPT_STUDY_METHODS = `You are an AI assistant specialized in analyzing text complexity and learning methods. Your task is to analyze the given text and tag different paragraphs based on their learning importance and recommended study method. IMPORTANT: You must not modify or rephrase any of the original text - only add a single tag around each paragraph.`;
+
+export const generateExercisePrompt = ({
+  prior_knowledge,
+  level,
+  length,
+  content,
+  pre_prompt,
+  post_prompt,
+}: {
+  prior_knowledge: string;
+  level: string;
+  length: string;
+  content: string;
+  pre_prompt: string;
+  post_prompt: string;
+}): { messages: { role: 'user'; content: string }[]; response_format: any } => {
+  const prompt = `${pre_prompt}
+  Document content:\n\n"${content}"\n\n
+  You must follow these rules:
+  - Separate sections with "\n\n" and paragraphs with "\n".
+  ${prior_knowledge.length > 0 ? `- Exclude these topics: ${prior_knowledge}.\n` : ''}.
+  ${level !== 'Auto' ? `- Technical depth: Match the user's level (${level}).\n` : ''}.
+  ${length !== 'Auto' ? `- Minimum length: ${length} words.\n` : ''}.
+  
+  ${post_prompt}`;
+
+  return {
+    messages: [
+      {
+        role: 'user',
+        content: prompt,
+      },
+    ],
+    response_format: exerciseFormat,
+  };
+};
+
+export const generateSummaryPrompt = ({
+  content,
+}: {
+  content: string;
+}): { messages: { role: 'user'; content: string }[]; response_format: any } => {
+  return {
+    messages: [
+      {
+        role: 'user',
+        content: `${SYSTEM_PROMPT_SUMMARY}\n\nPlease generate paragraph outline for the following lectureText:
+    ${content}`,
+      },
+    ],
+    response_format: summaryFormat
+  };
+};
+
+
 const MODE_INSTRUCTIONS = {
   write: {
     tag: 'write',
@@ -38,65 +95,25 @@ const MODE_INSTRUCTIONS = {
       'Content that can be absorbed through audio playback',
     ],
   },
-};
-
-const SYSTEM_PROMPT_STUDY_METHODS = `You are an AI assistant specialized in analyzing text complexity and learning methods. Your task is to analyze the given text and tag different paragraphs based on their learning importance and recommended study method. IMPORTANT: You must not modify or rephrase any of the original text - only add a single tag around each paragraph.`;
-
-export const generateExercisePrompt = ({
-  prior_knowledge,
-  level,
-  length,
-  content,
-  pre_prompt,
-  post_prompt,
-}: {
-  prior_knowledge: string;
-  level: string;
-  length: string;
-  content: string;
-  pre_prompt: string;
-  post_prompt: string;
-}): { messages: { role: 'system' | 'user'; content: string }[]; response_format: any } => {
-  const prompt = `${pre_prompt}
-  Document content:\n\n"${content}"\n\n
-  You must follow these rules:
-  - Separate sections with "\n\n" and paragraphs with "\n".
-  ${prior_knowledge.length > 0 ? `- Exclude these topics: ${prior_knowledge}.\n` : ''}.
-  ${level !== 'Auto' ? `- Technical depth: Match the user's level (${level}).\n` : ''}.
-  ${length !== 'Auto' ? `- Minimum length: ${length} words.\n` : ''}.
-  
-  ${post_prompt}`;
-
-  return {
-    messages: [
-      {
-        role: 'user',
-        content: prompt,
-      },
+  mermaid: {
+    tag: 'mermaid',
+    description: 'Insert mermaid script to visualize the content if needed',
+    examples: [
+      'Flowcharts and diagrams',
+      'Graphs and charts',
+      'Visual representations of data',
+      'Visual representations of algorithms',
+      'Visual representations of processes',
+      'Visual representations of systems',
+      'Visual representations of relationships',
+      'Visual representations of concepts',
+      'Visual representations of ideas',
+      'Visual representations of theories',
+      'Visual representations of models',
+      'Visual representations of systems',
+      'Visual representations of anything that can be represented in a visual way',
     ],
-    response_format: exerciseFormat,
-  };
-};
-
-export const generateSummaryPrompt = ({
-  content,
-}: {
-  content: string;
-}): { messages: { role: 'system' | 'user'; content: string }[]; response_format: any } => {
-  return {
-    messages: [
-      {
-        role: 'system',
-        content: SYSTEM_PROMPT_SUMMARY,
-      },
-      {
-        role: 'user',
-        content: `Please generate paragraph outline for the following lectureText:
-    ${content}`,
-      },
-    ],
-    response_format: summaryFormat
-  };
+  },
 };
 
 export const generateStudyMethodTagsPrompt = ({
@@ -105,7 +122,7 @@ export const generateStudyMethodTagsPrompt = ({
 }: {
   content: string;
   sensory_modes: string[];
-}): { messages: { role: 'system' | 'user'; content: string }[]; response_format: any } => {
+}): { messages: { role: 'user'; content: string }[]; response_format: any } => {
   let instructions = '';
 
   sensory_modes.forEach((mode, index) => {
@@ -122,17 +139,12 @@ export const generateStudyMethodTagsPrompt = ({
       Tag each segment with exactly one of these tags, ensuring proper spacing between tags:
       
       ${instructions}
-      Return the exact same text with a single appropriate learning method tag around each paragraph. Add a newline between different tagged paragraphs. Do not use nested tags. Do not change any words or formatting - only add tags with proper spacing between them.`;
-
+      Return the exact same text with a single appropriate learning method tag wrapping each paragraph. Add a newline between different tagged paragraphs. Do not use nested tags. Do not change any words or formatting - only add tags wrapping each paragraph with proper spacing between them.`;
   return {
     messages: [
       {
-        role: 'system',
-        content: system_content,
-      },
-      {
         role: 'user',
-        content: `Please analyze the following text and add a single appropriate learning method tag around each paragraph, ensuring proper spacing and newlines between different tagged paragraphs:\n\n"${content}"`,
+        content: `${system_content}\n\nPlease analyze the following text and wrap each paragraph with a single appropriate learning method tag, ensuring proper spacing and newlines between different tagged paragraphs:\n\n"${content}"`,
       },
     ],
     response_format: complexityFormat

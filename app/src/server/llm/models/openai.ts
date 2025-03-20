@@ -151,12 +151,17 @@ export class OpenAIService extends BaseLLMService {
       });
 
       const complexityContent = openaiResponse.choices[0]?.message?.content || '';
-      if (!complexityContent) {
+      const parsedContent = JSON.parse(complexityContent);
+      let taggedText = parsedContent.paragraphs
+        .map((p: { content?: string; type: string }) => (p.content ? `<${p.type}>${p.content}</${p.type}>` : ''))
+        .join('\n\n');
+
+      if (!taggedText) {
         throw new Error('Tagged text missing from complexity data.');
       }
 
       const tokenUsage = openaiResponse.usage?.total_tokens || 0;
-      return { success: true, data: complexityContent, usage: tokenUsage };
+      return { success: true, data: taggedText, usage: tokenUsage };
     }, 'generateComplexity');
   }
 }

@@ -58,7 +58,7 @@ export const exerciseGenerateSchema = z.object({
   model: z.string().min(1),
   include_summary: z.boolean(),
   include_mc_quiz: z.boolean(),
-  sensory_modes: z.array(z.enum(['listen', 'type', 'write'])),
+  sensory_modes: z.array(z.enum(['listen', 'type', 'write', 'mermaid'])),
 });
 
 export const exerciseShareSchema = z.object({

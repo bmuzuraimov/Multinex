@@ -29,8 +29,8 @@ export class LLMFactory {
     'deepseek-chat': ModelVendor.DEEPSEEK,
     'deepseek-coder': ModelVendor.DEEPSEEK,
     // Gemini models
-    'gemini-pro': ModelVendor.GEMINI,
-    'gemini-1.5-pro': ModelVendor.GEMINI
+    'gemini-2.0-flash-lite': ModelVendor.GEMINI,
+    'gemini-1.5-flash': ModelVendor.GEMINI
   };
 
   static getService(model: string): BaseLLMService {
