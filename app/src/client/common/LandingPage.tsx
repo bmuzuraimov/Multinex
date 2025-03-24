@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import HeroSection from '../components/LandingPage/HeroSection';
 import WhyMultinex from '../components/LandingPage/WhyMultinex';
-import ExperienceSection from '../components/LandingPage/ExperienceSection';
+import ComparisonSection from '../components/LandingPage/ComparisonSection';
 import FeaturesSection from '../components/LandingPage/FeatureSection';
 import FAQSection from '../components/LandingPage/FaqSection';
 import FooterSection from '../components/LandingPage/FooterSection';
@@ -10,8 +10,8 @@ import FooterSection from '../components/LandingPage/FooterSection';
 const MainContent = memo(() => (
   <main className='bg-white dark:bg-gray-900'>
     <HeroSection />
+    <ComparisonSection />
     <WhyMultinex />
-    <ExperienceSection />
     <FeaturesSection />
     <FAQSection />
   </main>

@@ -152,7 +152,7 @@ const AboutPage: React.FC = () => {
       </section>
 
       {/* Funding Information */}
-      <section className='max-w-7xl mx-auto px-8 py-16 bg-primary-50 rounded-3xl mb-20'>
+      {/* <section className='max-w-7xl mx-auto px-8 py-16 bg-primary-50 rounded-3xl mb-20'>
         <div className='flex items-center mb-12'>
           <TbLivePhoto className='text-primary-500 mr-3' size={32} />
           <h2 className='font-satoshi text-title-lg font-semibold text-primary-900'>Funding</h2>
@@ -173,16 +173,15 @@ const AboutPage: React.FC = () => {
             Total Funding: <span className='font-bold'>{total_funding.toLocaleString()} HKD</span>
           </p>
         </div>
-      </section>
+      </section> */}
 
       {/* Releases */}
-      <section className='max-w-7xl mx-auto px-8 py-16 mb-20'>
+      {/* <section className='max-w-7xl mx-auto px-8 py-16 mb-20'>
         <div className='flex items-center mb-12'>
           <FcCableRelease className='text-primary-500 mr-3' size={32} />
           <h2 className='font-satoshi text-title-lg font-semibold text-primary-900'>Releases</h2>
         </div>
 
-        {/* Add Feature Form - Only visible to admin */}
         {user?.email === ADMIN_EMAIL && (
           <div className='mb-12 bg-white rounded-2xl p-8 shadow-lg border border-primary-100'>
             <h3 className='font-satoshi text-title-sm font-semibold mb-6 text-primary-900'>Add New Feature</h3>
@@ -226,7 +225,6 @@ const AboutPage: React.FC = () => {
           </div>
         )}
 
-        {/* Upcoming Features */}
         <div className='mb-12'>
           <h3 className='font-satoshi text-title-sm font-semibold mb-6 text-primary-900'>Upcoming Features</h3>
           <ul className='space-y-6'>
@@ -267,7 +265,6 @@ const AboutPage: React.FC = () => {
           )}
         </div>
 
-        {/* Released Features */}
         <div>
           <h3 className='font-satoshi text-title-sm font-semibold mb-6 text-primary-900'>Released Features</h3>
           {features.filter((f) => f.completed).length > 0 ? (

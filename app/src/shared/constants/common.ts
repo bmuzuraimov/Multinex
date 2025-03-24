@@ -49,7 +49,7 @@ export const FAQS = [
   {
     id: 1,
     question: 'Which AI models do you support?',
-    answer: 'We support OpenAI GPT-4 and GPT-4-mini models, as well as models from Google Gemini.',
+    answer: 'We support models from OpenAI, Gemini and DeepSeek.',
     href: '',
   },
   {
