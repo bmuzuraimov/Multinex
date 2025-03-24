@@ -79,6 +79,9 @@ export const exerciseUpdateSchema = z.object({
     word_count: z.number().optional(),
     cursor: z.number().optional(),
     topic_id: z.string().uuid().nullable().optional(),
+    completed: z.boolean().optional(),
+    score: z.number().optional(),
+    completed_at: z.date().optional(),
   }),
 });
 

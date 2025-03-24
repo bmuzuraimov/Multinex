@@ -63,7 +63,7 @@ const ExercisePage: React.FC = React.memo(() => {
 
   const handleExerciseSubmission = useCallback(async () => {
     const PERFECT_SCORE = 100;
-    await updateExercise({
+    const updated_exercise = await updateExercise({
       id: exerciseId!,
       updated_data: {
         completed: true,
@@ -72,7 +72,7 @@ const ExercisePage: React.FC = React.memo(() => {
         completed_at: new Date(),
       },
     });
-
+    console.log('updated_exercise', updated_exercise);
     setExerciseMode('submitted');
   }, [exerciseId]);
 

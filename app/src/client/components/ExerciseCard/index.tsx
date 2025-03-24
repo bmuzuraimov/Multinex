@@ -155,7 +155,7 @@ const ExerciseCard: React.FC<{
           <div className='overflow-hidden rounded-md mb-4'>
             <img
               src={exercise.completed ? ExerciseDoneImg : ExerciseImg}
-              className='w-full transition-transform duration-300 group-hover:scale-105'
+              className='w-full p-4 transition-transform duration-300 group-hover:scale-105'
               alt='Exercise'
             />
           </div>
