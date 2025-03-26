@@ -13,6 +13,8 @@ export interface ExerciseFormContentSettings {
   set_prior_knowledge: (value: string[]) => void;
   topics: string[];
   set_topics: (value: string[]) => void;
+  content_type?: 'file' | 'text';
+  raw_content?: string;
 }
 
 export type ExerciseFormGenerationSettings = {

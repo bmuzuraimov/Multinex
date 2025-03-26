@@ -88,3 +88,14 @@ export const exerciseUpdateSchema = z.object({
 export const exerciseDeleteSchema = z.object({
   id: z.string().uuid(),
 });
+
+export const exerciseGenerateFromTextSchema = z.object({
+  content: z.string().min(1),
+  topic_id: z.string().uuid().nullable().optional(),
+  model: z.string().min(1),
+  include_summary: z.boolean(),
+  include_mc_quiz: z.boolean(),
+  sensory_modes: z.array(z.enum(['listen', 'type', 'write', 'mermaid'])),
+  length: z.string().optional().default('Auto'),
+  level: z.string().optional().default('Auto'),
+});

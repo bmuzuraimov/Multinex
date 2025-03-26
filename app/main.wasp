@@ -215,6 +215,12 @@ page CheckoutPage {
   component: import Checkout from "@src/client/app/CheckoutPage"
 }
 
+route CreateExerciseRoute { path: "/create-exercise", to: CreateExercisePage }
+page CreateExercisePage {
+  authRequired: true,
+  component: import Checkout from "@src/client/components/ExerciseForm/CreateExercise"
+}
+
 
 
 /* ⛑ These are the Wasp Operations: server code that you can easily call
@@ -296,6 +302,11 @@ action deleteTopic {
 action createExercise {
   fn: import { createExercise } from "@src/server/actions/exercises.js",
   entities: [Exercise, Question, User]
+}
+
+action generateExerciseFromText {
+  fn: import { generateExerciseFromText } from "@src/server/actions/exercises.js",
+  entities: [Exercise, User, Question, ExerciseGeneratePrompt],
 }
 
 action generateExercise {

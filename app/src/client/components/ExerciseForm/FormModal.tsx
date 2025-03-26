@@ -46,6 +46,10 @@ const FormModal: React.FC<FormModalProps> = ({
     exercise_settings.set_sensory_modes(updated_modes);
   };
 
+  const modalTitle = exercise_settings.content_type === 'text' 
+    ? 'Generate from Text' 
+    : exercise_settings.exercise_name;
+
   return ReactDOM.createPortal(
     <div className='fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-sm'>
       <div className='bg-white rounded-xl p-6 max-w-2xl w-full shadow-lg font-satoshi max-h-[90vh] overflow-y-auto'>
@@ -72,7 +76,7 @@ const FormModal: React.FC<FormModalProps> = ({
           <div className='relative p-3 bg-primary-50 rounded-full mt-6'>
             <BsFiletypeAi className='w-8 h-8 text-primary-600' />
           </div>
-          <h2 className='text-title-sm font-manrope font-semibold text-gray-900'>{exercise_settings.exercise_name}</h2>
+          <h2 className='text-title-sm font-manrope font-semibold text-gray-900'>{modalTitle}</h2>
 
           {/* Form Content */}
           <div className='w-full space-y-4'>
