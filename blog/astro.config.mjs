@@ -67,6 +67,32 @@ export default defineConfig({
             },
           ],
         },
+        {
+          label: 'Start',
+          items: [
+            {
+              label: 'Prerequisites',
+              link: '/start/prerequisites/',
+            },
+            {
+              label: 'Installation',
+              link: '/start/installation/',
+            },
+            {
+              label: 'Setup',
+              link: '/start/setup/',
+            },
+          ],
+        },
+        {
+          label: 'Project Structure',
+          link: '/structure/',
+        },
+        // Optional
+        // {
+        //   label: 'Data Model',
+        //   link: '/model/',
+        // },
       ],
       plugins: [
         starlightBlog({
