@@ -172,6 +172,7 @@ model Exercise {
   word_count         Int            @default(0)
   completed          Boolean        @default(false)
   completed_at       DateTime?
+  started_at         DateTime?
   truncated          Boolean        @default(false)
   score              Int            @default(0)
   tokens             Int            @default(0)
@@ -185,6 +186,7 @@ model Exercise {
   topic              Topic?         @relation(fields: [topic_id], references: [id], onDelete: Cascade)
   user               User?          @relation(fields: [user_id], references: [id], onDelete: Cascade) // Made optional
   created_at         DateTime       @default(now())
+  time_taken         Int?           @default(0)
   demo_exercise      DemoExercise?
 
   @@index([user_id])

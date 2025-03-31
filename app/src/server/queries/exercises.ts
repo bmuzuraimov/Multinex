@@ -4,11 +4,14 @@ import {
   type GetExercisesWithNoTopic,
   type GetExerciseById,
   type HasCompletedExercises,
+  type GetExerciseAnalytics,
 } from 'wasp/server/operations';
 import { getS3DownloadUrl } from '../utils/s3Utils';
 import { preprocessEssay } from '../utils/exerciseUtils';
 import { SensoryMode } from '../../shared/types';
 import { ExerciseStatus } from '@prisma/client';
+import { ApiResponse } from '../actions/types';
+import { handleError, validateUserAccess } from '../actions/utils';
 
 export const getExercisesWithNoTopic: GetExercisesWithNoTopic<void, Exercise[]> = async (_args, context) => {
   if (!context.user) {
@@ -114,4 +117,100 @@ export const getExerciseById: GetExerciseById<{ exercise_id: string }, ExerciseR
     formatted_essay: formattedEssay,
     audio_url: audioUrl,
   };
+};
+
+export const getExerciseAnalytics: GetExerciseAnalytics<
+  { exerciseId: string },
+  ApiResponse<any>
+> = async ({ exerciseId }, context) => {
+  try {
+    const user = validateUserAccess(context);
+
+    // Check if the user owns the original exercise
+    const originalExercise = await context.entities.Exercise.findFirst({
+      where: {
+        id: exerciseId,
+        user_id: user.id,
+      },
+    });
+
+    if (!originalExercise) {
+      return {
+        success: false,
+        code: 404,
+        message: 'Exercise not found or you do not have permission to view analytics',
+      };
+    }
+
+    // Find all duplicates of this exercise (shared copies)
+    const sharedExercises = await context.entities.Exercise.findMany({
+      where: {
+        duplicate_id: exerciseId,
+      },
+      include: {
+        user: {
+          select: {
+            email: true,
+          },
+        },
+      },
+    });
+
+    // Calculate analytics
+    const totalShares = sharedExercises.length;
+    const completedExercises = sharedExercises.filter(ex => ex.completed);
+    const totalCompletions = completedExercises.length;
+    
+    // Calculate scores and time spent
+    const scores = sharedExercises
+      .filter(ex => ex.completed && ex.score !== null)
+      .map(ex => ex.score)
+      .filter((score): score is number => score !== null);
+    
+    const timeSpentValues = sharedExercises
+      .filter(ex => ex.completed && ex.time_taken !== null)
+      .map(ex => ex.time_taken)
+      .filter((time): time is number => time !== null);
+
+    // Calculate averages
+    const averageScore = scores.length > 0 
+      ? scores.reduce((sum, score) => sum + score, 0) / scores.length 
+      : 0;
+    
+    const averageTimeSpent = timeSpentValues.length > 0
+      ? timeSpentValues.reduce((sum, time) => sum + time, 0) / timeSpentValues.length
+      : 0;
+    
+    const completionRate = totalShares > 0 
+      ? (totalCompletions / totalShares) * 100 
+      : 0;
+
+    // Prepare user progress data
+    const userProgress = sharedExercises.map(ex => {
+      return {
+        email: ex.user?.email || 'Unknown user',
+        completed: ex.completed,
+        score: ex.score,
+        timeSpent: ex.time_taken,
+        startedAt: ex.started_at ? ex.started_at.toISOString() : null,
+        completedAt: ex.completed_at ? ex.completed_at.toISOString() : null,
+      };
+    });
+
+    return {
+      success: true,
+      code: 200,
+      message: 'Analytics retrieved successfully',
+      data: {
+        totalShares,
+        totalCompletions,
+        averageScore,
+        averageTimeSpent,
+        completionRate,
+        userProgress,
+      },
+    };
+  } catch (error) {
+    return handleError(context.user?.email || 'demo', error, 'getExerciseAnalytics');
+  }
 };

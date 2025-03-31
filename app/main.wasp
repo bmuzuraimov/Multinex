@@ -385,6 +385,11 @@ query getExercisesWithNoTopic {
   entities: [Exercise]
 }
 
+query getExerciseAnalytics {
+  fn: import { getExerciseAnalytics } from "@src/server/queries/exercises.js",
+  entities: [Exercise, User]
+}
+
 query getExerciseById {
   fn: import { getExerciseById } from "@src/server/queries/exercises.js",
   entities: [Exercise]

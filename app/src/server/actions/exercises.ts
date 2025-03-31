@@ -311,6 +311,15 @@ export const shareExercise: ShareExercise<
       throw new Error('Exercise not found');
     }
 
+    // Check if the exercise is a duplicate (has a duplicate_id)
+    if (exercise.duplicate_id) {
+      return {
+        success: false,
+        code: 403,
+        message: 'Shared exercises cannot be reshared'
+      };
+    }
+
     await Promise.all(
       validatedInput.emails.map(async (email) => {
         await context.entities.Exercise.create({
@@ -339,6 +348,7 @@ export const updateExercise: UpdateExercise<
   { id: string; updated_data: Partial<Exercise> },
   ApiResponse<Exercise>
 > = async (input, context) => {
+  console.log('updateExercise', input); 
   try {
     const validatedInput = exerciseUpdateSchema.parse(input);
 
@@ -353,10 +363,43 @@ export const updateExercise: UpdateExercise<
       validatedInput.updated_data.cursor = Math.max(0, validatedInput.updated_data.cursor);
     }
 
+    // Calculate time_taken if completed_at is being set and we have a started_at
+    if (validatedInput.updated_data.completed_at && !validatedInput.updated_data.time_taken) {
+      // Get the current exercise to check if it has started_at
+      const currentExercise = await context.entities.Exercise.findUnique({
+        where: { id: validatedInput.id }
+      });
+      
+      if (currentExercise?.started_at) {
+        const startTime = new Date(currentExercise.started_at).getTime();
+        const endTime = new Date(validatedInput.updated_data.completed_at).getTime();
+        
+        // Ensure start time is before end time
+        if (startTime < endTime) {
+          const timeTakenSeconds = Math.max(0, (endTime - startTime) / 1000); // Convert ms to seconds
+          validatedInput.updated_data.time_taken = timeTakenSeconds; // Store in seconds for more precision
+          console.log(`Calculated time_taken: ${timeTakenSeconds} seconds`);
+        } else {
+          console.log('Warning: started_at is after completed_at, using default time_taken of 60 seconds');
+          validatedInput.updated_data.time_taken = 60; // Default to 60 seconds if timestamps are in wrong order
+        }
+      }
+    }
+
+    // Add debug logging here
+    console.log('Attempting to update exercise:', {
+      id: validatedInput.id,
+      user_id: user.id,
+      updates: validatedInput.updated_data
+    });
+
     const updated_exercise = await context.entities.Exercise.update({
       where: { id: validatedInput.id, user_id: user.id },
       data: validatedInput.updated_data,
     });
+
+    // Log the result
+    console.log('Update result:', updated_exercise);
 
     return {
       success: true,
@@ -365,6 +408,8 @@ export const updateExercise: UpdateExercise<
       data: updated_exercise,
     };
   } catch (error) {
+    // Enhanced error logging
+    console.error('Error updating exercise:', error);
     return handleError(context.user?.email || 'demo', error, 'updateExercise');
   }
 };

@@ -9,9 +9,19 @@ import { Tooltip } from 'react-tooltip';
 import ExerciseEditModal from './ExerciseEditModal';
 import { LuShare } from "react-icons/lu";
 import { toast } from 'sonner';
+import { getAllUsers } from 'wasp/client/operations'; // Import the getAllUsers operation
+import { BiLock, BiWorld, BiBarChart } from 'react-icons/bi';
+import ExerciseAnalyticsModal from './ExerciseAnalyticsModal';
 
-// Memoized ShareMenu component
-const ShareMenu = memo(({ isOpen, onClose, emailsInput, setEmailsInput, onShare }: {
+// ShareMenu with suggestions, access, and role dropdowns
+const ShareMenu = memo(({
+  isOpen,
+  onClose,
+  emailsInput,
+  setEmailsInput,
+  onShare,
+  users,
+}: {
   isOpen: boolean;
   onClose: () => void;
   emailsInput: string;
@@ -64,13 +74,20 @@ const ExerciseCard: React.FC<{
     completed: boolean;
     completed_at: Date | null;
     score: number;
+    duplicate_id: string | null;
   };
 }> = memo(({ index, exercise }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
+  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
   const [emailsInput, setEmailsInput] = useState('');
 
   const handleShare = async () => {
+    if (exercise.duplicate_id) {
+      toast.error('Shared exercises cannot be reshared.');
+      return;
+    }
+    
     const emails = emailsInput.split(',').map(email => email.trim()).filter(email => email !== '');
     if (emails.length > 0) {
       await shareExercise({ exercise_id: exercise.id, emails });
@@ -113,9 +130,18 @@ const ExerciseCard: React.FC<{
         emailsInput={emailsInput}
         setEmailsInput={setEmailsInput}
         onShare={handleShare}
+        users={users}
       />
 
-      <div className='relative flex flex-col items-center p-5 bg-white border border-primary-100 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer font-montserrat'>
+      {isAnalyticsModalOpen && (
+        <ExerciseAnalyticsModal
+          exerciseId={exercise.id}
+          exerciseName={exercise.name}
+          onClose={() => setIsAnalyticsModalOpen(false)}
+        />
+      )}
+
+      <div className="relative flex flex-col items-center p-5 bg-white border border-primary-100 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer font-montserrat">
         {exercise.truncated && (
           <>
             <PiCropThin
@@ -131,10 +157,21 @@ const ExerciseCard: React.FC<{
             />
           </>
         )}
-        <div className='absolute top-3 right-3 flex gap-2 z-above'>
-          <button
-            className='text-lg text-secondary-400 hover:text-secondary-500 transition-colors duration-200'
-            onClick={() => setIsShareMenuOpen(true)}
+        <div className="absolute top-3 right-3 flex gap-2 z-10">
+          {!exercise.duplicate_id && (
+            <button 
+              onClick={() => setIsAnalyticsModalOpen(true)} 
+              className="text-lg text-primary-400 hover:text-primary-500"
+              data-tooltip-id={`analytics-tooltip-${index}`}
+            >
+              <BiBarChart />
+            </button>
+          )}
+          <button 
+            onClick={() => setIsShareMenuOpen(true)} 
+            className={`text-lg ${exercise.duplicate_id ? 'text-gray-400 cursor-not-allowed' : 'text-secondary-400 hover:text-secondary-500'}`}
+            disabled={!!exercise.duplicate_id}
+            data-tooltip-id={`share-tooltip-${index}`}
           >
             <LuShare />
           </button>
@@ -151,8 +188,16 @@ const ExerciseCard: React.FC<{
             <RiDeleteBin4Line />
           </button>
         </div>
-        <a href={`/exercise/${exercise.id}`} className='w-full group'>
-          <div className='overflow-hidden rounded-md mb-4'>
+        
+        <Tooltip id={`analytics-tooltip-${index}`} place="top" content="View exercise analytics" />
+        <Tooltip 
+          id={`share-tooltip-${index}`} 
+          place="top" 
+          content={exercise.duplicate_id ? "Shared exercises cannot be reshared" : "Share exercise"} 
+        />
+        
+        <a href={`/exercise/${exercise.id}`} className="w-full group">
+          <div className="overflow-hidden rounded-md mb-4">
             <img
               src={exercise.completed ? ExerciseDoneImg : ExerciseImg}
               className='w-full p-4 transition-transform duration-300 group-hover:scale-105'

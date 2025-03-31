@@ -8,6 +8,7 @@ import ExerciseInterface from '../components/ExerciseInterface';
 import { ExerciseProvider } from '../contexts/ExerciseContext';
 import useExercise from '../hooks/useExercise';
 import CardSkeleton from '../components/CardSkeleton';
+import ExerciseTimer from '../components/ExerciseInterface/ExerciseTimer';
 
 const ExercisePage: React.FC = React.memo(() => {
   const { exerciseId } = useParams();
@@ -111,6 +112,7 @@ const ExercisePage: React.FC = React.memo(() => {
   return (
     <ExerciseProvider value={context_value}>
       <div className='relative'>
+      <ExerciseTimer exerciseId={exerciseId!} />
         {exercise_mode === 'typing' && (
           <div className='relative flex flex-row h-full'>
             <ExerciseSidebar />

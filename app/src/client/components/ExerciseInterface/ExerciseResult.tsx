@@ -5,6 +5,10 @@ import { Tooltip } from 'react-tooltip';
 import { HiOutlineInformationCircle } from 'react-icons/hi';
 import { useExerciseContext } from '../../contexts/ExerciseContext';
 import { cn } from '../../../shared/utils';
+import { Exercise } from 'wasp/entities';
+import ExerciseTimer from './ExerciseTimer';
+import { toast } from 'sonner';
+
 interface ExerciseResultProps {
   exerciseId: string;
 }
@@ -13,6 +17,23 @@ const ExerciseResult: React.FC<ExerciseResultProps> = ({ exerciseId }) => {
   const { set_mode, has_quiz } = useExerciseContext() || {};
   const [selected_rating, setSelected_rating] = useState(0);
   const [hover_rating, setHover_rating] = useState(0);
+  const [exercise, setExercise] = useState<Exercise | null>(null);
+
+  useEffect(() => {
+    const fetchExercise = async () => {
+      try {
+        const response = await fetch(`/api/exercises/${exerciseId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setExercise(data);
+        }
+      } catch (error) {
+        console.error('Error fetching exercise:', error);
+      }
+    };
+    
+    fetchExercise();
+  }, [exerciseId]);
 
   const handleRating = async (rating: number) => {
     setSelected_rating(rating);
@@ -22,6 +43,7 @@ const ExerciseResult: React.FC<ExerciseResultProps> = ({ exerciseId }) => {
   return (
     <div className='flex items-center justify-center min-h-screen bg-white'>
       <Confetti className='fixed inset-0' numberOfPieces={200} />
+      <ExerciseTimer exerciseId={exerciseId} />
       <div className='relative max-w-2xl w-full mx-auto bg-white p-12 rounded-2xl shadow-lg border border-primary-100'>
         <HiOutlineInformationCircle
           className='absolute top-6 right-6 w-6 h-6 text-tertiary-400 hover:text-tertiary-500 transition-colors duration-200'
@@ -52,7 +74,35 @@ const ExerciseResult: React.FC<ExerciseResultProps> = ({ exerciseId }) => {
                 </button>
               )}
               <a href='/portal'>
-                <button className='px-8 py-3 bg-white text-primary-500 border-2 border-primary-500 rounded-xl font-satoshi font-medium hover:bg-primary-50 active:bg-primary-100 transform active:scale-[0.98] transition-all duration-200'>
+                <button
+                  className='px-8 py-3 bg-white text-primary-500 border-2 border-primary-500 rounded-xl font-satoshi font-medium hover:bg-primary-50 active:bg-primary-100 transform active:scale-[0.98] transition-all duration-200'
+                  onClick={() => {
+                    // Show some visual feedback that we're processing
+                    const processingToast = toast.loading("Saving your progress...");
+                    
+                    // Wait 5 seconds before updating
+                    setTimeout(() => {
+                      const completedAt = new Date();
+                      
+                      updateExercise({ 
+                        id: exerciseId, 
+                        updated_data: {
+                          completed: true,
+                          completed_at: completedAt
+                        }
+                      }).then(() => {
+                        toast.dismiss(processingToast);
+                        toast.success("Progress saved successfully!");
+                        // Navigate to portal after successful update
+                        window.location.href = '/portal';
+                      }).catch(error => {
+                        toast.dismiss(processingToast);
+                        toast.error("Failed to save progress");
+                        console.error(error);
+                      });
+                    }, 5000); // 5 second delay
+                  }}
+                >
                   Portal
                 </button>
               </a>
