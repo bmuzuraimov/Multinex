@@ -344,9 +344,56 @@ export const updateExercise: UpdateExercise<
 
     const user = validateUserAccess(context);
 
+    // Fetch the current exercise to compare <listen> tags content
+    const currentExercise = await context.entities.Exercise.findUnique({
+      where: { id: validatedInput.id, user_id: user.id },
+      select: { lesson_text: true }
+    });
+
+    if (!currentExercise) {
+      throw new Error('Exercise not found');
+    }
+
     if (validatedInput.updated_data.lesson_text && validatedInput.updated_data.lesson_text.length > 0) {
       validatedInput.updated_data.word_count = validatedInput.updated_data.lesson_text.split(' ').length;
       validatedInput.updated_data.paragraph_summary = '';
+      
+      // Check if the lesson_text contains <listen> tags and if content has changed
+      const newLessonText = validatedInput.updated_data.lesson_text;
+      if (newLessonText.includes('<listen>')) {
+        // Extract content from <listen> tags in new and current lesson text
+        const extractListenContent = (text: string) => {
+          const matches = text.match(/<listen>([\s\S]*?)<\/listen>/g);
+          return matches ? matches.join('') : '';
+        };
+        
+        const newListenContent = extractListenContent(newLessonText);
+        const currentListenContent = extractListenContent(currentExercise.lesson_text);
+        
+        // If content within <listen> tags has changed, regenerate audio
+        if (newListenContent !== currentListenContent) {
+          const document_parser_url = process.env.DOCUMENT_PARSER_URL;
+          if (!document_parser_url) {
+            throw new Error('DOCUMENT_PARSER_URL is not set');
+          }
+          
+          try {
+            const form_data = new FormData();
+            form_data.append('exercise_id', validatedInput.id);
+            form_data.append('generate_text', newLessonText);
+            const audio_response = await fetch(`${document_parser_url}/api/generate-audio`, {
+              method: 'POST',
+              body: form_data,
+            });
+            
+            if (!audio_response.ok) {
+              await handleError(context.user?.email || 'demo', audio_response, 'regenerateAudio');
+            }
+          } catch (err) {
+            await handleError(context.user?.email || 'demo', err, 'regenerateAudio');
+          }
+        }
+      }
     }
 
     if (validatedInput.updated_data.cursor !== undefined) {
