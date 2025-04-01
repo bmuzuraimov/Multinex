@@ -1,5 +1,4 @@
 import { useAuth } from 'wasp/client/auth';
-import { stripePayment } from 'wasp/client/operations';
 import { TIERS } from '../../shared/constants';
 import { AiFillCheckCircle } from 'react-icons/ai';
 import { useState } from 'react';
@@ -7,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '../../shared/utils';
 import { z } from 'zod';
 import { toast } from 'sonner';
-
+import { stripePayment } from 'wasp/client/operations';
 const PricingPage = () => {
   const [is_stripe_payment_loading, setIsStripePaymentLoading] = useState<boolean | string>(false);
   const { data: user, isLoading: is_user_loading } = useAuth();
