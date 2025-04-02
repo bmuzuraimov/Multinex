@@ -31,7 +31,7 @@ class ElevenLabsService:
                     status_code=500, detail="ELEVENLABS_API_KEY is not configured")
 
             try:
-                self.elevenlabs_client = ElevenLabs(api_key=api_key)
+                self.elevenlabs_client = ElevenLabs(api_key=api_key, timeout=3600)
                 self._initialized = True
             except Exception as e:
                 logger.error(

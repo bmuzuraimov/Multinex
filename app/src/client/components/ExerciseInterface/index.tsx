@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { BsTextareaT, BsKeyboard, BsArrowRight, BsPalette } from 'react-icons/bs';
 import { TEXT_SIZES } from '../../../shared/constants';
 import { useExerciseContext } from '../../contexts/ExerciseContext';
@@ -6,6 +6,54 @@ import useLocalStorage from '../../hooks/useLocalStorage';
 import { cn } from '../../../shared/utils';
 import { TextNode } from './TextNode';
 import Mermaid from 'react-mermaid2';
+
+// Memoized Mermaid component to prevent unnecessary re-renders
+const MemoizedMermaid = memo(({ chart }: { chart: string }) => {
+  return (
+    <Mermaid
+      config={{ securityLevel: 'loose', theme: 'base' }}
+      chart={chart}
+    />
+  );
+});
+
+// Lazy loading component for Mermaid diagrams
+const LazyMermaid = ({ chart, nodeId }: { chart: string; nodeId: number }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    
+    observer.observe(ref.current);
+    
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <div ref={ref} className="w-full flex justify-center items-center min-h-[100px]">
+      {isVisible ? (
+        <MemoizedMermaid chart={chart} />
+      ) : (
+        <div className="w-full h-[100px] flex items-center justify-center text-gray-400 bg-gray-100 dark:bg-gray-700 rounded">
+          Loading diagram...
+        </div>
+      )}
+    </div>
+  );
+};
 
 const ExerciseInterface: React.FC = () => {
   const { essay_list, text_size, set_text_size, highlighted_nodes, set_highlighted_nodes, submit_exercise } =
@@ -18,7 +66,6 @@ const ExerciseInterface: React.FC = () => {
   const [currentSpanRef, setCurrentSpanRef] = useState<HTMLSpanElement | null>(null);
   const isProcessingRef = useRef(false);
   const lastKeyTimeRef = useRef(0);
-  const KEY_THROTTLE_MS = 20; // Throttle key events to 50ms
 
   // Create update callback
   const handleUpdate = useCallback(() => {
@@ -45,13 +92,6 @@ const ExerciseInterface: React.FC = () => {
     if (!essay_list || !submit_exercise) return;
 
     const handleKeyDown = async (e: KeyboardEvent) => {
-      // Throttle key events to prevent excessive processing
-      const now = Date.now();
-      if (now - lastKeyTimeRef.current < KEY_THROTTLE_MS) {
-        return;
-      }
-      lastKeyTimeRef.current = now;
-
       // Prevent multiple simultaneous executions
       if (isProcessingRef.current) return;
       isProcessingRef.current = true;
@@ -134,13 +174,7 @@ const ExerciseInterface: React.FC = () => {
                     </React.Fragment>
                   ))
                 ) : textNode.mode === 'mermaid' && textNode.value.trim().length > 1 ? (
-                  <div className='w-full flex justify-center items-center'>
-                    <Mermaid
-                      config={{ securityLevel: 'loose', theme: 'base' }}
-                      chart={textNode.value}
-                      key={`mermaid-${textNode.id}`}
-                    />
-                  </div>
+                  <LazyMermaid chart={textNode.value} nodeId={textNode.id} />
                 ) : (
                   <>
                     {textNode.value == '\n' ? '↵' : textNode.value}
