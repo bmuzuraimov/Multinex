@@ -1,13 +1,13 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../shadcn/components/ui/card';
-import { ScrollArea } from '../shadcn/components/ui/scroll-area';
-import { Separator } from '../shadcn/components/ui/separator';
-import { Badge } from '../shadcn/components/ui/badge';
-import { Button } from '../shadcn/components/ui/button';
-import { FaShieldAlt, FaDatabase, FaUserShield, FaLock } from 'react-icons/fa';
+import { Card, CardContent, CardHeader, CardTitle } from '../../shadcn/components/ui/card';
+import { ScrollArea } from '../../shadcn/components/ui/scroll-area';
+import { Separator } from '../../shadcn/components/ui/separator';
+import { Badge } from '../../shadcn/components/ui/badge';
+import { Button } from '../../shadcn/components/ui/button';
+import { FaShieldAlt, FaDatabase, FaUserShield } from 'react-icons/fa';
 import { MdSecurity, MdContactSupport } from 'react-icons/md';
 import { SiOpenai } from 'react-icons/si';
-
+import DefaultLayout from '../layouts/DefaultLayout';
 const PrivacyPage: React.FC = () => {
   return (
     <ScrollArea className="h-screen">
@@ -159,4 +159,4 @@ const PrivacyPage: React.FC = () => {
   );
 };
 
-export default PrivacyPage;
+export default DefaultLayout(PrivacyPage);

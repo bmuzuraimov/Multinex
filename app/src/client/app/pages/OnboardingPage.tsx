@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { updateCurrentUser, createOnboarding } from 'wasp/client/operations';
-import { cn } from '../../shared/utils';
+import { cn } from '../../../shared/utils';
 import { toast } from 'sonner';
-import { USER_TYPES, STEP_MESSAGES, PROGRESS_WIDTHS, LEARNING_STYLES } from '../../shared/constants/onboarding';
-
+import { USER_TYPES, STEP_MESSAGES, PROGRESS_WIDTHS, LEARNING_STYLES } from '../../../shared/constants/onboarding';
+import DefaultLayout from '../layouts/DefaultLayout';
 // shadcn components
-import { Card, CardContent, CardHeader, CardTitle } from '../shadcn/components/ui/card';
-import { Button } from '../shadcn/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '../shadcn/components/ui/radio-group';
-import { Label } from '../shadcn/components/ui/label';
-import { Checkbox } from '../shadcn/components/ui/checkbox';
-import { ScrollArea } from '../shadcn/components/ui/scroll-area';
+import { Card, CardContent, CardHeader, CardTitle } from '../../shadcn/components/ui/card';
+import { Button } from '../../shadcn/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '../../shadcn/components/ui/radio-group';
+import { Label } from '../../shadcn/components/ui/label';
+import { Checkbox } from '../../shadcn/components/ui/checkbox';
+import { ScrollArea } from '../../shadcn/components/ui/scroll-area';
 
 const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,18 +20,18 @@ const OnboardingPage: React.FC = () => {
   const [learning_style, setLearningStyle] = useState<string>('');
   const [subject_interests, setSubjectInterests] = useState({
     science_medicine: false,
-    technology_engineering: false, 
+    technology_engineering: false,
     business_economics: false,
     humanities_arts: false,
     language_learning: false,
-    test_prep: false
+    test_prep: false,
   });
   const [motivation_factors, setMotivationFactors] = useState({
     progress: false,
     gamification: false,
     reminders: false,
     community: false,
-    tool_only: false
+    tool_only: false,
   });
   const [source_channels, setSourceChannels] = useState({
     twitter: false,
@@ -40,7 +40,7 @@ const OnboardingPage: React.FC = () => {
     facebook: false,
     youtube: false,
     google: false,
-    word_of_mouth: false
+    word_of_mouth: false,
   });
 
   const handleOnboardingSubmit = async () => {
@@ -71,7 +71,7 @@ const OnboardingPage: React.FC = () => {
         source_youtube: source_channels.youtube,
         source_google: source_channels.google,
         source_word_of_mouth: source_channels.word_of_mouth,
-        feature_request: ""
+        feature_request: '',
       });
       await updateCurrentUser({ onboarding_complete: true });
       navigate('/portal');
@@ -96,29 +96,28 @@ const OnboardingPage: React.FC = () => {
           <CardHeader className='space-y-6'>
             {/* Progress Bar */}
             <div className='w-full max-w-8xl bg-primary-100 h-1.5 rounded-full relative mt-8'>
-              <div className={cn(
-                'bg-primary-500 h-1.5 rounded-full transition-all duration-500',
-                PROGRESS_WIDTHS[current_step - 1]
-                )}>
-              </div>
+              <div
+                className={cn(
+                  'bg-primary-500 h-1.5 rounded-full transition-all duration-500',
+                  PROGRESS_WIDTHS[current_step - 1]
+                )}
+              ></div>
             </div>
 
             {/* Back and Skip Buttons */}
             <div className='flex justify-between items-center'>
               {current_step > 1 ? (
                 <Button
-                  variant="ghost"
+                  variant='ghost'
                   onClick={() => setCurrentStep(current_step - 1)}
                   className='text-primary-600 hover:text-primary-700'
                 >
                   ← Back
                 </Button>
-              ) : <div />}
-              <Button
-                variant="ghost"
-                onClick={handleSkip}
-                className='text-primary-600 hover:text-primary-700'
-              >
+              ) : (
+                <div />
+              )}
+              <Button variant='ghost' onClick={handleSkip} className='text-primary-600 hover:text-primary-700'>
                 Skip →
               </Button>
             </div>
@@ -160,7 +159,7 @@ const OnboardingPage: React.FC = () => {
                   <Button
                     onClick={() => setCurrentStep(2)}
                     className='w-full text-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors'
-                    size="lg"
+                    size='lg'
                   >
                     Continue
                   </Button>
@@ -195,7 +194,7 @@ const OnboardingPage: React.FC = () => {
                   <Button
                     onClick={() => setCurrentStep(3)}
                     className='w-full text-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors'
-                    size="lg"
+                    size='lg'
                   >
                     Continue
                   </Button>
@@ -212,9 +211,7 @@ const OnboardingPage: React.FC = () => {
                         className={cn(
                           'flex items-center p-4 rounded-xl transition-all duration-300 cursor-pointer',
                           'border-2',
-                          value
-                            ? 'border-primary-500 bg-primary-50'
-                            : 'border-primary-100 hover:border-primary-200'
+                          value ? 'border-primary-500 bg-primary-50' : 'border-primary-100 hover:border-primary-200'
                         )}
                       >
                         <Checkbox
@@ -222,14 +219,19 @@ const OnboardingPage: React.FC = () => {
                           onCheckedChange={(checked) => setSubjectInterests({ ...subject_interests, [key]: checked })}
                           className='hidden'
                         />
-                        <div className={cn(
-                          'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
-                          value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
-                        )}>
-                          {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
+                        <div
+                          className={cn(
+                            'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
+                            value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
+                          )}
+                        >
+                          {value && <div className='w-2 h-2 bg-white rounded-sm'></div>}
                         </div>
                         <span className='font-satoshi text-lg text-primary-900'>
-                          {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                          {key
+                            .split('_')
+                            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join(' ')}
                         </span>
                       </Label>
                     ))}
@@ -238,7 +240,7 @@ const OnboardingPage: React.FC = () => {
                   <Button
                     onClick={() => setCurrentStep(4)}
                     className='w-full text-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors'
-                    size="lg"
+                    size='lg'
                   >
                     Continue
                   </Button>
@@ -255,9 +257,7 @@ const OnboardingPage: React.FC = () => {
                         className={cn(
                           'flex items-center p-4 rounded-xl transition-all duration-300 cursor-pointer',
                           'border-2',
-                          value
-                            ? 'border-primary-500 bg-primary-50'
-                            : 'border-primary-100 hover:border-primary-200'
+                          value ? 'border-primary-500 bg-primary-50' : 'border-primary-100 hover:border-primary-200'
                         )}
                       >
                         <Checkbox
@@ -265,11 +265,13 @@ const OnboardingPage: React.FC = () => {
                           onCheckedChange={(checked) => setMotivationFactors({ ...motivation_factors, [key]: checked })}
                           className='hidden'
                         />
-                        <div className={cn(
-                          'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
-                          value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
-                        )}>
-                          {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
+                        <div
+                          className={cn(
+                            'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
+                            value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
+                          )}
+                        >
+                          {value && <div className='w-2 h-2 bg-white rounded-sm'></div>}
                         </div>
                         <span className='font-satoshi text-lg text-primary-900'>
                           {key.charAt(0).toUpperCase() + key.slice(1)}
@@ -281,7 +283,7 @@ const OnboardingPage: React.FC = () => {
                   <Button
                     onClick={() => setCurrentStep(5)}
                     className='w-full text-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors'
-                    size="lg"
+                    size='lg'
                   >
                     Continue
                   </Button>
@@ -298,9 +300,7 @@ const OnboardingPage: React.FC = () => {
                         className={cn(
                           'flex items-center p-4 rounded-xl transition-all duration-300 cursor-pointer',
                           'border-2',
-                          value
-                            ? 'border-primary-500 bg-primary-50'
-                            : 'border-primary-100 hover:border-primary-200'
+                          value ? 'border-primary-500 bg-primary-50' : 'border-primary-100 hover:border-primary-200'
                         )}
                       >
                         <Checkbox
@@ -308,14 +308,19 @@ const OnboardingPage: React.FC = () => {
                           onCheckedChange={(checked) => setSourceChannels({ ...source_channels, [key]: checked })}
                           className='hidden'
                         />
-                        <div className={cn(
-                          'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
-                          value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
-                        )}>
-                          {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
+                        <div
+                          className={cn(
+                            'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
+                            value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
+                          )}
+                        >
+                          {value && <div className='w-2 h-2 bg-white rounded-sm'></div>}
                         </div>
                         <span className='font-satoshi text-lg text-primary-900'>
-                          {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                          {key
+                            .split('_')
+                            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join(' ')}
                         </span>
                       </Label>
                     ))}
@@ -324,7 +329,7 @@ const OnboardingPage: React.FC = () => {
                   <Button
                     onClick={handleOnboardingSubmit}
                     className='w-full text-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors'
-                    size="lg"
+                    size='lg'
                   >
                     Complete
                   </Button>
@@ -338,4 +343,4 @@ const OnboardingPage: React.FC = () => {
   );
 };
 
-export default OnboardingPage;
+export default DefaultLayout(OnboardingPage);

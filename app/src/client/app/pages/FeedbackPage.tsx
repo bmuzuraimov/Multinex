@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { createFeedback } from 'wasp/client/operations';
 import { FiCheckCircle, FiSend } from 'react-icons/fi';
-import { cn } from '../../shared/utils';
+import { cn } from '../../../shared/utils';
 
 // shadcn components
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../shadcn/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../shadcn/components/ui/select';
-import { Textarea } from '../shadcn/components/ui/textarea';
-import { Button } from '../shadcn/components/ui/button';
-import { Checkbox } from '../shadcn/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '../shadcn/components/ui/radio-group';
-import { Label } from '../shadcn/components/ui/label';
-import { Separator } from '../shadcn/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../shadcn/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../shadcn/components/ui/select';
+import { Textarea } from '../../shadcn/components/ui/textarea';
+import { Button } from '../../shadcn/components/ui/button';
+import { Checkbox } from '../../shadcn/components/ui/checkbox';
+import { Label } from '../../shadcn/components/ui/label';
+import { Separator } from '../../shadcn/components/ui/separator';
+import DefaultLayout from '../layouts/DefaultLayout';
 
 const FeedbackPage: React.FC = () => {
   const [form_data, setFormData] = useState({
@@ -229,4 +229,4 @@ const FeedbackPage: React.FC = () => {
   );
 };
 
-export default FeedbackPage;
+export default DefaultLayout(FeedbackPage);

@@ -1,21 +1,21 @@
 import { useQuery, getAllCourses, getExercisesWithNoTopic } from 'wasp/client/operations';
 import { useState, useEffect, useCallback } from 'react';
-import ExerciseForm from '../components/ExerciseForm';
-import CourseForm from '../components/CourseForm';
-import ExerciseCard from '../components/ExerciseCard';
-import UserTour from '../components/UserTour';
-import FooterSection from '../components/LandingPage/FooterSection';
+import ExerciseForm from '../../components/ExerciseForm';
+import CourseForm from '../../components/CourseForm';
+import ExerciseCard from '../../components/ExerciseCard';
+import DefaultLayout from '../layouts/DefaultLayout';
+import UserTour from '../../components/UserTour';
 import { useAuth } from 'wasp/client/auth';
-import CourseCard from '../components/CourseCard';
+import CourseCard from '../../components/CourseCard';
 import { toast } from 'sonner';
 
 // Import shadcn components
-import { Card, CardContent, CardHeader, CardTitle } from '../shadcn/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../shadcn/components/ui/tabs';
-import { Separator } from '../shadcn/components/ui/separator';
-import { Skeleton } from '../shadcn/components/ui/skeleton';
-import { ScrollArea } from '../shadcn/components/ui/scroll-area';
-import { Badge } from '../shadcn/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../../shadcn/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../shadcn/components/ui/tabs';
+import { Separator } from '../../shadcn/components/ui/separator';
+import { Skeleton } from '../../shadcn/components/ui/skeleton';
+import { ScrollArea } from '../../shadcn/components/ui/scroll-area';
+import { Badge } from '../../shadcn/components/ui/badge';
 
 // Import icons
 import { FiBook, FiFileText } from 'react-icons/fi';
@@ -31,7 +31,7 @@ interface Course {
   created_at: Date;
 }
 
-export default function PortalPage() {
+const PortalPage = () => {
   const {
     data: courses,
     error: courses_error,
@@ -181,10 +181,7 @@ export default function PortalPage() {
                         </Card>
 
                         {exercises?.map((exercise: any, index: number) => (
-                          <Card
-                            key={exercise.id}
-                            className='overflow-hidden hover:shadow-md transition-all'
-                          >
+                          <Card key={exercise.id} className='overflow-hidden hover:shadow-md transition-all'>
                             <ExerciseCard exercise={exercise} index={index} />
                           </Card>
                         ))}
@@ -197,8 +194,8 @@ export default function PortalPage() {
           </TabsContent>
         </Tabs>
       </div>
-
-      <FooterSection />
     </div>
   );
-}
+};
+
+export default DefaultLayout(PortalPage);

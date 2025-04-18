@@ -47,12 +47,12 @@ export const updateUserSchema = z.object({
 
 export const exerciseCreateSchema = z.object({
   name: z.string().min(1).max(100).trim(),
-  topic_id: z.string().uuid().nullable(),
+  topic_id: z.string().nullable(),
 });
 
 export const exerciseGenerateSchema = z.object({
   exercise_id: z.string().uuid(),
-  prior_knowledge: z.array(z.string()),
+  selected_topics: z.array(z.string()),
   length: z.string().min(1),
   level: z.string().min(1),
   model: z.string().min(1),
@@ -71,7 +71,6 @@ export const exerciseUpdateSchema = z.object({
   updated_data: z.object({
     name: z.string().min(1).max(100).trim().optional(),
     lesson_text: z.string().optional(),
-    paragraph_summary: z.string().optional(),
     level: z.string().optional(),
     truncated: z.boolean().optional(),
     tokens: z.number().optional(),
@@ -80,7 +79,6 @@ export const exerciseUpdateSchema = z.object({
     cursor: z.number().optional(),
     topic_id: z.string().uuid().nullable().optional(),
     completed: z.boolean().optional(),
-    score: z.number().optional(),
     completed_at: z.date().optional(),
   }),
 });

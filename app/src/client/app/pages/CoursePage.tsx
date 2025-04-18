@@ -11,25 +11,26 @@ import {
 } from 'wasp/client/operations';
 import { useAuth } from 'wasp/client/auth';
 import { toast } from 'sonner';
-import { cn } from '../../shared/utils';
+import { cn } from '../../../shared/utils';
+import DefaultLayout from '../layouts/DefaultLayout';
 
 // Shadcn Components
-import { Card, CardHeader } from '../shadcn/components/ui/card';
-import { Input } from '../shadcn/components/ui/input';
-import { Button } from '../shadcn/components/ui/button';
-import { ScrollArea } from '../shadcn/components/ui/scroll-area';
+import { Card, CardHeader } from '../../shadcn/components/ui/card';
+import { Input } from '../../shadcn/components/ui/input';
+import { Button } from '../../shadcn/components/ui/button';
+import { ScrollArea } from '../../shadcn/components/ui/scroll-area';
 
 // Icons
 import { HiLockClosed, HiGlobeAlt } from 'react-icons/hi';
 import { FiPlus } from 'react-icons/fi';
 
 // Components
-import UserTour from '../components/UserTour';
-import ExerciseCard from '../components/ExerciseCard';
-import ExerciseForm from '../components/ExerciseForm';
+import UserTour from '../../components/UserTour';
+import ExerciseCard from '../../components/ExerciseCard';
+import ExerciseForm from '../../components/ExerciseForm';
 import { RiDeleteBin4Line } from 'react-icons/ri';
 
-export default function CoursePage() {
+const CoursePage = () => {
   const { id: course_id } = useParams<{ id: string }>();
   if (!course_id) return null;
 
@@ -87,7 +88,9 @@ export default function CoursePage() {
                   onClick={handlePublishCourse}
                   className={cn(
                     'gap-2 transition-all duration-300',
-                    course?.is_public ? 'text-tertiary-600 hover:text-tertiary-700' : 'text-primary-600 hover:text-primary-700'
+                    course?.is_public
+                      ? 'text-tertiary-600 hover:text-tertiary-700'
+                      : 'text-primary-600 hover:text-primary-700'
                   )}
                 >
                   {course?.is_public ? (
@@ -116,17 +119,13 @@ export default function CoursePage() {
 
         {/* Topics Section */}
         <ScrollArea className='h-full'>
-          <div className='space-y-8'>
-            {topics?.map((topic) => (
-              <TaskSection key={topic.id} topic={topic} />
-            ))}
-          </div>
+          <div className='space-y-8'>{topics?.map((topic) => <TaskSection key={topic.id} topic={topic} />)}</div>
         </ScrollArea>
       </div>
       {user && <UserTour user_id={user.id} />}
     </div>
   );
-}
+};
 
 const TaskSection: React.FC<{
   topic: {
@@ -144,7 +143,6 @@ const TaskSection: React.FC<{
       word_count: number;
       completed: boolean;
       completed_at: Date | null;
-      score: number;
     }[];
   };
 }> = React.memo(({ topic }) => {
@@ -171,8 +169,8 @@ const TaskSection: React.FC<{
         onClick: () => {
           toast.promise(deleteTopic({ id: topic.id }), {
             loading: 'Deleting section...',
-            success: 'Section deleted successfully', 
-            error: 'Failed to delete section'
+            success: 'Section deleted successfully',
+            error: 'Failed to delete section',
           });
         },
       },
@@ -214,3 +212,5 @@ const TaskSection: React.FC<{
     </div>
   );
 });
+
+export default DefaultLayout(CoursePage);

@@ -8,5 +8,4 @@ export type Exercise = {
   word_count: number;
   completed: boolean;
   completed_at: Date | null;
-  score: number;
 }; 

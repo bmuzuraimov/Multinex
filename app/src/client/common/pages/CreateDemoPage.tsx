@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useQuery, getDemoExercise } from 'wasp/client/operations';
-import ExerciseResult from '../components/ExerciseInterface/ExerciseResult';
-import ExerciseSidebar from '../components/ExerciseInterface/ExerciseSidebar';
-import ExerciseTest from '../components/ExerciseInterface/ExerciseTest';
-import ExerciseInterface from '../components/ExerciseInterface';
-import { ExerciseProvider } from '../contexts/ExerciseContext';
-import useExercise from '../hooks/useExercise';
-
+import ExerciseResult from '../../components/ExerciseInterface/ExerciseResult';
+import ExerciseSidebar from '../../components/ExerciseInterface/ExerciseSidebar';
+import ExerciseTest from '../../components/ExerciseInterface/ExerciseTest';
+import ExerciseInterface from '../../components/ExerciseInterface';
+import { ExerciseProvider } from '../../contexts/ExerciseContext';
+import useExercise from '../../hooks/useExercise';
+import DefaultLayout from '../layouts/DefaultLayout';
 const CreateDemoPage: React.FC = React.memo(() => {
   const [text_size, setTextSize] = useState('xl');
   const [mode, set_mode] = useState<'typing' | 'submitted' | 'test'>('typing');
@@ -14,29 +14,21 @@ const CreateDemoPage: React.FC = React.memo(() => {
 
   const query_params = {
     user_agent: window.navigator.userAgent,
-    browser_language: window.navigator.language, 
+    browser_language: window.navigator.language,
     screen_resolution: `${window.screen.width}x${window.screen.height}`,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   };
 
   const { data: demo_exercise, isLoading } = useQuery(getDemoExercise, query_params);
 
-  const { 
-    essay,
-    essay_list,
-    essay_word_count,
-    essay_char_count,
-    summary,
-    has_quiz
-  } = useExercise(
+  const { essay, essay_list, essay_word_count, essay_char_count, has_quiz } = useExercise(
     demo_exercise?.exercise?.id || '',
     demo_exercise?.exercise?.lesson_text || '',
     demo_exercise?.formatted_essay || [],
-    demo_exercise?.exercise?.paragraph_summary || '',
-    demo_exercise?.exercise?.questions.map(q => ({
+    demo_exercise?.exercise?.questions.map((q) => ({
       ...q,
       exercise_id: q.exercise_id,
-      created_at: q.created_at
+      created_at: q.created_at,
     })) || [],
     mode,
     text_size,
@@ -79,7 +71,6 @@ const CreateDemoPage: React.FC = React.memo(() => {
     text_size,
     set_text_size: setTextSize,
     submit_exercise: handleSubmitExercise,
-    summary,
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -100,4 +91,4 @@ const CreateDemoPage: React.FC = React.memo(() => {
   );
 });
 
-export default CreateDemoPage;
+export default DefaultLayout(CreateDemoPage);

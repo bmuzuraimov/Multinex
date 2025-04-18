@@ -1,15 +1,8 @@
 import OpenAI from 'openai';
-import {
-  generateExercisePrompt,
-  generateSummaryPrompt,
-  generateExamPrompt,
-  generateStudyMethodTagsPrompt,
-  generateCoursePrompt,
-} from '../prompts';
+import { generateTopicPrompt, generateExamPrompt, generateCoursePrompt } from '../prompts';
 import { MAX_TOKENS } from '../../../shared/constants';
 import { HttpError } from 'wasp/server';
 import { TEMPERATURE } from '../../../shared/constants';
-import { SensoryMode } from '../../../shared/types';
 import { BaseLLMService, LLMResponse } from './base';
 
 export class OpenAIService extends BaseLLMService {
@@ -27,9 +20,9 @@ export class OpenAIService extends BaseLLMService {
     this.openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   }
 
-  async generateExercise(
+  async generateTopic(
     exerciseRawContent: string,
-    priorKnowledge: string,
+    selectedTopics: string,
     exerciseLength: string,
     difficultyLevel: string,
     modelName: string,
@@ -39,9 +32,9 @@ export class OpenAIService extends BaseLLMService {
     return this.withRetry(async () => {
       const openaiResponse = await this.openaiClient.chat.completions.create({
         model: modelName,
-        ...generateExercisePrompt({
+        ...generateTopicPrompt({
           content: exerciseRawContent,
-          prior_knowledge: priorKnowledge,
+          selected_topics: selectedTopics,
           length: exerciseLength,
           level: difficultyLevel,
           pre_prompt: prePrompt,
@@ -59,28 +52,7 @@ export class OpenAIService extends BaseLLMService {
 
       const tokenUsage = openaiResponse.usage?.total_tokens || 0;
       return { success: true, data: exerciseContent, usage: tokenUsage };
-    }, 'generateExercise');
-  }
-
-  async generateSummary(lectureContent: string, modelName: string): Promise<LLMResponse> {
-    return this.withRetry(async () => {
-      const openaiResponse = await this.openaiClient.chat.completions.create({
-        model: modelName,
-        ...generateSummaryPrompt({ content: lectureContent }),
-        temperature: TEMPERATURE,
-        max_tokens: MAX_TOKENS,
-      });
-
-      const summaryContent = openaiResponse.choices[0]?.message?.content || '';
-      const summaryData = JSON.parse(summaryContent);
-
-      if (!summaryData?.paragraphSummary) {
-        throw new Error('Paragraph summary missing from response JSON.');
-      }
-
-      const tokenUsage = openaiResponse.usage?.total_tokens || 0;
-      return { success: true, data: summaryData, usage: tokenUsage };
-    }, 'generateSummary');
+    }, 'generateTopic');
   }
 
   async generateQuestions(lectureContent: string, modelName: string): Promise<LLMResponse> {
@@ -129,39 +101,5 @@ export class OpenAIService extends BaseLLMService {
       const tokenUsage = openaiResponse.usage?.total_tokens || 0;
       return { success: true, data: courseData, usage: tokenUsage };
     }, 'generateCourse');
-  }
-
-  async generateComplexity(
-    lectureContent: string,
-    modelName: string,
-    sensoryModes: SensoryMode[]
-  ): Promise<LLMResponse> {
-    if (lectureContent.length === 0) {
-      return { success: true, data: { taggedText: '' }, usage: 0 };
-    }
-    return this.withRetry(async () => {
-      const openaiResponse = await this.openaiClient.chat.completions.create({
-        model: modelName,
-        ...generateStudyMethodTagsPrompt({
-          content: lectureContent,
-          sensory_modes: sensoryModes,
-        }),
-        temperature: 0.2,
-        max_tokens: MAX_TOKENS,
-      });
-
-      const complexityContent = openaiResponse.choices[0]?.message?.content || '';
-      const parsedContent = JSON.parse(complexityContent);
-      let taggedText = parsedContent.paragraphs
-        .map((p: { content?: string; type: string }) => (p.content ? `<${p.type}>${p.content}</${p.type}>` : ''))
-        .join('\n\n');
-
-      if (!taggedText) {
-        throw new Error('Tagged text missing from complexity data.');
-      }
-
-      const tokenUsage = openaiResponse.usage?.total_tokens || 0;
-      return { success: true, data: taggedText, usage: tokenUsage };
-    }, 'generateComplexity');
   }
 }

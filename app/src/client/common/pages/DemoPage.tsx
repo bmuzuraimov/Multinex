@@ -1,31 +1,23 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import ExerciseResult from '../components/ExerciseInterface/ExerciseResult';
-import ExerciseSidebar from '../components/ExerciseInterface/ExerciseSidebar';
-import ExerciseTest from '../components/ExerciseInterface/ExerciseTest';
-import ExerciseInterface from '../components/ExerciseInterface';
-import { ExerciseProvider } from '../contexts/ExerciseContext';
-import useExercise from '../hooks/useExercise';
-import { DEMO_EXERCISE } from '../../shared/constants/demo';
-import { SensoryMode } from '../../shared/types';
-
+import ExerciseResult from '../../components/ExerciseInterface/ExerciseResult';
+import ExerciseSidebar from '../../components/ExerciseInterface/ExerciseSidebar';
+import ExerciseTest from '../../components/ExerciseInterface/ExerciseTest';
+import ExerciseInterface from '../../components/ExerciseInterface';
+import { ExerciseProvider } from '../../contexts/ExerciseContext';
+import useExercise from '../../hooks/useExercise';
+import { DEMO_EXERCISE } from '../../../shared/constants/demo';
+import { SensoryMode } from '../../../shared/types';
+import DefaultLayout from '../layouts/DefaultLayout';
 const DemoPage: React.FC = React.memo(() => {
   const [text_size, setTextSize] = useState('xl');
   const [mode, set_mode] = useState<'typing' | 'submitted' | 'test'>('typing');
   const [highlighted_nodes, set_highlighted_nodes] = useState<number[]>([0]);
 
   const demo_exercise = DEMO_EXERCISE;
-  const { 
-    essay,
-    essay_list,
-    essay_word_count,
-    essay_char_count,
-    summary,
-    has_quiz
-  } = useExercise(
+  const { essay, essay_list, essay_word_count, essay_char_count, has_quiz } = useExercise(
     demo_exercise.id || '',
     demo_exercise.lesson_text || '',
     demo_exercise.formatted_essay || [],
-    demo_exercise.paragraph_summary || '',
     [],
     mode,
     text_size,
@@ -56,9 +48,9 @@ const DemoPage: React.FC = React.memo(() => {
   const context_value = {
     essay,
     essay_list,
-    formatted_essay: (demo_exercise.formatted_essay || []).map(item => ({
+    formatted_essay: (demo_exercise.formatted_essay || []).map((item) => ({
       ...item,
-      mode: item.mode as SensoryMode
+      mode: item.mode as SensoryMode,
     })),
     essay_word_count,
     essay_char_count,
@@ -71,9 +63,7 @@ const DemoPage: React.FC = React.memo(() => {
     text_size,
     set_text_size: setTextSize,
     submit_exercise: handleSubmitExercise,
-    summary,
   };
-
 
   return (
     <ExerciseProvider value={context_value}>
@@ -91,4 +81,4 @@ const DemoPage: React.FC = React.memo(() => {
   );
 });
 
-export default DemoPage;
+export default DefaultLayout(DemoPage);

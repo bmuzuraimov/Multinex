@@ -9,8 +9,8 @@ export interface ExerciseFormContentSettings {
   set_exercise_length: (value: string) => void;
   exercise_level: string;
   set_exercise_level: (value: string) => void;
-  prior_knowledge: string[];
-  set_prior_knowledge: (value: string[]) => void;
+  selected_topics: string[];
+  set_selected_topics: (value: string[]) => void;
   topics: string[];
   set_topics: (value: string[]) => void;
 }

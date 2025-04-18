@@ -226,7 +226,6 @@ export const DEMO_EXERCISE = {
             "end": 23.417
         }
     ],
-    "paragraph_summary": "",
     "level": "",
     "cursor": 0,
     "word_count": 782,

@@ -1,14 +1,11 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../shadcn/components/ui/card';
-import { Separator } from '../shadcn/components/ui/separator';
-import { ScrollArea } from '../shadcn/components/ui/scroll-area';
-import { Avatar, AvatarImage, AvatarFallback } from '../shadcn/components/ui/avatar';
-import { Badge } from '../shadcn/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../../shadcn/components/ui/card';
+import { Avatar, AvatarImage, AvatarFallback } from '../../shadcn/components/ui/avatar';
 import { TbBrandStorytel } from 'react-icons/tb';
 import { FaEnvelope } from 'react-icons/fa';
-import BAIEL_IMG from '../static/founder.jpeg';
-import CURIE_IMG from '../static/curie.jpg';
-import { ADMIN_EMAIL } from '../../shared/constants';
+import CURIE_IMG from '../../static/curie.jpg';
+import { ADMIN_EMAIL } from '../../../shared/constants';
+import DefaultLayout from '../layouts/DefaultLayout';
 
 const AboutPage: React.FC = () => {
   return (
@@ -159,4 +156,4 @@ const AboutPage: React.FC = () => {
   );
 };
 
-export default AboutPage;
+export default DefaultLayout(AboutPage);

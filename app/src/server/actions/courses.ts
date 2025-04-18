@@ -115,7 +115,6 @@ export const duplicateCourse: DuplicateCourse<{ id: string }, ApiResponse<Course
           data: {
             name: exercise.name,
             lesson_text: exercise.lesson_text,
-            paragraph_summary: exercise.paragraph_summary,
             level: exercise.level,
             word_count: exercise.word_count,
             model: exercise.model,

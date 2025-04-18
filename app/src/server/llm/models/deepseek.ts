@@ -1,8 +1,6 @@
 import OpenAI from 'openai';
 import {
-  generateExercisePrompt,
-  generateSummaryPrompt,
-  generateStudyMethodTagsPrompt,
+  generateTopicPrompt,
   generateCoursePrompt,
   generateExamPrompt,
 } from '../prompts';
@@ -25,9 +23,9 @@ export class DeepSeekService extends BaseLLMService {
     this.deepseek_client = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' });
   }
 
-  async generateExercise(
+  async generateTopic(
     exercise_raw_content: string,
-    prior_knowledge: string,
+    selected_topics: string,
     exercise_length: string,
     difficulty_level: string,
     model_name: string,
@@ -37,9 +35,9 @@ export class DeepSeekService extends BaseLLMService {
     return this.withRetry(async () => {
       const deepseek_response = await this.deepseek_client.chat.completions.create({
         model: 'deepseek-chat',
-        ...generateExercisePrompt({
+        ...generateTopicPrompt({
           content: exercise_raw_content,
-          prior_knowledge,
+          selected_topics,
           length: exercise_length,
           level: difficulty_level,
           pre_prompt,
@@ -57,28 +55,7 @@ export class DeepSeekService extends BaseLLMService {
 
       const token_usage = deepseek_response.usage?.total_tokens || 0;
       return { success: true, data: exercise_content, usage: token_usage };
-    }, 'generateExercise');
-  }
-
-  async generateSummary(lecture_content: string, model_name: string): Promise<LLMResponse> {
-    return this.withRetry(async () => {
-      const deepseek_response = await this.deepseek_client.chat.completions.create({
-        model: 'deepseek-chat',
-        ...generateSummaryPrompt({ content: lecture_content }),
-        temperature: 1.3,
-        max_tokens: 8192,
-      });
-
-      const summary_content = deepseek_response.choices[0]?.message?.content || '';
-      const summary_data = JSON.parse(summary_content);
-
-      if (!summary_data?.paragraphSummary) {
-        throw new Error('Paragraph summary missing from response JSON.');
-      }
-
-      const token_usage = deepseek_response.usage?.total_tokens || 0;
-      return { success: true, data: summary_data, usage: token_usage };
-    }, 'generateSummary');
+    }, 'generateTopic');
   }
 
   async generateQuestions(lecture_content: string, model_name: string): Promise<LLMResponse> {
@@ -127,54 +104,5 @@ export class DeepSeekService extends BaseLLMService {
       const token_usage = deepseek_response.usage?.total_tokens || 0;
       return { success: true, data: course_data, usage: token_usage };
     }, 'generateCourse');
-  }
-
-  async generateComplexity(
-    lecture_content: string,
-    model_name: string,
-    sensory_modes: SensoryMode[]
-  ): Promise<LLMResponse> {
-    if (lecture_content.length === 0) {
-      return { success: true, data: { tagged_text: '' }, usage: 0 };
-    }
-    const prompt = generateStudyMethodTagsPrompt({
-      content: lecture_content,
-      sensory_modes: sensory_modes,
-    });
-    prompt.messages.push({
-      role: 'user',
-      content: `EXAMPLE JSON OUTPUT:
-{
-  "paragraphs": [
-    {
-      "content": "This is a sample paragraph",
-      "type": "write"
-    }
-  ]
-}`,
-    });
-    return this.withRetry(async () => {
-      const deepseek_response = await this.deepseek_client.chat.completions.create({
-        model: 'deepseek-chat',
-        messages: prompt.messages,
-        response_format: {
-          type: 'json_object',
-        },
-        temperature: 1.3,
-        max_tokens: 8192,
-      });
-
-      const complexity_content = deepseek_response.choices[0]?.message?.content || '';
-      const parsed_content = JSON.parse(complexity_content);
-      if (!parsed_content?.paragraphs) {
-        throw new Error('Tagged text missing from complexity data.');
-      }
-      let tagged_text = parsed_content.paragraphs
-        .map((p: { content?: string; type: string }) => (p.content ? `<${p.type}>${p.content}</${p.type}>` : ''))
-        .join('\n\n');
-
-      const token_usage = deepseek_response.usage?.total_tokens || 0;
-      return { success: true, data: tagged_text, usage: token_usage };
-    }, 'generateComplexity');
   }
 }

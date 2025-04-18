@@ -1,14 +1,7 @@
-import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
-import {
-  generateExercisePrompt,
-  generateSummaryPrompt,
-  generateExamPrompt,
-  generateStudyMethodTagsPrompt,
-  generateCoursePrompt,
-} from '../prompts';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { generateTopicPrompt, generateExamPrompt, generateCoursePrompt } from '../prompts';
 import { HttpError } from 'wasp/server';
 import { TEMPERATURE, MAX_TOKENS } from '../../../shared/constants';
-import { SensoryMode } from '../../../shared/types';
 import { BaseLLMService, LLMResponse } from './base';
 
 export class GeminiService extends BaseLLMService {
@@ -26,9 +19,9 @@ export class GeminiService extends BaseLLMService {
     this.geminiClient = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   }
 
-  async generateExercise(
+  async generateTopic(
     exerciseRawContent: string,
-    priorKnowledge: string,
+    selectedTopics: string,
     exerciseLength: string,
     difficultyLevel: string,
     modelName: string,
@@ -46,9 +39,9 @@ export class GeminiService extends BaseLLMService {
         },
       });
 
-      const prompt = generateExercisePrompt({
+      const prompt = generateTopicPrompt({
         content: exerciseRawContent,
-        prior_knowledge: priorKnowledge,
+        selected_topics: selectedTopics,
         length: exerciseLength,
         level: difficultyLevel,
         pre_prompt: prePrompt,
@@ -72,47 +65,7 @@ export class GeminiService extends BaseLLMService {
       }
 
       return { success: true, data: exerciseContent, usage: 0 };
-    }, 'generateExercise');
-  }
-
-  async generateSummary(lectureContent: string, modelName: string): Promise<LLMResponse> {
-    return this.withRetry(async () => {
-      const model = this.geminiClient.getGenerativeModel({
-        model: modelName,
-        generationConfig: {
-          temperature: TEMPERATURE,
-          maxOutputTokens: MAX_TOKENS,
-          topP: 0.95,
-          topK: 10,
-        },
-      });
-
-      const prompt = generateSummaryPrompt({ content: lectureContent });
-
-      const chatSession = model.startChat({
-        history: [
-          {
-            role: 'user',
-            parts: [{ text: prompt.messages[0].content }],
-          },
-        ],
-      });
-
-      const result = await chatSession.sendMessage('Generate summary');
-      const summaryContent = result.response.text();
-
-      try {
-        const summaryData = JSON.parse(summaryContent);
-
-        if (!summaryData?.paragraphSummary) {
-          throw new Error('Paragraph summary missing from response JSON.');
-        }
-
-        return { success: true, data: summaryData, usage: 0 };
-      } catch (error: any) {
-        throw new Error(`Failed to parse summary JSON: ${error.message}`);
-      }
-    }, 'generateSummary');
+    }, 'generateTopic');
   }
 
   async generateQuestions(lectureContent: string, modelName: string): Promise<LLMResponse> {
@@ -199,66 +152,5 @@ export class GeminiService extends BaseLLMService {
         throw new Error(`Failed to parse course JSON: ${error.message}`);
       }
     }, 'generateCourse');
-  }
-
-  async generateComplexity(
-    lectureContent: string,
-    modelName: string,
-    sensoryModes: SensoryMode[]
-  ): Promise<LLMResponse> {
-    if (lectureContent.length === 0) {
-      return { success: true, data: { taggedText: '' }, usage: 0 };
-    }
-    return this.withRetry(async () => {
-      const model = this.geminiClient.getGenerativeModel({
-        model: modelName,
-        generationConfig: {
-          temperature: 0.8,
-          maxOutputTokens: MAX_TOKENS,
-          topP: 0.95,
-          topK: 10,
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: SchemaType.OBJECT,
-            properties: {
-              paragraphs: {
-                type: SchemaType.ARRAY,
-                items: {
-                  type: SchemaType.OBJECT,
-                  properties: {
-                    content: {
-                      type: SchemaType.STRING,
-                    },
-                    type: {
-                      type: SchemaType.STRING,
-                      enum: sensoryModes,
-                      format: 'enum',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-      
-      const result = await model.generateContent(
-        generateStudyMethodTagsPrompt({
-          content: lectureContent,
-          sensory_modes: sensoryModes,
-        }).messages[0].content
-      );
-      const complexityContent = result.response.text();
-      const parsedContent = JSON.parse(complexityContent);
-      let taggedText = parsedContent.paragraphs
-        .map((p: { content?: string; type: string }) => (p.content ? `<${p.type}>${p.content}</${p.type}>` : ''))
-        .join('\n\n');
-
-      if (!taggedText) {
-        throw new Error('Tagged text missing from response.');
-      }
-
-      return { success: true, data: taggedText, usage: 0 };
-    }, 'generateComplexity');
   }
 }

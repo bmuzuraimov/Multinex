@@ -2,7 +2,6 @@ import { BaseLLMService } from './base';
 import { OpenAIService } from './openai';
 import { DeepSeekService } from './deepseek';
 import { GeminiService } from './gemini';
-import { SensoryMode } from '../../../shared/types';
 import { LLMResponse } from './base';
 
 // Model vendor mapping
@@ -42,11 +41,6 @@ export class LLMFactory {
   }
 
   // Factory methods
-  static async generateSummary(lectureContent: string, model: string): Promise<LLMResponse> {
-    const service = this.getService(model);
-    return service.generateSummary(lectureContent, model);
-  }
-
   static async generateQuestions(lectureContent: string, model: string): Promise<LLMResponse> {
     const service = this.getService(model);
     return service.generateQuestions(lectureContent, model);
@@ -57,9 +51,9 @@ export class LLMFactory {
     return service.generateCourse(syllabusContent, model);
   }
 
-  static async generateExercise(
+  static async generateTopic(
     exerciseRawContent: string,
-    priorKnowledge: string,
+    selectedTopics: string,
     exerciseLength: string,
     difficultyLevel: string,
     model: string,
@@ -67,24 +61,15 @@ export class LLMFactory {
     postPrompt: string
   ): Promise<LLMResponse> {
     const service = this.getService(model);
-    return service.generateExercise(
+    return service.generateTopic(
       exerciseRawContent,
-      priorKnowledge,
+      selectedTopics,
       exerciseLength,
       difficultyLevel,
       model,
       prePrompt,
       postPrompt
     );
-  }
-
-  static async generateComplexity(
-    lectureContent: string,
-    model: string,
-    sensoryModes: SensoryMode[]
-  ): Promise<LLMResponse> {
-    const service = this.getService(model);
-    return service.generateComplexity(lectureContent, model, sensoryModes);
   }
 }
 

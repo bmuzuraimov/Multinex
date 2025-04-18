@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useExerciseContext } from '../../contexts/ExerciseContext';
 
 const ExerciseSidebar: React.FC = () => {
-  const { has_quiz, summary, essay_word_count, set_mode } = useExerciseContext() || {};
+  const { has_quiz, essay_word_count, set_mode } = useExerciseContext() || {};
   const [showHintsModal, setShowHintsModal] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   
@@ -32,9 +32,9 @@ const ExerciseSidebar: React.FC = () => {
 
       <div className='flex-1 overflow-hidden flex flex-col'>
         <h2 className='font-manrope text-title-sm font-semibold text-primary-900 mb-6'>Summary</h2>
-        {summary && summary.length > 0 ? (
+        {false ? (
           <ul className='space-y-3 overflow-y-auto flex-1'>
-            {summary?.map((s: string, index: number) => (
+            {['']?.map((s: string, index: number) => (
               <li
                 key={index}
                 className='rounded-lg p-4 transition-all duration-200 ease-in-out shadow-sm bg-primary-50 text-primary-800 hover:bg-primary-100 hover:shadow-md'

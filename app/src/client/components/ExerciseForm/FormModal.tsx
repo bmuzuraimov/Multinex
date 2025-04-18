@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { EXERCISE_LENGTHS, EXERCISE_LEVELS, AVAILABLE_MODELS } from '../../../shared/constants';
+import { AVAILABLE_MODELS } from '../../../shared/constants';
 import { ExerciseFormContentSettings, ExerciseFormGenerationSettings, SensoryMode } from '../../../shared/types';
 import { cn } from '../../../shared/utils';
-
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -23,11 +23,6 @@ import { Label } from "../../shadcn/components/ui/label";
 import { Card, CardContent } from "../../shadcn/components/ui/card";
 import { Separator } from "../../shadcn/components/ui/separator";
 import { Badge } from "../../shadcn/components/ui/badge";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "../../shadcn/components/ui/collapsible";
 import {
   Tooltip,
   TooltipContent,
@@ -91,6 +86,14 @@ const FormModal: React.FC<FormModalProps> = ({
     }
   };
 
+  const handleGenerate = () => {
+    if (exercise_settings.selected_topics.length === 0) {
+      toast.warning('Please select at least one topic before generating the exercise');
+      return;
+    }
+    on_generate();
+  };
+
   return ReactDOM.createPortal(
     <TooltipProvider>
       <Dialog open={true} onOpenChange={() => on_discard()}>
@@ -114,80 +117,27 @@ const FormModal: React.FC<FormModalProps> = ({
 
           <Card>
             <CardContent className="p-6 space-y-6">
-              {/* Length and Level Selection */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="font-montserrat text-sm text-gray-700">
-                      Exercise Length
-                    </Label>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Info className="w-4 h-4 text-gray-400" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Exercise length varies by level; higher levels require more words.
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <Select 
-                    value={exercise_settings.exercise_length}
-                    onValueChange={(value) => exercise_settings.set_exercise_length(value)}
-                  >
-                    <SelectTrigger className="font-satoshi">
-                      <SelectValue placeholder="Select length" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(EXERCISE_LENGTHS).map(([key, value]) => (
-                        <SelectItem key={key} value={key}>{value}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="font-montserrat text-sm text-gray-700">
-                    Exercise Level
-                  </Label>
-                  <Select
-                    value={exercise_settings.exercise_level}
-                    onValueChange={(value) => exercise_settings.set_exercise_level(value)}
-                  >
-                    <SelectTrigger className="font-satoshi">
-                      <SelectValue placeholder="Select level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(EXERCISE_LEVELS).map(([key, value]) => (
-                        <SelectItem key={key} value={key}>{value}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Prior Knowledge */}
+              {/* Topics */}
               <div className="space-y-3">
                 <Label className="font-montserrat text-sm text-gray-700">
-                  Prior Knowledge (Optional)
+                  Topics
                 </Label>
                 <div className="flex flex-wrap gap-2">
                   {exercise_settings.topics.map((topic) => (
                     <Badge
                       key={topic}
-                      variant={exercise_settings.prior_knowledge.includes(topic) ? "default" : "outline"}
+                      variant={exercise_settings.selected_topics.includes(topic) ? "default" : "outline"}
                       className={cn(
                         "cursor-pointer transition-all duration-200",
-                        exercise_settings.prior_knowledge.includes(topic)
+                        exercise_settings.selected_topics.includes(topic)
                           ? "bg-primary-500 hover:bg-primary-600"
                           : "hover:border-primary-300"
                       )}
                       onClick={() => {
-                        const updated_knowledge = exercise_settings.prior_knowledge.includes(topic)
-                          ? exercise_settings.prior_knowledge.filter((k: string) => k !== topic)
-                          : [...exercise_settings.prior_knowledge, topic];
-                        exercise_settings.set_prior_knowledge(updated_knowledge);
+                        const updated_knowledge = exercise_settings.selected_topics.includes(topic)
+                          ? exercise_settings.selected_topics.filter((k: string) => k !== topic)
+                          : [...exercise_settings.selected_topics, topic];
+                        exercise_settings.set_selected_topics(updated_knowledge);
                       }}
                     >
                       {topic}
@@ -197,52 +147,21 @@ const FormModal: React.FC<FormModalProps> = ({
               </div>
 
               <Separator />
-
-              {/* Learning Modes */}
-              <div className="space-y-3">
-                <Label className="font-montserrat text-sm text-gray-700">
-                  Learning Modes
-                </Label>
-                <div className="grid grid-cols-4 gap-3">
-                  {(['mermaid', 'listen', 'type', 'write'] as SensoryMode[]).map((mode) => (
-                    <Button
-                      key={mode}
-                      variant={exercise_settings.sensory_modes.includes(mode) ? "default" : "outline"}
-                      className={cn(
-                        "w-full justify-center gap-2 capitalize",
-                        exercise_settings.sensory_modes.includes(mode) && {
-                          'mermaid': 'bg-primary-500 hover:bg-primary-600',
-                          'listen': 'bg-listen text-primary-900 hover:bg-listen/90',
-                          'type': 'bg-type text-primary-900 hover:bg-type/90',
-                          'write': 'bg-write text-primary-900 hover:bg-write/90',
-                        }[mode]
-                      )}
-                      onClick={() => handleToggleMode(mode)}
-                    >
-                      {getModeIcon(mode)}
-                      {mode}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Include Summary / MC Quiz */}
+              {/* Model Selection and MC Quiz */}
               <div className="flex gap-3">
-                <Button
-                  variant={advanced_settings.include_summary ? "default" : "outline"}
-                  className={cn(
-                    "flex-1",
-                    advanced_settings.include_summary 
-                      ? "bg-primary-500 hover:bg-primary-600 text-white"
-                      : "border-primary-200 hover:bg-primary-50 hover:border-primary-300 text-primary-700"
-                  )}
-                  onClick={() => advanced_settings.set_include_summary(!advanced_settings.include_summary)}
+                <Select
+                  value={advanced_settings.selected_model}
+                  onValueChange={(value) => advanced_settings.set_selected_model(value)}
                 >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Include Summary
-                </Button>
+                  <SelectTrigger className="font-satoshi">
+                    <SelectValue placeholder="Select model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AVAILABLE_MODELS.map((model) => (
+                      <SelectItem key={model} value={model}>{model}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Button
                   variant={advanced_settings.include_mc_quiz ? "default" : "outline"}
                   className={cn(
@@ -257,44 +176,6 @@ const FormModal: React.FC<FormModalProps> = ({
                   Include MC Quiz
                 </Button>
               </div>
-
-              {/* Advanced Options */}
-              <Collapsible open={show_advanced} onOpenChange={setShowAdvanced}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" className="w-full justify-center gap-2">
-                    <Brain className="w-4 h-4" />
-                    Advanced Options
-                    <ChevronDown className={cn(
-                      "w-4 h-4 transition-transform duration-200",
-                      show_advanced && "rotate-180"
-                    )} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pt-4">
-                  <Card className="bg-gray-50">
-                    <CardContent className="p-4 space-y-3">
-                      <div className="space-y-2">
-                        <Label className="font-montserrat text-sm text-gray-700">
-                          Model Selection
-                        </Label>
-                        <Select
-                          value={advanced_settings.selected_model}
-                          onValueChange={(value) => advanced_settings.set_selected_model(value)}
-                        >
-                          <SelectTrigger className="font-satoshi">
-                            <SelectValue placeholder="Select model" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {AVAILABLE_MODELS.map((model) => (
-                              <SelectItem key={model} value={model}>{model}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </CollapsibleContent>
-              </Collapsible>
             </CardContent>
           </Card>
 
@@ -307,7 +188,7 @@ const FormModal: React.FC<FormModalProps> = ({
               Cancel
             </Button>
             <Button
-              onClick={on_generate}
+              onClick={handleGenerate}
               disabled={is_uploading}
               className={cn(
                 "bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 font-satoshi",

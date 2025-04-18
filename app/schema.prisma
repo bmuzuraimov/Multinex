@@ -163,21 +163,16 @@ model Exercise {
   id                 String         @id @default(uuid())
   status             ExerciseStatus @default(CREATED)
   name               String
-  raw_text           String         @default("")
   lesson_text        String         @default("")
   audio_timestamps   String[]       @default([])
-  paragraph_summary  String         @default("")
   level              String         @default("")
   cursor             Int            @default(0)
   word_count         Int            @default(0)
   completed          Boolean        @default(false)
   completed_at       DateTime?
   truncated          Boolean        @default(false)
-  score              Int            @default(0)
   tokens             Int            @default(0)
   model              String         @default("gpt-4o-mini")
-  pre_prompt         String         @default("")
-  post_prompt        String         @default("")
   user_evaluation    Int?           @default(0)
   questions          Question[]     @relation("ExerciseQuestions")
   user_id            String?        // Made optional since landing page tries won't have a user

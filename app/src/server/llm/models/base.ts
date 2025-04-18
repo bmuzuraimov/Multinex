@@ -1,8 +1,6 @@
-import { sendErrorToAdmin } from '../../actions/utils';
 import { RETRIES, DELAY_MS } from '../../../shared/constants';
 import { TiktokenModel, encoding_for_model } from 'tiktoken';
 import { OPENAI_MODEL } from '../../../shared/constants';
-import { SensoryMode } from '../../../shared/types';
 import { handleError } from '../../actions/utils';
 
 export interface LLMResponse {
@@ -29,19 +27,14 @@ export abstract class BaseLLMService {
     }
   }
 
-  abstract generateExercise(
+  abstract generateTopic(
     content: string,
-    prior_knowledge: string,
+    selected_topics: string,
     length: string,
     level: string,
     model: string,
     pre_prompt: string,
     post_prompt: string
-  ): Promise<LLMResponse>;
-
-  abstract generateSummary(
-    lecture_content: string,
-    model: string,
   ): Promise<LLMResponse>;
 
   abstract generateQuestions(
@@ -52,12 +45,6 @@ export abstract class BaseLLMService {
   abstract generateCourse(
     syllabus_content: string,
     model: string,
-  ): Promise<LLMResponse>;
-
-  abstract generateComplexity(
-    lecture_content: string,
-    model: string,
-    sensory_modes: SensoryMode[]
   ): Promise<LLMResponse>;
 
   static calculateRequiredTokens(content: string, model: TiktokenModel): number {

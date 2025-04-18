@@ -7,7 +7,7 @@ import {
 } from 'wasp/server/operations';
 import { Exercise } from 'wasp/entities';
 import { getS3DownloadUrl, deleteS3Objects } from '../utils/s3Utils';
-import { truncateText, cleanMarkdown, handleError, validateUserAccess } from './utils';
+import { truncateText, handleError, validateUserAccess } from './utils';
 import { SensoryMode } from '../../shared/types';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
@@ -35,7 +35,6 @@ export const createExercise: CreateExercise<{ name: string; topic_id: string | n
         name: validatedInput.name,
         user: context.user ? { connect: { id: context.user.id } } : undefined,
         lesson_text: '',
-        paragraph_summary: '',
         level: '',
         truncated: false,
         tokens: 0,
@@ -56,10 +55,45 @@ export const createExercise: CreateExercise<{ name: string; topic_id: string | n
   }
 };
 
+const generateTopicModule = async (
+  context: any,
+  exerciseRawContent: string, 
+  topic: string, 
+  exerciseLength: string,
+  difficultyLevel: string,
+  model: string,
+  prePrompt: string,
+  postPrompt: string
+): Promise<{ content: string; tokens: number }> => {
+  try {
+    const exercise_response = await LLMFactory.generateTopic(
+      exerciseRawContent,
+      topic,
+      exerciseLength,
+      difficultyLevel,
+      model,
+      prePrompt,
+      postPrompt
+    );
+
+    if (!exercise_response.success || !exercise_response.data) {
+      throw new Error(`Error generating exercise content for topic ${topic}: ${exercise_response.message}`);
+    }
+
+    return { 
+      content: exercise_response.data, 
+      tokens: exercise_response.usage || 0 
+    };
+  } catch (error) {
+    await handleError(context.user?.email || 'demo', error, 'generateTopicModule');
+    throw error;
+  }
+};
+
 export const generateExercise: GenerateExercise<
   {
     exercise_id: string;
-    prior_knowledge: string[];
+    selected_topics: string[];
     length: string;
     level: string;
     model: string;
@@ -99,133 +133,59 @@ export const generateExercise: GenerateExercise<
     const raw_exercise_text = await response.text();
     const { text: truncated_exercise_text, truncated } = truncateText(raw_exercise_text);
 
-    let generated_exercise_text: string;
-    let generated_exercise_tokens: number;
-    let tagged_exercise_text: string = '';
-    let pre_prompt = DEFAULT_PRE_PROMPT;
-    let post_prompt = DEFAULT_POST_PROMPT;
-    try {
-      const prior_knowledge_array = Array.isArray(validatedInput.prior_knowledge)
-        ? validatedInput.prior_knowledge
-        : typeof validatedInput.prior_knowledge === 'string'
-          ? [validatedInput.prior_knowledge]
-          : [];
-      const prompt_settings = context.user
-        ? await context.entities.ExerciseGeneratePrompt.findFirst({
-            where: { user_id: context.user.id },
-          })
-        : null;
-      pre_prompt = prompt_settings?.pre_prompt || DEFAULT_PRE_PROMPT;
-      post_prompt = prompt_settings?.post_prompt || DEFAULT_POST_PROMPT;
-      const exercise_response = await LLMFactory.generateExercise(
-        truncated_exercise_text,
-        prior_knowledge_array.join(','),
-        validatedInput.length,
-        validatedInput.level,
-        validatedInput.model,
-        pre_prompt,
-        post_prompt
-      );
+    // Update status to processing
+    await context.entities.Exercise.update({
+      where: { id: validatedInput.exercise_id },
+      data: { status: ExerciseStatus.EXERCISE_GENERATED },
+    });
 
-      if (!exercise_response.success || !exercise_response.data) {
-        throw new Error(`Error generating exercise content: ${exercise_response.message}`);
-      }
-      generated_exercise_text = exercise_response.data;
-      generated_exercise_tokens = exercise_response.usage || 0;
+    const prompt_settings = context.user
+      ? await context.entities.ExerciseGeneratePrompt.findFirst({
+          where: { user_id: context.user.id },
+        })
+      : null;
+    const pre_prompt = prompt_settings?.pre_prompt || DEFAULT_PRE_PROMPT;
+    const post_prompt = prompt_settings?.post_prompt || DEFAULT_POST_PROMPT;
 
-      await context.entities.Exercise.update({
-        where: { id: validatedInput.exercise_id },
-        data: { status: ExerciseStatus.EXERCISE_GENERATED },
-      });
-    } catch (error) {
-      throw new Error('Failed to generate exercise.');
-    }
+    // Process each topic individually
+    const selected_topics_array = Array.isArray(validatedInput.selected_topics)
+      ? validatedInput.selected_topics
+      : typeof validatedInput.selected_topics === 'string'
+        ? [validatedInput.selected_topics]
+        : [];
 
-    const lecture_content = cleanMarkdown(generated_exercise_text);
+    // Initialize combined content
+    let combined_content = '';
+    let total_tokens = 0;
 
-    let complexity_usage = 0;
-    try {
-      const complexity_response = await LLMFactory.generateComplexity(
-        lecture_content,
-        validatedInput.model,
-        validatedInput.sensory_modes
-      );
-      if (complexity_response.success && complexity_response.data) {
-        tagged_exercise_text = complexity_response.data;
-        complexity_usage = complexity_response.usage || 0;
-
+    // Process each selected topic as a separate module
+    for (const topic of selected_topics_array) {
+      try {
+        // Update status to show which topic is being processed
         await context.entities.Exercise.update({
           where: { id: validatedInput.exercise_id },
-          data: { status: ExerciseStatus.EXERCISE_TAGGED },
+          data: { 
+            status: ExerciseStatus.EXERCISE_GENERATED,
+          },
         });
-      }
-    } catch (error) {
-      await handleError(context.user?.email || 'demo', error, 'generateComplexity');
-    }
 
-    const document_parser_url = process.env.DOCUMENT_PARSER_URL;
-    if (!document_parser_url) {
-      throw new Error('DOCUMENT_PARSER_URL is not set');
-    }
-    try {
-      // Skip audio generation if no listen tags present
-      if (tagged_exercise_text?.includes('<listen>')) {
-        const form_data = new FormData();
-        form_data.append('exercise_id', validatedInput.exercise_id);
-        form_data.append('generate_text', tagged_exercise_text || '');
-        const audio_response = await fetch(`${document_parser_url}/api/generate-audio`, {
-          method: 'POST',
-          body: form_data,
-        });
-        if (!audio_response.ok) {
-          await handleError(context.user?.email || 'demo', audio_response, 'generateAudio');
-        }
-      }
-    } catch (err) {
-      await handleError(context.user?.email || 'demo', err, 'generateAudio');
-    }
-
-    let summary_json = null;
-    if (validatedInput.include_summary) {
-      try {
-        const summary_response = await LLMFactory.generateSummary(
-          lecture_content,
+        const moduleResult = await generateTopicModule(
+          context,
+          truncated_exercise_text,
+          topic,
+          validatedInput.length,
+          validatedInput.level,
           validatedInput.model,
+          pre_prompt,
+          post_prompt
         );
-        if (summary_response.success && summary_response.data) {
-          summary_json = summary_response.data;
 
-          await context.entities.Exercise.update({
-            where: { id: validatedInput.exercise_id },
-            data: { status: ExerciseStatus.SUMMARY_GENERATED },
-          });
-        } else {
-          await handleError(context.user?.email || 'demo', new Error('Failed to generate summary (no success)'), 'generateSummary');
-        }
-      } catch (err) {
-        await handleError(context.user?.email || 'demo', err, 'generateSummary');
-      }
-    }
-
-    let questions = null;
-    if (validatedInput.include_mc_quiz) {
-      try {
-        const questions_response = await LLMFactory.generateQuestions(
-          lecture_content,
-          validatedInput.model,
-        );
-        if (questions_response.success && questions_response.data) {
-          questions = questions_response.data.questions;
-
-          await context.entities.Exercise.update({
-            where: { id: validatedInput.exercise_id },
-            data: { status: ExerciseStatus.QUESTIONS_GENERATED },
-          });
-        } else {
-          await handleError(context.user?.email || 'demo', new Error('Failed to generate questions (no success)'), 'generateQuestions');
-        }
-      } catch (err) {
-        await handleError(context.user?.email || 'demo', err, 'generateQuestions');
+        // Add a clear section header for each topic
+        combined_content += `${moduleResult.content}\n\n`;
+        total_tokens += moduleResult.tokens;
+      } catch (error) {
+        console.error(`Error processing topic ${topic}:`, error);
+        // Continue with other topics if one fails
       }
     }
 
@@ -233,20 +193,12 @@ export const generateExercise: GenerateExercise<
       await context.entities.Exercise.update({
         where: { id: validatedInput.exercise_id },
         data: {
-          raw_text: lecture_content || '',
-          lesson_text: tagged_exercise_text || '',
-          paragraph_summary: summary_json?.paragraph_summary || '',
+          lesson_text: combined_content || '',
           level: validatedInput.level,
           truncated,
-          tokens:
-            (generated_exercise_tokens || 0) +
-            (summary_json?.tokens || 0) +
-            (questions?.tokens || 0) +
-            (complexity_usage || 0),
+          tokens: total_tokens,
           model: validatedInput.model,
-          pre_prompt: pre_prompt,
-          post_prompt: post_prompt,
-          word_count: lecture_content.split(' ').length || parseInt(validatedInput.length, 10),
+          word_count: combined_content.split(' ').length || parseInt(validatedInput.length, 10),
           status: 'FINISHED',
         },
       });
@@ -254,28 +206,26 @@ export const generateExercise: GenerateExercise<
       await handleError(context.user?.email || 'demo', error, 'updateExercise');
     }
 
-    if (questions && Array.isArray(questions)) {
-      try {
-        await Promise.all(
-          questions.map(async (question: { text: string; options: Array<{ text: string; isCorrect: boolean }> }) => {
-            await context.entities.Question.create({
-              data: {
-                text: question.text,
-                exercise: { connect: { id: validatedInput.exercise_id } },
-                options: {
-                  create: question.options.map((opt) => ({
-                    text: opt.text,
-                    isCorrect: opt.isCorrect,
-                  })),
-                },
-              },
-            });
-          })
-        );
-      } catch (err) {
-        await handleError(context.user?.email || 'demo', err, 'createQuestions');
-      }
-    }
+    // Process audio for <listen> tags if they exist
+    // if (combined_content.includes('<listen>')) {
+    //   const document_parser_url = process.env.DOCUMENT_PARSER_URL;
+    //   if (document_parser_url) {
+    //     try {
+    //       const form_data = new FormData();
+    //       form_data.append('exercise_id', validatedInput.exercise_id);
+    //       form_data.append('generate_text', combined_content || '');
+    //       const audio_response = await fetch(`${document_parser_url}/api/generate-audio`, {
+    //         method: 'POST',
+    //         body: form_data,
+    //       });
+    //       if (!audio_response.ok) {
+    //         await handleError(context.user?.email || 'demo', audio_response, 'generateAudio');
+    //       }
+    //     } catch (err) {
+    //       await handleError(context.user?.email || 'demo', err, 'generateAudio');
+    //     }
+    //   }
+    // }
 
     if (context.user) {
       try {
@@ -290,7 +240,7 @@ export const generateExercise: GenerateExercise<
 
     return { success: true, code: 200, message: 'Exercise generated successfully' };
   } catch (error) {
-    return handleError(context.user?.email || 'demo', error, 'generateExercise');
+    return handleError(context.user?.email || 'demo', error, 'generateTopic');
   }
 };
 
@@ -317,7 +267,6 @@ export const shareExercise: ShareExercise<
           data: {
             name: exercise.name,
             lesson_text: exercise.lesson_text,
-            paragraph_summary: exercise.paragraph_summary,
             level: exercise.level,
             truncated: exercise.truncated,
             tokens: exercise.tokens,
@@ -356,7 +305,6 @@ export const updateExercise: UpdateExercise<
 
     if (validatedInput.updated_data.lesson_text && validatedInput.updated_data.lesson_text.length > 0) {
       validatedInput.updated_data.word_count = validatedInput.updated_data.lesson_text.split(' ').length;
-      validatedInput.updated_data.paragraph_summary = '';
       
       // Check if the lesson_text contains <listen> tags and if content has changed
       const newLessonText = validatedInput.updated_data.lesson_text;

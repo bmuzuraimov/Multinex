@@ -15,7 +15,6 @@ const useExercise = (
   exercise_id: string,
   essay: string, 
   formatted_essay: { mode: string; text: string[] }[],
-  paragraph_summary: string,
   questions: Question[],
   default_mode: 'typing' | 'submitted' | 'test',
   text_size: string,
@@ -63,7 +62,6 @@ const useExercise = (
   const [mode, set_mode] = useState<'typing' | 'submitted' | 'test'>(default_mode || 'typing');
   const essay_char_count = useMemo(() => essay.length, [essay]);
   const essay_word_count = useMemo(() => essay.split(' ').length, [essay]);
-  const summary = useMemo(() => paragraph_summary?.split('|') || [], [paragraph_summary]);
   const has_quiz = useMemo(() => Boolean(questions?.length), [questions]);
 
   useEffect(() => {
@@ -88,7 +86,6 @@ const useExercise = (
     essay_list,
     mode,
     set_mode,
-    summary,
     has_quiz,
     essay_word_count,
     essay_char_count,

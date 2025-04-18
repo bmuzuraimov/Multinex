@@ -1,14 +1,15 @@
 import { Link } from 'wasp/client/router';
 import { type User } from 'wasp/entities';
 import { logout } from 'wasp/client/auth';
+import DefaultLayout from '../layouts/DefaultLayout';
 import { FiLogOut, FiUser, FiMail, FiShoppingBag, FiBell, FiEdit, FiFile } from 'react-icons/fi';
 import { Switch } from '@headlessui/react';
 import { useState, useEffect } from 'react';
 import { useQuery, updatePrompt, getPrompt, updateCurrentUser } from 'wasp/client/operations';
-import { toast } from 'sonner'
-import { cn } from '../../shared/utils';
+import { toast } from 'sonner';
+import { cn } from '../../../shared/utils';
 
-export default function AccountPage({ user }: { user: User }) {
+const AccountPage = ({ user }: { user: User }) => {
   return (
     <>
       <div className='mx-auto max-w-7xl px-6 py-12 font-montserrat'>
@@ -94,7 +95,7 @@ export default function AccountPage({ user }: { user: User }) {
       </div>
     </>
   );
-}
+};
 
 // ------------------------------------------------------------------
 // PROMPT CUSTOMIZATION CARD
@@ -246,3 +247,5 @@ function CustomerPortalButton() {
     </Link>
   );
 }
+
+export default DefaultLayout(AccountPage);

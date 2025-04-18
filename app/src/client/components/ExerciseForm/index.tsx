@@ -17,7 +17,7 @@ import { ExerciseFormContentSettings, ExerciseFormGenerationSettings, SensoryMod
 import { Link } from 'react-router-dom';
 import FileUploadArea from './FileUploadArea';
 import { Exercise } from 'wasp/entities';
-import { AudioTimestamp } from '../../components/ExerciseInterface/AudioController';
+import { AudioTimestamp } from '../ExerciseInterface/AudioController';
 import { ExerciseStatus } from '@prisma/client';
 
 type DemoExerciseResult = {
@@ -31,13 +31,11 @@ type DemoExerciseResult = {
   exercise: {
     id: string;
     name: string;
-    paragraph_summary: string;
     level: string;
     truncated: boolean;
     word_count: number;
     completed: boolean;
     completed_at: Date | null;
-    score: number;
     model: string;
     user_evaluation: number | null;
     user_id: string;
@@ -76,8 +74,8 @@ const INITIAL_EXERCISE_SETTINGS: ExerciseFormContentSettings = {
   set_exercise_length: () => {},
   exercise_level: 'Auto',
   set_exercise_level: () => {},
-  prior_knowledge: [],
-  set_prior_knowledge: () => {},
+  selected_topics: [],
+  set_selected_topics: () => {},
   topics: [],
   set_topics: () => {},
 };
@@ -141,8 +139,8 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
     set_exercise_level: (value: string) =>
       setExerciseSettings((prev: ExerciseFormContentSettings) => ({ ...prev, exercise_level: value })),
 
-    set_prior_knowledge: (value: string[]) =>
-      setExerciseSettings((prev: ExerciseFormContentSettings) => ({ ...prev, prior_knowledge: value })),
+    set_selected_topics: (value: string[]) =>
+      setExerciseSettings((prev: ExerciseFormContentSettings) => ({ ...prev, selected_topics: value })),
 
     set_topics: (value: string[]) =>
       setExerciseSettings((prev: ExerciseFormContentSettings) => ({ ...prev, topics: value })),
@@ -178,7 +176,7 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
       exercise_name: '',
       exercise_length: 'Auto',
       exercise_level: 'Auto',
-      prior_knowledge: [],
+      selected_topics: [],
       topics: [],
       sensory_modes: ['listen', 'type', 'write'],
     }));
@@ -193,7 +191,7 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
 
   // Handle the "Generate Exercise" button
   const handleExerciseSettings = useCallback(async () => {
-    if (is_uploading || !exercise_settings.topics) return;
+    if (is_uploading || !exercise_settings.topics || exercise_settings.topics.length === 0) return;
     setIsUploading(true);
     setLoadingStatus('Generating exercise...');
 
@@ -206,7 +204,7 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
       const exercise_data = {
         exercise_id: exercise.id,
         name: exercise_settings.exercise_name,
-        prior_knowledge: exercise_settings.prior_knowledge,
+        selected_topics: exercise_settings.selected_topics,
         length: exercise_settings.exercise_length,
         level: exercise_settings.exercise_level,
         model: advanced_settings.selected_model,
@@ -377,7 +375,7 @@ const ExerciseForm: React.FC<{ topic_id: string | null; demo: boolean }> = React
         renderDemoLink
       )}
 
-      {exercise_settings.topics.length > 0 && !is_uploading && (
+      {exercise_settings.topics && exercise_settings.topics.length > 0 && !is_uploading && (
         <FormModal
           on_generate={handleExerciseSettings}
           on_discard={() => {

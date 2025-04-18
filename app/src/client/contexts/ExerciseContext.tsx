@@ -10,7 +10,6 @@ interface ExerciseContextType {
   essay_char_count: number;
   essay_list: TextList;
   formatted_essay: { mode: SensoryMode; text: string[] }[];
-  summary: string[];
   has_quiz: boolean;
 
   // Exercise state and mode

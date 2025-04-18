@@ -2,7 +2,6 @@ import { useAuth } from 'wasp/client/auth';
 import { updateCurrentUser } from 'wasp/client/operations';
 import { Outlet, useNavigate } from 'react-router-dom';
 import './Main.css';
-import NavBar from './components/NavBar';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -55,11 +54,8 @@ export default function App() {
           },
         }}
       />
-      <div className='min-h-screen dark:text-white dark:bg-gray-900'>
-        <NavBar />
-        <div className='font-manrope'>
-          <Outlet />
-        </div>
+      <div className='min-h-screen font-manrope'>
+        <Outlet />
       </div>
       <div id='modal-root'></div>
     </>

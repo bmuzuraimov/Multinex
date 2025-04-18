@@ -20,7 +20,6 @@ type TopicsByCourse = {
     word_count: number;
     completed: boolean;
     completed_at: Date | null;
-    score: number;
   }[];
 };
 
@@ -49,7 +48,6 @@ export const getTopicsByCourse: GetTopicsByCourse<{ course_id: string }, TopicsB
           word_count: true,
           completed: true,
           completed_at: true,
-          score: true,
         }
       }
     },

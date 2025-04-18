@@ -2,7 +2,7 @@ import { useAuth, LoginForm } from 'wasp/client/auth';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { AuthWrapper } from './authWrapper';
+import { AuthWrapper } from '../layouts/authWrapper';
 import { authAppearance } from './appearance';
 
 export default function Login() {

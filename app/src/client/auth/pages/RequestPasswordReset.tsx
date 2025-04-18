@@ -1,5 +1,5 @@
 import { ForgotPasswordForm } from 'wasp/client/auth';
-import { AuthWrapper } from './authWrapper';
+import { AuthWrapper } from '../layouts/authWrapper';
 import { authAppearance } from './appearance';
 export function RequestPasswordReset() {
   return (

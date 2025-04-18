@@ -1,18 +1,18 @@
 import { useAuth } from 'wasp/client/auth';
-import { TIERS } from '../../shared/constants';
+import { TIERS } from '../../../shared/constants';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { cn } from '../../shared/utils';
+import { cn } from '../../../shared/utils';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { stripePayment } from 'wasp/client/operations';
-
+import DefaultLayout from '../layouts/DefaultLayout';
 // shadcn components
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../shadcn/components/ui/card';
-import { Button } from '../shadcn/components/ui/button';
-import { Badge } from '../shadcn/components/ui/badge';
-import { Separator } from '../shadcn/components/ui/separator';
-import { ScrollArea } from '../shadcn/components/ui/scroll-area';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../shadcn/components/ui/card';
+import { Button } from '../../shadcn/components/ui/button';
+import { Badge } from '../../shadcn/components/ui/badge';
+import { Separator } from '../../shadcn/components/ui/separator';
+import { ScrollArea } from '../../shadcn/components/ui/scroll-area';
 
 // Icons
 import { AiFillCheckCircle } from 'react-icons/ai';
@@ -56,7 +56,7 @@ const PricingPage = () => {
   }
 
   return (
-    <ScrollArea className="min-h-screen bg-primary-50/30">
+    <ScrollArea className='min-h-screen bg-primary-50/30'>
       <div className='mx-auto max-w-7xl px-8 py-24'>
         <div className='mx-auto max-w-4xl text-center mb-16 space-y-6'>
           <CardTitle className='text-4xl md:text-5xl font-manrope font-bold bg-gradient-to-r from-primary-600 via-primary-800 to-secondary-700 bg-clip-text text-transparent'>
@@ -64,11 +64,11 @@ const PricingPage = () => {
           </CardTitle>
           <CardDescription className='text-lg font-satoshi text-primary-600/80'>
             <div className='flex items-center justify-center gap-2 mt-6'>
-              <FiShield className="w-5 h-5 text-primary-500" />
+              <FiShield className='w-5 h-5 text-primary-500' />
               Secure payments powered by Stripe
             </div>
           </CardDescription>
-          <Separator className="my-8" />
+          <Separator className='my-8' />
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto'>
@@ -77,34 +77,28 @@ const PricingPage = () => {
               key={tier.id}
               className={cn(
                 'relative transition-all duration-300 border-2 flex flex-col',
-                tier.bestDeal 
-                  ? 'border-primary-300 shadow-xl bg-white/70 backdrop-blur-sm' 
+                tier.bestDeal
+                  ? 'border-primary-300 shadow-xl bg-white/70 backdrop-blur-sm'
                   : 'border-primary-100 shadow-lg hover:border-primary-200 bg-white/50'
               )}
             >
               {tier.bestDeal && (
-                <Badge 
-                  variant="default"
-                  className="absolute -top-3 -right-3 bg-primary-500 text-white font-satoshi px-4 py-1.5 shadow-lg"
+                <Badge
+                  variant='default'
+                  className='absolute -top-3 -right-3 bg-primary-500 text-white font-satoshi px-4 py-1.5 shadow-lg'
                 >
                   Most Popular
                 </Badge>
               )}
 
-              <CardHeader className="space-y-2">
-                <CardTitle className="text-title-sm font-manrope text-primary-900">
-                  {tier.name}
-                </CardTitle>
-                <CardDescription className="text-primary-600 font-satoshi">
-                  {tier.description}
-                </CardDescription>
-                <div className="text-title-lg font-manrope text-primary-900 pt-4">
-                  {tier.price}
-                </div>
+              <CardHeader className='space-y-2'>
+                <CardTitle className='text-title-sm font-manrope text-primary-900'>{tier.name}</CardTitle>
+                <CardDescription className='text-primary-600 font-satoshi'>{tier.description}</CardDescription>
+                <div className='text-title-lg font-manrope text-primary-900 pt-4'>{tier.price}</div>
               </CardHeader>
 
-              <CardContent className="space-y-6 flex-grow">
-                <Separator className="my-6" />
+              <CardContent className='space-y-6 flex-grow'>
+                <Separator className='my-6' />
                 <ul className='space-y-4'>
                   {tier.features.map((feature) => (
                     <li key={feature} className='flex items-center text-primary-700 font-satoshi'>
@@ -115,7 +109,7 @@ const PricingPage = () => {
                 </ul>
               </CardContent>
 
-              <CardFooter className="pt-6 mt-auto">
+              <CardFooter className='pt-6 mt-auto'>
                 <Button
                   onClick={() => handlePaymentClick(tier.id)}
                   disabled={is_stripe_payment_loading === tier.id}
@@ -138,4 +132,4 @@ const PricingPage = () => {
   );
 };
 
-export default PricingPage;
+export default DefaultLayout(PricingPage);

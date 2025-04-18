@@ -1,27 +1,50 @@
-import { exerciseFormat, complexityFormat, summaryFormat } from '../response_formats';
+import { exerciseFormat } from '../response_formats';
 
-const SYSTEM_PROMPT_SUMMARY = `You are an AI assistant tasked with summarizing paragraphs from a text. You will receive a 'lectureText' that consists of multiple paragraphs separated by '\\n\\n'. For each paragraph, generate a concise name with 2-3 words. Combine these summaries into a single string, separating each summary with '|'.
+const MULTI_MODAL_LEARNING_PROMPT = `Act like a world-class cognitive scientist and learning expert specializing in rapid knowledge acquisition. Your task is to write a text to help someone learn a topic 10x faster than traditional methods.
 
-The final output must be a valid JSON object in the following format:
+The target audience is university students, and they need to grasp this topic efficiently and intuitively.
+Neuroscience principles to consider:  
+- Cognitive Load Theory: Don't overload each section; keep content manageable.  
+- Dual Coding: Combine text and visuals.  
+- Generation Effect: Writing from memory strengthens retention.  
 
-{
-  "paragraphSummary": "Paragraph summary 1|Paragraph summary 2|Paragraph summary 3"
-}
+Volumes in percentages: Type 30%, Mermaid 25%, Listen 20%, Write 25%.  
 
-Do not include any additional text outside of the JSON object. Ensure that the JSON is properly formatted.`;
+Each content section must follow this format with all 4 elements in this exact order:
+1. TYPE - Active encoding that engages working memory through forced effort
+2. MERMAID - Visual-spatial scaffolding that leverages the visuospatial sketchpad for dual coding
+3. LISTEN - Auditory priming that activates the phonological loop
+4. WRITE - Retrieval practice that strengthens synaptic plasticity through recall
 
+Use exactly these tags and formats:
 
-const SYSTEM_PROMPT_STUDY_METHODS = `You are an AI assistant specialized in analyzing text complexity and learning methods. Your task is to analyze the given text and tag different paragraphs based on their learning importance and recommended study method. IMPORTANT: You must not modify or rephrase any of the original text - only add a single tag around each paragraph.`;
+<type>The mitochondrion is the powerhouse of the cell, generating ATP through oxidative phosphorylation. This process requires oxygen and occurs in the inner mitochondrial membrane.</type>
 
-export const generateExercisePrompt = ({
-  prior_knowledge,
+<mermaid>graph LR  
+A["Glycolysis"] --> B["Krebs Cycle"] --> C["ETC"] --> D["ATP"]  
+B --> E["CO2"]  
+C --> F["O2"]</mermaid>
+
+<listen>Mitochondria convert glucose into ATP through three stages: glycolysis in the cytoplasm, the Krebs cycle in the matrix, and the electron transport chain in the inner membrane. Oxygen is the final electron acceptor.</listen>
+
+<write>From memory, list the 3 main stages of cellular respiration and their ATP yields.</write>
+
+Rules for each tag:
+- <type>: Core factual content, clear and concise explanation of key concepts
+- <mermaid>: Use flowcharts for processes or class diagrams for hierarchies, limit to 5-8 nodes per chart
+- <listen>: Simplified, conversational version of the type content focusing on key relationships
+- <write>: Specific questions or tasks that directly reference the content covered
+`;
+
+export const generateTopicPrompt = ({
+  selected_topics,
   level,
   length,
   content,
   pre_prompt,
   post_prompt,
 }: {
-  prior_knowledge: string;
+  selected_topics: string;
   level: string;
   length: string;
   content: string;
@@ -29,12 +52,17 @@ export const generateExercisePrompt = ({
   post_prompt: string;
 }): { messages: { role: 'user'; content: string }[]; response_format: any } => {
   const prompt = `${pre_prompt}
-  Document content:\n\n"${content}"\n\n
+  
+  ${MULTI_MODAL_LEARNING_PROMPT}
+  
+  Document content to use as reference:\n\n"${content}"\n\n
+  
   You must follow these rules:
-  - Separate sections with "\n\n" and paragraphs with "\n".
-  ${prior_knowledge.length > 0 ? `- Exclude these topics: ${prior_knowledge}.\n` : ''}.
-  ${level !== 'Auto' ? `- Technical depth: Match the user's level (${level}).\n` : ''}.
-  ${length !== 'Auto' ? `- Minimum length: ${length} words.\n` : ''}.
+  - Generate multi-modal learning content for this topic: ${selected_topics}.
+  - Include all four elements (type, mermaid, listen, write) for each section.
+  - Separate sections with "\n\n".
+  ${level !== 'Auto' ? `- Technical depth: Match the user's level (${level}).\n` : ''}
+  ${length !== 'Auto' ? `- Minimum length: ${length} words.\n` : ''}
   
   ${post_prompt}`;
 
@@ -46,107 +74,5 @@ export const generateExercisePrompt = ({
       },
     ],
     response_format: exerciseFormat,
-  };
-};
-
-export const generateSummaryPrompt = ({
-  content,
-}: {
-  content: string;
-}): { messages: { role: 'user'; content: string }[]; response_format: any } => {
-  return {
-    messages: [
-      {
-        role: 'user',
-        content: `${SYSTEM_PROMPT_SUMMARY}\n\nPlease generate paragraph outline for the following lectureText:
-    ${content}`,
-      },
-    ],
-    response_format: summaryFormat
-  };
-};
-
-
-const MODE_INSTRUCTIONS = {
-  write: {
-    tag: 'write',
-    description: 'For content that students should write down by hand:',
-    examples: [
-      'Critical concepts requiring deep memorization',
-      'Important formulas and definitions that must be internalized', 
-      'Key technical terms that need to be mastered through handwriting',
-    ],
-  },
-  type: {
-    tag: 'type', 
-    description: 'For content that students should read and type out:',
-    examples: [
-      'Moderately important information',
-      'Supporting details and explanations',
-      'Content that is intuitive and easy to understand',
-    ],
-  },
-  listen: {
-    tag: 'listen',
-    description: 'For content that students can listen to:',
-    examples: [
-      'Basic background information',
-      'Supplementary or contextual details',
-      'Content that can be absorbed through audio playback',
-    ],
-  },
-  mermaid: {
-    tag: 'mermaid',
-    description: 'Insert mermaid script to visualize the content if needed',
-    examples: [
-      'Flowcharts and diagrams',
-      'Graphs and charts',
-      'Visual representations of data',
-      'Visual representations of algorithms',
-      'Visual representations of processes',
-      'Visual representations of systems',
-      'Visual representations of relationships',
-      'Visual representations of concepts',
-      'Visual representations of ideas',
-      'Visual representations of theories',
-      'Visual representations of models',
-      'Visual representations of systems',
-      'Visual representations of anything that can be represented in a visual way',
-    ],
-  },
-};
-
-export const generateStudyMethodTagsPrompt = ({
-  content,
-  sensory_modes,
-}: {
-  content: string;
-  sensory_modes: string[];
-}): { messages: { role: 'user'; content: string }[]; response_format: any } => {
-  let instructions = '';
-
-  sensory_modes.forEach((mode, index) => {
-    const { tag, description, examples } = MODE_INSTRUCTIONS[mode as keyof typeof MODE_INSTRUCTIONS];
-    instructions += `${index + 1}. <${tag}></${tag}> - ${description}\n`;
-    examples.forEach((example) => {
-      instructions += `   - ${example}\n`;
-    });
-    instructions += '\n';
-  });
-
-  const system_content = `${SYSTEM_PROMPT_STUDY_METHODS}
-
-      Tag each segment with exactly one of these tags, ensuring proper spacing between tags:
-      
-      ${instructions}
-      Return the exact same text with a single appropriate learning method tag wrapping each paragraph. Add a newline between different tagged paragraphs. Do not use nested tags. Do not change any words or formatting - only add tags wrapping each paragraph with proper spacing between them.`;
-  return {
-    messages: [
-      {
-        role: 'user',
-        content: `${system_content}\n\nPlease analyze the following text and wrap each paragraph with a single appropriate learning method tag, ensuring proper spacing and newlines between different tagged paragraphs:\n\n"${content}"`,
-      },
-    ],
-    response_format: complexityFormat
   };
 };

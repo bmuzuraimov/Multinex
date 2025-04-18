@@ -22,13 +22,11 @@ type DemoExerciseResult = {
   exercise: {
     id: string;
     name: string;
-    paragraph_summary: string;
     level: string;
     truncated: boolean;
     word_count: number;
     completed: boolean;
     completed_at: Date | null;
-    score: number;
     model: string;
     user_evaluation: number | null;
     user_id: string | null;

@@ -6,15 +6,16 @@ import { useAuth } from 'wasp/client/auth';
 import { toast } from 'sonner';
 
 // Import shadcn components
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../shadcn/components/ui/card';
-import { Button } from '../shadcn/components/ui/button';
-import { ScrollArea } from '../shadcn/components/ui/scroll-area';
-import { Skeleton } from '../shadcn/components/ui/skeleton';
-import { Alert, AlertDescription } from '../shadcn/components/ui/alert';
-import { Badge } from '../shadcn/components/ui/badge';
-import { Separator } from '../shadcn/components/ui/separator';
-import { HoverCard, HoverCardTrigger, HoverCardContent } from '../shadcn/components/ui/hover-card';
-import { cn } from '../shadcn/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../../shadcn/components/ui/card';
+import { Button } from '../../shadcn/components/ui/button';
+import { ScrollArea } from '../../shadcn/components/ui/scroll-area';
+import { Skeleton } from '../../shadcn/components/ui/skeleton';
+import { Alert, AlertDescription } from '../../shadcn/components/ui/alert';
+import { Badge } from '../../shadcn/components/ui/badge';
+import { Separator } from '../../shadcn/components/ui/separator';
+import { HoverCard, HoverCardTrigger, HoverCardContent } from '../../shadcn/components/ui/hover-card';
+import { cn } from '../../../shared/utils';
+import DefaultLayout from '../layouts/DefaultLayout';
 
 interface Course {
   id: string;
@@ -186,4 +187,4 @@ const PublicCoursesPage = () => {
   );
 };
 
-export default PublicCoursesPage;
+export default DefaultLayout(PublicCoursesPage);
