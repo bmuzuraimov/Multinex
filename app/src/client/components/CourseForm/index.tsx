@@ -27,10 +27,10 @@ const CourseForm: React.FC<CourseFormProps> = () => {
   }, [isCreating]);
 
   return (
-    <div className="relative bg-white rounded-2xl transition-all duration-300 group overflow-hidden h-full">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-secondary-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    <div className="relative bg-white rounded-2xl transition-all duration-300 group overflow-hidden h-[360px]">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-100 to-secondary-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       
-      <div className="absolute inset-0 border-2 border-dashed border-gray-200 group-hover:border-primary-300 rounded-2xl transition-colors duration-300"></div>
+      <div className="absolute inset-0 border-2 border-dashed border-gray-300 group-hover:border-primary-400 rounded-2xl transition-colors duration-300"></div>
 
       {isCreating ? (
         <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 backdrop-blur-sm">
@@ -41,17 +41,17 @@ const CourseForm: React.FC<CourseFormProps> = () => {
       ) : (
         <div 
           onClick={handleCreateCourse}
-          className="relative flex flex-col items-center justify-center h-full p-8 cursor-pointer space-y-4"
+          className="relative flex flex-col items-center justify-center h-full p-6"
         >
-          <div className="p-4 rounded-full bg-primary-50 group-hover:bg-primary-100 transition-colors duration-300">
+          <div className="p-4 rounded-full bg-primary-100 group-hover:bg-primary-200 transition-colors duration-300">
             <IoAddOutline className="w-8 h-8 text-primary-600 group-hover:text-primary-700 transition-all duration-300 transform group-hover:rotate-90" />
           </div>
           
-          <div className="text-center">
-            <h3 className="font-satoshi font-medium text-title-sm text-gray-800 mb-2">
+          <div className="text-center mt-6">
+            <h3 className="font-satoshi font-semibold text-title-sm text-gray-900 mb-2">
               Create New Course
             </h3>
-            <p className="font-montserrat text-sm text-gray-500">
+            <p className="font-montserrat text-sm text-gray-600">
               Click to add a new learning journey
             </p>
           </div>

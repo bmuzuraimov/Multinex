@@ -37,14 +37,14 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
   });
 
   return (
-    <div className='flex h-full items-center justify-center w-full max-w-4xl mx-auto'>
+    <div className='flex flex-1 w-full h-full'>
       <div
         {...getRootProps()}
         className={cn(
-          'flex flex-col h-full items-center p-6 justify-center w-full rounded-xl cursor-pointer bg-white border-2 border-primary-100 transition-all duration-300',
+          'flex flex-col flex-1 items-center justify-center w-full h-full rounded-xl cursor-pointer bg-white border-2 transition-all duration-300',
           is_uploading
-            ? 'opacity-50 cursor-not-allowed bg-primary-50'
-            : 'hover:border-primary-300 hover:bg-primary-50',
+            ? 'opacity-50 cursor-not-allowed bg-primary-50 border-primary-100'
+            : 'border-primary-100 hover:border-primary-300 hover:bg-primary-50',
           is_drag_active || dropzone_is_drag_active ? 'border-primary-400 bg-primary-50' : ''
         )}
       >

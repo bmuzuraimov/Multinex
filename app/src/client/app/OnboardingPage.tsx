@@ -5,6 +5,14 @@ import { cn } from '../../shared/utils';
 import { toast } from 'sonner';
 import { USER_TYPES, STEP_MESSAGES, PROGRESS_WIDTHS, LEARNING_STYLES } from '../../shared/constants/onboarding';
 
+// shadcn components
+import { Card, CardContent, CardHeader, CardTitle } from '../shadcn/components/ui/card';
+import { Button } from '../shadcn/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '../shadcn/components/ui/radio-group';
+import { Label } from '../shadcn/components/ui/label';
+import { Checkbox } from '../shadcn/components/ui/checkbox';
+import { ScrollArea } from '../shadcn/components/ui/scroll-area';
+
 const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
   const [current_step, setCurrentStep] = useState(1);
@@ -81,189 +89,251 @@ const OnboardingPage: React.FC = () => {
     }
   };
 
-
-
   return (
-    <div className='flex flex-col items-center min-h-screen bg-white font-montserrat'>
-      {/* Progress Bar */}
-      <div className='w-full max-w-8xl bg-primary-100 h-1.5 rounded-full relative mt-8'>
-        <div className={cn(
-          'bg-primary-500 h-1.5 rounded-full transition-all duration-500',
-          PROGRESS_WIDTHS[current_step - 1]
-        )}></div>
-      </div>
+    <div className='min-h-screen bg-primary-50/30 font-montserrat'>
+      <div className='mx-auto max-w-4xl px-6 py-12'>
+        <Card className='border-none shadow-xl bg-white/80 backdrop-blur-sm'>
+          <CardHeader className='space-y-6'>
+            {/* Progress Bar */}
+            <div className='w-full max-w-8xl bg-primary-100 h-1.5 rounded-full relative mt-8'>
+              <div className={cn(
+                'bg-primary-500 h-1.5 rounded-full transition-all duration-500',
+                PROGRESS_WIDTHS[current_step - 1]
+                )}>
+              </div>
+            </div>
 
-      {/* Back and Skip Buttons */}
-      <div className='w-full max-w-4xl mt-4 flex justify-between items-center px-8'>
-        {current_step > 1 && (
-          <button className='text-primary-600 font-semibold hover:text-primary-700 transition-colors' onClick={() => setCurrentStep(current_step - 1)}>
-            &lt; Back
-          </button>
-        )}
-        <button className='text-primary-600 font-semibold hover:text-primary-700 transition-colors' onClick={handleSkip}>
-          Skip &gt;
-        </button>
-      </div>
-
-      {/* Chat Bot Message */}
-      <div className='flex items-center justify-center mt-12'>
-        <div className='font-manrope text-title-lg text-primary-900 font-medium tracking-wide'>{STEP_MESSAGES[current_step]}</div>
-      </div>
-
-      {/* Steps */}
-      {current_step === 1 && (
-        <>
-          <div className='grid grid-cols-1 gap-4 mt-10 max-w-md mx-auto w-full px-6'>
-            {USER_TYPES.map((type) => (
-              <button
-                key={type.name}
-                className={cn(
-                  'flex items-center px-8 py-4 rounded-xl text-lg transition-all duration-300 w-full shadow-sm',
-                  selected_user_type === type.name 
-                    ? 'bg-primary-500 text-white shadow-md hover:bg-primary-600' 
-                    : 'bg-white border border-primary-100 text-primary-900 hover:border-primary-300'
-                )}
-                onClick={() => setSelectedUserType(type.name)}
+            {/* Back and Skip Buttons */}
+            <div className='flex justify-between items-center'>
+              {current_step > 1 ? (
+                <Button
+                  variant="ghost"
+                  onClick={() => setCurrentStep(current_step - 1)}
+                  className='text-primary-600 hover:text-primary-700'
+                >
+                  ← Back
+                </Button>
+              ) : <div />}
+              <Button
+                variant="ghost"
+                onClick={handleSkip}
+                className='text-primary-600 hover:text-primary-700'
               >
-                <span className='mr-3 text-xl'>{type.icon}</span> 
-                <span className='font-satoshi'>{type.name}</span>
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => setCurrentStep(2)}
-            disabled={!selected_user_type}
-            className={cn(
-              'mt-8 px-12 py-4 rounded-xl font-satoshi text-lg transition-all duration-300',
-              selected_user_type 
-                ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-md' 
-                : 'bg-primary-100 text-primary-300 cursor-not-allowed'
-            )}
-          >
-            Continue
-          </button>
-        </>
-      )}
+                Skip →
+              </Button>
+            </div>
 
-      {current_step === 2 && (
-        <div className='mt-10 w-full max-w-md px-6'>
-          <div className='grid grid-cols-2 gap-4'>
-            {LEARNING_STYLES.map((style) => (
-              <button
-                key={style}
-                className={cn(
-                  'p-6 rounded-xl transition-all duration-300 font-satoshi text-lg shadow-sm',
-                  learning_style === style 
-                    ? 'bg-primary-500 text-white shadow-md' 
-                    : 'bg-white border border-primary-100 text-primary-900 hover:border-primary-300'
-                )}
-                onClick={() => setLearningStyle(style)}
-              >
-                {style}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => setCurrentStep(3)}
-            disabled={!learning_style}
-            className={cn(
-              'mt-8 w-full py-4 rounded-xl font-satoshi text-lg transition-all duration-300',
-              learning_style 
-                ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-md'
-                : 'bg-primary-100 text-primary-300 cursor-not-allowed'
-            )}
-          >
-            Continue
-          </button>
-        </div>
-      )}
+            {/* Chat Bot Message */}
+            <CardTitle className='text-center font-manrope text-2xl text-primary-900'>
+              {STEP_MESSAGES[current_step]}
+            </CardTitle>
+          </CardHeader>
 
-      {current_step === 3 && (
-        <div className='mt-10 w-full max-w-md px-6'>
-          <div className='grid grid-cols-2 gap-4'>
-            {Object.entries(subject_interests).map(([key, value]) => (
-              <label key={key} className='flex items-center p-4 bg-white rounded-xl border border-primary-100 hover:border-primary-300 transition-all duration-300 cursor-pointer shadow-sm'>
-                <input
-                  type='checkbox'
-                  checked={value}
-                  onChange={(e) => setSubjectInterests({ ...subject_interests, [key]: e.target.checked })}
-                  className='hidden'
-                />
-                <div className={cn(
-                  'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
-                  value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
-                )}>
-                  {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
+          <CardContent className='p-8'>
+            <ScrollArea className='h-full'>
+              {/* Step 1: User Type */}
+              {current_step === 1 && (
+                <div className='space-y-6'>
+                  <RadioGroup
+                    value={selected_user_type || ''}
+                    onValueChange={setSelectedUserType}
+                    className='grid grid-cols-1 gap-4'
+                  >
+                    {USER_TYPES.map((type) => (
+                      <Label
+                        key={type.name}
+                        className={cn(
+                          'flex items-center p-4 rounded-xl transition-all duration-300 cursor-pointer',
+                          'border-2',
+                          selected_user_type === type.name
+                            ? 'border-primary-500 bg-primary-50'
+                            : 'border-primary-100 hover:border-primary-200'
+                        )}
+                      >
+                        <RadioGroupItem value={type.name} className='sr-only' />
+                        <span className='mr-3 text-xl'>{type.icon}</span>
+                        <span className='font-satoshi text-lg text-primary-900'>{type.name}</span>
+                      </Label>
+                    ))}
+                  </RadioGroup>
+
+                  <Button
+                    onClick={() => setCurrentStep(2)}
+                    className='w-full text-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors'
+                    size="lg"
+                  >
+                    Continue
+                  </Button>
                 </div>
-                <span className='text-primary-900 font-satoshi'>
-                  {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                </span>
-              </label>
-            ))}
-          </div>
-          <button onClick={() => setCurrentStep(4)} className='mt-8 w-full py-4 bg-primary-600 text-white rounded-xl font-satoshi text-lg hover:bg-primary-700 transition-colors shadow-md'>
-            Continue
-          </button>
-        </div>
-      )}
+              )}
 
-      {current_step === 4 && (
-        <div className='mt-10 w-full max-w-md px-6'>
-          <div className='grid grid-cols-1 gap-4'>
-            {Object.entries(motivation_factors).map(([key, value]) => (
-              <label key={key} className='flex items-center p-4 bg-white rounded-xl border border-primary-100 hover:border-primary-300 transition-all duration-300 cursor-pointer shadow-sm'>
-                <input
-                  type='checkbox'
-                  checked={value}
-                  onChange={(e) => setMotivationFactors({ ...motivation_factors, [key]: e.target.checked })}
-                  className='hidden'
-                />
-                <div className={cn(
-                  'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
-                  value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
-                )}>
-                  {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
-                </div>
-                <span className='text-primary-900 font-satoshi'>
-                  {key.charAt(0).toUpperCase() + key.slice(1)}
-                </span>
-              </label>
-            ))}
-          </div>
-          <button onClick={() => setCurrentStep(5)} className='mt-8 w-full py-4 bg-primary-600 text-white rounded-xl font-satoshi text-lg hover:bg-primary-700 transition-colors shadow-md'>
-            Continue
-          </button>
-        </div>
-      )}
+              {/* Step 2: Learning Style */}
+              {current_step === 2 && (
+                <div className='space-y-6'>
+                  <RadioGroup
+                    value={learning_style || ''}
+                    onValueChange={setLearningStyle}
+                    className='grid grid-cols-1 gap-4'
+                  >
+                    {LEARNING_STYLES.map((style) => (
+                      <Label
+                        key={style}
+                        className={cn(
+                          'flex items-center p-4 rounded-xl transition-all duration-300 cursor-pointer',
+                          'border-2',
+                          learning_style === style
+                            ? 'border-primary-500 bg-primary-50'
+                            : 'border-primary-100 hover:border-primary-200'
+                        )}
+                      >
+                        <RadioGroupItem value={style} className='sr-only' />
+                        <span className='font-satoshi text-lg text-primary-900'>{style}</span>
+                      </Label>
+                    ))}
+                  </RadioGroup>
 
-      {current_step === 5 && (
-        <div className='mt-10 w-full max-w-md px-6'>
-          <div className='grid grid-cols-2 gap-4'>
-            {Object.entries(source_channels).map(([key, value]) => (
-              <label key={key} className='flex items-center p-4 bg-white rounded-xl border border-primary-100 hover:border-primary-300 transition-all duration-300 cursor-pointer shadow-sm'>
-                <input
-                  type='checkbox'
-                  checked={value}
-                  onChange={(e) => setSourceChannels({ ...source_channels, [key]: e.target.checked })}
-                  className='hidden'
-                />
-                <div className={cn(
-                  'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
-                  value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
-                )}>
-                  {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
+                  <Button
+                    onClick={() => setCurrentStep(3)}
+                    className='w-full text-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors'
+                    size="lg"
+                  >
+                    Continue
+                  </Button>
                 </div>
-                <span className='text-primary-900 font-satoshi'>
-                  {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                </span>
-              </label>
-            ))}
-          </div>
-          <button onClick={handleOnboardingSubmit} className='mt-8 w-full py-4 bg-primary-600 text-white rounded-xl font-satoshi text-lg hover:bg-primary-700 transition-colors shadow-md'>
-            Complete
-          </button>
-        </div>
-      )}
+              )}
+
+              {/* Step 3: Subject Interests */}
+              {current_step === 3 && (
+                <div className='space-y-6'>
+                  <div className='grid grid-cols-2 gap-4'>
+                    {Object.entries(subject_interests).map(([key, value]) => (
+                      <Label
+                        key={key}
+                        className={cn(
+                          'flex items-center p-4 rounded-xl transition-all duration-300 cursor-pointer',
+                          'border-2',
+                          value
+                            ? 'border-primary-500 bg-primary-50'
+                            : 'border-primary-100 hover:border-primary-200'
+                        )}
+                      >
+                        <Checkbox
+                          checked={value}
+                          onCheckedChange={(checked) => setSubjectInterests({ ...subject_interests, [key]: checked })}
+                          className='hidden'
+                        />
+                        <div className={cn(
+                          'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
+                          value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
+                        )}>
+                          {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
+                        </div>
+                        <span className='font-satoshi text-lg text-primary-900'>
+                          {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                        </span>
+                      </Label>
+                    ))}
+                  </div>
+
+                  <Button
+                    onClick={() => setCurrentStep(4)}
+                    className='w-full text-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors'
+                    size="lg"
+                  >
+                    Continue
+                  </Button>
+                </div>
+              )}
+
+              {/* Step 4: Motivation Factors */}
+              {current_step === 4 && (
+                <div className='space-y-6'>
+                  <div className='grid grid-cols-1 gap-4'>
+                    {Object.entries(motivation_factors).map(([key, value]) => (
+                      <Label
+                        key={key}
+                        className={cn(
+                          'flex items-center p-4 rounded-xl transition-all duration-300 cursor-pointer',
+                          'border-2',
+                          value
+                            ? 'border-primary-500 bg-primary-50'
+                            : 'border-primary-100 hover:border-primary-200'
+                        )}
+                      >
+                        <Checkbox
+                          checked={value}
+                          onCheckedChange={(checked) => setMotivationFactors({ ...motivation_factors, [key]: checked })}
+                          className='hidden'
+                        />
+                        <div className={cn(
+                          'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
+                          value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
+                        )}>
+                          {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
+                        </div>
+                        <span className='font-satoshi text-lg text-primary-900'>
+                          {key.charAt(0).toUpperCase() + key.slice(1)}
+                        </span>
+                      </Label>
+                    ))}
+                  </div>
+
+                  <Button
+                    onClick={() => setCurrentStep(5)}
+                    className='w-full text-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors'
+                    size="lg"
+                  >
+                    Continue
+                  </Button>
+                </div>
+              )}
+
+              {/* Step 5: Source Channels */}
+              {current_step === 5 && (
+                <div className='space-y-6'>
+                  <div className='grid grid-cols-2 gap-4'>
+                    {Object.entries(source_channels).map(([key, value]) => (
+                      <Label
+                        key={key}
+                        className={cn(
+                          'flex items-center p-4 rounded-xl transition-all duration-300 cursor-pointer',
+                          'border-2',
+                          value
+                            ? 'border-primary-500 bg-primary-50'
+                            : 'border-primary-100 hover:border-primary-200'
+                        )}
+                      >
+                        <Checkbox
+                          checked={value}
+                          onCheckedChange={(checked) => setSourceChannels({ ...source_channels, [key]: checked })}
+                          className='hidden'
+                        />
+                        <div className={cn(
+                          'flex items-center justify-center w-5 h-5 border-2 rounded-md mr-3 transition-colors',
+                          value ? 'bg-primary-500 border-primary-500' : 'border-primary-300'
+                        )}>
+                          {value && <div className="w-2 h-2 bg-white rounded-sm"></div>}
+                        </div>
+                        <span className='font-satoshi text-lg text-primary-900'>
+                          {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                        </span>
+                      </Label>
+                    ))}
+                  </div>
+
+                  <Button
+                    onClick={handleOnboardingSubmit}
+                    className='w-full text-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors'
+                    size="lg"
+                  >
+                    Complete
+                  </Button>
+                </div>
+              )}
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

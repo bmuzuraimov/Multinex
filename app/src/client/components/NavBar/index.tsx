@@ -52,7 +52,6 @@ const NavBar = () => {
     routes.SignupRoute.build(),
     routes.AboutPageRoute.build(),
     routes.PublicCoursesRoute.build(),
-    routes.GuidePageRoute.build(),
     routes.PrivacyPageRoute.build(),
     routes.TermsPageRoute.build(),
     routes.CreateDemoRoute.build(),

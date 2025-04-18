@@ -1,13 +1,53 @@
-import { Tooltip } from 'react-tooltip';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { BsFiletypeAi, BsChevronDown } from 'react-icons/bs';
-import { HiOutlineInformationCircle } from 'react-icons/hi';
-import { IoMdClose } from 'react-icons/io';
 import { EXERCISE_LENGTHS, EXERCISE_LEVELS, AVAILABLE_MODELS } from '../../../shared/constants';
 import { ExerciseFormContentSettings, ExerciseFormGenerationSettings, SensoryMode } from '../../../shared/types';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { cn } from '../../../shared/utils';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../shadcn/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../shadcn/components/ui/select";
+import { Button } from "../../shadcn/components/ui/button";
+import { Label } from "../../shadcn/components/ui/label";
+import { Card, CardContent } from "../../shadcn/components/ui/card";
+import { Separator } from "../../shadcn/components/ui/separator";
+import { Badge } from "../../shadcn/components/ui/badge";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../../shadcn/components/ui/collapsible";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "../../shadcn/components/ui/tooltip";
+
+import { 
+  FileText, 
+  ChevronDown, 
+  Info, 
+  Loader2, 
+  Settings,
+  Brain,
+  FileQuestion,
+  Ear,
+  Keyboard,
+  Pencil,
+  Sparkles
+} from 'lucide-react';
 
 type FormModalProps = {
   on_generate: () => void;
@@ -26,315 +66,261 @@ const FormModal: React.FC<FormModalProps> = ({
   exercise_settings,
   advanced_settings,
 }) => {
+  const [show_advanced, setShowAdvanced] = useState(false);
   const modal_root = document.getElementById('modal-root');
   if (!modal_root) return null;
 
-  const [show_advanced, setShowAdvanced] = useState(false);
-  const navigate = useNavigate();
-
   const handleToggleMode = (mode: SensoryMode) => {
     const already_selected = exercise_settings.sensory_modes.includes(mode);
-
-    if (already_selected && exercise_settings.sensory_modes.length === 1) {
-      return;
-    }
+    if (already_selected && exercise_settings.sensory_modes.length === 1) return;
 
     const updated_modes = already_selected
       ? exercise_settings.sensory_modes.filter((m: SensoryMode) => m !== mode)
-      : ([...exercise_settings.sensory_modes, mode] as SensoryMode[]);
+      : [...exercise_settings.sensory_modes, mode];
 
     exercise_settings.set_sensory_modes(updated_modes);
   };
 
+  const getModeIcon = (mode: SensoryMode) => {
+    switch (mode) {
+      case 'listen': return <Ear className="w-4 h-4" />;
+      case 'type': return <Keyboard className="w-4 h-4" />;
+      case 'write': return <Pencil className="w-4 h-4" />;
+      case 'mermaid': return <Sparkles className="w-4 h-4" />;
+      default: return null;
+    }
+  };
+
   return ReactDOM.createPortal(
-    <div className='fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-sm'>
-      <div className='bg-white rounded-xl p-6 max-w-2xl w-full shadow-lg font-satoshi max-h-[90vh] overflow-y-auto'>
-        <div className='relative flex flex-col items-center space-y-4'>
-          {/* Close Button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              on_discard();
-            }}
-            className='absolute top-0 right-0 p-1.5 text-gray-400 hover:text-primary-600 transition-colors duration-200'
-          >
-            <IoMdClose className='w-5 h-5' />
-          </button>
-
-          {/* Modify Prompt Link */}
-          <div className='absolute top-0 left-0'>
-            <button onClick={() => navigate('/account')} className='text-sm text-primary-600 hover:text-primary-700'>
-              Customize Prompt
-            </button>
-          </div>
-
-          {/* Icon + Title */}
-          <div className='relative p-3 bg-primary-50 rounded-full mt-6'>
-            <BsFiletypeAi className='w-8 h-8 text-primary-600' />
-          </div>
-          <h2 className='text-title-sm font-manrope font-semibold text-gray-900'>{exercise_settings.exercise_name}</h2>
-
-          {/* Form Content */}
-          <div className='w-full space-y-4'>
-            {/* LENGTH + LEVEL */}
-            <div className='relative grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <HiOutlineInformationCircle
-                className='absolute -top-2 right-0 w-5 h-5 text-gray-400'
-                data-multiline
-                data-tooltip-id={`my-tooltip-${exercise_settings.exercise_name || 'all'}`}
-              />
-              <Tooltip
-                id={`my-tooltip-${exercise_settings.exercise_name || 'all'}`}
-                place='top'
-                className='z-tooltip'
-                content='Exercise length varies by level; higher levels require more words.'
-              />
-
-              {/* Exercise Length */}
-              <div className='space-y-1.5'>
-                <label className='block text-sm font-medium text-gray-700'>Length of the Exercise</label>
-                <select
-                  className='w-full p-2 text-sm border border-gray-200 rounded-lg shadow-sm focus:ring-1 focus:ring-primary-200 focus:border-primary-500 bg-white text-gray-900 hover:border-primary-400 transition-colors'
-                  value={exercise_settings.exercise_length}
-                  onChange={(e) => exercise_settings.set_exercise_length(e.target.value)}
-                >
-                  {Object.entries(EXERCISE_LENGTHS).map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Exercise Level */}
-              <div className='space-y-1.5'>
-                <label className='block text-sm font-medium text-gray-700'>Exercise Level</label>
-                <select
-                  className='w-full p-2 text-sm border border-gray-200 rounded-lg shadow-sm focus:ring-1 focus:ring-primary-200 focus:border-primary-500 bg-white text-gray-900 hover:border-primary-400 transition-colors'
-                  value={exercise_settings.exercise_level}
-                  onChange={(e) => exercise_settings.set_exercise_level(e.target.value)}
-                >
-                  {Object.entries(EXERCISE_LEVELS).map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </div>
+    <TooltipProvider>
+      <Dialog open={true} onOpenChange={() => on_discard()}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="font-manrope text-title-lg font-semibold text-gray-900">
+                {exercise_settings.exercise_name}
+              </DialogTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.open('/account', '_blank')}
+                className="text-primary-600 hover:text-primary-700"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Customize Prompt
+              </Button>
             </div>
+          </DialogHeader>
 
-            <div className='w-full border-t border-gray-100'></div>
+          <Card>
+            <CardContent className="p-6 space-y-6">
+              {/* Length and Level Selection */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="font-montserrat text-sm text-gray-700">
+                      Exercise Length
+                    </Label>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Info className="w-4 h-4 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Exercise length varies by level; higher levels require more words.
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <Select 
+                    value={exercise_settings.exercise_length}
+                    onValueChange={(value) => exercise_settings.set_exercise_length(value)}
+                  >
+                    <SelectTrigger className="font-satoshi">
+                      <SelectValue placeholder="Select length" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(EXERCISE_LENGTHS).map(([key, value]) => (
+                        <SelectItem key={key} value={key}>{value}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            {/* PRIOR KNOWLEDGE */}
-            <div className='space-y-2'>
-              <label className='block text-sm font-medium text-gray-700'>Prior Knowledge (Optional)</label>
-              <div className='flex flex-wrap gap-2'>
-                {exercise_settings.topics.map((topic) => (
-                  <div key={topic} className='inline-block'>
-                    <input
-                      type='checkbox'
-                      id={`topic-${topic}`}
-                      checked={exercise_settings.prior_knowledge.includes(topic)}
-                      onChange={(e) => {
-                        const updated_knowledge = e.target.checked
-                          ? [...exercise_settings.prior_knowledge, topic]
-                          : exercise_settings.prior_knowledge.filter((k: string) => k !== topic);
+                <div className="space-y-2">
+                  <Label className="font-montserrat text-sm text-gray-700">
+                    Exercise Level
+                  </Label>
+                  <Select
+                    value={exercise_settings.exercise_level}
+                    onValueChange={(value) => exercise_settings.set_exercise_level(value)}
+                  >
+                    <SelectTrigger className="font-satoshi">
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(EXERCISE_LEVELS).map(([key, value]) => (
+                        <SelectItem key={key} value={key}>{value}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Prior Knowledge */}
+              <div className="space-y-3">
+                <Label className="font-montserrat text-sm text-gray-700">
+                  Prior Knowledge (Optional)
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {exercise_settings.topics.map((topic) => (
+                    <Badge
+                      key={topic}
+                      variant={exercise_settings.prior_knowledge.includes(topic) ? "default" : "outline"}
+                      className={cn(
+                        "cursor-pointer transition-all duration-200",
+                        exercise_settings.prior_knowledge.includes(topic)
+                          ? "bg-primary-500 hover:bg-primary-600"
+                          : "hover:border-primary-300"
+                      )}
+                      onClick={() => {
+                        const updated_knowledge = exercise_settings.prior_knowledge.includes(topic)
+                          ? exercise_settings.prior_knowledge.filter((k: string) => k !== topic)
+                          : [...exercise_settings.prior_knowledge, topic];
                         exercise_settings.set_prior_knowledge(updated_knowledge);
                       }}
-                      className='sr-only'
-                    />
-                    <label
-                      htmlFor={`topic-${topic}`}
-                      className={cn(
-                        'inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200',
-                        exercise_settings.prior_knowledge.includes(topic)
-                          ? 'bg-primary-500 text-white shadow-sm hover:bg-primary-600'
-                          : 'bg-white text-gray-700 border border-gray-200 hover:border-primary-300 hover:bg-primary-50'
-                      )}
                     >
                       {topic}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className='w-full border-t border-gray-100'></div>
-
-            {/* Sensory Modes Selection */}
-            <div className='space-y-2'>
-              <label className='block text-sm font-medium text-gray-700'>Learning Modes</label>
-              <div className='flex justify-between items-center gap-3'>
-                {/* Mermaid Mode */}
-                <div className='flex-1'>
-                  <input
-                    type='checkbox'
-                    id='mode-mermaid'
-                    checked={exercise_settings.sensory_modes.includes('mermaid')}
-                    onChange={() => handleToggleMode('mermaid')}
-                    className='sr-only'
-                  />
-                  <label
-                    htmlFor='mode-mermaid'
-                    className={cn(
-                      'block text-center py-2 px-3 rounded-lg cursor-pointer transition-all duration-200',
-                      exercise_settings.sensory_modes.includes('mermaid')
-                        ? 'bg-primary-500 text-white shadow-sm'
-                        : 'bg-white text-gray-700 border border-primary-200 hover:bg-primary-50'
-                    )}
-                  >
-                    <span className='text-sm font-medium'>Mermaid</span>
-                  </label>
-                </div>
-                {/* Listening Mode */}
-                <div className='flex-1'>
-                  <input
-                    type='checkbox'
-                    id='mode-listen'
-                    checked={exercise_settings.sensory_modes.includes('listen')}
-                    onChange={() => handleToggleMode('listen')}
-                    className='sr-only'
-                  />
-                  <label
-                    htmlFor='mode-listen'
-                    className={cn(
-                      'block text-center py-2 px-3 rounded-lg cursor-pointer transition-all duration-200',
-                      exercise_settings.sensory_modes.includes('listen')
-                        ? 'bg-primary-500 text-white shadow-sm'
-                        : 'bg-white text-gray-700 border border-primary-200 hover:bg-primary-50'
-                    )}
-                  >
-                    <span className='text-sm font-medium'>👂 Listening</span>
-                  </label>
-                </div>
-
-                {/* Typing Mode */}
-                <div className='flex-1'>
-                  <input
-                    type='checkbox'
-                    id='mode-type'
-                    checked={exercise_settings.sensory_modes.includes('type')}
-                    onChange={() => handleToggleMode('type')}
-                    className='sr-only'
-                  />
-                  <label
-                    htmlFor='mode-type'
-                    className={cn(
-                      'block text-center py-2 px-3 rounded-lg cursor-pointer transition-all duration-200',
-                      exercise_settings.sensory_modes.includes('type')
-                        ? 'bg-secondary-500 text-white shadow-sm'
-                        : 'bg-white text-gray-700 border border-secondary-200 hover:bg-secondary-50'
-                    )}
-                  >
-                    <span className='text-sm font-medium'>⌨️ Typing</span>
-                  </label>
-                </div>
-
-                {/* Writing Mode */}
-                <div className='flex-1'>
-                  <input
-                    type='checkbox'
-                    id='mode-write'
-                    checked={exercise_settings.sensory_modes.includes('write')}
-                    onChange={() => handleToggleMode('write')}
-                    className='sr-only'
-                  />
-                  <label
-                    htmlFor='mode-write'
-                    className={cn(
-                      'block text-center py-2 px-3 rounded-lg cursor-pointer transition-all duration-200',
-                      exercise_settings.sensory_modes.includes('write')
-                        ? 'bg-tertiary-500 text-white shadow-sm'
-                        : 'bg-white text-gray-700 border border-tertiary-200 hover:bg-tertiary-50'
-                    )}
-                  >
-                    <span className='text-sm font-medium'>✍️ Writing</span>
-                  </label>
+                    </Badge>
+                  ))}
                 </div>
               </div>
-            </div>
 
-            <div className='w-full border-t border-gray-100'></div>
+              <Separator />
 
-            {/* INCLUDE SUMMARY / MC QUIZ */}
-            <div className='flex gap-3'>
-              <button
-                onClick={() => advanced_settings.set_include_summary(!advanced_settings.include_summary)}
-                className={cn(
-                  'flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200',
-                  advanced_settings.include_summary
-                    ? 'bg-primary-500 text-white shadow-sm hover:bg-primary-600'
-                    : 'bg-white text-gray-700 border border-gray-200 hover:border-primary-300 hover:bg-primary-50'
-                )}
-              >
-                Include Summary
-              </button>
-
-              <button
-                onClick={() => advanced_settings.set_include_mc_quiz(!advanced_settings.include_mc_quiz)}
-                className={cn(
-                  'flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200',
-                  advanced_settings.include_mc_quiz
-                    ? 'bg-primary-500 text-white shadow-sm hover:bg-primary-600'
-                    : 'bg-white text-gray-700 border border-gray-200 hover:border-primary-300 hover:bg-primary-50'
-                )}
-              >
-                Include MC Quiz
-              </button>
-            </div>
-
-            {/* ADVANCED OPTIONS */}
-            <div className='w-full'>
-              <button
-                onClick={() => setShowAdvanced(!show_advanced)}
-                className='w-full flex items-center justify-center text-sm text-gray-500 hover:text-primary-600 py-1.5 transition-colors duration-200'
-              >
-                <span className='border-b border-gray-100 w-12 mx-2'></span>
-                <span className='font-medium'>Advanced Options</span>
-                <span className='border-b border-gray-100 w-12 mx-2'></span>
-                <BsChevronDown
-                  className={cn(
-                    'w-4 h-4 transform transition-transform duration-200',
-                    show_advanced ? 'rotate-180' : ''
-                  )}
-                />
-              </button>
-
-              {show_advanced && (
-                <div className='mt-3 p-4 bg-gray-50 rounded-lg space-y-3'>
-                  <div className='space-y-1.5'>
-                    <label className='block text-sm font-medium text-gray-700'>Model Selection</label>
-                    <select
-                      className='w-full p-2 text-sm border border-gray-200 rounded-lg shadow-sm focus:ring-1 focus:ring-primary-200 focus:border-primary-500 bg-white text-gray-700'
-                      value={advanced_settings.selected_model}
-                      onChange={(e) => advanced_settings.set_selected_model(e.target.value)}
+              {/* Learning Modes */}
+              <div className="space-y-3">
+                <Label className="font-montserrat text-sm text-gray-700">
+                  Learning Modes
+                </Label>
+                <div className="grid grid-cols-4 gap-3">
+                  {(['mermaid', 'listen', 'type', 'write'] as SensoryMode[]).map((mode) => (
+                    <Button
+                      key={mode}
+                      variant={exercise_settings.sensory_modes.includes(mode) ? "default" : "outline"}
+                      className={cn(
+                        "w-full justify-center gap-2 capitalize",
+                        exercise_settings.sensory_modes.includes(mode) && {
+                          'mermaid': 'bg-primary-500 hover:bg-primary-600',
+                          'listen': 'bg-listen text-primary-900 hover:bg-listen/90',
+                          'type': 'bg-type text-primary-900 hover:bg-type/90',
+                          'write': 'bg-write text-primary-900 hover:bg-write/90',
+                        }[mode]
+                      )}
+                      onClick={() => handleToggleMode(mode)}
                     >
-                      {AVAILABLE_MODELS.map((model) => (
-                        <option key={model} value={model}>
-                          {model}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                      {getModeIcon(mode)}
+                      {mode}
+                    </Button>
+                  ))}
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Generate Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                on_generate();
-              }}
-              disabled={is_uploading}
-              className='w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium text-base'
+              <Separator />
+
+              {/* Include Summary / MC Quiz */}
+              <div className="flex gap-3">
+                <Button
+                  variant={advanced_settings.include_summary ? "default" : "outline"}
+                  className={cn(
+                    "flex-1",
+                    advanced_settings.include_summary 
+                      ? "bg-primary-500 hover:bg-primary-600 text-white"
+                      : "border-primary-200 hover:bg-primary-50 hover:border-primary-300 text-primary-700"
+                  )}
+                  onClick={() => advanced_settings.set_include_summary(!advanced_settings.include_summary)}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Include Summary
+                </Button>
+                <Button
+                  variant={advanced_settings.include_mc_quiz ? "default" : "outline"}
+                  className={cn(
+                    "flex-1",
+                    advanced_settings.include_mc_quiz 
+                      ? "bg-primary-500 hover:bg-primary-600 text-white"
+                      : "border-primary-200 hover:bg-primary-50 hover:border-primary-300 text-primary-700"
+                  )}
+                  onClick={() => advanced_settings.set_include_mc_quiz(!advanced_settings.include_mc_quiz)}
+                >
+                  <FileQuestion className="w-4 h-4 mr-2" />
+                  Include MC Quiz
+                </Button>
+              </div>
+
+              {/* Advanced Options */}
+              <Collapsible open={show_advanced} onOpenChange={setShowAdvanced}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" className="w-full justify-center gap-2">
+                    <Brain className="w-4 h-4" />
+                    Advanced Options
+                    <ChevronDown className={cn(
+                      "w-4 h-4 transition-transform duration-200",
+                      show_advanced && "rotate-180"
+                    )} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-4">
+                  <Card className="bg-gray-50">
+                    <CardContent className="p-4 space-y-3">
+                      <div className="space-y-2">
+                        <Label className="font-montserrat text-sm text-gray-700">
+                          Model Selection
+                        </Label>
+                        <Select
+                          value={advanced_settings.selected_model}
+                          onValueChange={(value) => advanced_settings.set_selected_model(value)}
+                        >
+                          <SelectTrigger className="font-satoshi">
+                            <SelectValue placeholder="Select model" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {AVAILABLE_MODELS.map((model) => (
+                              <SelectItem key={model} value={model}>{model}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CollapsibleContent>
+              </Collapsible>
+            </CardContent>
+          </Card>
+
+          <DialogFooter className="mt-6">
+            <Button
+              variant="outline"
+              onClick={on_discard}
+              className="font-satoshi"
             >
+              Cancel
+            </Button>
+            <Button
+              onClick={on_generate}
+              disabled={is_uploading}
+              className={cn(
+                "bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 font-satoshi",
+                is_uploading && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              {is_uploading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {is_uploading ? loading_status : 'Generate Exercise'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>,
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </TooltipProvider>,
     modal_root
   );
 };

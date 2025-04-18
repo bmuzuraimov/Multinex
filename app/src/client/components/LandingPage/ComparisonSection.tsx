@@ -1,7 +1,11 @@
-import anime from 'animejs/lib/anime.es.js';
 import { useEffect, useRef, useState } from 'react';
-import { CiPlay1 } from 'react-icons/ci';
+import anime from 'animejs';
 import { IoStopOutline } from 'react-icons/io5';
+import { CiPlay1 } from 'react-icons/ci';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../shadcn/components/ui/card';
+import { Button } from '../../shadcn/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../shadcn/components/ui/tooltip';
+import { cn } from '../../../shared/utils';
 
 const ComparisonSection = () => {
   const animationRef = useRef<HTMLDivElement>(null);
@@ -386,85 +390,117 @@ const ComparisonSection = () => {
   };
 
   return (
-    <section className='relative bg-white px-6 py-24 min-h-screen'>
+    <section className='relative px-6 py-24 min-h-screen'>
       <div className='max-w-7xl mx-auto'>
         {/* Semester Timeline Visualization */}
-        <div ref={animationRef} className='mb-20 dark:bg-gray-800 rounded-2xl'>
+        <div ref={animationRef} className='mb-20'>
           <div className='flex flex-col gap-8'>
-            <div className='timeline-container'>
-            <h2 className='text-center font-manrope text-title-xl font-bold text-danger mb-4'>Traditional Learning</h2>
-              <div className='timeline-description mb-6'>
-                <p className='font-satoshi text-gray-600 text-lg text-center'>
+            {/* Traditional Learning Timeline */}
+            <Card className='overflow-hidden border-none'>
+              <CardHeader>
+                <CardTitle className='text-center font-manrope text-title-xl font-bold text-danger'>
+                  Traditional Learning
+                </CardTitle>
+                <CardDescription className='text-center font-satoshi text-lg text-gray-600'>
                   Cramming before exams leads to stress and poor retention
-                </p>
-              </div>
-              <div className='traditional-timeline relative h-48 w-full bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden'>
-                <div className='milestone midterm absolute top-0 h-full' style={{ left: '40%' }}>
-                  <div className='milestone-label text-sm text-gray-500'>Midterm</div>
-                </div>
-                <div className='milestone final absolute top-0 h-full' style={{ left: '95%' }}>
-                  <div className='milestone-label text-sm text-gray-500'>Final</div>
-                </div>
-                <div
-                  className='tooltip midterm-tooltip absolute text-sm bg-white p-3 rounded shadow-lg opacity-0 pointer-events-none'
-                  style={{ left: '40%', top: '0', transform: 'translateX(-50%) translateY(-120%)' }}
-                >
-                  High stress, low comprehension
-                </div>
-                <div
-                  className='tooltip final-tooltip absolute text-sm bg-white p-3 rounded shadow-lg opacity-0 pointer-events-none'
-                  style={{ left: '95%', top: '0', transform: 'translateX(-50%) translateY(-120%)' }}
-                >
-                  Extreme cramming, minimal retention
-                </div>
-              </div>
-              <div className='flex justify-between mt-3 text-sm text-gray-500'>
-                <span>Week 1</span>
-                <span>Week 14</span>
-              </div>
-            </div>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='traditional-timeline relative h-48 w-full bg-gray-100/50 dark:bg-gray-700 rounded-lg overflow-hidden'>
+                  <TooltipProvider>
+                    {/* Midterm Milestone */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className='milestone midterm absolute top-0 h-full' style={{ left: '40%' }}>
+                          <div className='milestone-label text-sm text-gray-500'>Midterm</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className='bg-white/90 backdrop-blur-sm border border-danger/20'>
+                        <p>High stress, low comprehension</p>
+                      </TooltipContent>
+                    </Tooltip>
 
-            <div className='timeline-container'>
-            <h2 className='text-center font-manrope text-title-xl font-bold text-primary-900 mb-4'>Multinex Approach</h2>
-              <div className='timeline-description mb-6'>
-                <p className='font-satoshi text-gray-600 text-lg text-center'>
+                    {/* Final Milestone */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className='milestone final absolute top-0 h-full' style={{ left: '95%' }}>
+                          <div className='milestone-label text-sm text-gray-500'>Final</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className='bg-white/90 backdrop-blur-sm border border-danger/20'>
+                        <p>Extreme cramming, minimal retention</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <div className='flex justify-between mt-3 text-sm text-gray-500 font-satoshi'>
+                  <span>Week 1</span>
+                  <span>Week 14</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Multinex Timeline */}
+            <Card className='overflow-hidden border-none'>
+              <CardHeader>
+                <CardTitle className='text-center font-manrope text-title-xl font-bold text-primary-900'>
+                  Multinex Approach
+                </CardTitle>
+                <CardDescription className='text-center font-satoshi text-lg text-gray-600'>
                   Consistent engagement builds lasting knowledge networks
-                </p>
-              </div>
-              <div className='multinex-timeline relative h-48 w-full bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden'>
-                <div className='milestone midterm absolute top-0 h-full' style={{ left: '40%' }}>
-                  <div className='milestone-label text-sm text-gray-500'>Midterm</div>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='multinex-timeline relative h-48 w-full bg-gray-100/50 dark:bg-gray-700 rounded-lg overflow-hidden'>
+                  <TooltipProvider>
+                    {/* Midterm Milestone */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className='milestone midterm absolute top-0 h-full' style={{ left: '40%' }}>
+                          <div className='milestone-label text-sm text-gray-500'>Midterm</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className='bg-white/90 backdrop-blur-sm border border-primary-200'>
+                        <p>Steady preparation, low stress</p>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    {/* Final Milestone */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className='milestone final absolute top-0 h-full' style={{ left: '95%' }}>
+                          <div className='milestone-label text-sm text-gray-500'>Final</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className='bg-white/90 backdrop-blur-sm border border-primary-200'>
+                        <p>Strong knowledge foundation</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
-                <div className='milestone final absolute top-0 h-full' style={{ left: '95%' }}>
-                  <div className='milestone-label text-sm text-gray-500'>Final</div>
+                <div className='flex justify-between mt-3 text-sm text-gray-500 font-satoshi'>
+                  <span>Week 1</span>
+                  <span>Week 14</span>
                 </div>
-                <div
-                  className='tooltip midterm-tooltip absolute text-sm bg-white p-3 rounded shadow-lg opacity-0 pointer-events-none'
-                  style={{ left: '40%', top: '0', transform: 'translateX(-50%) translateY(-120%)' }}
-                >
-                  Steady preparation, low stress
-                </div>
-                <div
-                  className='tooltip final-tooltip absolute text-sm bg-white p-3 rounded shadow-lg opacity-0 pointer-events-none'
-                  style={{ left: '95%', top: '0', transform: 'translateX(-50%) translateY(-120%)' }}
-                >
-                  Strong knowledge foundation
-                </div>
-              </div>
-              <div className='flex justify-between mt-3 text-sm text-gray-500'>
-                <span>Week 1</span>
-                <span>Week 14</span>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
           <div className='mt-10 text-center'>
-            <button
+            <Button
               onClick={togglePlayPause}
-              className='px-6 py-3 text-lg bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors'
+              variant='default'
+              size='lg'
+              className={cn(
+                'px-6 py-3 text-lg rounded-full transition-all duration-200',
+                isPlaying 
+                  ? 'bg-danger hover:bg-danger/90' 
+                  : 'bg-primary-500 hover:bg-primary-600'
+              )}
             >
               {isPlaying ? <IoStopOutline className='mr-2' /> : <CiPlay1 className='mr-2' />}
-            </button>
+              {isPlaying ? 'Stop' : 'Play'} Animation
+            </Button>
           </div>
         </div>
       </div>

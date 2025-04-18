@@ -1,9 +1,22 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Dialog } from '@headlessui/react';
+import { useState, useCallback } from 'react';
+import { toast } from 'sonner';
+import { HiGlobeAlt, HiLockClosed } from 'react-icons/hi';
 import { COURSE_IMAGES } from '../../../shared/constants';
 import { cn } from '../../../shared/utils';
-import { HiGlobeAlt, HiLockClosed } from 'react-icons/hi';
-import { toast } from 'sonner';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../shadcn/components/ui/dialog';
+import { Button } from '../../shadcn/components/ui/button';
+import { Input } from '../../shadcn/components/ui/input';
+import { Textarea } from '../../shadcn/components/ui/textarea';
+import { Label } from '../../shadcn/components/ui/label';
+import { ScrollArea } from '../../shadcn/components/ui/scroll-area';
+import { Card } from '../../shadcn/components/ui/card';
 import { updateCourse } from 'wasp/client/operations';
 
 interface Course {
@@ -31,64 +44,66 @@ export default function CourseEditModal({ course, is_open, onClose }: CourseEdit
     is_public: course.is_public,
   });
 
-  const handleEditSave = useCallback(async (id: string, data: Partial<Course>) => {
-    const result = await updateCourse({ id, data });
-    if (result.success) {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await updateCourse({
+        id: course.id,
+        data: form_data,
+      });
       toast.success('Course updated successfully');
-    } else {
+      onClose();
+    } catch (error) {
       toast.error('Failed to update course');
     }
-  }, []);
-
-  useEffect(() => {
-    setFormData({
-      name: course.name,
-      description: course.description,
-      image: course.image || '',
-      is_public: course.is_public,
-    });
-  }, [course]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleEditSave(course.id, form_data);
-    onClose();
-  };
+  }, [course.id, form_data, onClose]);
 
   return (
-    <Dialog open={is_open} onClose={onClose} className='relative z-modal'>
-      <div className='fixed inset-0 bg-black/20 backdrop-blur-sm' aria-hidden='true' />
-      <div className='fixed inset-0 flex items-center justify-center p-4'>
-        <Dialog.Panel className='mx-auto max-w-4xl w-full rounded-2xl bg-white p-8 shadow-xl'>
-          <Dialog.Title className='text-title-lg font-manrope text-primary-900 mb-6'>Edit Course</Dialog.Title>
-          <form onSubmit={handleSubmit} className='space-y-6'>
+    <Dialog open={is_open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[625px]">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-semibold text-primary-900 font-montserrat">
+            Edit Course
+          </DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-4">
             <div>
-              <label className='block text-sm font-montserrat text-primary-800 mb-2'>Name</label>
-              <input
-                type='text'
+              <Label htmlFor="name" className="text-sm font-montserrat text-primary-800">
+                Course Name
+              </Label>
+              <Input
+                id="name"
                 value={form_data.name}
                 onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                className='w-full rounded-xl border border-primary-100 bg-white px-4 py-3 text-primary-900 focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition duration-200'
-                required
+                className="mt-2"
+                placeholder="Enter course name"
               />
             </div>
+
             <div>
-              <label className='block text-sm font-montserrat text-primary-800 mb-2'>Description</label>
-              <textarea
+              <Label htmlFor="description" className="text-sm font-montserrat text-primary-800">
+                Description
+              </Label>
+              <Textarea
+                id="description"
                 value={form_data.description}
                 onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                className='w-full rounded-xl border border-primary-100 bg-white px-4 py-3 text-primary-900 focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition duration-200'
-                rows={3}
-                required
+                className="mt-2 min-h-[120px]"
+                placeholder="Enter course description"
               />
             </div>
+
             <div>
-              <label className='block text-sm font-montserrat text-primary-800 mb-2'>Background Style</label>
-              <div className='grid grid-cols-5 gap-4'>
-                {COURSE_IMAGES.map((image, index) => (
-                  <button
+              <Label className="text-sm font-montserrat text-primary-800 mb-2">
+                Course Image
+              </Label>
+              <ScrollArea className="h-72 rounded-md border border-primary-100">
+                <div className="grid grid-cols-3 gap-4 p-4">
+                  {COURSE_IMAGES.map((image, index) => (
+                    <Card
                     key={index}
-                    type='button'
                     className={cn(
                       'h-24 rounded-xl transition-all duration-200',
                       image,
@@ -97,10 +112,13 @@ export default function CourseEditModal({ course, is_open, onClose }: CourseEdit
                         : 'hover:ring-2 hover:ring-primary-300 hover:ring-offset-2'
                     )}
                     onClick={() => setFormData((prev) => ({ ...prev, image }))}
-                  />
-                ))}
-              </div>
+                  >
+                    </Card>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
+
             <div className='flex items-center gap-3'>
               <button
                 type='button'
@@ -125,24 +143,26 @@ export default function CourseEditModal({ course, is_open, onClose }: CourseEdit
                 )}
               </button>
             </div>
-            <div className='flex justify-end gap-4 mt-8'>
-              <button
-                type='button'
-                onClick={onClose}
-                className='px-6 py-3 text-sm font-satoshi text-primary-700 hover:bg-primary-50 rounded-xl transition-colors duration-200'
-              >
-                Cancel
-              </button>
-              <button
-                type='submit'
-                className='px-6 py-3 text-sm font-satoshi text-white bg-primary-500 hover:bg-primary-600 rounded-xl transition-colors duration-200'
-              >
-                Save Changes
-              </button>
-            </div>
-          </form>
-        </Dialog.Panel>
-      </div>
+          </div>
+          
+          <DialogFooter className="gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="text-primary-700"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="bg-primary-600 text-white hover:bg-primary-700"
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 }

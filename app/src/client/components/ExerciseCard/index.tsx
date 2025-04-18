@@ -1,61 +1,30 @@
 import React, { useState, memo } from 'react';
 import { deleteExercise, shareExercise } from 'wasp/client/operations';
-import { RiDeleteBin4Line } from 'react-icons/ri';
+import { toast } from 'sonner';
 import ExerciseImg from '../../static/exercise.png';
 import ExerciseDoneImg from '../../static/exercise_done.png';
-import { PiCropThin } from 'react-icons/pi';
-import { CiEdit } from 'react-icons/ci';
-import { Tooltip } from 'react-tooltip';
 import ExerciseEditModal from './ExerciseEditModal';
-import { LuShare } from "react-icons/lu";
-import { toast } from 'sonner';
 
-// Memoized ShareMenu component
-const ShareMenu = memo(({ isOpen, onClose, emailsInput, setEmailsInput, onShare }: {
-  isOpen: boolean;
-  onClose: () => void;
-  emailsInput: string;
-  setEmailsInput: (value: string) => void;
-  onShare: () => void;
-}) => {
-  if (!isOpen) return null;
-  
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-modal">
-      <div className="bg-white w-full max-w-xl p-6 rounded-lg shadow-lg font-montserrat">
-        <h2 className="text-title-sm font-manrope font-semibold mb-4 text-gray-900">Share Exercise</h2>
-        <input
-          type="text"
-          placeholder="Enter emails separated by commas"
-          value={emailsInput}
-          onChange={(e) => setEmailsInput(e.target.value)}
-          className="w-full p-3 border border-primary-200 rounded-md focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-all duration-200 font-satoshi"
-        />
-        <div className="flex justify-end mt-6 gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-md text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 font-satoshi"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onShare}
-            className="px-4 py-2 rounded-md text-white bg-primary-500 hover:bg-primary-600 transition-colors duration-200 font-satoshi"
-          >
-            Share
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-});
+import { Card, CardContent, CardHeader, CardFooter } from '../../shadcn/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../../shadcn/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../shadcn/components/ui/dialog';
+import { Button } from '../../shadcn/components/ui/button';
+import { Input } from '../../shadcn/components/ui/input';
+import { Badge } from '../../shadcn/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../shadcn/components/ui/tooltip';
 
-// Memoized ExerciseCard component
-const ExerciseCard: React.FC<{
+import { MoreVertical, Edit, Share, Trash2, Crop } from 'lucide-react';
+
+interface ExerciseCardProps {
   index: number;
   exercise: {
     id: string;
-    status: string; 
+    status: string;
     name: string;
     level: string;
     lesson_text: string;
@@ -65,23 +34,67 @@ const ExerciseCard: React.FC<{
     completed_at: Date | null;
     score: number;
   };
-}> = memo(({ index, exercise }) => {
+}
+
+const ShareDialog = memo(
+  ({
+    isOpen,
+    onClose,
+    emailsInput,
+    setEmailsInput,
+    onShare,
+  }: {
+    isOpen: boolean;
+    onClose: () => void;
+    emailsInput: string;
+    setEmailsInput: (value: string) => void;
+    onShare: () => void;
+  }) => (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className='sm:max-w-xl'>
+        <DialogHeader>
+          <DialogTitle className='font-manrope text-title-sm font-semibold text-gray-900'>Share Exercise</DialogTitle>
+        </DialogHeader>
+        <Input
+          placeholder='Enter emails separated by commas'
+          value={emailsInput}
+          onChange={(e) => setEmailsInput(e.target.value)}
+          className='font-satoshi'
+        />
+        <DialogFooter>
+          <Button variant='outline' onClick={onClose} className='font-satoshi'>
+            Cancel
+          </Button>
+          <Button onClick={onShare} className='bg-primary-500 hover:bg-primary-600 font-satoshi'>
+            Share
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+);
+
+const ExerciseCard: React.FC<ExerciseCardProps> = memo(({ index, exercise }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
   const [emailsInput, setEmailsInput] = useState('');
 
   const handleShare = async () => {
-    const emails = emailsInput.split(',').map(email => email.trim()).filter(email => email !== '');
+    const emails = emailsInput
+      .split(',')
+      .map((email) => email.trim())
+      .filter((email) => email !== '');
     if (emails.length > 0) {
       await shareExercise({ exercise_id: exercise.id, emails });
       setIsShareMenuOpen(false);
       setEmailsInput('');
+      toast.success('Exercise shared successfully');
     } else {
-      toast.error('Please enter at least one email.');
+      toast.error('Please enter at least one email');
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     toast('Are you sure you want to delete this exercise?', {
       action: {
         label: 'Delete',
@@ -89,7 +102,7 @@ const ExerciseCard: React.FC<{
           toast.promise(deleteExercise({ id: exercise.id }), {
             loading: 'Deleting exercise...',
             success: 'Exercise deleted successfully',
-            error: 'Failed to delete exercise'
+            error: 'Failed to delete exercise',
           });
         },
       },
@@ -106,8 +119,8 @@ const ExerciseCard: React.FC<{
           onClose={() => setIsModalOpen(false)}
         />
       )}
-      
-      <ShareMenu 
+
+      <ShareDialog
         isOpen={isShareMenuOpen}
         onClose={() => setIsShareMenuOpen(false)}
         emailsInput={emailsInput}
@@ -115,56 +128,66 @@ const ExerciseCard: React.FC<{
         onShare={handleShare}
       />
 
-      <div className='relative flex flex-col items-center p-5 bg-white border border-primary-100 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer font-montserrat'>
-        {exercise.truncated && (
-          <>
-            <PiCropThin
-              className='absolute bottom-3 left-3 z-above text-xl text-primary-900'
-              data-multiline
-              data-tooltip-id={`cropped-tooltip-${index || 'all'}`}
-            />
-            <Tooltip
-              id={`cropped-tooltip-${index || 'all'}`}
-              place='bottom'
-              className='z-tooltip font-satoshi'
-              content='The length of the uploaded file was too long and has been cropped.'
-            />
-          </>
-        )}
-        <div className='absolute top-3 right-3 flex gap-2 z-above'>
-          <button
-            className='text-lg text-secondary-400 hover:text-secondary-500 transition-colors duration-200'
-            onClick={() => setIsShareMenuOpen(true)}
-          >
-            <LuShare />
-          </button>
-          <button
-            className='text-lg text-primary-400 hover:text-primary-500 transition-colors duration-200'
-            onClick={() => setIsModalOpen(true)}
-          >
-            <CiEdit />
-          </button>
-          <button
-            className='text-lg text-danger hover:text-red-600 transition-colors duration-200'
-            onClick={handleDelete}
-          >
-            <RiDeleteBin4Line />
-          </button>
-        </div>
-        <a href={`/exercise/${exercise.id}`} className='w-full group'>
-          <div className='overflow-hidden rounded-md mb-4'>
+      <div className='group relative hover:shadow-lg transition-all duration-300'>
+        <CardHeader className='relative p-0'>
+          <div className='absolute top-3 right-3 z-10'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='ghost' size='icon' className='hover:bg-white/10'>
+                  <MoreVertical className='h-5 w-5 text-gray-600' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end'>
+                <DropdownMenuItem onClick={() => setIsShareMenuOpen(true)}>
+                  <Share className='mr-2 h-4 w-4' />
+                  Share
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsModalOpen(true)}>
+                  <Edit className='mr-2 h-4 w-4' />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDelete} className='text-danger'>
+                  <Trash2 className='mr-2 h-4 w-4' />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <a href={`/exercise/${exercise.id}`} className='block'>
             <img
               src={exercise.completed ? ExerciseDoneImg : ExerciseImg}
-              className='w-full p-4 transition-transform duration-300 group-hover:scale-105'
               alt='Exercise'
+              className='w-full p-4 transition-transform duration-300 group-hover:scale-105'
             />
-          </div>
-          <h3 className='text-title-xsm font-manrope font-medium text-center text-gray-900 group-hover:text-primary-600 transition-colors duration-200 line-clamp-2'>
-            {exercise.name}
-          </h3>
-        </a>
-        <div className='mt-2 text-sm font-satoshi font-medium text-primary-500'>{exercise.level}</div>
-        <div className='mt-1 text-xs font-satoshi text-gray-500'>{exercise.word_count} words</div>
+          </a>
+        </CardHeader>
+
+        <CardContent className='p-4'>
+          <a href={`/exercise/${exercise.id}`} className='block'>
+            <h3 className='font-manrope text-title-xsm font-medium text-gray-900 group-hover:text-primary-600 transition-colors duration-200 line-clamp-2 min-h-[48px]'>
+              {exercise.name}
+            </h3>
+          </a>
+        </CardContent>
+
+        <CardFooter className='p-4 pt-0 flex items-center justify-between'>
+          <Badge variant='secondary' className='font-satoshi bg-primary-50 text-primary-700'>
+            {exercise.level}
+          </Badge>
+          <span className='text-xs font-satoshi text-gray-500'>{exercise.word_count} words</span>
+        </CardFooter>
+
+        {exercise.truncated && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className='absolute bottom-3 left-3'>
+                <Crop className='h-5 w-5 text-primary-900' />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>The length of the uploaded file was too long and has been cropped.</TooltipContent>
+          </Tooltip>
+        )}
       </div>
     </>
   );

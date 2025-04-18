@@ -3,6 +3,19 @@ import { updateExercise } from 'wasp/client/operations';
 import { cn } from '../../../shared/utils';
 import { toast } from 'sonner';
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../shadcn/components/ui/dialog";
+import { Button } from "../../shadcn/components/ui/button";
+import { Input } from "../../shadcn/components/ui/input";
+import { Textarea } from "../../shadcn/components/ui/textarea";
+import { Label } from "../../shadcn/components/ui/label";
+import { Card, CardContent } from "../../shadcn/components/ui/card";
+import { Loader2 } from "lucide-react";
+
 interface ExerciseEditModalProps {
   id: string;
   name: string;
@@ -10,39 +23,9 @@ interface ExerciseEditModalProps {
   onClose: () => void;
 }
 
-const LoadingSpinner = memo(() => (
-  <svg
-    className='animate-spin h-5 w-5 mr-3 text-white'
-    xmlns='http://www.w3.org/2000/svg'
-    fill='none'
-    viewBox='0 0 24 24'
-  >
-    <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
-    <path
-      className='opacity-75'
-      fill='currentColor'
-      d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-    ></path>
-  </svg>
-));
-
-const CloseButton = memo(({ onClose }: { onClose: () => void }) => (
-  <button
-    onClick={onClose}
-    className='text-tertiary-400 hover:text-tertiary-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200'
-  >
-    <span className='sr-only'>Close</span>
-    <svg className='h-6 w-6' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
-    </svg>
-  </button>
-));
-
 const ExerciseEditModal: React.FC<ExerciseEditModalProps> = memo(({ id, name, lesson_text, onClose }) => {
   const [exerciseName, setExerciseName] = useState(name);
   const [exerciseText, setExerciseText] = useState(lesson_text);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -52,8 +35,6 @@ const ExerciseEditModal: React.FC<ExerciseEditModalProps> = memo(({ id, name, le
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     setLoading(true);
     try {
       toast.promise(updateExercise({ id, updated_data: { name: exerciseName, lesson_text: exerciseText } }), {
@@ -71,60 +52,74 @@ const ExerciseEditModal: React.FC<ExerciseEditModalProps> = memo(({ id, name, le
   const wordCount = exerciseText.split(' ').length;
 
   return (
-    <div className='fixed inset-0 z-modal flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm transition-opacity duration-300'>
-      <div className='relative w-full max-w-4xl bg-white rounded-xl shadow-xl transform transition-all duration-300 ease-in-out'>
-        <div className='absolute top-4 right-4'>
-          <CloseButton onClose={onClose} />
-        </div>
-        <div className='p-8'>
-          <h2 className='font-manrope text-title-lg font-semibold text-gray-900 mb-6'>Edit Exercise</h2>
-          <form onSubmit={handleSubmit} className='space-y-6'>
-            <div>
-              <label htmlFor='name' className='block font-montserrat text-sm font-medium text-gray-700 mb-2'>
-                Name
-              </label>
-              <input
-                type='text'
-                id='name'
-                value={exerciseName}
-                onChange={(e) => setExerciseName(e.target.value)}
-                className='block w-full rounded-lg border-gray-200 shadow-sm focus:border-primary-500 focus:ring-primary-500 font-satoshi text-base transition duration-200'
-              />
-            </div>
-            <div>
-              <div className='flex justify-between items-center mb-2'>
-                <label htmlFor='lessonText' className='block font-montserrat text-sm font-medium text-gray-700'>
-                  Lesson Text
-                </label>
-                <span className='font-satoshi text-sm text-tertiary-400'>{wordCount} words</span>
+    <Dialog open={true} onOpenChange={() => onClose()}>
+      <DialogContent className="sm:max-w-4xl">
+        <DialogHeader>
+          <DialogTitle className="font-manrope text-title-lg font-semibold text-gray-900">
+            Edit Exercise
+          </DialogTitle>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <Card className="border-primary-100">
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="font-montserrat text-sm text-gray-700">
+                    Name
+                  </Label>
+                  <Input
+                    id="name"
+                    value={exerciseName}
+                    onChange={(e) => setExerciseName(e.target.value)}
+                    className="font-satoshi border-gray-200 focus:border-primary-500 focus:ring-primary-500"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="lessonText" className="font-montserrat text-sm text-gray-700">
+                      Lesson Text
+                    </Label>
+                    <span className="font-satoshi text-sm text-tertiary-400">
+                      {wordCount} words
+                    </span>
+                  </div>
+                  <Textarea
+                    id="lessonText"
+                    value={exerciseText}
+                    onChange={(e) => setExerciseText(e.target.value)}
+                    className="min-h-[300px] font-satoshi border-gray-200 focus:border-primary-500 focus:ring-primary-500"
+                  />
+                </div>
               </div>
-              <textarea
-                id='lessonText'
-                value={exerciseText}
-                onChange={(e) => setExerciseText(e.target.value)}
-                rows={4}
-                className='block w-full h-96 rounded-lg border-gray-200 shadow-sm focus:border-primary-500 focus:ring-primary-500 font-satoshi text-base transition duration-200'
-              />
-            </div>
-            {error && <div className='text-sm font-satoshi text-danger rounded-md bg-danger/10 p-3'>{error}</div>}
-            {success && <div className='text-sm font-satoshi text-success rounded-md bg-success/10 p-3'>{success}</div>}
-            <div>
-              <button
-                type='submit'
-                disabled={loading}
-                className={cn(
-                  'w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-satoshi font-medium text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition duration-200',
-                  loading ? 'opacity-50 cursor-not-allowed' : ''
-                )}
-              >
-                {loading && <LoadingSpinner />}
-                {loading ? 'Updating...' : 'Update Exercise'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="mr-2 font-satoshi"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading}
+              className={cn(
+                "bg-primary-500 hover:bg-primary-600 text-white font-satoshi",
+                loading && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {loading ? 'Updating...' : 'Update Exercise'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 });
 

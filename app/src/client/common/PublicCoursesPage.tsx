@@ -4,7 +4,17 @@ import { VscCopy } from 'react-icons/vsc';
 import { HiOutlineBookOpen, HiOutlineAcademicCap } from 'react-icons/hi';
 import { useAuth } from 'wasp/client/auth';
 import { toast } from 'sonner';
-import { cn } from '../../shared/utils';
+
+// Import shadcn components
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../shadcn/components/ui/card';
+import { Button } from '../shadcn/components/ui/button';
+import { ScrollArea } from '../shadcn/components/ui/scroll-area';
+import { Skeleton } from '../shadcn/components/ui/skeleton';
+import { Alert, AlertDescription } from '../shadcn/components/ui/alert';
+import { Badge } from '../shadcn/components/ui/badge';
+import { Separator } from '../shadcn/components/ui/separator';
+import { HoverCard, HoverCardTrigger, HoverCardContent } from '../shadcn/components/ui/hover-card';
+import { cn } from '../shadcn/lib/utils';
 
 interface Course {
   id: string;
@@ -19,122 +29,87 @@ interface Course {
 }
 
 const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll: (id: string) => void }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const { data: user } = useAuth();
-
-  const handleEnroll = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (!user) {
-        toast.error('Please sign in to enroll in this course');
-        return;
-      }
-      if (user.id === course.user_id) {
-        toast.error('This is your course - no need to enroll!');
-        return;
-      }
-      onEnroll(course.id);
-    },
-    [course.id, course.user_id, onEnroll, user]
-  );
-
-  const toggleDescription = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsDescriptionExpanded((prev) => !prev);
-  }, []);
-
   const isOwner = user?.id === course.user_id;
 
+  const handleEnroll = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      toast.error('Please sign in to enroll in this course');
+      return;
+    }
+    if (isOwner) {
+      toast.error('This is your course - no need to enroll!');
+      return;
+    }
+    onEnroll(course.id);
+  }, [course.id, isOwner, onEnroll, user]);
+
   return (
-    <div
-      className={cn(
-        'relative bg-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-102 overflow-hidden',
-        isOwner ? 'border border-primary-500' : 'border border-primary-100'
-      )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className={cn(
-        'relative h-48 w-full bg-cover bg-center',
-        course.image
-      )}>
-        <div className='absolute inset-0 bg-gradient-to-t from-black/50 to-transparent'></div>
-      </div>
-      <div className='p-6 relative'>
-        <div className='flex justify-between items-start mb-3'>
-          <h4 className='text-lg font-manrope font-semibold text-gray-900'>{course.name}</h4>
+    <Card className={cn(
+      'group transition-all duration-300 hover:shadow-lg',
+      isOwner ? 'border-primary-500' : 'border-primary-100'
+    )}>
+      <CardHeader className="space-y-2">
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-lg font-manrope text-primary-900">{course.name}</CardTitle>
           {!isOwner && (
-            <button
-              className={cn(
-                'p-2 rounded-full bg-white/90 text-secondary-500 hover:text-secondary-600 transition-colors duration-200 backdrop-blur-sm',
-                isHovered ? 'opacity-100' : 'opacity-0'
-              )}
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={handleEnroll}
-              title={user ? 'Enroll in this course' : 'Sign in to enroll'}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <VscCopy className='w-5 h-5' />
-            </button>
+              <VscCopy className="w-5 h-5" />
+            </Button>
           )}
         </div>
-        <div className='relative'>
-          <p className={cn(
-            'text-sm font-montserrat text-gray-600',
-            isDescriptionExpanded ? '' : 'line-clamp-3'
-          )}>
-            {course.description}
-          </p>
-          {course.description.length > 150 && (
-            <button
-              onClick={toggleDescription}
-              className={cn(
-                'mt-1 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors',
-                isDescriptionExpanded ? '' : 'line-clamp-3'
-              )}
-            >
-              {isDescriptionExpanded ? 'Show less' : 'Read more'}
-            </button>
-          )}
-        </div>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <CardDescription className="line-clamp-2 cursor-pointer">
+              {course.description}
+            </CardDescription>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-80">
+            <p className="text-sm text-muted-foreground">{course.description}</p>
+          </HoverCardContent>
+        </HoverCard>
+      </CardHeader>
 
-        <div className='mt-4 flex flex-col space-y-3'>
-          <div className='flex items-center justify-between text-sm text-gray-600'>
-            <div className='flex items-center space-x-2'>
-              <HiOutlineBookOpen className='w-5 h-5 text-secondary-400' />
-              <span className='font-satoshi'>{course.total_topics} Topics</span>
-            </div>
-            <div className='flex items-center space-x-2'>
-              <HiOutlineAcademicCap className='w-5 h-5 text-secondary-400' />
-              <span className='font-satoshi'>{course.total_exercises} Exercises</span>
-            </div>
+      <CardContent className="space-y-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <HiOutlineBookOpen className="w-5 h-5 text-secondary-500" />
+            <span className="font-satoshi text-sm">{course.total_topics} Topics</span>
           </div>
-
-          <div className='pt-3 border-t border-primary-100 flex justify-between items-center'>
-            <span className='text-xs font-satoshi text-gray-500'>
-              Added{' '}
-              {new Date(course.created_at).toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              })}
-            </span>
-            <span className='text-xs font-medium text-primary-600'>
-              {isOwner ? 'Your Course' : 'Free'}
-            </span>
+          <div className="flex items-center space-x-2">
+            <HiOutlineAcademicCap className="w-5 h-5 text-secondary-500" />
+            <span className="font-satoshi text-sm">{course.total_exercises} Exercises</span>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+
+      <CardFooter className="pt-4 flex justify-between items-center">
+        <span className="text-xs font-satoshi text-muted-foreground">
+          {new Date(course.created_at).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          })}
+        </span>
+        <Badge variant={isOwner ? "secondary" : "default"}>
+          {isOwner ? 'Your Course' : 'Free'}
+        </Badge>
+      </CardFooter>
+    </Card>
   );
 });
-
-PublicCourseCard.displayName = 'PublicCourseCard';
 
 const PublicCoursesPage = () => {
   const {
     data: publicCourses,
-    isLoading: isLoadingPublicCourses,
-    error: errorPublicCourses,
+    isLoading,
+    error
   } = useQuery(getPublicCourses);
 
   const handleEnroll = useCallback(async (id: string) => {
@@ -152,51 +127,62 @@ const PublicCoursesPage = () => {
     });
   }, []);
 
-  if (isLoadingPublicCourses) {
+  if (isLoading) {
     return (
-      <div className='flex justify-center items-center min-h-screen'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600'></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-8">
+        {[...Array(6)].map((_, i) => (
+          <Card key={i} className="w-full">
+            <CardHeader>
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-full mt-2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-20 w-full" />
+            </CardContent>
+          </Card>
+        ))}
       </div>
     );
   }
 
-  if (errorPublicCourses) {
+  if (error) {
     return (
-      <div className='flex justify-center items-center min-h-screen'>
-        <div className='text-danger'>Error loading courses. Please try again later.</div>
+      <div className="p-8">
+        <Alert variant="destructive">
+          <AlertDescription>
+            Error loading courses. Please try again later.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
 
   if (!publicCourses?.courses?.length) {
     return (
-      <div className='flex flex-col justify-center items-center min-h-screen space-y-4'>
-        <HiOutlineBookOpen className='w-16 h-16 text-primary-300' />
-        <div className='text-gray-500 text-lg font-manrope'>No public courses available yet</div>
-        <p className='text-gray-400 text-sm font-montserrat'>Check back later for new content</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <HiOutlineBookOpen className="w-16 h-16 text-primary-300" />
+        <CardTitle className="text-xl text-primary-900">No public courses available yet</CardTitle>
+        <CardDescription>Check back later for new content</CardDescription>
       </div>
     );
   }
 
   return (
-    <div className='lg:mt-10 pb-10'>
-      <div className='mx-auto max-w-7xl px-6 lg:px-8'>
-        <div className='mx-auto max-w-4xl text-center'>
-          <h2 className='mt-2 text-title-xl font-bold font-manrope tracking-tight text-gray-900'>
+    <ScrollArea className="h-full">
+      <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center space-y-4 mb-16">
+          <h2 className="text-3xl font-bold font-manrope tracking-tight text-primary-900">
             Community Courses
           </h2>
-          <p className='mt-4 text-lg font-montserrat text-gray-600'>
-            Explore and enroll in high-quality courses shared by the community. All courses are free to use.
-          </p>
         </div>
 
-        <div className='mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {publicCourses.courses.map((course) => (
             <PublicCourseCard key={course.id} course={course as any} onEnroll={handleEnroll} />
           ))}
         </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 };
 

@@ -2,6 +2,11 @@ import { Link } from 'wasp/client/router';
 import ExerciseForm from '../ExerciseForm';
 import { useAuth } from 'wasp/client/auth';
 import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../shadcn/components/ui/card';
+import { Button } from '../../shadcn/components/ui/button';
+import { Badge } from '../../shadcn/components/ui/badge';
+import { Separator } from '../../shadcn/components/ui/separator';
+
 const HeroSection: React.FC = () => {
   const { data: user, isLoading } = useAuth();
   const [demoMode, setDemoMode] = useState(true);
@@ -15,56 +20,75 @@ const HeroSection: React.FC = () => {
   }, [user, isLoading]);
 
   return (
-    <div className='relative pt-14 w-full min-h-[85vh] flex items-center pointer-events-none'>
-      {/* Cool background stuff */}
-      <div
-        className='absolute top-0 right-0 -z-10 transform-gpu blur-3xl overflow-hidden w-full h-full'
-        aria-hidden='true'
-      >
-        <div
-          className='hidden absolute top-0 right-0 w-full h-full bg-gradient-to-tr from-teal-400 to-purple-600 opacity-30 dark:opacity-20 dark:block'
-          style={{
-            clipPath: 'polygon(80% 20%, 90% 55%, 50% 100%, 70% 30%, 20% 50%, 50% 0)',
-          }}
-        />
+    <div className='relative pt-14 w-full min-h-[85vh] flex items-center'>
+      {/* Enhanced background with multiple gradients */}
+      <div className='absolute inset-0 -z-10'>
+        <div className='absolute inset-0 bg-gradient-to-tr from-primary-50 via-transparent to-secondary-50/30 opacity-70' />
+        <div className='absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary-100/20 via-transparent to-secondary-100/20' />
       </div>
-      <div className='py-24 sm:py-32 w-full'>
-        <div className='mx-auto max-w-8xl px-6 lg:px-8'>
-          <div className='mx-auto max-w-3xl text-center'>
-            <h1 className='text-3xl font-semibold tracking-tight text-gray-900 sm:text-6xl dark:text-gray-100'>
-              <span className='text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-gray-900'>
-                Triathlon But For Brain
-              </span>
-            </h1>
-            <p className='my-6 mx-auto max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-300'>
-              <span className='font-semibold text-teal-600 dark:text-teal-400'>Type key concepts</span> →{' '}
-              <span className='font-semibold text-red-600 dark:text-red-400'>Handwrite connections</span> →{' '}
-              <span className='font-semibold text-blue-600 dark:text-blue-400'>Listen explanations</span>.
-            </p>
-            <ExerciseForm topic_id={null} demo={demoMode} />
+
+      <div className='w-full py-24 sm:py-32'>
+        <Card className='mx-auto max-w-4xl border-none bg-transparent shadow-none'>
+          <CardContent className='text-center space-y-8'>
+            {/* Main Title */}
+            <CardHeader className='p-0 space-y-4'>
+              <CardTitle className='text-4xl sm:text-6xl lg:text-7xl font-semibold tracking-tight'>
+                <span className='text-transparent bg-clip-text bg-gradient-to-r from-primary-600 via-primary-800 to-secondary-700'>
+                  Triathlon But For Brain
+                </span>
+              </CardTitle>
+              <CardDescription className='mx-auto py-4 text-md sm:text-lg text-muted-foreground'>
+                <span className='font-medium text-tertiary-600'>📊 Diagram to visualize</span>
+                <span className='mx-2'>→</span>
+                <span className='font-medium text-primary-600'>⌨️ Type to encode</span>
+                <span className='mx-2'>→</span>
+                <span className='font-medium text-secondary-600'>🎧 Listen to reinforce</span>
+                <span className='mx-2'>→</span>
+                <span className='font-medium text-danger'>✍️ Write to recall</span>
+              </CardDescription>
+            </CardHeader>
+
+            {/* Exercise Form */}
+            <div className='pointer-events-auto'>
+              <ExerciseForm topic_id={null} demo={demoMode} />
+            </div>
+
+            {/* CTA Buttons */}
             {!user && !isLoading && (
-              <div className='mt-10 flex items-center justify-center gap-x-6'>
-                <Link
-                  to='/signup'
-                  className='rounded-full bg-gradient-to-r from-teal-500 to-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:from-teal-600 hover:to-teal-700 transition-all duration-200 pointer-events-auto hover:shadow-teal-500/25'
+              <div className='flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pointer-events-auto'>
+                <Button
+                  asChild
+                  size='lg'
+                  className='rounded-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white shadow-lg hover:shadow-primary-500/25'
                 >
-                  Sign up for more free credits
-                </Link>
-                <Link
-                  to='/demo'
-                  className='rounded-full bg-gradient-to-r from-tertiary-500 to-tertiary-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:from-tertiary-600 hover:to-tertiary-700 transition-all duration-200 pointer-events-auto hover:shadow-tertiary-500/25'
+                  <Link to='/signup'>Sign up for more free credits</Link>
+                </Button>
+
+                <Button
+                  asChild
+                  variant='secondary'
+                  size='lg'
+                  className='rounded-full bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 text-white shadow-lg hover:shadow-secondary-500/25'
                 >
-                  Try demo <span aria-hidden='true' className='transition-transform group-hover:translate-x-1'>→</span>
-                </Link>
+                  <Link to='/demo' className='group'>
+                    Try demo
+                    <span aria-hidden='true' className='ml-2 transition-transform group-hover:translate-x-1'>
+                      →
+                    </span>
+                  </Link>
+                </Button>
               </div>
             )}
-          </div>
-          <div className='flex justify-center'>
-            <span className='px-4 py-1 font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-full text-sm mt-8 inline-block text-center italic'>
-              Beyond AI Summaries ✨
-            </span>
-          </div>
-        </div>
+
+            <Separator className='my-8' />
+
+            <div className='flex flex-col items-center justify-center gap-4'>
+              <Badge variant='secondary' className='px-4 py-1'>
+                🚀 Education 2.0
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

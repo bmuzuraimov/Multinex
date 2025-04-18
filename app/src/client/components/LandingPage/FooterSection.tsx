@@ -1,201 +1,155 @@
-import { createNewsletter } from 'wasp/client/operations';
-import { FOOTER_NAVIGATION } from '../../../shared/constants';
-import { FaFacebook, FaXTwitter, FaInstagram, FaLinkedin, FaTiktok } from 'react-icons/fa6';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { Link } from 'wasp/client/router';
+import { Separator } from '../../shadcn/components/ui/separator';
+import { Button } from '../../shadcn/components/ui/button';
+import { Card, CardContent } from '../../shadcn/components/ui/card';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '../../shadcn/components/ui/hover-card';
+import { cn } from '../../../shared/utils';
 
-const FooterSection = () => {
-  const [email, setEmail] = useState('');
+const FooterSection: React.FC = () => {
+  const currentYear = new Date().getFullYear();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!email) {
-      toast.error('Please enter your email address');
-      return;
-    }
-
-    try {
-      const response = await createNewsletter({ 
-        email,
-        userAgent: window.navigator.userAgent,
-        source: 'website_footer'
-      });
-      if (response.success) {
-        toast.success('Successfully subscribed to newsletter!');
-        setEmail('');
-      } else {
-        toast.error(response.message || 'Failed to subscribe');
-      }
-    } catch (error) {
-      toast.error('An error occurred while subscribing');
-    }
+  const footerLinks = {
+    product: [
+      { name: 'Features', href: '#features' },
+      { name: 'Pricing', href: '#pricing' },
+      { name: 'Demo', href: '/demo' },
+      { name: 'Roadmap', href: '#roadmap' },
+    ],
+    company: [
+      { name: 'About', href: '/about' },
+      { name: 'Blog', href: '/blog' },
+      { name: 'Careers', href: '/careers' },
+      { name: 'Contact', href: '/contact' },
+    ],
+    legal: [
+      { name: 'Privacy', href: '/privacy' },
+      { name: 'Terms', href: '/terms' },
+      { name: 'Cookie Policy', href: '/cookies' },
+      { name: 'Licenses', href: '/licenses' },
+    ],
+    social: [
+      { name: 'Twitter', href: 'https://twitter.com/multinex', icon: '𝕏' },
+      { name: 'GitHub', href: 'https://github.com/multinex', icon: '⌨' },
+      { name: 'Discord', href: 'https://discord.gg/multinex', icon: '💬' },
+      { name: 'LinkedIn', href: 'https://linkedin.com/company/multinex', icon: '💼' },
+    ],
   };
 
   return (
-    <div className='relative mt-32 w-full bg-white'>
-      <footer className='relative w-full py-16'>
-        <div className='relative max-w-7xl mx-auto px-6 lg:px-8'>
-          {/* Main footer content */}
-          <div className='grid grid-cols-1 lg:grid-cols-4 gap-12'>
-            {/* Brand section */}
-            <div className='lg:col-span-1'>
-              <div className='space-y-6'>
-                <div className='relative group'>
-                  <svg
-                    className='h-10 w-auto transition-transform duration-300 ease-in-out transform group-hover:scale-110'
-                    viewBox='0 0 150 40'
-                    fill='none'
-                    xmlns='http://www.w3.org/2000/svg'
-                  >
-                    <path
-                      d='M20 10 L40 10 L30 30 Z'
-                      className='fill-primary-500 drop-shadow-[0_2px_8px_rgba(5,196,155,0.5)]'
-                    />
-                    <text
-                      x='45'
-                      y='28'
-                      className='text-2xl font-bold fill-primary-900'
-                      style={{ fontFamily: 'Manrope' }}
-                    >
-                      Multinex
-                    </text>
-                  </svg>
-                </div>
-
-                <p className='font-montserrat text-gray-600 leading-relaxed'>
-                  Making studying more engaging and effective through active learning and multi-sensory techniques.
-                </p>
-
-                <div className='flex space-x-5'>
-                  <a
-                    href='https://www.facebook.com/profile.php?id=61566443964554'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-gray-400 hover:text-primary-500 transition-colors duration-200'
-                  >
-                    <FaFacebook className='h-5 w-5' />
-                  </a>
-                  <a
-                    href='https://x.com/multinex'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-gray-400 hover:text-primary-500 transition-colors duration-200'
-                  >
-                    <FaXTwitter className='h-5 w-5' />
-                  </a>
-                  <a
-                    href='https://www.instagram.com/multinex/'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-gray-400 hover:text-primary-500 transition-colors duration-200'
-                  >
-                    <FaInstagram className='h-5 w-5' />
-                  </a>
-                  <a
-                    href='https://www.linkedin.com/company/multinex/'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-gray-400 hover:text-primary-500 transition-colors duration-200'
-                  >
-                    <FaLinkedin className='h-5 w-5' />
-                  </a>
-                  <a
-                    href='https://www.tiktok.com/@multinex'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-gray-400 hover:text-primary-500 transition-colors duration-200'
-                  >
-                    <FaTiktok className='h-5 w-5' />
-                  </a>
-                </div>
-              </div>
+    <footer className='relative bg-gradient-to-b from-gray-50/50 to-white border-t border-gray-100'>
+      <div className='mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16'>
+        <div className='xl:grid xl:grid-cols-3 xl:gap-8'>
+          {/* Brand Section */}
+          <Card className='bg-transparent border-none shadow-none space-y-8 xl:col-span-1'>
+            <div className='space-y-4'>
+              <Link
+                to='/'
+                className='flex items-center space-x-2 text-2xl font-satoshi font-bold text-primary-900'
+              >
+                <span className='bg-gradient-to-r from-primary-600 to-primary-900 bg-clip-text text-transparent'>
+                  Multinex
+                </span>
+              </Link>
+              <p className='text-gray-600 font-manrope max-w-xs'>
+                Empowering learning through multi-modal engagement and AI-driven personalization
+              </p>
             </div>
 
-            {/* Navigation sections */}
-            <div className='lg:col-span-2 grid grid-cols-2 gap-8'>
+            {/* Social Links */}
+            <div className='flex space-x-4'>
+              {footerLinks.social.map((item) => (
+                <HoverCard key={item.name}>
+                  <HoverCardTrigger asChild>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className='h-10 w-10 rounded-full hover:bg-primary-100 hover:text-primary-900'
+                      asChild
+                    >
+                      <a href={item.href} target='_blank' rel='noopener noreferrer'>
+                        <span className='text-xl'>{item.icon}</span>
+                      </a>
+                    </Button>
+                  </HoverCardTrigger>
+                  <HoverCardContent className='w-auto p-2 bg-white/95 backdrop-blur-sm'>
+                    <p className='text-sm font-manrope text-gray-600'>Follow us on {item.name}</p>
+                  </HoverCardContent>
+                </HoverCard>
+              ))}
+            </div>
+          </Card>
+
+          {/* Links Grid */}
+          <div className='mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0'>
+            <div className='grid grid-cols-2 gap-8 md:gap-x-12'>
               <div>
-                <h3 className='font-manrope text-title-sm font-semibold text-primary-900 mb-4'>Quick Links</h3>
-                <ul className='space-y-3'>
-                  {FOOTER_NAVIGATION.app.map((item) => (
+                <h3 className='text-base font-satoshi font-semibold text-primary-900'>Product</h3>
+                <ul role='list' className='mt-4 space-y-3'>
+                  {footerLinks.product.map((item) => (
                     <li key={item.name}>
-                      <a
-                        href={item.href}
-                        className='font-montserrat text-gray-500 hover:text-primary-600 transition-colors duration-200'
+                      <Link
+                        to={item.href as any}
+                        className='text-sm text-gray-600 hover:text-primary-700 transition-colors font-manrope'
                       >
                         {item.name}
-                      </a>
+                      </Link>
                     </li>
                   ))}
-                  <li>
-                    <a
-                      href='https://multinex.getrewardful.com/signup'
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='font-montserrat text-gray-500 hover:text-primary-600 transition-colors duration-200'
-                    >
-                      Affiliate Program
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href='/guide'
-                      className='font-montserrat text-gray-500 hover:text-primary-600 transition-colors duration-200'
-                    >
-                      Guide
-                    </a>
-                  </li>
                 </ul>
               </div>
-
               <div>
-                <h3 className='font-manrope text-title-sm font-semibold text-primary-900 mb-4'>About Us</h3>
-                <ul className='space-y-3'>
-                  {FOOTER_NAVIGATION.company.map((item) => (
+                <h3 className='text-base font-satoshi font-semibold text-primary-900'>Company</h3>
+                <ul role='list' className='mt-4 space-y-3'>
+                  {footerLinks.company.map((item) => (
                     <li key={item.name}>
-                      <a
-                        href={item.href}
-                        className='font-montserrat text-gray-500 hover:text-primary-600 transition-colors duration-200'
+                      <Link
+                        to={item.href as any}
+                        className='text-sm text-gray-600 hover:text-primary-700 transition-colors font-manrope'
                       >
                         {item.name}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
               </div>
             </div>
-
-            <div className='lg:col-span-1'>
-              <h3 className='font-manrope text-title-sm font-semibold text-primary-900 mb-4'>Stay Updated</h3>
-              <form onSubmit={handleSubmit} className='mt-4'>
-                <div className='flex flex-col space-y-3'>
-                  <input
-                    type='email'
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder='Your email address'
-                    className='w-full px-4 py-2.5 rounded-lg bg-white border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200 font-satoshi'
-                  />
-                  <button
-                    type='submit'
-                    className='w-full px-4 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors duration-200 font-satoshi font-medium'
-                  >
-                    Subscribe
-                  </button>
-                </div>
-              </form>
+            <div>
+              <h3 className='text-base font-satoshi font-semibold text-primary-900'>Legal</h3>
+              <ul role='list' className='mt-4 space-y-3'>
+                {footerLinks.legal.map((item) => (
+                  <li key={item.name}>
+                    <Link
+                      to={item.href as any}
+                      className='text-sm text-gray-600 hover:text-primary-700 transition-colors font-manrope'
+                    >
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-
-          {/* Bottom bar */}
-          <div className='mt-16 pt-8 border-t border-gray-100'>
-            <p className='text-center font-satoshi text-sm text-gray-400'>
-              © {new Date().getFullYear()} Multinex Tech. All rights reserved.
-            </p>
           </div>
         </div>
-      </footer>
-    </div>
+
+        <Separator className='my-8 bg-gray-100' />
+
+        {/* Bottom Section */}
+        <div className='flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0'>
+          <p className='text-sm text-gray-500 font-manrope'>
+            © {currentYear} Multinex. All rights reserved.
+          </p>
+          <div className='flex items-center space-x-2'>
+            <Button variant='ghost' size='sm' className='text-gray-500 hover:text-primary-700'>
+              <Link to='/privacy'>Privacy</Link>
+            </Button>
+            <Separator orientation='vertical' className='h-4 bg-gray-200' />
+            <Button variant='ghost' size='sm' className='text-gray-500 hover:text-primary-700'>
+              <Link to='/terms'>Terms</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 };
 

@@ -1,14 +1,31 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../shadcn/components/ui/card';
+import { Progress } from '../shadcn/components/ui/progress';
+import { Button } from '../shadcn/components/ui/button';
+import { Separator } from '../shadcn/components/ui/separator';
+import { cn } from '../../shared/utils';
+import { FiCheck, FiX, FiAlertTriangle, FiArrowRight } from 'react-icons/fi';
 
 export default function CheckoutPage() {
   const [payment_status, setPaymentStatus] = useState('loading');
-
+  const [progress, setProgress] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     function handleDelayedRedirect() {
+      // Animate progress bar
+      const interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            return 100;
+          }
+          return prev + 2;
+        });
+      }, 80);
+
       return setTimeout(() => {
         navigate('/account');
       }, 4000);
@@ -32,64 +49,82 @@ export default function CheckoutPage() {
     };
   }, [location]);
 
+  const statusConfig = {
+    paid: {
+      icon: <FiCheck className="w-8 h-8" />,
+      title: "Payment Successful!",
+      description: "Thank you for your purchase. Your payment has been processed successfully.",
+      iconClass: "bg-success/10 text-success",
+      borderClass: "border-success/20",
+    },
+    canceled: {
+      icon: <FiX className="w-8 h-8" />,
+      title: "Payment Canceled",
+      description: "Your payment was canceled. Please try again if you'd like to complete your purchase.",
+      iconClass: "bg-danger/10 text-danger",
+      borderClass: "border-danger/20",
+    },
+    error: {
+      icon: <FiAlertTriangle className="w-8 h-8" />,
+      title: "Payment Error",
+      description: "There was an error processing your payment. Please try again.",
+      iconClass: "bg-warning/10 text-warning",
+      borderClass: "border-warning/20",
+    }
+  };
+
+  const currentStatus = statusConfig[payment_status as keyof typeof statusConfig];
+
   return (
-    <div className='min-h-screen bg-white flex items-center justify-center font-montserrat px-4'>
-      <div className='w-full max-w-xl'>
-        <div className='bg-white rounded-2xl p-8 shadow-lg border border-primary-100'>
-          <div className='text-center space-y-6'>
-            {payment_status === 'paid' && (
-              <>
-                <div className='w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto'>
-                  <span className='text-4xl'>🎉</span>
-                </div>
-                <h1 className='text-title-lg font-manrope font-bold text-primary-900'>
-                  Payment Successful!
-                </h1>
-                <p className='text-primary-600 font-satoshi'>
-                  Thank you for your purchase. Your payment has been processed successfully.
-                </p>
-              </>
-            )}
-            
-            {payment_status === 'canceled' && (
-              <>
-                <div className='w-20 h-20 bg-danger/10 rounded-full flex items-center justify-center mx-auto'>
-                  <span className='text-4xl'>😔</span>
-                </div>
-                <h1 className='text-title-lg font-manrope font-bold text-danger'>
-                  Payment Canceled
-                </h1>
-                <p className='text-primary-600 font-satoshi'>
-                  Your payment was canceled. Please try again if you'd like to complete your purchase.
-                </p>
-              </>
-            )}
-
-            {payment_status === 'error' && (
-              <>
-                <div className='w-20 h-20 bg-warning/10 rounded-full flex items-center justify-center mx-auto'>
-                  <span className='text-4xl'>⚠️</span>
-                </div>
-                <h1 className='text-title-lg font-manrope font-bold text-warning'>
-                  Payment Error
-                </h1>
-                <p className='text-primary-600 font-satoshi'>
-                  There was an error processing your payment. Please try again.
-                </p>
-              </>
-            )}
-
-            {payment_status !== 'loading' && (
-              <div className='mt-8 text-sm text-primary-500 font-satoshi'>
-                Redirecting you to your account page...
-                <div className='mt-4 h-1 bg-primary-100 rounded-full overflow-hidden'>
-                  <div className='h-full bg-primary-500 animate-[loading_4s_ease-in-out]' style={{width: '100%'}} />
-                </div>
-              </div>
-            )}
+    <div className="min-h-screen bg-primary-50/30 grid place-items-center px-4 py-16 font-montserrat">
+      <Card className={cn(
+        "w-full max-w-xl shadow-xl transition-all duration-500",
+        "border-2",
+        currentStatus?.borderClass || "border-primary-100"
+      )}>
+        <CardHeader className="space-y-6 text-center">
+          <div className={cn(
+            "w-16 h-16 rounded-full mx-auto flex items-center justify-center",
+            currentStatus?.iconClass || "bg-primary-100 text-primary-600"
+          )}>
+            {currentStatus?.icon}
           </div>
-        </div>
-      </div>
+          <div className="space-y-2">
+            <CardTitle className="text-title-lg font-manrope font-bold text-primary-900">
+              {currentStatus?.title}
+            </CardTitle>
+            <CardDescription className="text-base font-satoshi text-primary-600">
+              {currentStatus?.description}
+            </CardDescription>
+          </div>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          <Separator className="my-6" />
+          
+          {payment_status !== 'loading' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-sm font-satoshi">
+                <span className="text-primary-600">Redirecting to account page</span>
+                <span className="text-primary-900 font-medium">{progress}%</span>
+              </div>
+              <Progress 
+                value={progress} 
+                className="h-2 bg-primary-600" 
+              />
+              
+              <Button 
+                variant="outline" 
+                className="w-full mt-6 gap-2"
+                onClick={() => navigate('/account')}
+              >
+                Go to Account
+                <FiArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

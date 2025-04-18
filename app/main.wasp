@@ -110,11 +110,6 @@ page PublicCoursesPage {
   component: import PublicCoursesPage from "@src/client/common/PublicCoursesPage"
 }
 
-route GuidePageRoute { path: "/guide", to: GuidePage }
-page GuidePage {
-  component: import GuidePage from "@src/client/common/GuidePage"
-}
-
 route AboutPageRoute { path: "/about", to: AboutPage }
 page AboutPage {
   component: import AboutPage from "@src/client/common/AboutPage"
