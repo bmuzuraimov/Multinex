@@ -51,21 +51,17 @@ export class LLMFactory {
     return service.generateCourse(syllabusContent, model);
   }
 
-  static async generateTopic(
-    exerciseRawContent: string,
-    selectedTopics: string,
-    exerciseLength: string,
-    difficultyLevel: string,
+  static async generateModule(
+    context: string,
+    topic_name: string,
     model: string,
     prePrompt: string,
     postPrompt: string
   ): Promise<LLMResponse> {
     const service = this.getService(model);
-    return service.generateTopic(
-      exerciseRawContent,
-      selectedTopics,
-      exerciseLength,
-      difficultyLevel,
+    return service.generateModule(
+      context,
+      topic_name,
       model,
       prePrompt,
       postPrompt

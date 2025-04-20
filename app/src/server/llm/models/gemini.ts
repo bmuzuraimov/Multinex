@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { generateTopicPrompt, generateExamPrompt, generateCoursePrompt } from '../prompts';
+import { generateModulePrompt, generateExamPrompt, generateCoursePrompt } from '../prompts';
 import { HttpError } from 'wasp/server';
 import { TEMPERATURE, MAX_TOKENS } from '../../../shared/constants';
 import { BaseLLMService, LLMResponse } from './base';
@@ -19,11 +19,9 @@ export class GeminiService extends BaseLLMService {
     this.geminiClient = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   }
 
-  async generateTopic(
-    exerciseRawContent: string,
-    selectedTopics: string,
-    exerciseLength: string,
-    difficultyLevel: string,
+  async generateModule(
+    context: string,
+    topic_name: string,
     modelName: string,
     prePrompt: string,
     postPrompt: string
@@ -32,18 +30,16 @@ export class GeminiService extends BaseLLMService {
       const model = this.geminiClient.getGenerativeModel({
         model: modelName, // Use the specified model name
         generationConfig: {
-          temperature: TEMPERATURE,
+          temperature: 0.3,
           maxOutputTokens: MAX_TOKENS,
           topP: 0.95,
           topK: 10,
         },
       });
 
-      const prompt = generateTopicPrompt({
-        content: exerciseRawContent,
-        selected_topics: selectedTopics,
-        length: exerciseLength,
-        level: difficultyLevel,
+      const prompt = generateModulePrompt({
+        context: context,
+        topic_name: topic_name,
         pre_prompt: prePrompt,
         post_prompt: postPrompt,
       });
@@ -65,7 +61,7 @@ export class GeminiService extends BaseLLMService {
       }
 
       return { success: true, data: exerciseContent, usage: 0 };
-    }, 'generateTopic');
+    }, 'generateModule');
   }
 
   async generateQuestions(lectureContent: string, modelName: string): Promise<LLMResponse> {

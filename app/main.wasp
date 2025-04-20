@@ -88,51 +88,49 @@ app Multinex {
   // },
 }
 
-/* 💽 Wasp defines DB entities via Prisma Database Models:
- * https://wasp-lang.dev/docs/data-model/entities
- */
-
-
-
-
 /* 📡 These are the Wasp client Routes and Pages.
  * You can easily make them inaccessible to the unauthenticated user w/ 'authRequired: true'.
  * https://wasp-lang.dev/docs/tutorial/pages
  */
 
-route LandingPageRoute { path: "/", to: LandingPage }
+route LandingRoute { path: "/", to: LandingPage }
 page LandingPage {
-  component: import LandingPage from "@src/client/common/pages/LandingPage"
+  component: import Landing from "@src/client/common/pages/Landing"
 }
 
 route PublicCoursesRoute { path: "/public-courses", to: PublicCoursesPage }
 page PublicCoursesPage {
-  component: import PublicCoursesPage from "@src/client/common/pages/PublicCoursesPage"
+  component: import PublicCourses from "@src/client/common/pages/PublicCourses"
 }
 
-route AboutPageRoute { path: "/about", to: AboutPage }
+route AboutRoute { path: "/about", to: AboutPage }
 page AboutPage {
-  component: import AboutPage from "@src/client/common/pages/AboutPage"
+  component: import About from "@src/client/common/pages/About"
 }
 
-route PrivacyPageRoute { path: "/privacy", to: PrivacyPage }
+route PrivacyRoute { path: "/privacy", to: PrivacyPage }
 page PrivacyPage {
-  component: import PrivacyPage from "@src/client/common/pages/PrivacyPage"
+  component: import Privacy from "@src/client/common/pages/Privacy"
 }
 
-route TermsPageRoute { path: "/terms", to: TermsPage }
+route TermsRoute { path: "/terms", to: TermsPage }
 page TermsPage {
-  component: import TermsPage from "@src/client/common/pages/TermsPage"
+  component: import Terms from "@src/client/common/pages/Terms"
 }
 
 route CreateDemoRoute { path: "/create-demo", to: CreateDemoPage }
 page CreateDemoPage {
-  component: import CreateDemoPage from "@src/client/common/pages/CreateDemoPage"
+  component: import CreateDemo from "@src/client/common/pages/CreateDemo"
 }
 
 route DemoRoute { path: "/demo", to: DemoPage }
 page DemoPage {
-  component: import DemoPage from "@src/client/common/pages/DemoPage"
+  component: import Demo from "@src/client/common/pages/Demo"
+}
+
+route PricingRoute { path: "/pricing", to: PricingPage }
+page PricingPage {
+  component: import Pricing from "@src/client/user/pages/Pricing"
 }
 
 //#region Auth Pages
@@ -165,49 +163,44 @@ page PasswordResetPage {
 route PortalRoute { path: "/portal", to: PortalPage }
 page PortalPage {
   authRequired: true,
-  component: import PortalPage from "@src/client/app/pages/PortalPage"
+  component: import Portal from "@src/client/user/pages/Portal"
 }
 
 
-route OnboardingPageRoute { path: "/onboarding", to: OnboardingPage }
+route OnboardingRoute { path: "/onboarding", to: OnboardingPage }
 page OnboardingPage {
   authRequired: true,
-  component: import OnboardingPage from "@src/client/app/pages/OnboardingPage"
+  component: import Onboarding from "@src/client/user/pages/Onboarding"
 }
 
 route FeedbackRoute { path: "/feedback", to: FeedbackPage }
 page FeedbackPage {
   authRequired: true,
-  component: import FeedbackPage from "@src/client/app/pages/FeedbackPage"
+  component: import Feedback from "@src/client/user/pages/Feedback"
 }
 
 route CourseRoute { path: "/course/:id", to: CoursePage }
 page CoursePage {
   authRequired: true,
-  component: import CoursePage from "@src/client/app/pages/CoursePage"
+  component: import Course from "@src/client/user/pages/Course"
 }
 
 route ExerciseRoute { path: "/exercise/:exerciseId", to: ExercisePage }
 page ExercisePage {
   authRequired: true,
-  component: import ExercisePage from "@src/client/app/pages/ExercisePage"
-}
-
-route PricingPageRoute { path: "/pricing", to: PricingPage }
-page PricingPage {
-  component: import PricingPage from "@src/client/app/pages/PricingPage"
+  component: import Exercise from "@src/client/user/pages/Exercise"
 }
 
 route AccountRoute { path: "/account", to: AccountPage }
 page AccountPage {
   authRequired: true,
-  component: import Account from "@src/client/app/pages/AccountPage"
+  component: import Account from "@src/client/user/pages/Account"
 }
 
 route CheckoutRoute { path: "/checkout", to: CheckoutPage }
 page CheckoutPage {
   authRequired: true,
-  component: import Checkout from "@src/client/app/pages/CheckoutPage"
+  component: import Checkout from "@src/client/user/pages/Checkout"
 }
 
 
@@ -216,16 +209,47 @@ page CheckoutPage {
  * from the client. Queries fetch stuff, Actions modify/do stuff.
  * https://wasp-lang.dev/docs/data-model/operations/overview
  */
-
-// 📝 Actions
-action createNewsletter {
-  fn: import { createNewsletter } from "@src/server/actions/newsletter.js",
-  entities: [Newsletter]
+// ========== Actions and Queries ==========
+// ===== User =====
+query getUser {
+  fn: import { getUser } from "@src/server/queries/user.js",
+  entities: [User]
 }
 
-action createFeedback {
-  fn: import { createFeedback } from "@src/server/actions/feedback.js",
-  entities: [Feedback]
+query getAllUsers {
+  fn: import { getAllUsers } from "@src/server/queries/user.js", 
+  entities: [User]
+}
+
+action createUser {
+  fn: import { createUser } from "@src/server/actions/user.js",
+  entities: [User]
+}
+
+action updateUser {
+  fn: import { updateUser } from "@src/server/actions/user.js",
+  entities: [User]
+}
+
+action deleteUser {
+  fn: import { deleteUser } from "@src/server/actions/user.js",
+  entities: [User]
+}
+
+// ===== ExercisePrompt =====
+query getPrompt {
+  fn: import { getPrompt } from "@src/server/queries/prompt.js",
+  entities: [ExerciseGeneratePrompt]
+}
+
+query getAllPrompts {
+  fn: import { getAllPrompts } from "@src/server/queries/prompt.js",
+  entities: [ExerciseGeneratePrompt]
+}
+
+action createPrompt {
+  fn: import { createPrompt } from "@src/server/actions/prompt.js",
+  entities: [ExerciseGeneratePrompt]
 }
 
 action updatePrompt {
@@ -233,59 +257,46 @@ action updatePrompt {
   entities: [ExerciseGeneratePrompt]
 }
 
-action createOnboarding {
-  fn: import { createOnboarding } from "@src/server/actions/onboarding.js",
-  entities: [Onboarding]
+action deletePrompt {
+  fn: import { deletePrompt } from "@src/server/actions/prompt.js",
+  entities: [ExerciseGeneratePrompt]
 }
 
-action createFeature {
-  fn: import { createFeature } from "@src/server/actions/features.js",
-  entities: [Feature]
+// ===== Topic =====
+query getTopic {
+  fn: import { getTopic } from "@src/server/queries/topic.js",
+  entities: [Topic]
 }
 
-action createQuestion {
-  fn: import { createQuestion } from "@src/server/actions/quiz.js",
-  entities: [Question]
-}
-
-action createCourse {
-  fn: import { createCourse } from "@src/server/actions/courses.js",
-  entities: [Course]
-}
-
-action duplicateCourse {
-  fn: import { duplicateCourse } from "@src/server/actions/courses.js",
-  entities: [Course, Topic, Exercise, Question, Option]
-}
-
-action generateCourse {
-  fn: import { generateCourse } from "@src/server/actions/courses.js",
-  entities: [Topic, Course, User]
-}
-
-action updateCourse {
-  fn: import { updateCourse } from "@src/server/actions/courses.js",
-  entities: [Course]
-}
-
-action deleteCourse {
-  fn: import { deleteCourse } from "@src/server/actions/courses.js",
-  entities: [Course, Topic, Exercise, Question, Option]
+query getAllTopics {
+  fn: import { getAllTopics } from "@src/server/queries/topic.js",
+  entities: [Topic]
 }
 
 action createTopic {
-  fn: import { createTopic } from "@src/server/actions/topics.js",
+  fn: import { createTopic } from "@src/server/actions/topic.js",
   entities: [Topic]
 }
 
 action updateTopic {
-  fn: import { updateTopic } from "@src/server/actions/topics.js",
+  fn: import { updateTopic } from "@src/server/actions/topic.js",
   entities: [Topic]
 }
 
 action deleteTopic {
-  fn: import { deleteTopic } from "@src/server/actions/topics.js",
+  fn: import { deleteTopic } from "@src/server/actions/topic.js",
   entities: [Topic, Exercise, Question, Option]
+}
+
+// ===== Exercise =====
+query getExercise {
+  fn: import { getExercise } from "@src/server/queries/exercise.js",
+  entities: [Exercise]
+}
+
+query getAllExercises {
+  fn: import { getAllExercises } from "@src/server/queries/exercise.js",
+  entities: [Exercise]
 }
 
 action createExercise {
@@ -313,14 +324,98 @@ action deleteExercise {
   entities: [Exercise, Question, Option]
 }
 
-action stripePayment {
-  fn: import { stripePayment } from "@src/server/actions/payments.js",
-  entities: [User]
+
+// ===== Onboarding =====
+query getOnboarding {
+  fn: import { getOnboarding } from "@src/server/queries/onboarding.js",
+  entities: [Onboarding]
 }
 
-action updateCurrentUser {
-  fn: import { updateCurrentUser } from "@src/server/actions/users.js",
-  entities: [User]
+query getAllOnboardings {
+  fn: import { getAllOnboardings } from "@src/server/queries/onboarding.js",
+  entities: [Onboarding]
+}
+
+action createOnboarding {
+  fn: import { createOnboarding } from "@src/server/actions/onboarding.js",
+  entities: [Onboarding]
+}
+
+action updateOnboarding {
+  fn: import { updateOnboarding } from "@src/server/actions/onboarding.js",
+  entities: [Onboarding]
+}
+
+action deleteOnboarding {
+  fn: import { deleteOnboarding } from "@src/server/actions/onboarding.js",
+  entities: [Onboarding]
+}
+// ===== Organization =====
+query getOrganization {
+  fn: import { getOrganization } from "@src/server/queries/organization.js",
+  entities: [Organization]
+}
+
+query getAllOrganizations {
+  fn: import { getAllOrganizations } from "@src/server/queries/organization.js",
+  entities: [Organization]
+}
+
+action createOrganization {
+  fn: import { createOrganization } from "@src/server/actions/organization.js",
+  entities: [Organization]
+}
+
+action updateOrganization {
+  fn: import { updateOrganization } from "@src/server/actions/organization.js",
+  entities: [Organization]
+}
+
+action deleteOrganization {
+  fn: import { deleteOrganization } from "@src/server/actions/organization.js",
+  entities: [Organization]
+}
+
+// ===== Course =====
+query getCourse {
+  fn: import { getCourse } from "@src/server/queries/course.js",
+  entities: [Course]
+}
+
+query getAllCourses {
+  fn: import { getAllCourses } from "@src/server/queries/course.js",
+  entities: [Course]
+}
+
+action createCourse {
+  fn: import { createCourse } from "@src/server/actions/course.js",
+  entities: [Course]
+}
+
+action duplicateCourse {
+  fn: import { duplicateCourse } from "@src/server/actions/course.js",
+  entities: [Course, Topic, Exercise, Question, Option]
+}
+
+action updateCourse {
+  fn: import { updateCourse } from "@src/server/actions/course.js",
+  entities: [Course]
+}
+
+action deleteCourse {
+  fn: import { deleteCourse } from "@src/server/actions/course.js",
+  entities: [Course]
+}
+
+// ===== Demo Exercise =====
+query getAllDemoExercises {
+  fn: import { getAllDemoExercises } from "@src/server/queries/demoExercise.js",
+  entities: [DemoExercise]
+}
+
+query getDemoExercise {
+  fn: import { getDemoExercise } from "@src/server/queries/demoExercise.js",
+  entities: [DemoExercise]
 }
 
 action createDemoExercise {
@@ -328,8 +423,147 @@ action createDemoExercise {
   entities: [DemoExercise, Exercise]
 }
 
+action updateDemoExercise {
+  fn: import { updateDemoExercise } from "@src/server/actions/demoExercise.js",
+  entities: [DemoExercise]
+}
 
-// 📚 Queries
+action deleteDemoExercise {
+  fn: import { deleteDemoExercise } from "@src/server/actions/demoExercise.js",
+  entities: [DemoExercise]
+}
+
+// ===== Feature =====
+query getFeature {
+  fn: import { getFeature } from "@src/server/queries/feature.js",
+  entities: [Feature]
+}
+
+query getAllFeatures {
+  fn: import { getAllFeatures } from "@src/server/queries/feature.js",
+  entities: [Feature]
+}
+
+action createFeature {
+  fn: import { createFeature } from "@src/server/actions/feature.js",
+  entities: [Feature]
+}
+
+action updateFeature {
+  fn: import { updateFeature } from "@src/server/actions/feature.js",
+  entities: [Feature]
+}
+
+action deleteFeature {
+  fn: import { deleteFeature } from "@src/server/actions/feature.js",
+  entities: [Feature]
+}
+
+// ===== Question =====
+query getQuestion {
+  fn: import { getQuestion } from "@src/server/queries/question.js",
+  entities: [Question]
+}
+
+query getAllQuestions {
+  fn: import { getAllQuestions } from "@src/server/queries/question.js",
+  entities: [Question]
+}
+
+action createQuestion {
+  fn: import { createQuestion } from "@src/server/actions/question.js",
+  entities: [Question]
+}
+
+action updateQuestion {
+  fn: import { updateQuestion } from "@src/server/actions/question.js",
+  entities: [Question]
+}
+
+action deleteQuestion {
+  fn: import { deleteQuestion } from "@src/server/actions/question.js",
+  entities: [Question]
+}
+
+// ===== Option =====
+query getOption {
+  fn: import { getOption } from "@src/server/queries/option.js",
+  entities: [Option]
+}
+
+query getAllOptions {
+  fn: import { getAllOptions } from "@src/server/queries/option.js",
+  entities: [Option]
+}
+
+action createOption {
+  fn: import { createOption } from "@src/server/actions/option.js",
+  entities: [Option]
+}
+
+action updateOption {
+  fn: import { updateOption } from "@src/server/actions/option.js",
+  entities: [Option]
+}
+
+action deleteOption {
+  fn: import { deleteOption } from "@src/server/actions/option.js",
+  entities: [Option]
+}
+
+// ===== Feedback =====
+query getFeedback {
+  fn: import { getFeedback } from "@src/server/queries/feedback.js",
+  entities: [Feedback]
+}
+
+query getAllFeedback {
+  fn: import { getAllFeedback } from "@src/server/queries/feedback.js",
+  entities: [Feedback]
+}
+
+action createFeedback {
+  fn: import { createFeedback } from "@src/server/actions/feedback.js",
+  entities: [Feedback]
+}
+
+action updateFeedback {
+  fn: import { updateFeedback } from "@src/server/actions/feedback.js",
+  entities: [Feedback]
+}
+
+action deleteFeedback {
+  fn: import { deleteFeedback } from "@src/server/actions/feedback.js",
+  entities: [Feedback]
+}
+
+// ===== Newsletter =====
+query getNewsletter {
+  fn: import { getNewsletter } from "@src/server/queries/newsletter.js",
+  entities: [Newsletter]
+}
+
+query getAllNewsletters {
+  fn: import { getAllNewsletters } from "@src/server/queries/newsletter.js",
+  entities: [Newsletter]
+}
+
+action createNewsletter {
+  fn: import { createNewsletter } from "@src/server/actions/newsletter.js",
+  entities: [Newsletter]
+}
+
+action updateNewsletter {
+  fn: import { updateNewsletter } from "@src/server/actions/newsletter.js",
+  entities: [Newsletter]
+}
+
+action deleteNewsletter {
+  fn: import { deleteNewsletter } from "@src/server/actions/newsletter.js",
+  entities: [Newsletter]
+}
+
+// Others
 query getUploadURL {
   fn: import { getUploadURL } from "@src/server/queries/file.js",
   entities: [User]
@@ -340,55 +574,11 @@ query getDownloadURL {
   entities: [User]
 }
 
-query getPrompt {
-  fn: import { getPrompt } from "@src/server/queries/prompt.js",
-  entities: [ExerciseGeneratePrompt]
+action stripePayment {
+  fn: import { stripePayment } from "@src/server/actions/payments.js",
+  entities: [User]
 }
 
-query getAllCourses {
-  fn: import { getAllCourses } from "@src/server/queries/courses.js",
-  entities: [Course]
-}
-
-query getPublicCourses {
-  fn: import { getPublicCourses } from "@src/server/queries/courses.js",
-  entities: [Course]
-}
-
-query getFeedbackByUserId {
-  fn: import { getFeedbackByUserId } from "@src/server/queries/feedbacks.js",
-  entities: [Feedback]
-}
-
-query hasCompletedExercises {
-  fn: import { hasCompletedExercises } from "@src/server/queries/exercises.js",
-  entities: [Exercise]
-}
-
-query getCourseById {
-  fn: import { getCourseById } from "@src/server/queries/courses.js",
-  entities: [Course]
-}
-
-query getTopicsByCourse {
-  fn: import { getTopicsByCourse } from "@src/server/queries/topics.js",
-  entities: [Topic, Exercise]
-}
-
-query getExercisesWithNoTopic {
-  fn: import { getExercisesWithNoTopic } from "@src/server/queries/exercises.js",
-  entities: [Exercise]
-}
-
-query getExerciseById {
-  fn: import { getExerciseById } from "@src/server/queries/exercises.js",
-  entities: [Exercise]
-}
-
-query getDemoExercise {
-  fn: import { getDemoExercise } from "@src/server/queries/demoExercise.js",
-  entities: [DemoExercise]
-}
 
 /*
  * 📡 These are custom Wasp API Endpoints.

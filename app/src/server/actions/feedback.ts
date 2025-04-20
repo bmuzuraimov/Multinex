@@ -1,67 +1,93 @@
-import { HttpError } from 'wasp/server';
-import { type CreateFeedback } from 'wasp/server/operations';
-import { emailSender } from 'wasp/server/email';
-import { feedbackTemplate } from '../email-templates/feedback';
-import { ApiResponse } from './types';
 import { Feedback } from 'wasp/entities';
+import { emailSender } from 'wasp/server/email';
+import { HttpError } from 'wasp/server';
+import { feedbackTemplate } from '../email-templates/feedback';
+import { type CreateFeedback, type UpdateFeedback, type DeleteFeedback } from 'wasp/server/operations';
 
-export const createFeedback: CreateFeedback<{
+type Response = {
+  success: boolean;
   message: string;
-  rating: number;
-  usability?: string;
-  features?: string;
-  improvements?: string;
-  would_recommend: boolean;
-  experience_level?: string;
-  category: string;
-  browser_info: string;
-},
-  ApiResponse<Feedback>
-> = async (feedback, context) => {
+  data: any;
+};
+
+export const createFeedback: CreateFeedback<Partial<Feedback>, Response> = async (
+  feedbackData: Partial<Feedback>,
+  context: any
+) => {
   if (!context.user) {
-    throw new HttpError(401);
+    throw new HttpError(401, 'Unauthorized');
   }
+  try {
+    const { html, text } = feedbackTemplate({
+      message: feedbackData.message || '',
+      email: feedbackData.email || '',
+      rating: feedbackData.rating || 0,
+      usability: feedbackData.usability || undefined,
+      features: feedbackData.features || undefined,
+      improvements: feedbackData.improvements || undefined,
+      would_recommend: feedbackData.would_recommend || false,
+      experience_level: feedbackData.experience_level || undefined,
+      browser_info: feedbackData.browser_info || '',
+      category: feedbackData.category || '',
+    });
+    await emailSender.send({
+      to: 'bmuzuraimov@gmail.com',
+      subject: 'New Feedback from ' + feedbackData.email,
+      html,
+      text,
+    });
+    const feedback = await context.entities.Feedback.create({
+      data: { ...feedbackData, user_id: context.user.id },
+    });
+    return {
+      success: true,
+      message: 'Feedback created successfully',
+      data: feedback,
+    };
+  } catch (error: any) {
+    throw new HttpError(500, 'Failed to create feedback', { error: error.message });
+  }
+};
 
-  const created_feedback = await context.entities.Feedback.create({
-    data: {
-      message: feedback.message,
-      email: context.user.email ?? '',
-      rating: feedback.rating,
-      usability: feedback.usability,
-      features: feedback.features,
-      improvements: feedback.improvements,
-      would_recommend: feedback.would_recommend,
-      experience_level: feedback.experience_level,
-      category: feedback.category,
-      browser_info: feedback.browser_info,
-      user: { connect: { id: context.user.id } },
-    },
-  });
+export const updateFeedback: UpdateFeedback<Partial<Feedback>, Response> = async (
+  feedbackData: Partial<Feedback>,
+  context: any
+) => {
+  if (!context.user) {
+    throw new HttpError(401, 'Unauthorized');
+  }
+  try {
+    const feedback = await context.entities.Feedback.update({
+      where: { id: feedbackData.id, user_id: context.user.id },
+      data: feedbackData,
+    });
+    return {
+      success: true,
+      message: 'Feedback updated successfully',
+      data: feedback,
+    };
+  } catch (error: any) {
+    throw new HttpError(500, 'Failed to update feedback', { error: error.message });
+  }
+};
 
-  const feedback_email = await feedbackTemplate({
-    message: created_feedback.message,
-    email: created_feedback.email,
-    rating: created_feedback.rating,
-    usability: created_feedback.usability ?? undefined,
-    features: created_feedback.features ?? undefined,
-    improvements: created_feedback.improvements ?? undefined,
-    would_recommend: created_feedback.would_recommend,
-    experience_level: created_feedback.experience_level ?? undefined,
-    category: created_feedback.category,
-    browser_info: created_feedback.browser_info ?? '',
-  });
-
-  await emailSender.send({
-    to: process.env.ADMIN_EMAILS!,
-    subject: feedback_email.subject,
-    text: feedback_email.text,
-    html: feedback_email.html,
-  });
-
-  return {
-    success: true,
-    code: 200,
-    message: 'Feedback created successfully',
-    data: created_feedback,
-  };
+export const deleteFeedback: DeleteFeedback<Partial<Feedback>, Response> = async (
+  feedbackData: Partial<Feedback>,
+  context: any
+) => {
+  if (!context.user) {
+    throw new HttpError(401, 'Unauthorized');
+  }
+  try {
+    const feedback = await context.entities.Feedback.delete({
+      where: { id: feedbackData.id, user_id: context.user.id },
+    });
+    return {
+      success: true,
+      message: 'Feedback deleted successfully',
+      data: feedback,
+    };
+  } catch (error: any) {
+    throw new HttpError(500, 'Failed to delete feedback', { error: error.message });
+  }
 };

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, Dispatch, SetStateAction } from 'react';
 import { SensoryMode } from '../../shared/types';
-import { TextList } from '../components/ExerciseInterface/TextList';
+import { TextList } from '../user/pages/Exercise/components/ExerciseInterface/TextList';
 import { toast } from 'sonner';
 
 interface ExerciseContextType {

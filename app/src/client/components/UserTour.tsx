@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Joyride, { CallBackProps, STATUS } from 'react-joyride';
-import { updateCurrentUser } from 'wasp/client/operations';
+import { updateUser } from 'wasp/client/operations';
 import { useAuth } from 'wasp/client/auth';
 import useColorMode from '../hooks/useColorMode';
 import useLocalStorage from '../hooks/useLocalStorage';
@@ -39,7 +39,7 @@ const UserTour: React.FC<{
       setRunTour(false);
       setStepIndex(0);
       try {
-        await updateCurrentUser({
+        await updateUser({
           tour_complete: true,
         });
         if (status === STATUS.FINISHED) {

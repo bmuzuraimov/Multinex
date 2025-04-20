@@ -36,7 +36,7 @@ class OpenAIService:
                 messages=[
                     {
                         "role": "system",
-                        "content": f"Extract 5-10 most relevant topics from the following text. Return them as a comma-separated list."
+                        "content": f"Extract main distinct and non-overlapping topics from the following text. Return them as a comma-separated list with descriptive names with relation to the main topic of the text."
                     },
                     {
                         "role": "user",

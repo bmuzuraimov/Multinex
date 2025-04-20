@@ -1,28 +1,67 @@
 import { Newsletter } from "wasp/entities"
-import { ApiResponse } from "./types"
-import { type CreateNewsletter } from 'wasp/server/operations';
+import { type CreateNewsletter, type UpdateNewsletter, type DeleteNewsletter } from 'wasp/server/operations';
+import { HttpError } from 'wasp/server';
 
-export const createNewsletter: CreateNewsletter<
-  { 
-    email: string,
-    userAgent?: string,
-    source?: string 
-  }, 
-  ApiResponse<Newsletter>
-> = async ({ email, userAgent, source }, context) => {
-  const created_newsletter = await context.entities.Newsletter.create({
-    data: {
-      email,
-      source: source || 'website_footer',
-      user_agent: userAgent || 'Unknown',
-    },
-  });
-
-  return {
-    success: true,
-    code: 200,
-    message: 'Newsletter created successfully',
-    data: created_newsletter,
-  };
+type Response = {
+  success: boolean;
+  message: string;
+  data: any;
 };
 
+export const createNewsletter: CreateNewsletter<Partial<Newsletter>, Response> = async (
+  newsletterData: Partial<Newsletter>,
+  context: { entities: { Newsletter: any } }
+) => {
+  try {
+    const newsletter = await context.entities.Newsletter.create({
+      data: newsletterData,
+    });
+    return {
+      success: true,
+      message: 'Newsletter created successfully',
+      data: newsletter,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new HttpError(500, 'Error creating newsletter');
+  }
+};
+
+export const updateNewsletter: UpdateNewsletter<Partial<Newsletter>, Response> = async (
+  newsletterData: Partial<Newsletter>, 
+  context: { entities: { Newsletter: any } }
+) => {
+  try {
+    const newsletter = await context.entities.Newsletter.update({
+      where: { id: newsletterData.id },
+      data: newsletterData,
+    });
+    return {
+      success: true,
+      message: 'Newsletter updated successfully',
+      data: newsletter,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new HttpError(500, 'Error updating newsletter');
+  }
+};
+
+export const deleteNewsletter: DeleteNewsletter<Partial<Newsletter>, Response> = async (
+  newsletterData: Partial<Newsletter>,
+  context: { entities: { Newsletter: any } }
+) => {
+  try {
+    const newsletter = await context.entities.Newsletter.delete({
+      where: { id: newsletterData.id },
+    });
+    return {
+      success: true, 
+      message: 'Newsletter deleted successfully',
+      data: newsletter,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new HttpError(500, 'Error deleting newsletter');
+  }
+};

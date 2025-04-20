@@ -1,4 +1,4 @@
-import { BaseEmailTemplate } from '../components/EmailTemplateFactory';
+import { BaseEmailTemplate, HTML_UTILS } from '../components/EmailTemplateFactory';
 import { components } from '../components/BaseTemplate';
 
 interface WelcomeEmailParams {
@@ -14,7 +14,7 @@ export class WelcomeEmail extends BaseEmailTemplate {
   }
 
   protected generateSubject(): string {
-    return 'Welcome to Multinex – A Smarter Way to Learn!';
+    return 'Welcome to Multinex – Get Started';
   }
 
   protected generateText(): string {
@@ -22,68 +22,55 @@ export class WelcomeEmail extends BaseEmailTemplate {
     return `
 Hi ${user_name},
 
-Welcome to Multinex! 🎉 We're so excited to have you on board.
+Welcome to Multinex! We're excited to have you join us.
 
-Multinex is designed to help you learn and understand information better through writing, typing, and listening—three proven ways to improve retention and comprehension. Whether you're preparing for exams, mastering new subjects, or just sharpening your skills, we're here to support your learning journey.
+Multinex helps you learn through writing, typing, and listening—three proven ways to improve retention.
 
-Here's how to get started:
-• Explore different learning modes – writing, typing, and listening
-• Try your first lesson and see what works best for you
-• Save progress and track improvements
+Get started:
+• Explore different learning modes
+• Try your first lesson
+• Track your progress
 
-If you have any questions, feel free to reach out—we're happy to help!
-
-Start now: ${login_link}
-
-Thanks for being part of Multinex!
-
-Thanks for your time, and have a great day!
+Your account is ready: ${login_link}
 
 Multinex
-
 Type, write, listen. In one AI-powered workspace.`;
   }
 
   protected generateHtmlContent(): string {
     const { user_name, login_link } = this.params;
 
-    const welcome_card = `
-      <tr>${components.paragraph(`Hi ${user_name},`)}</tr>
-      <tr>${components.paragraph(
-        `Welcome to <strong>Multinex</strong>! <span style="font-size: 18px;">🎉</span> We're so excited to have you on board.`
-      )}</tr>
-      <tr>${components.paragraph(
-        `<strong>Multinex</strong> is designed to help you learn and understand information better through ` +
-          'writing, typing, and listening—three proven ways to improve retention and comprehension. ' +
-          "Whether you're preparing for exams, mastering new subjects, or just sharpening your skills, " +
-          "we're here to support your learning journey."
-      )}</tr>
-    `;
+    const welcomeSection = HTML_UTILS.buildSection(`
+      ${components.heading('Welcome to Multinex')}
+      ${components.paragraph(`Hi ${user_name},`)}
+      ${components.paragraph(
+        `We're excited to have you join our learning platform. Multinex helps you master information through multiple learning modes.`
+      )}
+    `);
 
-    const get_started_card = `
-      <tr>${components.subheading("Here's how to get started:")}</tr>
-      <tr>${components.bullet_list([
-        'Explore different learning modes – writing, typing, and listening',
-        'Try your first lesson and see what works best for you',
-        'Save progress and track improvements',
-      ])}</tr>
-    `;
+    const featuresSection = HTML_UTILS.buildSection(`
+      ${components.highlight_card(`
+        ${components.subheading('Your AI-powered learning workspace')}
+        ${components.bullet_list([
+          '<strong>Write</strong>: Reinforce knowledge through writing exercises',
+          '<strong>Type</strong>: Improve recall with interactive typing drills',
+          '<strong>Listen</strong>: Learn on the go with audio features'
+        ])}
+      `)}
+    `);
 
-    const support_card = `
-      <tr>${components.paragraph("If you have any questions, feel free to reach out—we're happy to help!")}</tr>
-      <tr>${components.button('Start Now', login_link)}</tr>
-      <tr>${components.paragraph('Thanks for being part of <strong>Multinex</strong>!')}</tr>
-      <tr>${components.paragraph('Thanks for your time, and have a great day!')}</tr>
-      <tr>${components.paragraph('<strong>Multinex</strong>')}</tr>
-    `;
+    const callToActionSection = HTML_UTILS.buildSection(`
+      ${components.paragraph('Your account is ready. Start exploring Multinex today:')}
+      ${HTML_UTILS.createButtonRow([
+        { text: 'Log In Now', link: login_link, variant: 'primary' },
+        { text: 'Learn More', link: 'https://multinex.app/features', variant: 'secondary' }
+      ])}
+    `);
 
     return `
-      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
-        <tr>${components.heading('Welcome to <strong>Multinex</strong> – A Smarter Way to Learn!')}</tr>
-        <tr>${welcome_card}</tr>
-        <tr>${get_started_card}</tr>
-        <tr>${support_card}</tr>
-      </table>
+      ${welcomeSection}
+      ${featuresSection}
+      ${callToActionSection}
     `;
   }
 }

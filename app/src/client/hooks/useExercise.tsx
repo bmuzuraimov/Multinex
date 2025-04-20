@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Question } from 'wasp/entities';
-import { TextList } from '../components/ExerciseInterface/TextList';
+import { TextList } from '../user/pages/Exercise/components/ExerciseInterface/TextList';
 import { updateExercise } from 'wasp/client/operations';
 import { useAuth } from 'wasp/client/auth';
 

@@ -20,7 +20,7 @@ app/deploy_client.sh
 
 # Astro
 # build output
-dist/
+blog/dist/
 # generated types
 .astro/
 

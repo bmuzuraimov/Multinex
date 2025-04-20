@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { generateTopicPrompt, generateExamPrompt, generateCoursePrompt } from '../prompts';
+import { generateModulePrompt, generateExamPrompt, generateCoursePrompt } from '../prompts';
 import { MAX_TOKENS } from '../../../shared/constants';
 import { HttpError } from 'wasp/server';
 import { TEMPERATURE } from '../../../shared/constants';
@@ -20,11 +20,9 @@ export class OpenAIService extends BaseLLMService {
     this.openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   }
 
-  async generateTopic(
-    exerciseRawContent: string,
-    selectedTopics: string,
-    exerciseLength: string,
-    difficultyLevel: string,
+  async generateModule(
+    context: string,
+    topic_name: string,
     modelName: string,
     prePrompt: string,
     postPrompt: string
@@ -32,11 +30,9 @@ export class OpenAIService extends BaseLLMService {
     return this.withRetry(async () => {
       const openaiResponse = await this.openaiClient.chat.completions.create({
         model: modelName,
-        ...generateTopicPrompt({
-          content: exerciseRawContent,
-          selected_topics: selectedTopics,
-          length: exerciseLength,
-          level: difficultyLevel,
+        ...generateModulePrompt({
+          context: context,
+          topic_name: topic_name,
           pre_prompt: prePrompt,
           post_prompt: postPrompt,
         }),
@@ -52,7 +48,7 @@ export class OpenAIService extends BaseLLMService {
 
       const tokenUsage = openaiResponse.usage?.total_tokens || 0;
       return { success: true, data: exerciseContent, usage: tokenUsage };
-    }, 'generateTopic');
+    }, 'generateModule');
   }
 
   async generateQuestions(lectureContent: string, modelName: string): Promise<LLMResponse> {

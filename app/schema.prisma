@@ -164,6 +164,7 @@ model Exercise {
   status             ExerciseStatus @default(CREATED)
   name               String
   lesson_text        String         @default("")
+  modules            Json           @default("{}")
   audio_timestamps   String[]       @default([])
   level              String         @default("")
   cursor             Int            @default(0)

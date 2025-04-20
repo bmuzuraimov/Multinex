@@ -1,6 +1,5 @@
-import { BaseEmailTemplate } from '../components/EmailTemplateFactory';
+import { BaseEmailTemplate, TEXT_UTILS, HTML_UTILS } from '../components/EmailTemplateFactory';
 import { components } from '../components/BaseTemplate';
-import { TEXT_UTILS } from '../components/EmailTemplateFactory';
 
 interface PasswordResetEmailParams {
   password_reset_link: string;
@@ -13,7 +12,7 @@ export class PasswordResetEmail extends BaseEmailTemplate {
   }
 
   protected generateSubject(): string {
-    return 'Reset Your Password - Multinex';
+    return 'Reset Your Multinex Password';
   }
 
   protected generateText(): string {
@@ -21,28 +20,41 @@ export class PasswordResetEmail extends BaseEmailTemplate {
     return `
 Hi ${user_name},
 
-We received a request to reset your password for your Multinex account. If this was you, please verify your password by clicking the link below. If you didn't request a password reset, you can ignore this email.
+We received a request to reset your Multinex password. 
 
-${password_reset_link}
+Reset your password: ${password_reset_link}
 
-${TEXT_UTILS.generateSignature()}`;
+This link will expire in 24 hours. If you didn't request this reset, please ignore this email.
+
+Multinex
+Type, write, listen. In one AI-powered workspace.`;
   }
 
   protected generateHtmlContent(): string {
     const { user_name, password_reset_link } = this.params;
+
+    const mainSection = HTML_UTILS.buildSection(`
+      ${components.heading('Reset Your Password')}
+      ${components.paragraph(`Hi ${user_name},`)}
+      ${components.paragraph('We received a request to reset your Multinex password.')}
+    `);
+
+    const securitySection = HTML_UTILS.buildSection(`
+      ${components.card(`
+        ${components.paragraph('Please click the button below to reset your password:')}
+        ${components.button('Reset Password', password_reset_link)}
+        ${components.paragraph('<small>This link will expire in 24 hours. If you didn\'t request this reset, please ignore this email.</small>')}
+      `)}
+    `);
+
+    const helpSection = HTML_UTILS.buildSection(`
+      ${components.paragraph('Need help? Contact our <a href="https://multinex.app/support" style="color: #3182CE; text-decoration: none;">support team</a>.')}
+    `);
+
     return `
-      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
-        <tr>${components.heading('Reset Your Password')}</tr>
-        <tr>${components.paragraph(`Hi ${user_name},`)}</tr>
-        <tr>${components.paragraph(
-          'We received a request to reset your password for your <strong>Multinex</strong> account. ' +
-          'If this was you, please verify your password by clicking the button below. ' +
-          'If you didn\'t request a password reset, you can ignore this email.'
-        )}</tr>
-        <tr>${components.button('Reset Password', password_reset_link)}</tr>
-        <tr>${components.paragraph('Thanks for your time, and have a great day!')}</tr>
-        <tr>${components.paragraph('<strong>Multinex</strong>')}</tr>
-      </table>
+      ${mainSection}
+      ${securitySection}
+      ${helpSection}
     `;
   }
 }

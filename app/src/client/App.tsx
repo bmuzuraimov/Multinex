@@ -1,5 +1,5 @@
 import { useAuth } from 'wasp/client/auth';
-import { updateCurrentUser } from 'wasp/client/operations';
+import { updateUser } from 'wasp/client/operations';
 import { Outlet, useNavigate } from 'react-router-dom';
 import './Main.css';
 import { useEffect } from 'react';
@@ -23,7 +23,7 @@ export default function App() {
       const lastSeenAt = new Date(user.last_active);
       const today = new Date();
       if (today.getTime() - lastSeenAt.getTime() > 5 * 60 * 1000) {
-        updateCurrentUser({ last_active: today });
+        updateUser({ last_active: today });
       }
     }
   }, [user]);

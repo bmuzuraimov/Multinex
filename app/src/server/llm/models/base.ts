@@ -27,11 +27,9 @@ export abstract class BaseLLMService {
     }
   }
 
-  abstract generateTopic(
-    content: string,
-    selected_topics: string,
-    length: string,
-    level: string,
+  abstract generateModule(
+    context: string,
+    topic_name: string,
     model: string,
     pre_prompt: string,
     post_prompt: string

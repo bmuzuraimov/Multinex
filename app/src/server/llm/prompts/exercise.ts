@@ -36,34 +36,21 @@ Rules for each tag:
 - <write>: Specific questions or tasks that directly reference the content covered
 `;
 
-export const generateTopicPrompt = ({
-  selected_topics,
-  level,
-  length,
-  content,
+export const generateModulePrompt = ({
+  context,
+  topic_name,
   pre_prompt,
   post_prompt,
 }: {
-  selected_topics: string;
-  level: string;
-  length: string;
-  content: string;
+  context: string;
+  topic_name: string;
   pre_prompt: string;
   post_prompt: string;
 }): { messages: { role: 'user'; content: string }[]; response_format: any } => {
   const prompt = `${pre_prompt}
-  
   ${MULTI_MODAL_LEARNING_PROMPT}
-  
-  Document content to use as reference:\n\n"${content}"\n\n
-  
-  You must follow these rules:
-  - Generate multi-modal learning content for this topic: ${selected_topics}.
-  - Include all four elements (type, mermaid, listen, write) for each section.
-  - Separate sections with "\n\n".
-  ${level !== 'Auto' ? `- Technical depth: Match the user's level (${level}).\n` : ''}
-  ${length !== 'Auto' ? `- Minimum length: ${length} words.\n` : ''}
-  
+  Topic: ${topic_name}\n
+  Context: ${context}\n
   ${post_prompt}`;
 
   return {

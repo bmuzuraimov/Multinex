@@ -7,14 +7,14 @@ import { type StripePayment } from 'wasp/server/operations';
 
 export const stripePayment: StripePayment<string, StripePaymentResult> = async (tier, context) => {
   if (!context.user) {
-    throw new HttpError(401);
+    throw new HttpError(401, 'Unauthorized');
   }
 
   const user_email = context.user.email;
   if (!user_email) {
     throw new HttpError(
       403,
-      'User needs an email to make a payment. If using the usernameAndPassword Auth method, switch to an Auth method that provides an email.'
+      'User needs an email to make a payment. If using the usernameAndPassword Auth method, switch to an Auth method that provides an email'
     );
   }
 
@@ -46,24 +46,26 @@ export const stripePayment: StripePayment<string, StripePaymentResult> = async (
     if (!session) {
       throw new HttpError(500, 'Error creating session');
     }
+
+    const updated_user = await context.entities.User.update({
+      where: {
+        id: context.user.id,
+      },
+      data: {
+        checkout_session_id: session.id,
+        stripe_id: customer.id,
+      },
+    });
+
+    return {
+      session_url: session.url,
+      session_id: session.id,
+    };
+
   } catch (error: any) {
-    const status_code = error.statusCode || 500;
-    const error_message = error.message || 'Internal server error';
-    throw new HttpError(status_code, error_message);
+    if (error instanceof HttpError) {
+      throw error;
+    }
+    throw new HttpError(500, 'Payment processing failed', { error: error.message });
   }
-
-  const updated_user = await context.entities.User.update({
-    where: {
-      id: context.user.id,
-    },
-    data: {
-      checkout_session_id: session.id,
-      stripe_id: customer.id,
-    },
-  });
-
-  return {
-    session_url: session.url,
-    session_id: session.id,
-  };
 };

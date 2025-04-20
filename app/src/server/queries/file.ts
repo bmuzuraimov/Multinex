@@ -13,8 +13,11 @@ export const getUploadURL: GetUploadURL<{ key: string, file_type: string }, { up
   try {
     return await getS3UploadUrl({ key, file_type });
   } catch (error) {
-    console.error('Error generating upload URL:', error);
-    throw new HttpError(500, 'Failed to generate upload URL. Please try again later.');
+    console.error(error);
+    if (error instanceof HttpError) {
+      throw error;
+    }
+    throw new HttpError(500, 'Failed to generate upload URL. Please try again later.', { error });
   }
 };
 
@@ -29,7 +32,10 @@ export const getDownloadURL: GetDownloadURL<{ key: string }, string> = async (
   try {
     return await getS3DownloadUrl({ key });
   } catch (error) {
-    console.error('Error generating signed URL:', error);
-    throw new HttpError(500, 'Failed to generate download URL. Please try again later.');
+    console.error(error);
+    if (error instanceof HttpError) {
+      throw error;
+    }
+    throw new HttpError(500, 'Failed to generate download URL. Please try again later.', { error });
   }
 };

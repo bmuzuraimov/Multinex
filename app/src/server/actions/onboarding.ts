@@ -1,95 +1,93 @@
-import { HttpError } from 'wasp/server';
-import type { CreateOnboarding } from 'wasp/server/operations';
-import { ApiResponse } from './types';
 import { Onboarding } from 'wasp/entities';
+import { HttpError } from 'wasp/server';
+import { type CreateOnboarding, type UpdateOnboarding, type DeleteOnboarding } from 'wasp/server/operations';
 
-export const createOnboarding: CreateOnboarding<
-  {
-    user_type: string;
-    learning_style: string;
-    science_medicine: boolean;
-    technology_engineering: boolean;
-    business_economics: boolean;
-    humanities_arts: boolean;
-    language_learning: boolean;
-    test_prep: boolean;
-    motivation_progress: boolean;
-    motivation_gamification: boolean;
-    motivation_reminders: boolean;
-    motivation_community: boolean;
-    motivation_tool_only: boolean;
-    source_twitter: boolean;
-    source_instagram: boolean;
-    source_tiktok: boolean;
-    source_facebook: boolean;
-    source_youtube: boolean;
-    source_google: boolean;
-    source_word_of_mouth: boolean;
-    feature_request?: string;
-  },
-  ApiResponse<Onboarding>
-> = async (onboarding, context) => {
+type Response = {
+  success: boolean;
+  message: string;
+  data: any;
+};
+
+export const createOnboarding: CreateOnboarding<Partial<Onboarding>, Response> = async (
+  onboardingData: Partial<Onboarding>,
+  context: any
+) => {
   if (!context.user) {
-    throw new HttpError(401);
+    throw new HttpError(401, 'Unauthorized');
   }
+  try {
+    const onboarding = await context.entities.Onboarding.upsert({
+      where: {
+        user_id: context.user.id,
+      },
+      create: {
+        ...onboardingData,
+        user: { connect: { id: context.user.id } },
+      },
+      update: onboardingData,
+    });
 
-  const new_onboarding = await context.entities.Onboarding.upsert({
-    where: {
-      user_id: context.user.id,
-    },
-    create: {
-      user_type: onboarding.user_type,
-      learning_style: onboarding.learning_style,
-      science_medicine: onboarding.science_medicine,
-      technology_engineering: onboarding.technology_engineering,
-      business_economics: onboarding.business_economics,
-      humanities_arts: onboarding.humanities_arts,
-      language_learning: onboarding.language_learning,
-      test_prep: onboarding.test_prep,
-      motivation_progress: onboarding.motivation_progress,
-      motivation_gamification: onboarding.motivation_gamification,
-      motivation_reminders: onboarding.motivation_reminders,
-      motivation_community: onboarding.motivation_community,
-      motivation_tool_only: onboarding.motivation_tool_only,
-      source_twitter: onboarding.source_twitter,
-      source_instagram: onboarding.source_instagram,
-      source_tiktok: onboarding.source_tiktok,
-      source_facebook: onboarding.source_facebook,
-      source_youtube: onboarding.source_youtube,
-      source_google: onboarding.source_google,
-      source_word_of_mouth: onboarding.source_word_of_mouth,
-      feature_request: onboarding.feature_request,
-      user: { connect: { id: context.user.id } },
-    },
-    update: {
-      user_type: onboarding.user_type,
-      learning_style: onboarding.learning_style,
-      science_medicine: onboarding.science_medicine,
-      technology_engineering: onboarding.technology_engineering,
-      business_economics: onboarding.business_economics,
-      humanities_arts: onboarding.humanities_arts,
-      language_learning: onboarding.language_learning,
-      test_prep: onboarding.test_prep,
-      motivation_progress: onboarding.motivation_progress,
-      motivation_gamification: onboarding.motivation_gamification,
-      motivation_reminders: onboarding.motivation_reminders,
-      motivation_community: onboarding.motivation_community,
-      motivation_tool_only: onboarding.motivation_tool_only,
-      source_twitter: onboarding.source_twitter,
-      source_instagram: onboarding.source_instagram,
-      source_tiktok: onboarding.source_tiktok,
-      source_facebook: onboarding.source_facebook,
-      source_youtube: onboarding.source_youtube,
-      source_google: onboarding.source_google,
-      source_word_of_mouth: onboarding.source_word_of_mouth,
-      feature_request: onboarding.feature_request,
-    },
-  });
+    return {
+      success: true,
+      message: 'Onboarding created successfully',
+      data: onboarding,
+    };
+  } catch (error: any) {
+    if (error instanceof HttpError) {
+      throw error;
+    }
+    throw new HttpError(500, 'Failed to create onboarding', { error: error.message });
+  }
+};
 
-  return {
-    success: true,
-    code: 200,
-    message: 'Onboarding created successfully',
-    data: new_onboarding,
-  };
+export const updateOnboarding: UpdateOnboarding<Partial<Onboarding>, Response> = async (
+  onboardingData: Partial<Onboarding>,
+  context: any
+) => {
+  if (!context.user) {
+    throw new HttpError(401, 'Unauthorized');
+  }
+  try {
+    const onboarding = await context.entities.Onboarding.update({
+      where: { user_id: context.user.id },
+      data: onboardingData,
+    });
+
+    return {
+      success: true,
+      message: 'Onboarding updated successfully',
+      data: onboarding,
+    };
+  } catch (error: any) {
+    if (error instanceof HttpError) {
+      throw error;
+    }
+    throw new HttpError(500, 'Failed to update onboarding', { error: error.message });
+  }
+};
+
+export const deleteOnboarding: DeleteOnboarding<Partial<Onboarding>, Response> = async (
+  onboardingData: Partial<Onboarding>,
+  context: any
+) => {
+  try {
+    if (!context.user) {
+      throw new HttpError(401, 'Unauthorized');
+    }
+
+    const onboarding = await context.entities.Onboarding.delete({
+      where: { user_id: context.user.id },
+    });
+
+    return {
+      success: true,
+      message: 'Onboarding deleted successfully',
+      data: onboarding,
+    };
+  } catch (error: any) {
+    if (error instanceof HttpError) {
+      throw error;
+    }
+    throw new HttpError(500, 'Failed to delete onboarding', { error: error.message });
+  }
 };

@@ -1,75 +1,76 @@
-import { type CreateDemoExercise } from 'wasp/server/operations';
+import { type CreateDemoExercise, type UpdateDemoExercise, type DeleteDemoExercise } from 'wasp/server/operations';
 import { DemoExercise } from 'wasp/entities';
-import { handleError } from './utils';
-import { demoExerciseSchema } from './validations';
-import { ApiResponse } from './types';
+import { HttpError } from 'wasp/server';
 
-export const createDemoExercise: CreateDemoExercise<
-  {
-    exercise_id: string;
-    user_agent: string;
-    browser_language: string;
-    screen_resolution: string;
-    timezone: string;
-  },
-  ApiResponse<DemoExercise>
-> = async (input, context) => {
+type Response = {
+  success: boolean;
+  message: string;
+  data: any;
+};
+
+/**
+ * Create a new demo exercise
+ */
+export const createDemoExercise: CreateDemoExercise<Partial<DemoExercise>, Response> = async (
+  demoExerciseData: Partial<DemoExercise>,
+  context: { entities: { DemoExercise: any } }
+) => {
   try {
-    // Validate input
-    const validatedInput = demoExerciseSchema.parse(input);
-
-    // Check if demo exercise already exists for this exercise
-    const existingDemoExercise = await context.entities.DemoExercise.findFirst({
-      where: {
-        exercise_id: validatedInput.exercise_id,
-      },
+    const demoExercise = await context.entities.DemoExercise.create({
+      data: demoExerciseData,
     });
-
-    if (existingDemoExercise) {
-      return {
-        success: false,
-        code: 409,
-        message: 'Demo exercise already exists for this exercise within 24 hours',
-      };
-    }
-
-    // Validate exercise exists and is active
-    const exercise = await context.entities.Exercise.findUnique({
-      where: {
-        id: validatedInput.exercise_id,
-      },
-    });
-
-    if (!exercise) {
-      return {
-        success: false,
-        code: 404,
-        message: 'Exercise not found or inactive',
-      };
-    }
-
-    // Create the demo exercise record with sanitized input
-    const demo_exercise = await context.entities.DemoExercise.create({
-      data: {
-        user_agent: validatedInput.user_agent.slice(0, 500),
-        browser_language: validatedInput.browser_language?.slice(0, 10),
-        screen_resolution: validatedInput.screen_resolution?.slice(0, 20),
-        timezone: validatedInput.timezone?.slice(0, 50),
-        exercise: {
-          connect: {
-            id: validatedInput.exercise_id,
-          },
-        },
-      },
-    });
-
     return {
       success: true,
-      code: 200,
       message: 'Demo exercise created successfully',
-      data: demo_exercise,
+      data: demoExercise,
     };
   } catch (error) {
-    return handleError(context.user?.email || 'demo', error, 'createDemoExercise');
+    console.error(error);
+    throw new HttpError(500, 'Error creating demo exercise');
+  }
+};
+
+/**
+ * Update an existing demo exercise
+ */
+export const updateDemoExercise: UpdateDemoExercise<Partial<DemoExercise>, Response> = async (
+  demoExerciseData: Partial<DemoExercise>,
+  context: { entities: { DemoExercise: any } }
+) => {
+  try {
+    const demoExercise = await context.entities.DemoExercise.update({
+      where: { id: demoExerciseData.id },
+      data: demoExerciseData,
+    });
+    return {
+      success: true,
+      message: 'Demo exercise updated successfully',
+      data: demoExercise,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new HttpError(500, 'Error updating demo exercise');
+  }
+};
+
+/**
+ * Delete a demo exercise
+ */
+export const deleteDemoExercise: DeleteDemoExercise<{ id: string }, Response> = async (
+  { id }: { id: string },
+  context: { entities: { DemoExercise: any } }
+) => {
+  try {
+    const demoExercise = await context.entities.DemoExercise.delete({
+      where: { id },
+    });
+    return {
+      success: true,
+      message: 'Demo exercise deleted successfully',
+      data: demoExercise,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new HttpError(500, 'Error deleting demo exercise');
   }
 };

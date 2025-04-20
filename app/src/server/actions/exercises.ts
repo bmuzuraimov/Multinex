@@ -8,13 +8,11 @@ import {
 import { Exercise } from 'wasp/entities';
 import { getS3DownloadUrl, deleteS3Objects } from '../utils/s3Utils';
 import { truncateText, handleError, validateUserAccess } from './utils';
-import { SensoryMode } from '../../shared/types';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
 import { ExerciseStatus } from '@prisma/client';
 import { DEFAULT_PRE_PROMPT, DEFAULT_POST_PROMPT } from '../../shared/constants';
 import { LLMFactory } from '../llm/models';
-import { ApiResponse } from './types';
 import {
   exerciseCreateSchema,
   exerciseGenerateSchema,
@@ -22,14 +20,20 @@ import {
   exerciseUpdateSchema,
   exerciseDeleteSchema,
 } from './validations';
+import { HttpError } from 'wasp/server';
+type Response = {
+  success: boolean;
+  message: string;
+  data: any;
+};
 
-export const createExercise: CreateExercise<{ name: string; topic_id: string | null }, ApiResponse<Exercise>> = async (
+export const createExercise: CreateExercise<{ name: string; topic_id: string | null }, Response> = async (
   input,
   context
 ) => {
   try {
     const validatedInput = exerciseCreateSchema.parse(input);
-    
+
     const exercise = await context.entities.Exercise.create({
       data: {
         name: validatedInput.name,
@@ -46,46 +50,38 @@ export const createExercise: CreateExercise<{ name: string; topic_id: string | n
 
     return {
       success: true,
-      code: 200,
       message: 'Exercise created successfully',
       data: exercise,
     };
-  } catch (error) {
-    return handleError(context.user?.email || 'demo', error, 'createExercise');
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'An error occurred while creating the exercise',
+      data: null,
+    };
   }
 };
 
-const generateTopicModule = async (
-  context: any,
-  exerciseRawContent: string, 
-  topic: string, 
-  exerciseLength: string,
-  difficultyLevel: string,
+const createModule = async (
+  context: string,
+  topic: string,
   model: string,
   prePrompt: string,
   postPrompt: string
 ): Promise<{ content: string; tokens: number }> => {
   try {
-    const exercise_response = await LLMFactory.generateTopic(
-      exerciseRawContent,
-      topic,
-      exerciseLength,
-      difficultyLevel,
-      model,
-      prePrompt,
-      postPrompt
-    );
+    console.log('topic', topic);
+    const exercise_response = await LLMFactory.generateModule(context, topic, model, prePrompt, postPrompt);
 
     if (!exercise_response.success || !exercise_response.data) {
       throw new Error(`Error generating exercise content for topic ${topic}: ${exercise_response.message}`);
     }
 
-    return { 
-      content: exercise_response.data, 
-      tokens: exercise_response.usage || 0 
+    return {
+      content: exercise_response.data,
+      tokens: exercise_response.usage || 0,
     };
   } catch (error) {
-    await handleError(context.user?.email || 'demo', error, 'generateTopicModule');
     throw error;
   }
 };
@@ -97,11 +93,9 @@ export const generateExercise: GenerateExercise<
     length: string;
     level: string;
     model: string;
-    include_summary: boolean;
     include_mc_quiz: boolean;
-    sensory_modes: SensoryMode[];
   },
-  ApiResponse<Exercise>
+  Response
 > = async (input, context) => {
   try {
     const validatedInput = exerciseGenerateSchema.parse(input);
@@ -136,7 +130,10 @@ export const generateExercise: GenerateExercise<
     // Update status to processing
     await context.entities.Exercise.update({
       where: { id: validatedInput.exercise_id },
-      data: { status: ExerciseStatus.EXERCISE_GENERATED },
+      data: {
+        modules: Object.fromEntries(validatedInput.selected_topics.map((topic) => [topic, null])),
+        status: ExerciseStatus.EXERCISE_GENERATED,
+      },
     });
 
     const prompt_settings = context.user
@@ -157,24 +154,12 @@ export const generateExercise: GenerateExercise<
     // Initialize combined content
     let combined_content = '';
     let total_tokens = 0;
-
     // Process each selected topic as a separate module
     for (const topic of selected_topics_array) {
       try {
-        // Update status to show which topic is being processed
-        await context.entities.Exercise.update({
-          where: { id: validatedInput.exercise_id },
-          data: { 
-            status: ExerciseStatus.EXERCISE_GENERATED,
-          },
-        });
-
-        const moduleResult = await generateTopicModule(
-          context,
+        const moduleResult = await createModule(
           truncated_exercise_text,
           topic,
-          validatedInput.length,
-          validatedInput.level,
           validatedInput.model,
           pre_prompt,
           post_prompt
@@ -183,6 +168,27 @@ export const generateExercise: GenerateExercise<
         // Add a clear section header for each topic
         combined_content += `${moduleResult.content}\n\n`;
         total_tokens += moduleResult.tokens;
+
+        // Get current exercise to merge with existing modules
+        const currentExercise = await context.entities.Exercise.findUnique({
+          where: { id: validatedInput.exercise_id },
+          select: { modules: true },
+        });
+
+        // Merge new module with existing modules
+        const updatedModules = {
+          ...(currentExercise?.modules as Record<string, string>),
+          [topic]: moduleResult.content,
+        };
+
+        // Update status and modules
+        await context.entities.Exercise.update({
+          where: { id: validatedInput.exercise_id },
+          data: {
+            modules: updatedModules,
+            status: ExerciseStatus.EXERCISE_GENERATED,
+          },
+        });
       } catch (error) {
         console.error(`Error processing topic ${topic}:`, error);
         // Continue with other topics if one fails
@@ -207,25 +213,25 @@ export const generateExercise: GenerateExercise<
     }
 
     // Process audio for <listen> tags if they exist
-    // if (combined_content.includes('<listen>')) {
-    //   const document_parser_url = process.env.DOCUMENT_PARSER_URL;
-    //   if (document_parser_url) {
-    //     try {
-    //       const form_data = new FormData();
-    //       form_data.append('exercise_id', validatedInput.exercise_id);
-    //       form_data.append('generate_text', combined_content || '');
-    //       const audio_response = await fetch(`${document_parser_url}/api/generate-audio`, {
-    //         method: 'POST',
-    //         body: form_data,
-    //       });
-    //       if (!audio_response.ok) {
-    //         await handleError(context.user?.email || 'demo', audio_response, 'generateAudio');
-    //       }
-    //     } catch (err) {
-    //       await handleError(context.user?.email || 'demo', err, 'generateAudio');
-    //     }
-    //   }
-    // }
+    if (combined_content.includes('<listen>')) {
+      const document_parser_url = process.env.DOCUMENT_PARSER_URL;
+      if (document_parser_url) {
+        try {
+          const form_data = new FormData();
+          form_data.append('exercise_id', validatedInput.exercise_id);
+          form_data.append('generate_text', combined_content || '');
+          const audio_response = await fetch(`${document_parser_url}/api/generate-audio`, {
+            method: 'POST',
+            body: form_data,
+          });
+          if (!audio_response.ok) {
+            await handleError(context.user?.email || 'demo', audio_response, 'generateAudio');
+          }
+        } catch (err) {
+          await handleError(context.user?.email || 'demo', err, 'generateAudio');
+        }
+      }
+    }
 
     if (context.user) {
       try {
@@ -238,16 +244,24 @@ export const generateExercise: GenerateExercise<
       }
     }
 
-    return { success: true, code: 200, message: 'Exercise generated successfully' };
-  } catch (error) {
-    return handleError(context.user?.email || 'demo', error, 'generateTopic');
+    return {
+      success: true,
+      message: 'Exercise generated successfully',
+      data: null,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'An error occurred while generating the exercise',
+      data: null,
+    };
   }
 };
 
-export const shareExercise: ShareExercise<
-  { exercise_id: string; emails: Array<string> },
-  ApiResponse<Exercise>
-> = async (input, context) => {
+export const shareExercise: ShareExercise<{ exercise_id: string; emails: Array<string> }, Response> = async (
+  input,
+  context
+) => {
   try {
     const validatedInput = exerciseShareSchema.parse(input);
 
@@ -278,16 +292,27 @@ export const shareExercise: ShareExercise<
         });
       })
     );
-    return { success: true, code: 200, message: 'Exercise shared successfully' };
-  } catch (error) {
-    return handleError(context.user?.email || 'demo', error, 'shareExercise');
+    return {
+      success: true,
+      message: 'Exercise shared successfully',
+      data: null,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'An error occurred while sharing the exercise',
+      data: null,
+    };
   }
 };
 
-export const updateExercise: UpdateExercise<
-  { id: string; updated_data: Partial<Exercise> },
-  ApiResponse<Exercise>
-> = async (input, context) => {
+export const updateExercise: UpdateExercise<{ id: string; updated_data: Partial<Exercise> }, Response> = async (
+  input,
+  context
+) => {
+  if (!context.user) {
+    throw new HttpError(401, 'Unauthorized');
+  }
   try {
     const validatedInput = exerciseUpdateSchema.parse(input);
 
@@ -296,7 +321,7 @@ export const updateExercise: UpdateExercise<
     // Fetch the current exercise to compare <listen> tags content
     const currentExercise = await context.entities.Exercise.findUnique({
       where: { id: validatedInput.id, user_id: user.id },
-      select: { lesson_text: true }
+      select: { lesson_text: true },
     });
 
     if (!currentExercise) {
@@ -305,7 +330,7 @@ export const updateExercise: UpdateExercise<
 
     if (validatedInput.updated_data.lesson_text && validatedInput.updated_data.lesson_text.length > 0) {
       validatedInput.updated_data.word_count = validatedInput.updated_data.lesson_text.split(' ').length;
-      
+
       // Check if the lesson_text contains <listen> tags and if content has changed
       const newLessonText = validatedInput.updated_data.lesson_text;
       if (newLessonText.includes('<listen>')) {
@@ -314,17 +339,17 @@ export const updateExercise: UpdateExercise<
           const matches = text.match(/<listen>([\s\S]*?)<\/listen>/g);
           return matches ? matches.join('') : '';
         };
-        
+
         const newListenContent = extractListenContent(newLessonText);
         const currentListenContent = extractListenContent(currentExercise.lesson_text);
-        
+
         // If content within <listen> tags has changed, regenerate audio
         if (newListenContent !== currentListenContent) {
           const document_parser_url = process.env.DOCUMENT_PARSER_URL;
           if (!document_parser_url) {
             throw new Error('DOCUMENT_PARSER_URL is not set');
           }
-          
+
           try {
             const form_data = new FormData();
             form_data.append('exercise_id', validatedInput.id);
@@ -333,12 +358,12 @@ export const updateExercise: UpdateExercise<
               method: 'POST',
               body: form_data,
             });
-            
+
             if (!audio_response.ok) {
-              await handleError(context.user?.email || 'demo', audio_response, 'regenerateAudio');
+              throw new Error('Failed to generate audio');
             }
           } catch (err) {
-            await handleError(context.user?.email || 'demo', err, 'regenerateAudio');
+            console.error('Error regenerating audio:', err);
           }
         }
       }
@@ -355,16 +380,22 @@ export const updateExercise: UpdateExercise<
 
     return {
       success: true,
-      code: 200,
       message: 'Exercise updated successfully',
       data: updated_exercise,
     };
-  } catch (error) {
-    return handleError(context.user?.email || 'demo', error, 'updateExercise');
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'An error occurred while updating the exercise',
+      data: null,
+    };
   }
 };
 
-export const deleteExercise: DeleteExercise<{ id: string }, ApiResponse<Exercise>> = async (input, context) => {
+export const deleteExercise: DeleteExercise<{ id: string }, Response> = async (input, context) => {
+  if (!context.user) {
+    throw new HttpError(401, 'Unauthorized');
+  }
   try {
     const validatedInput = exerciseDeleteSchema.parse(input);
 
@@ -379,8 +410,16 @@ export const deleteExercise: DeleteExercise<{ id: string }, ApiResponse<Exercise
       },
     });
 
-    return { success: true, code: 200, message: 'Exercise deleted successfully' };
-  } catch (error) {
-    return handleError(context.user?.email || 'demo', error, 'deleteExercise');
+    return {
+      success: true,
+      message: 'Exercise deleted successfully',
+      data: null,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'An error occurred while deleting the exercise',
+      data: null,
+    };
   }
 };

@@ -1,6 +1,5 @@
-import { BaseEmailTemplate } from '../components/EmailTemplateFactory';
+import { BaseEmailTemplate, HTML_UTILS } from '../components/EmailTemplateFactory';
 import { components } from '../components/BaseTemplate';
-import { TEXT_UTILS } from '../components/EmailTemplateFactory';
 
 interface VerificationEmailParams {
   verification_link: string;
@@ -13,7 +12,7 @@ export class VerificationEmail extends BaseEmailTemplate {
   }
 
   protected generateSubject(): string {
-    return 'Verify Your Email Address - Multinex';
+    return 'Verify Your Email - Multinex';
   }
 
   protected generateText(): string {
@@ -21,30 +20,40 @@ export class VerificationEmail extends BaseEmailTemplate {
     return `
 Hi ${user_name},
 
-Thank you for signing up with Multinex! To complete your registration, please verify your email address by clicking the link below:
+Please verify your email to activate your Multinex account.
 
-${verification_link}
+Verify now: ${verification_link}
 
-If you didn't create this account, you can ignore this email.
+This link will expire in 24 hours. If you didn't create an account, please ignore this email.
 
-${TEXT_UTILS.generateSignature()}`;
+Multinex
+Type, write, listen. In one AI-powered workspace.`;
   }
 
   protected generateHtmlContent(): string {
     const { user_name, verification_link } = this.params;
+
+    const headerSection = HTML_UTILS.buildSection(`
+      ${components.heading('Verify Your Email')}
+      ${components.paragraph(`Hi ${user_name},`)}
+    `);
+
+    const verificationSection = HTML_UTILS.buildSection(`
+      ${components.highlight_card(`
+        ${components.paragraph('Please verify your email address to activate your Multinex account:')}
+        ${components.button('Verify Email', verification_link)}
+        ${components.paragraph('<small>This link will expire in 24 hours.</small>')}
+      `)}
+    `);
+
+    const securityNote = HTML_UTILS.buildSection(`
+      ${components.paragraph("If you didn't create this account, you can safely ignore this email.")}
+    `);
+
     return `
-      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
-        <tr>${components.heading('Verify Your Email Address')}</tr>
-        <tr>${components.paragraph(`Hi ${user_name},`)}</tr>
-        <tr>${components.paragraph(
-          'Thank you for signing up with <strong>Multinex</strong>! To complete your registration, ' +
-          'please verify your email address by clicking the link below:'
-        )}</tr>
-        <tr>${components.button('Click to Verify', verification_link)}</tr>
-        <tr>${components.paragraph("If you didn't create this account, you can ignore this email.")}</tr>
-        <tr>${components.paragraph('Thanks for your time, and have a great day!')}</tr>
-        <tr>${components.paragraph('<strong>Multinex</strong>')}</tr>
-      </table>
+      ${headerSection}
+      ${verificationSection}
+      ${securityNote}
     `;
   }
 }

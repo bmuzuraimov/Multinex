@@ -18,7 +18,6 @@ export enum ErrorSeverity {
 // Standard error response type
 export type ErrorResponse = {
   success: false;
-  code: number;
   message: string;
   errors?: any[];
 };
@@ -250,7 +249,6 @@ export const handleError = async (email: string, error: unknown, operation: stri
   // Return standardized error response
   const response: ErrorResponse = {
     success: false,
-    code,
     message: formatted_message
   };
 
@@ -258,6 +256,6 @@ export const handleError = async (email: string, error: unknown, operation: stri
   if (error instanceof z.ZodError) {
     response.errors = error.errors;
   }
-
   return response;
 };
+

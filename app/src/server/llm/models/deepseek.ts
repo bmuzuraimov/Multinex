@@ -1,11 +1,10 @@
 import OpenAI from 'openai';
 import {
-  generateTopicPrompt,
+  generateModulePrompt,
   generateCoursePrompt,
   generateExamPrompt,
 } from '../prompts';
 import { HttpError } from 'wasp/server';
-import { SensoryMode } from '../../../shared/types';
 import { BaseLLMService, LLMResponse } from './base';
 
 export class DeepSeekService extends BaseLLMService {
@@ -23,11 +22,9 @@ export class DeepSeekService extends BaseLLMService {
     this.deepseek_client = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' });
   }
 
-  async generateTopic(
-    exercise_raw_content: string,
-    selected_topics: string,
-    exercise_length: string,
-    difficulty_level: string,
+  async generateModule(
+    context: string,
+    topic_name: string,
     model_name: string,
     pre_prompt: string,
     post_prompt: string
@@ -35,11 +32,9 @@ export class DeepSeekService extends BaseLLMService {
     return this.withRetry(async () => {
       const deepseek_response = await this.deepseek_client.chat.completions.create({
         model: 'deepseek-chat',
-        ...generateTopicPrompt({
-          content: exercise_raw_content,
-          selected_topics,
-          length: exercise_length,
-          level: difficulty_level,
+        ...generateModulePrompt({
+          context: context,
+          topic_name: topic_name,
           pre_prompt,
           post_prompt,
         }),
@@ -55,7 +50,7 @@ export class DeepSeekService extends BaseLLMService {
 
       const token_usage = deepseek_response.usage?.total_tokens || 0;
       return { success: true, data: exercise_content, usage: token_usage };
-    }, 'generateTopic');
+    }, 'generateModule');
   }
 
   async generateQuestions(lecture_content: string, model_name: string): Promise<LLMResponse> {
