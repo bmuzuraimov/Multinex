@@ -127,6 +127,16 @@ route DemoRoute { path: "/demo", to: DemoPage }
 page DemoPage {
   component: import Demo from "@src/client/common/pages/Demo"
 }
+route SolutionsStudentsRoute { path: "/solutions/students", to: SolutionsStudentsPage }
+page SolutionsStudentsPage {
+  component: import SolutionsStudents from "@src/client/common/pages/SolutionsStudents"
+}
+
+route SolutionsTeachersRoute { path: "/solutions/teachers", to: SolutionsTeachersPage }
+page SolutionsTeachersPage {
+  component: import SolutionsTeachers from "@src/client/common/pages/SolutionsTeachers"
+}
+
 
 route PricingRoute { path: "/pricing", to: PricingPage }
 page PricingPage {
@@ -181,13 +191,11 @@ page FeedbackPage {
 
 route CourseRoute { path: "/course/:id", to: CoursePage }
 page CoursePage {
-  authRequired: true,
   component: import Course from "@src/client/user/pages/Course"
 }
 
 route ExerciseRoute { path: "/exercise/:exerciseId", to: ExercisePage }
 page ExercisePage {
-  authRequired: true,
   component: import Exercise from "@src/client/user/pages/Exercise"
 }
 

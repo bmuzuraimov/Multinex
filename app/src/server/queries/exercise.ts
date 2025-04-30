@@ -8,19 +8,14 @@ type Response = {
   message: string;
   data: any;
 };
-
 export const getExercise: GetExercise<{ exercise_id: string }, Response> = async (
   { exercise_id }: { exercise_id: string },
   context: any
 ) => {
-  if (!context.user) {
-    throw new HttpError(401, 'Unauthorized');
-  }
-
   try {
-    const exercise = await context.entities.Exercise.findFirstOrThrow({
+    // First try to find the exercise directly
+    let exercise = await context.entities.Exercise.findUnique({
       where: {
-        user_id: context.user.id,
         id: exercise_id,
       },
       include: {
@@ -32,10 +27,29 @@ export const getExercise: GetExercise<{ exercise_id: string }, Response> = async
             options: true,
           },
         },
-        topic: true,
+        topic: {
+          include: {
+            course: true
+          }
+        },
         user: true,
       },
     });
+
+    // If no exercise found, throw error
+    if (!exercise) {
+      throw new HttpError(404, 'Exercise not found');
+    }
+
+    // Check if user is authorized to access this exercise
+    // Allow access if:
+    // 1. User is logged in and owns the exercise, OR
+    // 2. The exercise belongs to a topic in a public course
+    const isPublicCourse = exercise.topic?.course?.is_public || false;
+    
+    if (!isPublicCourse && (!context.user || exercise.user_id !== context.user.id)) {
+      throw new HttpError(401, 'Unauthorized');
+    }
 
     if (exercise.audio_timestamps && typeof exercise.audio_timestamps[0] === 'string') {
       exercise.audio_timestamps = exercise.audio_timestamps.map((timestamp: string) => JSON.parse(timestamp));

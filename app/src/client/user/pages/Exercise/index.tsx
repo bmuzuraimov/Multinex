@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useAction, getExercise, updateExercise } from 'wasp/client/operations';
 import ExerciseResult from './components/ExerciseInterface/ExerciseResult';
 import ExerciseSidebar from './components/ExerciseInterface/ExerciseSidebar';
@@ -10,13 +10,29 @@ import useExercise from '../../../hooks/useExercise';
 import CardSkeleton from '../../../components/CardSkeleton';
 import DefaultLayout from '../../layouts/DefaultLayout';
 import useLocalStorage from '../../../hooks/useLocalStorage';
+import { useAuth } from 'wasp/client/auth';
+import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
+// Import shadcn components
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../../shadcn/components/ui/dialog';
+import { Button } from '../../../shadcn/components/ui/button';
 
 const Exercise: React.FC = React.memo(() => {
   const { exerciseId } = useParams();
+  const { data: user } = useAuth();
+  const navigate = useNavigate();
   const [text_size, setTextSize] = useLocalStorage('text_size', 'xl');
   const [exercise_mode, setExerciseMode] = useState<'typing' | 'submitted' | 'test'>('typing');
   const [highlighted_nodes, setHighlightedNodes] = useState<number[]>([0]);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const {
     data: exerciseResponse,
     isLoading: is_exercise_loading,
@@ -26,8 +42,18 @@ const Exercise: React.FC = React.memo(() => {
   }) as { data: any; isLoading: boolean; refetch: () => void };
   const updateExerciseAction = useAction(updateExercise);
 
-  const exercise = exerciseResponse?.success ? (exerciseResponse.data as any) : null;
+  useEffect(() => {
+    if (!user) {
+      const redirectTimer = setTimeout(() => {
+        setShowLoginModal(true);
+        toast.info('Session expired. Please log in to continue.');
+      }, 1200000); // 90 seconds
 
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [user, navigate]);
+
+  const exercise = exerciseResponse?.success ? (exerciseResponse.data as any) : null;
   const { essay, essay_list, essay_char_count, essay_word_count, has_quiz } = useExercise(
     exerciseId!,
     exercise?.essay || '',
@@ -41,6 +67,7 @@ const Exercise: React.FC = React.memo(() => {
     text_size,
     exercise?.cursor || 0
   );
+
 
   // Only set up audio once when it becomes available
   useEffect(() => {
@@ -112,6 +139,22 @@ const Exercise: React.FC = React.memo(() => {
 
   return (
     <ExerciseProvider value={context_value}>
+      <Dialog open={showLoginModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-manrope font-bold text-primary-900">Session Expired</DialogTitle>
+            <DialogDescription className="text-gray-600">
+              Your session has expired. Please log in again to continue your exercise.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex justify-end space-x-2 sm:space-x-4">
+            <Button asChild>
+              <Link to="/login">Log In</Link>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className='relative'>
         {exercise_mode === 'typing' && (
           <div className='relative flex flex-row h-full'>

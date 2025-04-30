@@ -7,7 +7,7 @@ const ExerciseTest: React.FC<{
   title: string;
   questions: any[];
 }> = ({ title, questions }) => {
-  const { set_mode } = useExerciseContext();
+  const context = useExerciseContext();
   const [selected_options, setSelected_options] = useState<{ [key: string]: string }>({});
   const [show_results, setShow_results] = useState<boolean>(false);
 
@@ -41,7 +41,7 @@ const ExerciseTest: React.FC<{
           <div className="flex justify-center mt-8">
             <button
               type="button"
-              onClick={() => set_mode('typing')}
+              onClick={() => context?.set_mode('typing')}
               className="group relative px-8 py-3 bg-primary-500 text-white font-satoshi text-sm font-medium rounded-lg shadow-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-300"
             >
               <span className="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -121,18 +121,38 @@ const ExerciseTest: React.FC<{
                 <div className="mt-6 pl-8 font-satoshi">
                   {selected_options[question.id] ? (
                     question.options.find((opt: Option) => opt.text === selected_options[question.id])?.is_correct ? (
-                      <div className="flex items-center text-success">
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span className="font-medium">Correct Response</span>
+                      <div className="flex flex-col">
+                        <div className="flex items-center text-success">
+                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className="font-medium">Correct Response</span>
+                        </div>
+                        {question.options.find((opt: Option) => opt.text === selected_options[question.id])?.explanation && (
+                          <p className="mt-2 text-primary-700 bg-primary-50 p-3 rounded-lg">
+                            {question.options.find((opt: Option) => opt.text === selected_options[question.id])?.explanation}
+                          </p>
+                        )}
                       </div>
                     ) : (
-                      <div className="flex items-center text-danger">
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        <span className="font-medium">Incorrect Response</span>
+                      <div className="flex flex-col">
+                        <div className="flex items-center text-danger">
+                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          <span className="font-medium">Incorrect Response</span>
+                        </div>
+                        {question.options.find((opt: Option) => opt.text === selected_options[question.id])?.explanation && (
+                          <p className="mt-2 text-danger-700 bg-danger-50 p-3 rounded-lg">
+                            {question.options.find((opt: Option) => opt.text === selected_options[question.id])?.explanation}
+                          </p>
+                        )}
+                        {question.options.find((opt: Option) => opt.is_correct)?.explanation && (
+                          <p className="mt-2 text-success-700 bg-success-50 p-3 rounded-lg">
+                            <span className="font-medium">Correct explanation: </span>
+                            {question.options.find((opt: Option) => opt.is_correct)?.explanation}
+                          </p>
+                        )}
                       </div>
                     )
                   ) : (
@@ -164,7 +184,7 @@ const ExerciseTest: React.FC<{
           </button>
           <button
             type="button"
-            onClick={() => set_mode('typing')}
+            onClick={() => context?.set_mode('typing')}
             className="group relative px-8 py-3 bg-primary-500 text-white font-satoshi text-sm font-medium rounded-lg shadow-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-300"
           >
             <span className="absolute inset-y-0 left-0 flex items-center pl-3">

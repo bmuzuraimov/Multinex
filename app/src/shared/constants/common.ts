@@ -3,6 +3,8 @@ import { ADMIN_EMAIL } from './pricing';
 
 export const PUBLIC_NAVBAR = [
   { name: 'Courses', href: '/public-courses' },
+  // { name: 'For Students', href: '/solutions/students' },
+  { name: 'For Teachers', href: '/solutions/teachers' },
   { name: 'Pricing', href: '/pricing' },
   { name: 'About', href: '/about' },
 ] as const;

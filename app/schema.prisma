@@ -225,6 +225,7 @@ model Option {
   id           String    @id @default(uuid())
   text         String
   is_correct   Boolean   @default(false)
+  explanation  String    @default("")
   question_id  String
   question     Question  @relation("QuestionOptions", fields: [question_id], references: [id], onDelete: Cascade)
   created_at   DateTime  @default(now())

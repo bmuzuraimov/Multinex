@@ -1,8 +1,9 @@
 import { useAction, useQuery, duplicateCourse, getAllCourses } from 'wasp/client/operations';
-import { useCallback, memo, useMemo } from 'react';
-import { HiOutlineBookOpen, HiOutlineAcademicCap, HiOutlinePlusCircle } from 'react-icons/hi';
+import { useCallback, memo, useMemo, useState, useEffect, useRef } from 'react';
+import { HiOutlineBookOpen, HiOutlineAcademicCap, HiOutlinePlusCircle, HiOutlineSearch } from 'react-icons/hi';
 import { useAuth } from 'wasp/client/auth';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 // Import shadcn components
 import {
@@ -19,6 +20,15 @@ import { Skeleton } from '../../../shadcn/components/ui/skeleton';
 import { Alert, AlertDescription } from '../../../shadcn/components/ui/alert';
 import { Badge } from '../../../shadcn/components/ui/badge';
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '../../../shadcn/components/ui/hover-card';
+import { Input } from '../../../shadcn/components/ui/input';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '../../../shadcn/components/ui/pagination';
 import { cn } from '../../../../shared/utils';
 import DefaultLayout from '../../layouts/DefaultLayout';
 
@@ -60,7 +70,7 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
   const formattedDate = useMemo(() => {
     return new Date(course.created_at).toLocaleDateString(undefined, {
       year: 'numeric',
-      month: 'short', 
+      month: 'short',
       day: 'numeric',
     });
   }, [course.created_at]);
@@ -77,7 +87,9 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
     >
       <CardHeader className='space-y-2'>
         <div className='flex justify-between items-start'>
-          <CardTitle className='text-lg font-manrope text-primary-900'>{course.name}</CardTitle>
+          <Link to={`/course/${course.id}`} className='block no-underline text-inherit'>
+            <CardTitle className='text-lg font-manrope text-primary-900'>{course.name}</CardTitle>
+          </Link>
           {!isOwner && (
             <Button
               variant='outline'
@@ -85,7 +97,7 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
               onClick={handleEnroll}
               className='opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-2'
             >
-              <HiOutlinePlusCircle className="w-4 h-4" />
+              <HiOutlinePlusCircle className='w-4 h-4' />
               Enroll
             </Button>
           )}
@@ -114,7 +126,7 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
       </CardContent>
 
       <CardFooter className='pt-4 flex justify-between items-center'>
-        <span className='text-xs font-satoshi text-muted-foreground'>{formattedDate}</span>
+        <span className='text-xs font-satoshi text-muted-foreground'>{course.created_at.toLocaleDateString()}</span>
         <Badge variant={isOwner ? 'secondary' : 'default'}>{isOwner ? 'Your Course' : 'Free'}</Badge>
       </CardFooter>
     </Card>
@@ -146,13 +158,37 @@ const EmptyState = memo(() => (
 ));
 
 const PublicCourses = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const coursesPerPage = 18;
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 1000); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   const {
     data: response,
     isLoading,
     error,
+    refetch,
   } = useQuery(getAllCourses, {
     where: {
       is_public: true,
+      ...(debouncedSearchTerm
+        ? {
+            name: {
+              contains: debouncedSearchTerm,
+              mode: 'insensitive',
+            },
+          }
+        : {}),
     },
     include: {
       user: true,
@@ -162,26 +198,88 @@ const PublicCourses = () => {
         },
       },
     },
+    orderBy: {
+      created_at: 'asc',
+    },
+    take: coursesPerPage,
+    skip: (currentPage - 1) * coursesPerPage,
   });
+
+  // For pagination, we need to know the total number of courses
+  const { data: countResponse, isLoading: isCountLoading } = useQuery(getAllCourses, {
+    where: {
+      is_public: true,
+      ...(debouncedSearchTerm
+        ? {
+            name: {
+              contains: debouncedSearchTerm,
+              mode: 'insensitive',
+            },
+          }
+        : {}),
+    },
+  });
+
+  // Calculate total pages
+  useEffect(() => {
+    if (countResponse?.data) {
+      setTotalPages(Math.ceil(countResponse.data.length / coursesPerPage));
+      // Reset to page 1 if current page is beyond total pages
+      if (currentPage > Math.ceil(countResponse.data.length / coursesPerPage)) {
+        setCurrentPage(1);
+      }
+    }
+  }, [countResponse?.data, currentPage, coursesPerPage]);
 
   const duplicateCourseAction = useAction(duplicateCourse);
 
-  const handleEnroll = useCallback(async (id: string) => {
-    toast('Do you want to enroll in this course?', {
-      action: {
-        label: 'Enroll',
-        onClick: () => {
-          toast.promise(duplicateCourseAction({ id }), {
-            loading: 'Enrolling in course...',
-            success: 'Successfully enrolled in course! You can now find it in your courses.',
-            error: 'Failed to enroll in course. Please try again.',
-          });
+  const handleEnroll = useCallback(
+    async (id: string) => {
+      toast('Do you want to enroll in this course?', {
+        action: {
+          label: 'Enroll',
+          onClick: () => {
+            toast.promise(duplicateCourseAction({ id }), {
+              loading: 'Enrolling in course...',
+              success: 'Successfully enrolled in course! You can now find it in your courses.',
+              error: 'Failed to enroll in course. Please try again.',
+            });
+          },
         },
-      },
-    });
-  }, [duplicateCourseAction]);
+      });
+    },
+    [duplicateCourseAction]
+  );
 
-  if (isLoading) return <LoadingState />;
+  // Handle search input changes
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    // Don't reset page here, we'll do it in the useEffect when debouncedSearchTerm changes
+  }, []);
+
+  // Reset to page 1 when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm]);
+
+  // Handle pagination
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const handlePrevious = useCallback(() => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  }, [currentPage]);
+
+  const handleNext = useCallback(() => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  }, [currentPage, totalPages]);
+
+  if (isLoading || isCountLoading) return <LoadingState />;
 
   if (error) {
     return (
@@ -193,20 +291,75 @@ const PublicCourses = () => {
     );
   }
 
-  if (!response?.data) return <EmptyState />;
+  const courses = response?.data || [];
+  const noCoursesFound = courses.length === 0;
 
   return (
     <ScrollArea className='h-full'>
       <div className='py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'>
-        <div className='text-center space-y-4 mb-16'>
+        <div className='text-center space-y-4 mb-8'>
           <h2 className='text-3xl font-bold font-manrope tracking-tight text-primary-900'>Community Courses</h2>
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
-          {response.data.map((course: Course) => (
-            <PublicCourseCard key={course.id} course={course} onEnroll={handleEnroll} />
-          ))}
+        {/* Search input */}
+        <div className='mb-8 max-w-md mx-auto'>
+          <div className='relative'>
+            <HiOutlineSearch className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5' />
+            <Input
+              type='text'
+              placeholder='Search courses by name...'
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className='pl-10'
+            />
+          </div>
         </div>
+
+        {noCoursesFound ? (
+          <EmptyState />
+        ) : (
+          <>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8'>
+              {courses.map((course: Course) => (
+                <PublicCourseCard key={course.id} course={course} onEnroll={handleEnroll} />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <Pagination className='mt-8'>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={handlePrevious}
+                    className={cn(currentPage === 1 && 'pointer-events-none opacity-50')}
+                  />
+                </PaginationItem>
+
+                {[...Array(totalPages)].map((_, i) => {
+                  const page = i + 1;
+                  // Show a reasonable number of page links
+                  if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
+                    return (
+                      <PaginationItem key={page}>
+                        <PaginationLink onClick={() => handlePageChange(page)} isActive={page === currentPage}>
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+                  return null;
+                })}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={handleNext}
+                    className={cn(currentPage === totalPages && 'pointer-events-none opacity-50')}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </>
+        )}
       </div>
     </ScrollArea>
   );

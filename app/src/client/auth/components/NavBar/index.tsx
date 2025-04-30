@@ -7,6 +7,7 @@ import { BiLogIn } from 'react-icons/bi';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import { HiBars3 } from 'react-icons/hi2';
 import { MdOutlineToken } from 'react-icons/md';
+import { FaGithub } from 'react-icons/fa';
 import DropdownUser from './DropdownUser';
 import DarkModeSwitcher from './DarkModeSwitcher';
 import { UserMenuItems } from './UserMenuItems';
@@ -136,6 +137,19 @@ const NavBar = () => {
         </div>
 
         <div className='hidden lg:flex lg:flex-1 lg:justify-end lg:items-center'>
+          <a
+            href="https://github.com/bmuzuraimov/Multinex"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              'flex items-center mr-4 transition-transform hover:scale-110',
+              is_auth ? 'text-gray-600 hover:text-primary-600' : 'text-gray-800 dark:text-gray-200 hover:text-teal-500 dark:hover:text-teal-400'
+            )}
+            aria-label="GitHub repository"
+          >
+            <FaGithub className="h-6 w-6" />
+          </a>
+          
           {is_auth && <DarkModeSwitcher />}
           {!is_user_loading && user && is_auth && (
             <div className='group relative flex items-center gap-2 text-sm font-medium leading-6 text-primary-600 bg-primary-50 px-3 py-1.5 rounded-full transition-all duration-200'>
@@ -220,6 +234,21 @@ const NavBar = () => {
                     is_auth={is_auth}
                   />
                 ))}
+                <a
+                  href="https://github.com/bmuzuraimov/Multinex"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    'flex items-center gap-2 px-4 py-3 rounded-lg',
+                    is_auth
+                      ? 'text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200 hover:translate-x-2'
+                      : 'text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium'
+                  )}
+                  onClick={handleMobileMenuClose}
+                >
+                  <FaGithub className="h-5 w-5" />
+                  GitHub
+                </a>
               </div>
               <div className='py-6'>
                 {is_user_loading ? null : !user ? (
