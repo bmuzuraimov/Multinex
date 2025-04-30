@@ -151,11 +151,8 @@ export const generateExercise: GenerateExercise<
         ? [validatedInput.selected_topics]
         : [];
 
-    // Initialize combined content
-    let combined_content = '';
-    let total_tokens = 0;
-    // Process each selected topic as a separate module
-    for (const topic of selected_topics_array) {
+    // Process all selected topics in parallel while preserving order
+    const modulePromises = selected_topics_array.map(async (topic) => {
       try {
         const moduleResult = await createModule(
           truncated_exercise_text,
@@ -164,34 +161,26 @@ export const generateExercise: GenerateExercise<
           pre_prompt,
           post_prompt
         );
-
-        // Add a clear section header for each topic
-        combined_content += `${moduleResult.content}\n\n`;
-        total_tokens += moduleResult.tokens;
-
-        // Get current exercise to merge with existing modules
-        const currentExercise = await context.entities.Exercise.findUnique({
-          where: { id: validatedInput.exercise_id },
-          select: { modules: true },
-        });
-
-        // Merge new module with existing modules
-        const updatedModules = {
-          ...(currentExercise?.modules as Record<string, string>),
-          [topic]: moduleResult.content,
-        };
-
-        // Update status and modules
-        await context.entities.Exercise.update({
-          where: { id: validatedInput.exercise_id },
-          data: {
-            modules: updatedModules,
-            status: ExerciseStatus.EXERCISE_GENERATED,
-          },
-        });
+        return { topic, content: moduleResult.content, tokens: moduleResult.tokens };
       } catch (error) {
         console.error(`Error processing topic ${topic}:`, error);
-        // Continue with other topics if one fails
+        return { topic, content: '', tokens: 0, error: true };
+      }
+    });
+
+    // Wait for all module generations to complete
+    const moduleResults = await Promise.all(modulePromises);
+    
+    // Combine content in the original order
+    let combined_content = '';
+    let total_tokens = 0;
+    const modulesMap: Record<string, string> = {};
+    
+    for (const result of moduleResults) {
+      if (!result.error) {
+        combined_content += `<write>${result.topic}</write>\n${result.content}\n\n`;
+        total_tokens += result.tokens;
+        modulesMap[result.topic] = result.content;
       }
     }
 
@@ -200,6 +189,9 @@ export const generateExercise: GenerateExercise<
         where: { id: validatedInput.exercise_id },
         data: {
           lesson_text: combined_content || '',
+          modules: {
+            topic_terms: selected_topics_array,
+          },
           level: validatedInput.level,
           truncated,
           tokens: total_tokens,
