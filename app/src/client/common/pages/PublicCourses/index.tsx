@@ -1,5 +1,5 @@
 import { useAction, useQuery, duplicateCourse, getAllCourses } from 'wasp/client/operations';
-import { useCallback, memo, useMemo, useState, useEffect, useRef } from 'react';
+import { useCallback, memo, useMemo, useState, useEffect } from 'react';
 import { HiOutlineBookOpen, HiOutlineAcademicCap, HiOutlinePlusCircle, HiOutlineSearch } from 'react-icons/hi';
 import { useAuth } from 'wasp/client/auth';
 import { toast } from 'sonner';

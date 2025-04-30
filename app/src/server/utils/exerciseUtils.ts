@@ -87,6 +87,5 @@ export function preprocessEssay(rawEssay: string) {
   });
   // Join all sections to create final essay string
   const essay = formattedEssay.map(section => section.text.join('')).join('');
-  console.log(formattedEssay);
   return { essay, formattedEssay };
 }
