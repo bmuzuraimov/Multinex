@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useQuery, getDemoExercise } from 'wasp/client/operations';
-import ExerciseResult from '../../../user/pages/Exercise/components/ExerciseInterface/ExerciseResult';
-import ExerciseSidebar from '../../../user/pages/Exercise/components/ExerciseInterface/ExerciseSidebar';
-import ExerciseTest from '../../../user/pages/Exercise/components/ExerciseInterface/ExerciseTest';
+import ExerciseResult from '../../../user/pages/Exercise/components/ExerciseResult';
+import ExerciseSidebar from '../../../user/pages/Exercise/components/ExerciseSidebar';
+import ExerciseTest from '../../../user/pages/Exercise/components/ExerciseTest';
 import ExerciseInterface from '../../../user/pages/Exercise/components/ExerciseInterface';
+import ExerciseEditor from '../../../user/pages/Exercise/components/ExerciseEditor';
 import { ExerciseProvider } from '../../../contexts/ExerciseContext';
 import useExercise from '../../../hooks/useExercise';
 import DefaultLayout from '../../layouts/DefaultLayout';
@@ -11,7 +12,7 @@ import useLocalStorage from '../../../hooks/useLocalStorage';
 
 const CreateDemo: React.FC = React.memo(() => {
   const [text_size, setTextSize] = useLocalStorage('text_size', 'xl');
-  const [mode, set_mode] = useState<'typing' | 'submitted' | 'test'>('typing');
+  const [mode, set_mode] = useState<'typing' | 'submitted' | 'test' | 'editing'>('typing');
   const [highlighted_nodes, set_highlighted_nodes] = useState<number[]>([0]);
 
   const { data: response, isLoading, error } = useQuery(getDemoExercise, {
@@ -22,6 +23,10 @@ const CreateDemo: React.FC = React.memo(() => {
   });
 
   const demo_exercise = response?.data;
+  
+  // Extract course information if available from the demo exercise
+  const courseId = demo_exercise?.exercise?.topic?.course?.id;
+  const courseName = demo_exercise?.exercise?.topic?.course?.name;
 
   const { essay, essay_list, essay_word_count, essay_char_count, has_quiz } = useExercise(
     demo_exercise?.exercise?.id || '',
@@ -74,6 +79,9 @@ const CreateDemo: React.FC = React.memo(() => {
     text_size,
     set_text_size: setTextSize,
     submit_exercise: handleSubmitExercise,
+    lesson_text: demo_exercise?.exercise?.lesson_text || '',
+    course_id: courseId,
+    course_name: courseName,
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -90,6 +98,12 @@ const CreateDemo: React.FC = React.memo(() => {
         )}
         {mode === 'submitted' && <ExerciseResult exerciseId={demo_exercise?.exercise?.id || ''} />}
         {mode === 'test' && <ExerciseTest title={demo_exercise?.exercise?.name || ''} questions={demo_exercise?.exercise?.questions || []} />}
+        {mode === 'editing' && (
+          <div className='relative flex flex-row h-full'>
+            <ExerciseSidebar />
+            <ExerciseEditor exerciseId={demo_exercise?.exercise?.id || ''} />
+          </div>
+        )}
       </div>
     </ExerciseProvider>
   );

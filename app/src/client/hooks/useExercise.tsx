@@ -16,7 +16,7 @@ const useExercise = (
   essay: string, 
   formatted_essay: { mode: string; text: string[] }[],
   questions: Question[],
-  default_mode: 'typing' | 'submitted' | 'test',
+  default_mode: 'typing' | 'submitted' | 'test' | 'editing',
   text_size: string,
   progress_cursor: number
 ) => {
@@ -59,7 +59,7 @@ const useExercise = (
     return newTextList;
   }, [formattedEssaySnapshot, progress_cursor, text_size, formatted_essay]);
 
-  const [mode, set_mode] = useState<'typing' | 'submitted' | 'test'>(default_mode || 'typing');
+  const [mode, set_mode] = useState<'typing' | 'submitted' | 'test' | 'editing'>(default_mode || 'typing');
   const essay_char_count = useMemo(() => essay.length, [essay]);
   const essay_word_count = useMemo(() => essay.split(' ').length, [essay]);
   const has_quiz = useMemo(() => Boolean(questions?.length), [questions]);

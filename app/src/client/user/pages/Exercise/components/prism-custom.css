@@ -1,0 +1,147 @@
+/* Custom Prism.js styling for exercise editor */
+
+/* Basic text and background colors for the editor */
+.editor-container {
+  background-color: #282c34;
+  color: #abb2bf;
+}
+
+/* Tag styling - common properties */
+.token.tag {
+  font-weight: 500;
+}
+
+/* Tag name styling */
+.token.tag .token.tag-name {
+  font-weight: bold;
+}
+
+/* Type tag - teal */
+.token.type-tag {
+  color: #4fd1c5 !important; /* teal color */
+}
+
+/* Content inside type tags */
+.token.type-tag ~ .token.content {
+  background-color: rgba(79, 209, 197, 0.05);
+  border-left: 2px solid #4fd1c5;
+  padding-left: 8px;
+  display: block;
+  margin: 4px 0;
+}
+
+/* Write tag - red */
+.token.write-tag {
+  color: #f56565 !important; /* red color */
+}
+
+/* Content inside write tags */
+.token.write-tag ~ .token.content {
+  background-color: rgba(245, 101, 101, 0.05);
+  border-left: 2px solid #f56565;
+  padding-left: 8px;
+  display: block;
+  margin: 4px 0;
+}
+
+/* Listen tag - blue */
+.token.listen-tag {
+  color: #4299e1 !important; /* blue color */
+}
+
+/* Content inside listen tags */
+.token.listen-tag ~ .token.content {
+  background-color: rgba(66, 153, 225, 0.05);
+  border-left: 2px solid #4299e1;
+  padding-left: 8px;
+  display: block;
+  margin: 4px 0;
+}
+
+/* Mermaid tag - yellowish */
+.token.mermaid-tag {
+  color: #ecc94b !important; /* yellowish color */
+}
+
+/* Content inside mermaid tags */
+.token.mermaid-tag ~ .token.content {
+  background-color: rgba(236, 201, 75, 0.05);
+  border-left: 2px solid #ecc94b;
+  padding-left: 8px;
+  display: block;
+  margin: 4px 0;
+}
+
+/* Enhance syntax highlighting for mermaid content */
+.token.mermaid-content {
+  display: block;
+  padding: 8px;
+  margin: 4px 0;
+  background-color: rgba(236, 201, 75, 0.1);
+  border-radius: 4px;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+/* Mermaid diagram keywords */
+.token.mermaid-content .token.keyword {
+  color: #ecc94b;
+}
+
+/* Mermaid diagram strings */
+.token.mermaid-content .token.string {
+  color: #9ae6b4;
+}
+
+/* Mermaid diagram functions/classes */
+.token.mermaid-content .token.function,
+.token.mermaid-content .token.class-name {
+  color: #90cdf4;
+}
+
+/* Punctuation (<, >, /) in tags */
+.token.tag .token.punctuation {
+  opacity: 0.7;
+}
+
+/* Improve the look of editor */
+.npm__react-simple-code-editor__textarea {
+  transition: background-color 0.2s;
+}
+
+.npm__react-simple-code-editor__textarea:focus {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Make sure the editor text is visible during typing */
+.npm__react-simple-code-editor__textarea {
+  caret-color: white;
+}
+
+/* Add some visual clues for different tag boundaries */
+.token.type-tag ~ .token.content::after,
+.token.write-tag ~ .token.content::after,
+.token.listen-tag ~ .token.content::after,
+.token.mermaid-tag ~ .token.content::after {
+  content: ''; 
+  display: block;
+  height: 2px;
+  margin-top: 4px;
+  border-radius: 4px;
+}
+
+.token.type-tag ~ .token.content::after {
+  background: linear-gradient(to right, #4fd1c5, transparent);
+}
+
+.token.write-tag ~ .token.content::after {
+  background: linear-gradient(to right, #f56565, transparent);
+}
+
+.token.listen-tag ~ .token.content::after {
+  background: linear-gradient(to right, #4299e1, transparent);
+}
+
+.token.mermaid-tag ~ .token.content::after {
+  background: linear-gradient(to right, #ecc94b, transparent);
+}

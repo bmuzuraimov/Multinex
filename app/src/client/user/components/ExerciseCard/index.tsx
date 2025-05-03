@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '../../../shadcn/components/ui/button';
 import { Input } from '../../../shadcn/components/ui/input';
 import { Badge } from '../../../shadcn/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../../shadcn/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '../../../shadcn/components/ui/tooltip';
 import { cn } from '../../../../shared/utils';
 
 import { MoreVertical, Edit, Share, Trash2, Crop, CheckCircle, Tag } from 'lucide-react';
@@ -201,21 +201,23 @@ const ExerciseCard: React.FC<any> = memo(({ exercise, user }) => {
                   </Badge>
                 ))}
                 {topicTerms.length > 3 && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge
-                        variant='outline'
-                        className='font-satoshi text-xs bg-gray-50 text-primary-700 border-primary-100 px-2 py-0.5 rounded-full cursor-pointer'
-                      >
-                        +{topicTerms.length - 3}
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <div className='max-w-[200px]'>
-                        <p className='text-xs font-satoshi'>{topicTerms.slice(3).join(', ')}</p>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge
+                          variant='outline'
+                          className='font-satoshi text-xs bg-gray-50 text-primary-700 border-primary-100 px-2 py-0.5 rounded-full cursor-pointer'
+                        >
+                          +{topicTerms.length - 3}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <div className='max-w-[200px]'>
+                          <p className='text-xs font-satoshi'>{topicTerms.slice(3).join(', ')}</p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
             ) : (
@@ -225,14 +227,16 @@ const ExerciseCard: React.FC<any> = memo(({ exercise, user }) => {
         </CardContent>
 
         {exercise.truncated && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className='absolute bottom-3 left-3'>
-                <Crop className='h-5 w-5 text-warning' />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>The length of the uploaded file was too long and has been cropped.</TooltipContent>
-          </Tooltip>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className='absolute bottom-3 left-3'>
+                  <Crop className='h-5 w-5 text-warning' />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>The length of the uploaded file was too long and has been cropped.</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </div>
     </>

@@ -2,7 +2,7 @@ import { FREE_CREDITS } from './pricing';
 import { ADMIN_EMAIL } from './pricing';
 
 export const PUBLIC_NAVBAR = [
-  { name: 'Courses', href: '/public-courses' },
+  { name: 'Free Courses', href: '/public-courses' },
   // { name: 'For Students', href: '/solutions/students' },
   { name: 'For Teachers', href: '/solutions/teachers' },
   { name: 'Pricing', href: '/pricing' },
@@ -11,6 +11,7 @@ export const PUBLIC_NAVBAR = [
 
 export const AUTH_NAVBAR = [
   { name: 'Portal', href: '/portal' },
+  { name: 'Free Courses', href: '/public-courses' },
   { name: 'Pricing', href: '/pricing' },
   { name: 'Feedback', href: '/feedback' },
 ] as const;

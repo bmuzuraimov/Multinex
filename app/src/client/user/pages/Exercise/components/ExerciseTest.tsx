@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { type Option } from 'wasp/entities';
-import { useExerciseContext } from '../../../../../contexts/ExerciseContext';
-import { cn } from '../../../../../../shared/utils';
+import { useExerciseContext } from '../../../../contexts/ExerciseContext';
+import { cn } from '../../../../../shared/utils';
 
 const ExerciseTest: React.FC<{
   title: string;

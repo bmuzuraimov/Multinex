@@ -11,11 +11,12 @@ interface ExerciseContextType {
   essay_list: TextList;
   formatted_essay: { mode: SensoryMode; text: string[] }[];
   has_quiz: boolean;
+  lesson_text?: string;
 
   // Exercise state and mode
-  mode: 'typing' | 'submitted' | 'test';
+  mode: 'typing' | 'submitted' | 'test' | 'editing';
   highlighted_nodes: number[];
-  set_mode: React.Dispatch<React.SetStateAction<'typing' | 'submitted' | 'test'>>;
+  set_mode: React.Dispatch<React.SetStateAction<'typing' | 'submitted' | 'test' | 'editing'>>;
   set_highlighted_nodes: React.Dispatch<React.SetStateAction<number[]>>;
 
   // Audio playback controls
@@ -27,6 +28,13 @@ interface ExerciseContextType {
 
   // Exercise completion
   submit_exercise: () => Promise<void>;
+  
+  // Course information
+  course_id?: string;
+  course_name?: string;
+
+  // Topic terms
+  topic_terms?: string[];
 }
 
 const EXERCISE_CONTEXT = createContext<ExerciseContextType | undefined>(undefined);

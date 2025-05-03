@@ -3,8 +3,17 @@ import { VerificationEmail } from './auth/VerificationEmail';
 import { PasswordResetEmail } from './auth/PasswordResetEmail';
 import { WelcomeEmail } from './auth/WelcomeEmail';
 
-export const verificationEmailContent = ({ verificationLink }: { verificationLink: string }) => 
-  EmailTemplateFactory.createTemplate(VerificationEmail, { verificationLink });
+export const verificationEmailContent = ({ 
+  verificationLink, 
+  user
+}: { 
+  verificationLink: string; 
+  user?: { username?: string; email?: string; } 
+}) => 
+  EmailTemplateFactory.createTemplate(VerificationEmail, { 
+    verification_link: verificationLink,
+    user_name: user?.username || user?.email?.split('@')[0] || 'there'
+  });
 
 export const passwordResetEmailContent = ({ passwordResetLink }: { passwordResetLink: string }) => 
   EmailTemplateFactory.createTemplate(PasswordResetEmail, { passwordResetLink });

@@ -284,9 +284,9 @@ export const generateBaseLayout = (content: string, title: string) => `
                     <td>
                       <p style="margin: 0 0 ${SPACING.SM} 0;">Type, write, listen. In one AI-powered workspace.</p>
                       <p style="margin: 0 0 ${SPACING.SM} 0;">
-                        <a href="https://multinex.app/blog" style="${convertStyleToString(styles.footer_link)}">Blog</a> • 
-                        <a href="https://multinex.app/help" style="${convertStyleToString(styles.footer_link)}">Help Center</a> • 
-                        <a href="https://multinex.app/contact" style="${convertStyleToString(styles.footer_link)}">Contact Us</a>
+                        <a href="https://multinex.app/public-courses" style="${convertStyleToString(styles.footer_link)}">Community Courses</a> • 
+                        <a href="https://multinex.app/pricing" style="${convertStyleToString(styles.footer_link)}">Pricing</a> • 
+                        <a href="https://multinex.app/about" style="${convertStyleToString(styles.footer_link)}">About</a>
                       </p>
                       <p style="margin: ${SPACING.SM} 0 0 0; color: ${COLORS.TEXT.LIGHT};">
                         © ${new Date().getFullYear()} Multinex. All rights reserved.

@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useAction, getExercise, updateExercise } from 'wasp/client/operations';
-import ExerciseResult from './components/ExerciseInterface/ExerciseResult';
-import ExerciseSidebar from './components/ExerciseInterface/ExerciseSidebar';
-import ExerciseTest from './components/ExerciseInterface/ExerciseTest';
+import ExerciseResult from './components/ExerciseResult';
+import ExerciseSidebar from './components/ExerciseSidebar';
+import ExerciseTest from './components/ExerciseTest';
 import ExerciseInterface from './components/ExerciseInterface';
+import ExerciseEditor from './components/ExerciseEditor';
 import { ExerciseProvider } from '../../../contexts/ExerciseContext';
 import useExercise from '../../../hooks/useExercise';
 import CardSkeleton from '../../../components/CardSkeleton';
@@ -30,7 +31,7 @@ const Exercise: React.FC = React.memo(() => {
   const { data: user } = useAuth();
   const navigate = useNavigate();
   const [text_size, setTextSize] = useLocalStorage('text_size', 'xl');
-  const [exercise_mode, setExerciseMode] = useState<'typing' | 'submitted' | 'test'>('typing');
+  const [exercise_mode, setExerciseMode] = useState<'typing' | 'submitted' | 'test' | 'editing'>('typing');
   const [highlighted_nodes, setHighlightedNodes] = useState<number[]>([0]);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const {
@@ -52,7 +53,6 @@ const Exercise: React.FC = React.memo(() => {
       return () => clearTimeout(redirectTimer);
     }
   }, [user, navigate]);
-
   const exercise = exerciseResponse?.success ? (exerciseResponse.data as any) : null;
   const { essay, essay_list, essay_char_count, essay_word_count, has_quiz } = useExercise(
     exerciseId!,
@@ -104,6 +104,11 @@ const Exercise: React.FC = React.memo(() => {
     setExerciseMode('submitted');
   }, [exerciseId]);
 
+  // Extract course information if available
+  const courseId = exercise?.topic?.course?.id;
+  const courseName = exercise?.topic?.course?.name;
+  const topicTerms = exercise?.modules?.topic_terms;
+
   // Memoize the context value to prevent unnecessary recreations
   const context_value = useMemo(
     () => ({
@@ -121,6 +126,10 @@ const Exercise: React.FC = React.memo(() => {
       text_size: text_size,
       set_text_size: setTextSize,
       submit_exercise: handleExerciseSubmission,
+      lesson_text: exercise?.lesson_text,
+      course_id: courseId,
+      course_name: courseName,
+      topic_terms: topicTerms,
     }),
     [
       essay,
@@ -134,6 +143,10 @@ const Exercise: React.FC = React.memo(() => {
       highlighted_nodes,
       text_size,
       handleExerciseSubmission,
+      exercise?.lesson_text,
+      courseId,
+      courseName,
+      topicTerms,
     ]
   );
 
@@ -165,6 +178,12 @@ const Exercise: React.FC = React.memo(() => {
         {exercise_mode === 'submitted' && <ExerciseResult exerciseId={exerciseId!} />}
         {exercise_mode === 'test' && (
           <ExerciseTest title={exercise?.name ?? ''} questions={exercise?.questions ?? []} />
+        )}
+        {exercise_mode === 'editing' && (
+          <div className='relative flex flex-row h-full'>
+            <ExerciseSidebar />
+            <ExerciseEditor exerciseId={exerciseId!} />
+          </div>
         )}
       </div>
     </ExerciseProvider>

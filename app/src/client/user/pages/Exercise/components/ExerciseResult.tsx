@@ -3,8 +3,8 @@ import Confetti from 'react-confetti';
 import { useAction, updateExercise } from 'wasp/client/operations';
 import { Tooltip } from 'react-tooltip';
 import { HiOutlineInformationCircle } from 'react-icons/hi';
-import { useExerciseContext } from '../../../../../contexts/ExerciseContext';
-import { cn } from '../../../../../../shared/utils';
+import { useExerciseContext } from '../../../../contexts/ExerciseContext';
+import { cn } from '../../../../../shared/utils';
 interface ExerciseResultProps {
   exerciseId: string;
 }
