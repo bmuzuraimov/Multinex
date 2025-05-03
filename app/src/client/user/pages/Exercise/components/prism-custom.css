@@ -6,6 +6,32 @@
   color: #abb2bf;
 }
 
+/* Make sure selection is visible with a nicer color */
+::selection {
+  background-color: rgba(66, 153, 225, 0.3) !important;
+  color: white !important;
+}
+
+/* Allow cursor to appear as text-selection cursor for the pre element too */
+.npm__react-simple-code-editor__container pre {
+  cursor: text !important;
+}
+
+/* Fix any potential issues with text selection in the editor */
+.editor-container,
+.npm__react-simple-code-editor__textarea,
+.npm__react-simple-code-editor__container pre {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+}
+
+/* Make text cursor visible */
+.npm__react-simple-code-editor__textarea {
+  caret-color: white;
+}
+
 /* Tag styling - common properties */
 .token.tag {
   font-weight: 500;
@@ -111,11 +137,6 @@
 .npm__react-simple-code-editor__textarea:focus {
   outline: none;
   background-color: rgba(255, 255, 255, 0.02);
-}
-
-/* Make sure the editor text is visible during typing */
-.npm__react-simple-code-editor__textarea {
-  caret-color: white;
 }
 
 /* Add some visual clues for different tag boundaries */

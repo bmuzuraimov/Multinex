@@ -182,7 +182,7 @@ const Exercise: React.FC = React.memo(() => {
         {exercise_mode === 'editing' && (
           <div className='relative flex flex-row h-full'>
             <ExerciseSidebar />
-            <ExerciseEditor exerciseId={exerciseId!} />
+            <ExerciseEditor exerciseId={exerciseId!} isOwner={user?.id === exercise?.user_id} />
           </div>
         )}
       </div>

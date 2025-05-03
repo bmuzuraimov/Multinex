@@ -54,8 +54,9 @@ const HeroSection: React.FC = () => {
             </div>
 
             {/* CTA Buttons */}
-            {!user && !isLoading && (
-              <div className='flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pointer-events-auto'>
+
+            <div className='flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pointer-events-auto'>
+              {!user && !isLoading ? (
                 <Button
                   asChild
                   size='lg'
@@ -63,22 +64,29 @@ const HeroSection: React.FC = () => {
                 >
                   <Link to='/signup'>Sign up for more free credits</Link>
                 </Button>
-
+              ) : (
                 <Button
                   asChild
-                  variant='secondary'
                   size='lg'
-                  className='rounded-full bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 text-white shadow-lg hover:shadow-secondary-500/25'
+                  className='rounded-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white shadow-lg hover:shadow-primary-500/25'
                 >
-                  <Link to='/demo' className='group'>
-                    Try demo
-                    <span aria-hidden='true' className='ml-2 transition-transform group-hover:translate-x-1'>
-                      →
-                    </span>
-                  </Link>
+                  <Link to='/portal'>Go to portal</Link>
                 </Button>
-              </div>
-            )}
+              )}
+              <Button
+                asChild
+                variant='secondary'
+                size='lg'
+                className='rounded-full bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 text-white shadow-lg hover:shadow-secondary-500/25'
+              >
+                <Link to='/demo' className='group'>
+                  Try demo
+                  <span aria-hidden='true' className='ml-2 transition-transform group-hover:translate-x-1'>
+                    →
+                  </span>
+                </Link>
+              </Button>
+            </div>
 
             <Separator className='my-8' />
 

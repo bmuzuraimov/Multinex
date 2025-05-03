@@ -15,7 +15,11 @@ const CreateDemo: React.FC = React.memo(() => {
   const [mode, set_mode] = useState<'typing' | 'submitted' | 'test' | 'editing'>('typing');
   const [highlighted_nodes, set_highlighted_nodes] = useState<number[]>([0]);
 
-  const { data: response, isLoading, error } = useQuery(getDemoExercise, {
+  const {
+    data: response,
+    isLoading,
+    error,
+  } = useQuery(getDemoExercise, {
     user_agent: window.navigator.userAgent,
     browser_language: window.navigator.language,
     screen_resolution: `${window.screen.width}x${window.screen.height}`,
@@ -23,10 +27,10 @@ const CreateDemo: React.FC = React.memo(() => {
   });
 
   const demo_exercise = response?.data;
-  
+
   // Extract course information if available from the demo exercise
-  const courseId = demo_exercise?.exercise?.topic?.course?.id;
-  const courseName = demo_exercise?.exercise?.topic?.course?.name;
+  const courseId = demo_exercise?.exercise?.course?.id;
+  const courseName = demo_exercise?.exercise?.course?.name;
 
   const { essay, essay_list, essay_word_count, essay_char_count, has_quiz } = useExercise(
     demo_exercise?.exercise?.id || '',
@@ -36,7 +40,7 @@ const CreateDemo: React.FC = React.memo(() => {
       ...q,
       exercise_id: q.exercise_id,
       created_at: q.created_at,
-      options: q.options || []
+      options: q.options || [],
     })) || [],
     mode,
     text_size,
@@ -82,6 +86,7 @@ const CreateDemo: React.FC = React.memo(() => {
     lesson_text: demo_exercise?.exercise?.lesson_text || '',
     course_id: courseId,
     course_name: courseName,
+    topic_terms: demo_exercise?.exercise?.modules?.topic_terms || [],
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -97,11 +102,16 @@ const CreateDemo: React.FC = React.memo(() => {
           </div>
         )}
         {mode === 'submitted' && <ExerciseResult exerciseId={demo_exercise?.exercise?.id || ''} />}
-        {mode === 'test' && <ExerciseTest title={demo_exercise?.exercise?.name || ''} questions={demo_exercise?.exercise?.questions || []} />}
+        {mode === 'test' && (
+          <ExerciseTest
+            title={demo_exercise?.exercise?.name || ''}
+            questions={demo_exercise?.exercise?.questions || []}
+          />
+        )}
         {mode === 'editing' && (
           <div className='relative flex flex-row h-full'>
             <ExerciseSidebar />
-            <ExerciseEditor exerciseId={demo_exercise?.exercise?.id || ''} />
+            <ExerciseEditor exerciseId={demo_exercise?.exercise?.id || ''} isOwner={false} />
           </div>
         )}
       </div>

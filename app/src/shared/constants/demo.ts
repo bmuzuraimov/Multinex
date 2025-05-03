@@ -1,3 +1,4 @@
+export const DEMO_EXERCISE_ID = 'e7754fd5-5acb-420c-a52e-99e617e64ed4';
 export const DEMO_EXERCISE = {
     "id": "welcome-exercise-1e1bdb1a-2118-4c7f-9989-69112cf0490e",
     "status": "FINISHED",

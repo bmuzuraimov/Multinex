@@ -80,7 +80,7 @@ const customMarkdownLanguage = {
   }
 };
 
-const ExerciseEditor: React.FC<{ exerciseId: string }> = ({ exerciseId }) => {
+const ExerciseEditor: React.FC<{ exerciseId: string, isOwner: boolean }> = ({ exerciseId, isOwner }) => {
   const { lesson_text, set_mode } = useExerciseContext() || {};
   const [editableText, setEditableText] = useState(lesson_text || '');
   const [isSaving, setIsSaving] = useState(false);
@@ -97,6 +97,11 @@ const ExerciseEditor: React.FC<{ exerciseId: string }> = ({ exerciseId }) => {
   const handleSave = async () => {
     if (!editableText.trim()) {
       toast.error('Lesson text cannot be empty');
+      return;
+    }
+
+    if (!isOwner) {
+      toast.error('You do not have permission to edit this exercise');
       return;
     }
 
@@ -128,6 +133,11 @@ const ExerciseEditor: React.FC<{ exerciseId: string }> = ({ exerciseId }) => {
 
   // Helper to insert sensory mode tags
   const insertTag = (tag: 'type' | 'write' | 'listen' | 'mermaid') => {
+    if (!isOwner) {
+      toast.error('You do not have permission to edit this exercise');
+      return;
+    }
+    
     const textarea = document.querySelector('.npm__react-simple-code-editor__textarea') as HTMLTextAreaElement;
     if (!textarea) return;
     
@@ -165,66 +175,72 @@ const ExerciseEditor: React.FC<{ exerciseId: string }> = ({ exerciseId }) => {
     <div className="w-full h-[calc(100vh-64px)] p-6 flex flex-col overflow-hidden">
       <div className="flex flex-col gap-4 mb-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-primary-900">Edit Exercise Content</h2>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={handleCancel}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleSave}
-              disabled={isSaving}
-            >
-              {isSaving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
+          <h2 className="text-xl font-semibold text-primary-900">
+            {isOwner ? 'Edit Exercise Content' : 'View Exercise Content'}
+          </h2>
+          {isOwner && (
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleCancel}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          )}
         </div>
         
-        <div className="flex flex-wrap items-center gap-4 p-3 bg-gray-50 rounded-md">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Insert:</span>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => insertTag('type')}
-              className="bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-700"
-            >
-              &lt;type&gt;
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => insertTag('write')}
-              className="bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-700"
-            >
-              &lt;write&gt;
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => insertTag('listen')}
-              className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
-            >
-              &lt;listen&gt;
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => insertTag('mermaid')}
-              className="bg-yellow-50 hover:bg-yellow-100 border-yellow-200 text-yellow-700"
-            >
-              &lt;mermaid&gt;
-            </Button>
+        {isOwner && (
+          <div className="flex flex-wrap items-center gap-4 p-3 bg-gray-50 rounded-md">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Insert:</span>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => insertTag('type')}
+                className="bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-700"
+              >
+                &lt;type&gt;
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => insertTag('write')}
+                className="bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-700"
+              >
+                &lt;write&gt;
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => insertTag('listen')}
+                className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
+              >
+                &lt;listen&gt;
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => insertTag('mermaid')}
+                className="bg-yellow-50 hover:bg-yellow-100 border-yellow-200 text-yellow-700"
+              >
+                &lt;mermaid&gt;
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col border rounded-md shadow-md">
         <Editor
           value={editableText}
-          onValueChange={setEditableText}
+          onValueChange={isOwner ? setEditableText : () => {}}
           highlight={code => highlight(code, customMarkdownLanguage, 'markdown')}
           padding={16}
           style={{
@@ -236,10 +252,11 @@ const ExerciseEditor: React.FC<{ exerciseId: string }> = ({ exerciseId }) => {
             backgroundColor: '#282c34',
             borderRadius: '0.375rem',
             color: '#abb2bf',
+            cursor: 'text',
           }}
           className="flex-1 min-h-0 w-full overflow-auto outline-none focus:ring-0 focus:border-primary-300 editor-container"
           textareaClassName="outline-none focus:ring-0 focus:border-primary-300 w-full h-full resize-none"
-          onKeyDown={(e) => {
+          onKeyDown={isOwner ? (e) => {
             // Ensure Enter key is processed normally
             if (e.key === 'Enter') {
               const textarea = e.target as HTMLTextAreaElement;
@@ -261,7 +278,8 @@ const ExerciseEditor: React.FC<{ exerciseId: string }> = ({ exerciseId }) => {
               
               e.preventDefault();
             }
-          }}
+          } : undefined}
+          readOnly={!isOwner}
         />
       </div>
       
@@ -282,6 +300,12 @@ const ExerciseEditor: React.FC<{ exerciseId: string }> = ({ exerciseId }) => {
           <span>&lt;mermaid&gt;</span>
         </div>
       </div>
+      
+      {!isOwner && (
+        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-sm">
+          You are viewing this exercise in read-only mode because you are not the owner. Only the exercise owner can edit this content.
+        </div>
+      )}
     </div>
   );
 };
