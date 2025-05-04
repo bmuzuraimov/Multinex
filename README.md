@@ -1,7 +1,9 @@
-# Multinex
+<p align="center">
+  <img src="https://multinex.app/public-banner.png" alt="Multinex Logo">
+</p>
 
 <p align="center">
-  <img src="https://multinex.app/public-banner.png" alt="Multinex Logo" width="500">
+Multinex is a multi-channel learning platform. It allows you to create engaging exercises with &lt;type&gt;&lt;/type&gt;, &lt;listen&gt;&lt;/listen&gt;, &lt;mermaid&gt;&lt;/mermaid&gt;, &lt;write&gt;&lt;/write&gt; tags.
 </p>
 
 <p align="center">
@@ -9,6 +11,8 @@
   <a href="https://github.com/bmuzuraimov/Multinex/stargazers"><img src="https://img.shields.io/github/stars/bmuzuraimov/Multinex" alt="GitHub stars"></a>
   <a href="https://github.com/bmuzuraimov/Multinex/issues"><img src="https://img.shields.io/github/issues/bmuzuraimov/Multinex" alt="GitHub issues"></a>
   <a href="https://wasp-lang.dev/"><img src="https://img.shields.io/badge/Built%20With-Wasp%20v0.15.2-orange" alt="Built with Wasp"></a>
+  <a href="https://github.com/bmuzuraimov/Multinex/pulse"><img src="https://img.shields.io/github/commit-activity/m/bmuzuraimov/Multinex" alt="Commit Activity"></a>
+  <a href="https://multinex.app"><img src="https://img.shields.io/badge/Demo-Live-brightgreen" alt="Live Demo"></a>
 </p>
 
 ## 🎓 Educational Application

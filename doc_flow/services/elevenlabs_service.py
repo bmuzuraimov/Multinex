@@ -100,16 +100,13 @@ class ElevenLabsService:
         return timestamps
 
     async def generateAudio(self, exercise_id: str, text: str) -> Dict:
-        print('text', text)
         filtered_text = self.filterText(text)
-        print('filtered_text', filtered_text)
         try:
             response = self.elevenlabs_client.text_to_speech.convert_with_timestamps(
                 voice_id="XrExE9yKIg1WjnnlVkGX",
                 output_format="mp3_44100_64",
                 text=filtered_text,
                 model_id="eleven_multilingual_v2",
-                # model_id="eleven_multilingual_v2",
             )
         except BadRequestError as e:
             raise HTTPException(
