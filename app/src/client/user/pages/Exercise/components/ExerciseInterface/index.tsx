@@ -135,7 +135,7 @@ const ExerciseInterface: React.FC = () => {
       ></div>
       <div className='relative flex-1 w-5/6 mx-auto leading-10 h-full pb-12 pt-8 scrollbar-hide'>
         {essay_list.getCursor()?.id === 0 && (
-          <div className='absolute top-6 left-0 flex flex-row items-center space-x-2 z-modal transform -translate-x-[105%] bg-white dark:bg-gray-800 p-1 rounded-lg animate-pulse'>
+          <div className='absolute top-6 left-0 flex flex-row items-center space-x-2 z-tooltip transform -translate-x-[105%] bg-white dark:bg-gray-800 p-1 rounded-lg animate-pulse'>
             <BsKeyboard className='w-5 h-5' />
             <span>Start typing</span>
             <BsArrowRight className='w-5 h-5' />

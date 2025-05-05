@@ -4,6 +4,7 @@ import { HiOutlineBookOpen, HiOutlineAcademicCap, HiOutlinePlusCircle, HiOutline
 import { useAuth } from 'wasp/client/auth';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+import { COURSE_IMAGES } from '../../../../shared/constants';
 
 // Import shadcn components
 import {
@@ -81,10 +82,23 @@ const PublicCourseCard = memo(({ course, onEnroll }: { course: Course; onEnroll:
   return (
     <Card
       className={cn(
-        'group transition-all duration-300 hover:shadow-lg',
+        'group transition-all duration-300 hover:shadow-lg relative overflow-hidden',
         isOwner ? 'border-primary-500' : 'border-primary-100'
       )}
     >
+      <Link to={`/course/${course.id}`} className='block no-underline text-inherit'>
+      <div
+          className='relative h-52 w-full bg-cover bg-center transition-transform duration-300 group-hover:scale-105'
+          style={{ 
+            backgroundImage: course.image ? 
+              `url(${course.image})` : 
+              `url(${COURSE_IMAGES[Math.floor(Math.random() * COURSE_IMAGES.length)]})` 
+          }}
+        >
+          <div className='absolute inset-0 bg-gradient-to-t from-primary-950/60 to-transparent' />
+        </div>
+      </Link>
+
       <CardHeader className='space-y-2'>
         <div className='flex justify-between items-start'>
           <Link to={`/course/${course.id}`} className='block no-underline text-inherit'>

@@ -65,7 +65,6 @@ This format ensures consistency across all endpoints and makes it easier for cli
 ## Dependencies
 Major dependencies include:
 - FastAPI (0.115.6)
-- PyMuPDF (1.25.1)
 - OpenAI (1.57.4)
 - SQLAlchemy (2.0.37)
 - Boto3 (1.36.8)

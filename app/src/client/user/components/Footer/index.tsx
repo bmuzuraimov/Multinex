@@ -3,14 +3,13 @@ import { Separator } from '../../../shadcn/components/ui/separator';
 import { Button } from '../../../shadcn/components/ui/button';
 import { Card, CardContent } from '../../../shadcn/components/ui/card';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '../../../shadcn/components/ui/hover-card';
-import { cn } from '../../../../shared/utils';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   const footerLinks = {
     product: [
-      { name: 'Features', href: '#features' },
+      { name: 'Features', href: 'https://multinex.app/#features' },
       { name: 'Pricing', href: '#pricing' },
       { name: 'Demo', href: '/demo' },
       { name: 'Roadmap', href: '#roadmap' },

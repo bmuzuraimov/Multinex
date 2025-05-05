@@ -28,7 +28,6 @@ import { FiPlus } from 'react-icons/fi';
 import { RiDeleteBin4Line } from 'react-icons/ri';
 
 // Components
-import UserTour from '../../../components/UserTour';
 import ExerciseCard from '../../components/ExerciseCard';
 import ExerciseForm from '../../components/ExerciseForm';
 
@@ -235,18 +234,18 @@ const Course = () => {
           {/* Topics Section */}
           <ScrollArea className='h-full'>
             <div className='space-y-8'>
-              {course?.data?.topics?.map((topic) => (
+              {course?.data?.topics?.map((topic, index) => (
                 <TaskSection 
                   key={topic.id} 
                   topic={topic} 
                   refetchCourse={refetchCourse} 
-                  isOwner={isOwner} 
+                  isOwner={isOwner}
+                  isFirst={index === 0}
                 />
               ))}
             </div>
           </ScrollArea>
         </div>
-        {user && <UserTour user_id={user.id} />}
       </div>
     </TooltipProvider>
   );
@@ -272,7 +271,8 @@ const TaskSection: React.FC<{
   };
   refetchCourse: () => void;
   isOwner: boolean;
-}> = React.memo(({ topic, refetchCourse, isOwner }) => {
+  isFirst: boolean;
+}> = React.memo(({ topic, refetchCourse, isOwner, isFirst }) => {
   const [topic_name, setTopicNameState] = useState(topic.name);
   const [topic_length, setTopicLengthState] = useState(topic.length);
   const [topic_level, setTopicLevelState] = useState(topic.level);
@@ -326,8 +326,7 @@ const TaskSection: React.FC<{
   }, [topic]);
 
   return (
-    <div className='tour-step-3 bg-white rounded-2xl shadow-lg hover:shadow-xl p-12 transition-all duration-300 border border-primary-100'>
-      {user && <UserTour user_id={user.id} />}
+    <div className={cn(isFirst ? 'tour-step-3' : '', 'bg-white rounded-2xl shadow-lg hover:shadow-xl p-12 transition-all duration-300 border border-primary-100')}>
       <div className='flex items-center mb-12 group relative'>
         {isOwner ? (
           <input
@@ -356,7 +355,7 @@ const TaskSection: React.FC<{
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8'>
         {isOwner && <ExerciseForm topic_id={topic.id} demo={false} />}
         {topic.exercises?.map((exercise, idx) => (
-          <ExerciseCard key={exercise.id} index={idx} exercise={exercise as any} user={user} />
+          <ExerciseCard key={exercise.id} index={idx} exercise={exercise as any} user={user} isFirst={isFirst && idx === 0} />
         ))}
       </div>
     </div>

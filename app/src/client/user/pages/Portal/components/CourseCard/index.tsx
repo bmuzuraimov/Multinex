@@ -50,10 +50,12 @@ const CourseCard = memo(({ course }: { course: any }) => {
     <Card className='group relative overflow-hidden transition-all duration-300 hover:shadow-lg'>
       <Link to={`/course/${course.id}` as any}>
         <div
-          className={cn(
-            'relative h-52 w-full bg-cover bg-center transition-transform duration-300 group-hover:scale-105',
-            course.image || COURSE_IMAGES[0]
-          )}
+          className='relative h-52 w-full bg-cover bg-center transition-transform duration-300 group-hover:scale-105'
+          style={{ 
+            backgroundImage: course.image ? 
+              `url(${course.image})` : 
+              `url(${COURSE_IMAGES[Math.floor(Math.random() * COURSE_IMAGES.length)]})` 
+          }}
         >
           <div className='absolute inset-0 bg-gradient-to-t from-primary-950/60 to-transparent' />
         </div>

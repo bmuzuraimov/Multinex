@@ -4,6 +4,7 @@ import { logout } from 'wasp/client/auth';
 import { MdOutlineSpaceDashboard } from 'react-icons/md';
 import { cn } from '../../../../shared/utils';
 import { FcFeedback } from 'react-icons/fc';
+import TourResetButton from '../../../components/TourResetButton';
 
 export const UserMenuItems = ({ user, setMobileMenuOpen }: { user?: Partial<User>; setMobileMenuOpen?: any }) => {
   const current_path = window.location.pathname;
@@ -58,6 +59,9 @@ export const UserMenuItems = ({ user, setMobileMenuOpen }: { user?: Partial<User
             </svg>
             Account Settings
           </Link>
+        </li>
+        <li>
+          <TourResetButton tooltipText='Restart Tour' showTooltip={true}/>
         </li>
       </ul>
       <button

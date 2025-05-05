@@ -1,3 +1,4 @@
+import React from 'react';
 import { Step } from 'react-joyride';
 
 export const TOUR_STEPS: Step[] = [
@@ -15,38 +16,73 @@ export const TOUR_STEPS: Step[] = [
       placement: 'center',
       disableOverlay: false,
       disableBeacon: true,
+      isFixed: true,
     },
     {
       target: '.tour-step-1',
-      content: "Here are your courses! We've created a demo course for you to get started. Click 'Next' to proceed.",
-      spotlightClicks: true,
+      content: (
+        <div className='font-montserrat'>
+          <h3 className='text-base font-bold mb-2'>Your Courses</h3>
+          <p>This is your learning portal! We've created a demo course to help you get started.</p>
+          <p className='mt-2 text-sm text-secondary-600 dark:text-secondary-300'>Click "Next" to go to your demo course.</p>
+        </div>
+      ),
+      spotlightClicks: false,
       placement: 'bottom',
       disableBeacon: true,
+      placementBeacon: 'bottom',
+      floaterProps: {
+        hideArrow: false,
+        disableAnimation: false,
+      },
     },
     {
       target: '.tour-step-2',
-      content: 'Create sections here to organize your course content into chapters.',
-      spotlightClicks: true,
+      content: (
+        <div className='font-montserrat'>
+          <h3 className='text-base font-bold mb-2'>Course Sections</h3>
+          <p>Once you're in a course, you can create sections to organize your course content into chapters.</p>
+          <p className='mt-2 text-sm text-secondary-600 dark:text-secondary-300'>Each section can contain multiple exercises.</p>
+        </div>
+      ),
+      spotlightClicks: false,
       placement: 'bottom',
-      event: 'hover',
       disableBeacon: true,
+      placementBeacon: 'top-end',
     },
     {
       target: '.tour-step-3',
-      content: 'Each section can contain multiple exercises in a structured sequence.',
-      spotlightClicks: true,
-      placement: 'bottom',
-      event: 'hover',
+      content: (
+        <div className='font-montserrat'>
+          <h3 className='text-base font-bold mb-2'>Section Content</h3>
+          <p>Each section contains exercises arranged in a logical sequence.</p>
+          <p className='mt-2 text-sm text-secondary-600 dark:text-secondary-300'>You can add, edit, or rearrange exercises within a section.</p>
+        </div>
+      ),
+      spotlightClicks: false,
+      placement: 'top',
       disableBeacon: true,
+      placementBeacon: 'top-start',
     },
     {
-      target: '.shadow-md',
-      content: "Let's walk through the demo exercise to get you started!",
+      target: '.tour-exercise-card',
+      content: (
+        <div className='font-montserrat'>
+          <h3 className='text-base font-bold mb-2'>Exercises</h3>
+          <p>Each exercise card represents a learning activity for your students.</p>
+          <p className='mt-2 text-sm'>Let's check out our demo exercise to see how it works!</p>
+          <p className='mt-2 text-xs text-secondary-600 dark:text-secondary-300'>(Click on the exercise card to continue)</p>
+        </div>
+      ),
       spotlightClicks: true,
-      placement: 'auto',
+      placement: 'bottom',
       disableBeacon: true,
+      floaterProps: {
+        disableAnimation: false,
+        hideArrow: false,
+      },
     },
-  ];
+];
 
 export const JOYRIDE_STYLES = (color_mode: 'dark' | 'light') => ({
   options: {
@@ -56,6 +92,7 @@ export const JOYRIDE_STYLES = (color_mode: 'dark' | 'light') => ({
     width: 500,
     zIndex: 50,
     primaryColor: color_mode === 'dark' ? '#66efc9' : '#05c49b',
+    overlayColor: 'rgba(0, 0, 0, 0.5)',
   },
   buttonNext: {
     backgroundColor: color_mode === 'dark' ? '#66efc9' : '#05c49b',

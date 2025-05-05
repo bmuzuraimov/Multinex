@@ -9,7 +9,7 @@ const Footer: React.FC = () => {
 
   const footerLinks = {
     product: [
-      { name: 'Features', href: '#features' },
+      { name: 'Features', href: 'https://multinex.app/#features' },
       { name: 'Pricing', href: '#pricing' },
       { name: 'Demo', href: '/demo' },
       { name: 'Roadmap', href: '#roadmap' },

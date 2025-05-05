@@ -4,7 +4,6 @@ import ExerciseForm from '../../components/ExerciseForm';
 import CourseForm from './components/CourseForm';
 import ExerciseCard from '../../components/ExerciseCard';
 import DefaultLayout from '../../layouts/DefaultLayout';
-import UserTour from '../../../components/UserTour';
 import { useAuth } from 'wasp/client/auth';
 import CourseCard from './components/CourseCard';
 import { toast } from 'sonner';
@@ -30,78 +29,42 @@ import { cn } from '../../../../shared/utils';
 // Import icons
 import { FiBook, FiFileText, FiSearch } from 'react-icons/fi';
 
+// Constants
+const ITEMS_PER_PAGE = 12;
 
 const Portal = () => {
-  const [activeTab, setActiveTab] = useState('courses');
+  const { data: user } = useAuth();
   const [courseSearchTerm, setCourseSearchTerm] = useState('');
   const [exerciseSearchTerm, setExerciseSearchTerm] = useState('');
   const [debouncedCourseSearch, setDebouncedCourseSearch] = useState('');
   const [debouncedExerciseSearch, setDebouncedExerciseSearch] = useState('');
-  const [coursesCurrentPage, setCoursesCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState('courses');
   const [exercisesCurrentPage, setExercisesCurrentPage] = useState(1);
-  const [coursesTotalPages, setCoursesTotalPages] = useState(1);
+  const [coursesCurrentPage, setCoursesCurrentPage] = useState(1);
   const [exercisesTotalPages, setExercisesTotalPages] = useState(1);
-  const itemsPerPage = 8;
-  const { data: user } = useAuth();
-  
-  // Debounce course search term
+  const [coursesTotalPages, setCoursesTotalPages] = useState(1);
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  // Debounce search terms
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedCourseSearch(courseSearchTerm);
-    }, 300); // 300ms delay
-
+    }, 500);
     return () => clearTimeout(timer);
   }, [courseSearchTerm]);
 
-  // Debounce exercise search term  
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedExerciseSearch(exerciseSearchTerm);
-    }, 300); // 300ms delay
-
+    }, 500);
     return () => clearTimeout(timer);
   }, [exerciseSearchTerm]);
 
-  // Reset to page 1 when search terms change
-  useEffect(() => {
-    setCoursesCurrentPage(1);
-  }, [debouncedCourseSearch]);
-
-  useEffect(() => {
-    setExercisesCurrentPage(1);
-  }, [debouncedExerciseSearch]);
-
-  // Query for paginated and filtered courses
-  const {
-    data: coursesResponse,
-    error: courses_error,
-    isLoading: courses_loading,
-    refetch: refetchCourses,
-  } = useQuery(getAllCourses, {
-    where: debouncedCourseSearch ? {
-      name: {
-        contains: debouncedCourseSearch,
-        mode: 'insensitive'
-      }
-    } : {},
-    include: {
-      topics: {
-        include: {
-          exercises: true,
-        },
-      },
-    },
-    take: itemsPerPage,
-    skip: (coursesCurrentPage - 1) * itemsPerPage,
-    orderBy: {
-      created_at: 'asc',
-    },
-  });
-
-  // Query for courses count (for pagination)
+  // Get total count of courses
   const {
     data: coursesCountResponse,
     isLoading: coursesCountLoading,
+    error: coursesCountError,
   } = useQuery(getAllCourses, {
     where: debouncedCourseSearch ? {
       name: {
@@ -111,33 +74,30 @@ const Portal = () => {
     } : {},
   });
 
-  // Query for paginated and filtered exercises
+  // Get courses for the current page
   const {
-    data: exercisesResponse,
-    error: exercises_error,
-    isLoading: exercises_loading,
-    refetch: refetchExercises,
-  } = useQuery(getAllExercises, {
-    where: {
-      topic_id: null,
-      ...(debouncedExerciseSearch ? {
-        name: {
-          contains: debouncedExerciseSearch,
-          mode: 'insensitive'
-        }
-      } : {})
-    },
+    data: coursesResponse,
+    isLoading: courses_loading,
+    error: courses_error,
+  } = useQuery(getAllCourses, {
+    where: debouncedCourseSearch ? {
+      name: {
+        contains: debouncedCourseSearch,
+        mode: 'insensitive'
+      }
+    } : {},
+    take: ITEMS_PER_PAGE,
+    skip: (coursesCurrentPage - 1) * ITEMS_PER_PAGE,
     orderBy: {
       created_at: 'desc',
     },
-    take: itemsPerPage,
-    skip: (exercisesCurrentPage - 1) * itemsPerPage,
   });
 
-  // Query for exercises count (for pagination)
+  // Get total count of exercises
   const {
     data: exercisesCountResponse,
     isLoading: exercisesCountLoading,
+    error: exercisesCountError,
   } = useQuery(getAllExercises, {
     where: {
       topic_id: null,
@@ -149,73 +109,91 @@ const Portal = () => {
       } : {})
     },
   });
-  
-  // Calculate total pages for courses pagination
+
+  // Get exercises for the current page
+  const {
+    data: exercisesResponse,
+    isLoading: exercises_loading,
+    error: exercises_error,
+  } = useQuery(getAllExercises, {
+    where: {
+      topic_id: null,
+      ...(debouncedExerciseSearch ? {
+        name: {
+          contains: debouncedExerciseSearch,
+          mode: 'insensitive'
+        }
+      } : {})
+    },
+    take: ITEMS_PER_PAGE,
+    skip: (exercisesCurrentPage - 1) * ITEMS_PER_PAGE,
+    orderBy: {
+      created_at: 'desc',
+    },
+  });
+
+  // Extract data
+  const courses = coursesResponse?.data || [];
+  const exercises = exercisesResponse?.data || [];
+
+  // Calculate total pages
   useEffect(() => {
-    if (coursesCountResponse?.success && coursesCountResponse.data) {
-      setCoursesTotalPages(Math.ceil(coursesCountResponse.data.length / itemsPerPage));
-      if (coursesCurrentPage > Math.ceil(coursesCountResponse.data.length / itemsPerPage)) {
-        setCoursesCurrentPage(1);
-      }
+    if (coursesCountResponse?.data) {
+      setCoursesTotalPages(Math.max(1, Math.ceil(coursesCountResponse.data.length / ITEMS_PER_PAGE)));
     }
-  }, [coursesCountResponse?.data, coursesCurrentPage]);
+  }, [coursesCountResponse]);
 
-  // Calculate total pages for exercises pagination
   useEffect(() => {
-    if (exercisesCountResponse?.success && exercisesCountResponse.data) {
-      setExercisesTotalPages(Math.ceil(exercisesCountResponse.data.length / itemsPerPage));
-      if (exercisesCurrentPage > Math.ceil(exercisesCountResponse.data.length / itemsPerPage)) {
-        setExercisesCurrentPage(1);
-      }
+    if (exercisesCountResponse?.data) {
+      setExercisesTotalPages(Math.max(1, Math.ceil(exercisesCountResponse.data.length / ITEMS_PER_PAGE)));
     }
-  }, [exercisesCountResponse?.data, exercisesCurrentPage]);
+  }, [exercisesCountResponse]);
 
-  const courses = coursesResponse?.success ? (coursesResponse.data as any[]) : [];
-  const exercises = exercisesResponse?.success ? (exercisesResponse.data as any[]) : [];
+  // Add effect to set dataLoaded after data is fetched
+  useEffect(() => {
+    if (!exercises_loading && !exercisesCountLoading && exercises.length > 0) {
+      // Set a short timeout to ensure DOM elements are fully rendered
+      const timer = setTimeout(() => {
+        setDataLoaded(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [exercises_loading, exercisesCountLoading, exercises]);
 
-  if (courses_error) {
-    toast.error('Error loading courses');
-  }
-
-  if (exercises_error) {
-    toast.error('Error loading exercises');
-  }
-
-  // Pagination handlers for courses
+  // Handle pagination
   const handleCoursesPageChange = useCallback((page: number) => {
     setCoursesCurrentPage(page);
   }, []);
 
   const handleCoursesPrevious = useCallback(() => {
-    if (coursesCurrentPage > 1) {
-      setCoursesCurrentPage(prev => prev - 1);
-    }
-  }, [coursesCurrentPage]);
+    setCoursesCurrentPage((prev) => Math.max(1, prev - 1));
+  }, []);
 
   const handleCoursesNext = useCallback(() => {
-    if (coursesCurrentPage < coursesTotalPages) {
-      setCoursesCurrentPage(prev => prev + 1);
-    }
-  }, [coursesCurrentPage, coursesTotalPages]);
+    setCoursesCurrentPage((prev) => Math.min(coursesTotalPages, prev + 1));
+  }, [coursesTotalPages]);
 
-  // Pagination handlers for exercises
   const handleExercisesPageChange = useCallback((page: number) => {
     setExercisesCurrentPage(page);
   }, []);
 
   const handleExercisesPrevious = useCallback(() => {
-    if (exercisesCurrentPage > 1) {
-      setExercisesCurrentPage(prev => prev - 1);
-    }
-  }, [exercisesCurrentPage]);
+    setExercisesCurrentPage((prev) => Math.max(1, prev - 1));
+  }, []);
 
   const handleExercisesNext = useCallback(() => {
-    if (exercisesCurrentPage < exercisesTotalPages) {
-      setExercisesCurrentPage(prev => prev + 1);
-    }
-  }, [exercisesCurrentPage, exercisesTotalPages]);
+    setExercisesCurrentPage((prev) => Math.min(exercisesTotalPages, prev + 1));
+  }, [exercisesTotalPages]);
 
-  // Search handlers
+  // Handle errors if needed
+  if (courses_error) {
+    toast.error(`Error loading courses: ${courses_error.message}`);
+  }
+
+  if (exercises_error) {
+    toast.error(`Error loading exercises: ${exercises_error.message}`);
+  }
+
   const handleCourseSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setCourseSearchTerm(e.target.value);
   }, []);
@@ -226,8 +204,6 @@ const Portal = () => {
 
   return (
     <div className='min-h-screen bg-background'>
-      {user && <UserTour user_id={user.id} />}
-
       <div className='mx-auto max-w-7xl px-6 py-12'>
         <div className='flex items-center justify-between mb-8'>
           <div>
@@ -400,7 +376,7 @@ const Portal = () => {
 
                         {exercises?.map((exercise: any, index: number) => (
                           <Card key={exercise.id} className='overflow-hidden hover:shadow-md transition-all'>
-                            <ExerciseCard exercise={exercise} key={exercise.id} user={user} />
+                            <ExerciseCard exercise={exercise} key={exercise.id} user={user} isFirst={index === 0} />
                           </Card>
                         ))}
                         {exercises.length === 0 && debouncedExerciseSearch && (

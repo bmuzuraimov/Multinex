@@ -16,28 +16,31 @@ const TextContent: React.FC<TextContentProps> = ({ activeIndex, setSectionsRef }
   const section1Ref = useRef<HTMLElement>(null);
   const section2Ref = useRef<HTMLElement>(null);
 
-  // Responsive text content for different screen sizes
+  // Improved text content with cognitive science principles
   const textContent = {
     desktop: {
       text0:
-        "The formula for the area of a circle, A=πr², is fundamental in geometry. Here, r represents the radius of the circle, and π (approximately 3.14159) is a constant that relates the circle's circumference to its diameter.",
+        'When you write things down, you create stronger neural pathways in your brain. This activates multiple regions, including visual processing and fine motor skills. The physical act of writing engages your working memory and helps transfer information from short-term to long-term memory.',
       text1:
-        'This formula works because it integrates the radius into the calculation to define the space enclosed within a circle. For example, a circle with a radius of 3 cm would have an area of about 28.27 square centimeters. Understanding this allows for practical applications, like calculating the surface area of circular objects or spaces.',
+        'Typing allows you to process information quickly. While not as effective as handwriting for retention, typing helps you to keep your attention on the content.',
       text2:
-        'Interestingly, the concept of π has fascinated mathematicians for centuries, as it is an irrational number that continues infinitely without repeating patterns. Ancient civilizations, like the Egyptians and Babylonians, approximated π long before modern calculations refined its value.',
+        'Seeing and hearing information simultaneously activates multiple neural pathways, creating stronger memory traces. This dual-coding approach reduces cognitive load and enhances understanding by leveraging both your visual and auditory processing systems. When information enters through multiple senses, your brain forms more connections, making recall easier and learning more intuitive and natural.',
     },
     tablet: {
       text0:
-        'The formula A=πr² is fundamental in geometry. Here, r is the radius, and π (≈3.14159) relates circumference to diameter.',
+        'Writing by hand creates stronger memory connections by engaging motor skills and visual processing simultaneously.',
       text1:
-        "This formula integrates the radius to define the circle's area. A circle with radius 3 cm has area ≈28.27 cm². This helps calculate surface areas of circular objects.",
+        'Typing processes information efficiently using different cognitive pathways. While less effective than handwriting for memory formation, typing helps you to keep your attention on the content.',
       text2:
-        'π has fascinated mathematicians as an infinite, non-repeating number. Ancient Egyptians and Babylonians first approximated it.',
+        'Seeing and hearing information together activates multiple brain regions simultaneously. This reduces mental effort while strengthening memory formation. When your brain receives input through both visual and auditory channels, it builds stronger neural connections for easier recall later.',
     },
     mobile: {
-      text0: 'A=πr² is key in geometry. r is radius, π is ≈3.14159.',
-      text1: 'The formula finds circle areas. Example: 3cm radius = 28.27cm².',
-      text2: 'π is infinite and non-repeating. Known since ancient times.',
+      text0:
+        'Writing activates motor skills and visual processing together. This creates stronger memory traces and improved learning compared to passive reading or typing.',
+      text1:
+        'Typing is fast and efficient. Great for capturing your attention on the content.',
+      text2:
+        'Using both eyes and ears to learn reduces mental effort while improving memory. Multiple sensory inputs create stronger neural connections for better recall.',
     },
   };
 
@@ -167,8 +170,7 @@ const TextContent: React.FC<TextContentProps> = ({ activeIndex, setSectionsRef }
             <div className='group relative flex items-center gap-3 md:gap-4 lg:gap-6 px-4 md:px-6 lg:px-8 py-2 md:py-3 lg:py-4 rounded-xl md:rounded-2xl bg-white border-2 border-red-100 transition-all duration-200 hover:border-primary-300'>
               <span className='text-2xl md:text-3xl lg:text-4xl'>✍️</span>
               <div className='flex flex-col'>
-                <span className='font-satoshi font-bold text-lg md:text-xl lg:text-2xl text-danger'>Write down</span>
-                <span className='text-sm md:text-base lg:text-lg font-manrope text-gray-600'>Must memorize</span>
+                <span className='font-satoshi font-bold text-lg md:text-xl lg:text-2xl text-danger'>&lt;write&gt;Handwriting&lt;/write&gt;</span>
               </div>
             </div>
           </div>
@@ -180,13 +182,7 @@ const TextContent: React.FC<TextContentProps> = ({ activeIndex, setSectionsRef }
                 : 'bg-gray-50 border-2 border-gray-100'
             )}
           >
-            <p
-              className={cn(
-                'text-lg md:text-xl lg:text-2xl',
-                activeIndex === 0 ? 'font-dancing' : 'font-manrope',
-                'leading-relaxed text-danger min-h-[100px] md:min-h-[150px] lg:min-h-[200px]'
-              )}
-            >
+            <p className='text-lg md:text-xl lg:text-2xl font-manrope leading-relaxed text-danger min-h-[100px] md:min-h-[150px] lg:min-h-[200px]'>
               {activeIndex === 0
                 ? fullText0.split('').map((char, index) => (
                     <span
@@ -216,10 +212,7 @@ const TextContent: React.FC<TextContentProps> = ({ activeIndex, setSectionsRef }
             <div className='group relative flex items-center gap-3 md:gap-4 lg:gap-6 px-4 md:px-6 lg:px-8 py-2 md:py-3 lg:py-4 rounded-xl md:rounded-2xl bg-white border-2 border-primary-100 transition-all duration-200 hover:border-primary-300'>
               <span className='text-2xl md:text-3xl lg:text-4xl'>⌨️</span>
               <div className='flex flex-col'>
-                <span className='font-satoshi font-bold text-lg md:text-xl lg:text-2xl text-primary-600'>Type</span>
-                <span className='text-sm md:text-base lg:text-lg font-manrope text-gray-600'>
-                  Easy but not intuitive
-                </span>
+                <span className='font-satoshi font-bold text-lg md:text-xl lg:text-2xl text-primary-600'>&lt;type&gt;Typing&lt;/type&gt;</span>
               </div>
             </div>
           </div>
@@ -231,12 +224,7 @@ const TextContent: React.FC<TextContentProps> = ({ activeIndex, setSectionsRef }
                 : 'bg-gray-50 border-2 border-gray-100'
             )}
           >
-            <p
-              className={cn(
-                'text-lg md:text-xl lg:text-2xl font-manrope leading-relaxed text-primary-800 min-h-[100px] md:min-h-[150px] lg:min-h-[200px]',
-                activeIndex === 1 ? 'font-dancing' : 'font-manrope'
-              )}
-            >
+            <p className='text-lg md:text-xl lg:text-2xl font-manrope leading-relaxed text-primary-800 min-h-[100px] md:min-h-[150px] lg:min-h-[200px]'>
               {activeIndex === 1
                 ? fullText1.split('').map((char, index) => (
                     <span

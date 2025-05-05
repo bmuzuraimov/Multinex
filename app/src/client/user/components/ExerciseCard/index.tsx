@@ -59,7 +59,7 @@ const ShareDialog = memo(
   )
 );
 
-const ExerciseCard: React.FC<any> = memo(({ exercise, user }) => {
+const ExerciseCard: React.FC<any> = memo(({ exercise, user, isFirst }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
   const [emailsInput, setEmailsInput] = useState('');
@@ -121,7 +121,7 @@ const ExerciseCard: React.FC<any> = memo(({ exercise, user }) => {
         onShare={handleShare}
       />
 
-      <div className='relative bg-white rounded-lg border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 h-full'>
+      <div className={cn('relative bg-white rounded-lg border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 h-full', isFirst && 'tour-exercise-card')}>
         {/* Status indicator */}
         {exercise.completed && (
           <div className='absolute top-0 right-0 w-0 h-0 border-t-[50px] border-t-primary-500 border-l-[50px] border-l-transparent z-10'></div>

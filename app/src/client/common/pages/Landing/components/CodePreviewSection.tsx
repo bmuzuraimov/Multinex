@@ -71,14 +71,11 @@ const CodePreviewSection: React.FC = () => {
     <div className='relative w-full h-screen'>
       <div className='mx-auto max-w-6xl backdrop-blur supports-[backdrop-filter]:bg-background/75'>
         <CardHeader className='text-center'>
-          <CardTitle className='text-3xl font-bold'>
-            <span className='text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-600'>
+          <CardTitle className='text-center font-montserrat text-4xl md:text-5xl lg:text-title-xl font-bold'>
+            <span className='bg-gradient-to-r from-primary-900 via-primary-700 to-primary-900 bg-clip-text text-transparent'>
               Interface & Code Behind
             </span>
           </CardTitle>
-          <CardDescription className='text-lg'>
-            Slide to switch between the interactive interface and the code that powers it
-          </CardDescription>
         </CardHeader>
 
         <CardContent className='space-y-8'>

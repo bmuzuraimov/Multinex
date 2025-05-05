@@ -15,44 +15,27 @@ Multinex is a multi-channel learning platform. It allows you to create engaging 
   <a href="https://multinex.app"><img src="https://img.shields.io/badge/Demo-Live-brightgreen" alt="Live Demo"></a>
 </p>
 
-## 🎓 Educational Application
-
-Multinex is designed to enhance learning for university students through multi-modal channels, enabling efficient and intuitive mastery of educational content. It leverages neuroscience principles like Cognitive Load Theory, Dual Coding, and the Generation Effect to optimize knowledge acquisition.
-
-The interface supports interactive engagement with material across various topics, particularly in exercise-related subjects, as part of structured courses.
-
 ## ✨ Features
 
 ### Multi-Modal Learning
 
-Combines text, visuals, writing, and audio to reinforce concepts through active encoding, visual-spatial scaffolding, retrieval practice, and auditory priming.
+Uses different ways to learn - typing, seeing pictures, handwriting, and listening - to help you remember information better and understand it more deeply.
 
 ### Content Types
 
-- **Type**: Students type core concepts to engage working memory and attention, using clear, concise text to minimize cognitive load.
-- **Mermaid**: Visual flowcharts or diagrams (e.g., hierarchies, processes) provide dual coding via the visuospatial sketchpad, limited to 5–8 items for clarity.
-- **Write**: Retrieval-based exercises, such as fill-in-the-blank prompts, strengthen retention through synaptic plasticity, with scaffolds to support beginners.
-- **Listen**: Audio summaries with active prompts (e.g., questions) leverage the phonological loop and prosody to enhance engagement and prevent passive consumption.
+- **Type**: Students type important concepts to help them remember better and stay focused.
+- **Mermaid**: Visual diagrams and flowcharts help students understand relationships between ideas using both words and pictures.
+- **Write**: Fill-in-the-blank exercises help students recall information, with hints available for beginners.
+- **Listen**: Audio lessons with questions keep students engaged and help them learn through hearing.
 
-### Interactive Workflow
-
-Students type text, view Mermaid charts, listen to audio summaries, and write answers, ensuring varied and active interaction with material.
-
-### Neuroscience-Driven Design
-
-Built to reduce cognitive overload, combine verbal and visual inputs, and promote active recall for 10x faster learning compared to traditional methods.
-
-## 🎯 Purpose
-
-The application targets university students, helping them grasp complex topics efficiently. It is particularly suited for exercise-related topics within structured courses, fostering deep understanding through scientifically grounded learning strategies.
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 18, TypeScript, Tailwind CSS, Radix UI
 - **Backend**: Node.js, Express, Wasp framework
 - **Database**: PostgreSQL
-- **Document Processing**: FastAPI, Apache Tika, PyMuPDF
-- **AI Services**: OpenAI, Google Generative AI
+- **Document Processing**: FastAPI, Apache Tika
+- **AI Services**: OpenAI, Google Generative AI, Deepseek chat
 - **Storage**: AWS S3
 - **Authentication**: Email, Google OAuth
 - **Payments**: Stripe
@@ -61,8 +44,8 @@ The application targets university students, helping them grasp complex topics e
 
 Multinex consists of two main components:
 
-1. **Main Application (Wasp/React)**: Handles user interface, authentication, and core functionality
-2. **Document Processing Service (FastAPI)**: Processes uploaded documents, extracts text, and generates exercises
+1. **Main Application (/app)**: Handles user interface, authentication, and core functionality
+2. **Document Processing Service (/doc_flow)**: Processes uploaded documents, extracts topics.
 
 ## 🧰 Prerequisites
 
@@ -89,7 +72,7 @@ cd Multinex
 
 ### 3. Set Up the Database
 
-Ensure Docker is running on your system, then start PostgreSQL and run migrations:
+Make sure Docker is running on your system, then start PostgreSQL and run migrations:
 
 ```bash
 cd app
